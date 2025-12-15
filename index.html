@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Personal job application tracker with Kanban board interface">
+    <title>Job Board - Application Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Kanban Board Section -->
+        <main class="board-section">
+            <header class="app-header">
+                <h1>Job Applications</h1>
+                <button id="addJobBtn" class="btn-primary">+ Add Job</button>
+            </header>
+
+            <div class="kanban-board">
+                <div class="column" data-status="interested">
+                    <div class="column-header">
+                        <h2>Interested</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="interested"></div>
+                </div>
+
+                <div class="column" data-status="applied">
+                    <div class="column-header">
+                        <h2>Applied</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="applied"></div>
+                </div>
+
+                <div class="column" data-status="interview">
+                    <div class="column-header">
+                        <h2>Interview</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="interview"></div>
+                </div>
+
+                <div class="column" data-status="offer">
+                    <div class="column-header">
+                        <h2>Offer</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="offer"></div>
+                </div>
+
+                <div class="column" data-status="rejected">
+                    <div class="column-header">
+                        <h2>Rejected</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="rejected"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Lateral Detail Panel -->
+        <aside id="detailPanel" class="detail-panel">
+            <div class="panel-content">
+                <div class="panel-header">
+                    <h2 id="panelTitle">Job Details</h2>
+                    <button id="closePanel" class="btn-icon" aria-label="Close panel">&times;</button>
+                </div>
+
+                <form id="jobForm" class="job-form">
+                    <input type="hidden" id="jobId">
+                    
+                    <div class="form-group">
+                        <label for="company">Company</label>
+                        <input type="text" id="company" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="position">Position</label>
+                        <input type="text" id="position" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="salary">Salary Range</label>
+                        <input type="text" id="salary" placeholder="e.g., $80k-$100k">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" required>
+                            <option value="interested">Interested</option>
+                            <option value="applied">Applied</option>
+                            <option value="interview">Interview</option>
+                            <option value="offer">Offer</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comments">Comments / Progress Notes</label>
+                        <textarea id="comments" rows="8" placeholder="Track your progress, interview notes, follow-ups, etc..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Save</button>
+                        <button type="button" id="deleteBtn" class="btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </aside>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
