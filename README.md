@@ -1,5 +1,7 @@
 # Job Board - Personal Application Tracker
 
+![Job Board Preview](preview.png)
+
 A minimalist Kanban-style job board to track your job applications.
 
 ## Quick Start
