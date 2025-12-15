@@ -1,5 +1,7 @@
 # Design System Documentation
 
+![Design System Overview](design-system.png)
+
 This document describes the design patterns and visual language of the Job Board application, inspired by Notion and ClickUp.
 
 ## Design Philosophy
