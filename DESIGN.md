@@ -163,9 +163,10 @@ The board supports two entity types on the same Kanban board:
 - Connection cards: 🤝 emoji + "Connection" badge (purple tint)
 - Job cards: 💼 emoji + "Job" badge (blue tint)
 
-**Field Display:**
-- Connections show: Contact Name, Organization
-- Jobs show: Position Title, Company, Location, Salary
+**Field Display (Intelligent):**
+- Connections: Prefer Contact Name (fallback to Position), Organization (fallback to Company), plus Location/Salary if available
+- Jobs: Show Position, Company, Location, Salary
+- All entities can display location and salary information
 
 ### Column Interpretation
 
