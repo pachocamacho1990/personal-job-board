@@ -209,10 +209,12 @@ function openJobDetails(jobId) {
     } else {
         // New entry
         document.getElementById('panelTitle').textContent = 'Add New Item';
+        document.getElementById('jobId').value = '';  // Clear the hidden jobId field
         jobForm.reset();
         // Default to job type
         document.querySelector('input[name="type"][value="job"]').checked = true;
         toggleFieldsByType('job');
+        updateRatingDisplay();  // Reset star display to default (3 stars)
         deleteBtn.style.display = 'none';
     }
 
