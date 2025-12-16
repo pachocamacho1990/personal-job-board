@@ -52,15 +52,15 @@ function createJob(jobData) {
         id: Date.now().toString(),
         type: jobData.type || 'job',
 
-        // Connection fields
-        contactName: jobData.contactName || '',
-        organization: jobData.organization || '',
-
-        // Job fields
+        // Core fields (shared by both types)
         company: jobData.company || '',
         position: jobData.position || '',
         location: jobData.location || '',
         salary: jobData.salary || '',
+
+        // Connection-specific additional fields (optional)
+        contactName: jobData.contactName || '',
+        organization: jobData.organization || '',
 
         // Common fields
         status: jobData.status,
@@ -115,10 +115,21 @@ function renderJob(job) {
     card.dataset.jobId = job.id;
     card.dataset.type = job.type;
 
-    // Determine what to display based on type
+    // Intelligently determine what to display
     const isConnection = job.type === 'connection';
-    const title = isConnection ? job.contactName : job.position;
-    const subtitle = isConnection ? job.organization : job.company;
+
+    // For connections, prefer contactName, fall back to position if available
+    // For jobs, use position
+    const title = isConnection
+        ? (job.contactName || job.position || 'Untitled')
+        : (job.position || 'Untitled');
+
+    // For connections, prefer organization, fall back to company
+    // For jobs, use company
+    const subtitle = isConnection
+        ? (job.organization || job.company || '')
+        : (job.company || '');
+
     const typeEmoji = isConnection ? '🤝' : '💼';
     const typeName = isConnection ? 'Connection' : 'Job';
 
@@ -129,10 +140,10 @@ function renderJob(job) {
                 ${typeName}
             </span>
         </div>
-        <h3>${title || 'Untitled'}</h3>
-        <p class="company">${subtitle || ''}</p>
-        ${!isConnection && job.location ? `<p>${job.location}</p>` : ''}
-        ${!isConnection && job.salary ? `<p>${job.salary}</p>` : ''}
+        <h3>${title}</h3>
+        <p class="company">${subtitle}</p>
+        ${job.location ? `<p>${job.location}</p>` : ''}
+        ${job.salary ? `<p>${job.salary}</p>` : ''}
     `;
 
     // Click to view details
@@ -195,14 +206,13 @@ function openJobDetails(jobId) {
 // Toggle field visibility based on type
 function toggleFieldsByType(type) {
     const connectionFields = document.querySelector('.connection-fields');
-    const jobFields = document.querySelector('.job-fields');
 
+    // Only toggle connection-specific fields
+    // Core fields (company, position, location, salary) are always visible
     if (type === 'connection') {
         connectionFields.style.display = 'block';
-        jobFields.style.display = 'none';
     } else {
         connectionFields.style.display = 'none';
-        jobFields.style.display = 'block';
     }
 }
 

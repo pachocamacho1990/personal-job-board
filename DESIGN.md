@@ -181,21 +181,33 @@ Columns serve dual purposes:
 
 ### Data Structure
 
+All entities share the same core fields, with connections having additional optional fields:
+
 ```javascript
 {
   type: "connection" | "job",
   
-  // Connection fields
-  contactName: "Person name",
-  organization: "Company/Org",
-  
-  // Job fields
-  position: "Job title",
+  // Core fields (available for both types)
   company: "Company name",
+  position: "Job title / Role",
   location: "City",
-  salary: "$XXk-$XXk"
+  salary: "$XXk-$XXk",
+  
+  // Connection-specific additional fields
+  contactName: "Person name",        // Primary identifier for connections
+  organization: "Org name",          // Alternative to company for connections
+  
+  // Common fields
+  status: "interested" | "applied" | "interview" | "offer" | "rejected",
+  comments: "Notes",
+  dateAdded: "ISO timestamp"
 }
 ```
+
+**Field Usage:**
+- **Connections**: Can use all fields. Typically focus on `contactName` and optionally `organization`, `position`, `company`
+- **Jobs**: Use `position`, `company`, `location`, `salary` as primary fields
+- This shared model makes it easy to convert connections to formal job applications
 
 This unified approach allows tracking the full journey from initial networking contact to formal job application.
 
