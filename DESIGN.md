@@ -53,6 +53,14 @@ Minimalist Notion-inspired design for the personal job board.
 - **Compact mode** (⊞): Reduced padding (8px), inline layout, ~50% height reduction
 - **Persistence**: View preference saved to localStorage
 
+### Markdown Comments
+- **Library**: marked.js (CDN, ~5KB)
+- **Toggle**: Preview/Edit button in detail panel
+- **Edit mode**: Standard textarea with markdown syntax
+- **Preview mode**: Rendered HTML with styled markdown
+- **Supported**: Headings, bold, italic, lists, code blocks, links, blockquotes, horizontal rules
+- **Storage**: Raw markdown saved to localStorage
+
 ## Data Model
 
 ```javascript
@@ -81,3 +89,4 @@ Minimalist Notion-inspired design for the personal job board.
 - Hover: cards lift, buttons brighten
 - Star click: auto-highlight up to rating
 - View toggle: switch between comfortable/compact modes (persists across sessions)
+- Markdown toggle: switch between edit and preview for comments (resets to edit when closing panel)

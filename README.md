@@ -11,6 +11,7 @@ A minimalist Kanban board to track job applications and networking connections.
 - 🎯 **Visual Badges**: Emoji icons and type badges for quick scanning
 - 📋 **Kanban Workflow**: Drag-and-drop through 5 stages
 - 🗜️ **Compact View**: Toggle between comfortable and compact card layouts
+- 📝 **Markdown Comments**: Format notes with headings, lists, code, and more
 - 💾 **Local Storage**: All data stays on your machine
 
 ## Quick Start
@@ -33,6 +34,11 @@ Open **http://localhost:8000** in your browser.
 - Fields: Company, Position, Location, Salary
 
 **Star Ratings**: Click a star (1-5) to set priority level
+
+**Markdown Comments**: Write formatted notes using markdown syntax:
+- Toggle between **Edit** and **Preview** modes
+- Supports: headings, **bold**, _italic_, lists, `code`, links
+- Perfect for interview notes, follow-ups, and progress tracking
 
 **View Toggle**: Click the ⊟/⊞ button in the header to switch between:
 - **Comfortable view** (⊟): Full-size cards with multi-line layout
