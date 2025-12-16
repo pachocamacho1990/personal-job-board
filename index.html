@@ -154,9 +154,18 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="comments">Comments / Progress Notes</label>
-                        <textarea id="comments" rows="8"
-                            placeholder="Track your progress, interview notes, follow-ups, etc..."></textarea>
+                        <div class="comments-header">
+                            <label for="comments">Comments / Progress Notes</label>
+                            <button type="button" id="togglePreview" class="btn-preview">Preview</button>
+                        </div>
+                        <textarea id="comments" rows="8" placeholder="Track your progress, interview notes, follow-ups, etc...
+
+Supports markdown:
+• **bold**, _italic_
+• # Headings
+• - Lists
+• `code`"></textarea>
+                        <div id="commentsPreview" class="markdown-preview" style="display: none;"></div>
                     </div>
 
                     <div class="form-actions">
@@ -168,7 +177,8 @@
         </aside>
     </div>
 
-    <script src="app.js?v=2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="app.js?v=3"></script>
 </body>
 
 </html>

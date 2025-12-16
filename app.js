@@ -4,6 +4,7 @@
 let jobs = [];
 let currentJobId = null;
 let isCompactView = false; // View mode state
+let isPreviewMode = false; // Markdown preview mode
 
 // DOM Elements
 const addJobBtn = document.getElementById('addJobBtn');
@@ -11,6 +12,9 @@ const detailPanel = document.getElementById('detailPanel');
 const closePanel = document.getElementById('closePanel');
 const jobForm = document.getElementById('jobForm');
 const deleteBtn = document.getElementById('deleteBtn');
+const togglePreviewBtn = document.getElementById('togglePreview');
+const commentsTextarea = document.getElementById('comments');
+const commentsPreview = document.getElementById('commentsPreview');
 
 // Initialize app
 function init() {
@@ -315,6 +319,11 @@ function closeJobPanel() {
     jobForm.reset();
     document.getElementById('jobId').value = ''; // Explicitly clear hidden ID
     currentJobId = null;
+
+    // Reset to edit mode when closing
+    if (isPreviewMode) {
+        togglePreviewMode();
+    }
 }
 
 // Form handling
@@ -419,6 +428,27 @@ function handleDrop(e) {
     return false;
 }
 
+// Markdown Preview Toggle
+function togglePreviewMode() {
+    isPreviewMode = !isPreviewMode;
+
+    if (isPreviewMode) {
+        // Switch to preview mode
+        const markdown = commentsTextarea.value;
+        commentsPreview.innerHTML = markdown ? marked.parse(markdown) : '<p style="color: var(--text-tertiary);">No comments yet...</p>';
+        commentsTextarea.style.display = 'none';
+        commentsPreview.style.display = 'block';
+        togglePreviewBtn.textContent = 'Edit';
+        togglePreviewBtn.classList.add('active');
+    } else {
+        // Switch to edit mode
+        commentsTextarea.style.display = 'block';
+        commentsPreview.style.display = 'none';
+        togglePreviewBtn.textContent = 'Preview';
+        togglePreviewBtn.classList.remove('active');
+    }
+}
+
 // Event Listeners
 function setupEventListeners() {
     // Add job button
@@ -462,6 +492,9 @@ function setupEventListeners() {
 
     // View toggle button
     document.getElementById('viewToggle').addEventListener('click', toggleViewMode);
+
+    // Markdown preview toggle
+    togglePreviewBtn.addEventListener('click', togglePreviewMode);
 }
 
 // Start the app
