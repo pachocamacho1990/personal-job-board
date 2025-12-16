@@ -24,9 +24,10 @@ function loadJobs() {
         const stored = localStorage.getItem('jobApplications');
         jobs = stored ? JSON.parse(stored) : [];
 
-        // Auto-migrate: add type field to old entries
+        // Auto-migrate: add type and rating fields to old entries
         jobs = jobs.map(job => ({
             type: job.type || 'job',  // default existing entries to 'job'
+            rating: job.rating || 3,  // default to 3 stars (moderate interest)
             ...job
         }));
 
@@ -64,6 +65,7 @@ function createJob(jobData) {
 
         // Common fields
         status: jobData.status,
+        rating: jobData.rating || 3,  // Default to 3 stars
         comments: jobData.comments || '',
         dateAdded: new Date().toISOString()
     };
@@ -89,6 +91,13 @@ function deleteJob(id) {
 
 function getJob(id) {
     return jobs.find(j => j.id === id);
+}
+
+// Helper function to render star rating
+function renderStars(rating) {
+    const filled = '★'.repeat(rating);
+    const empty = '☆'.repeat(5 - rating);
+    return `<span class="rating-stars">${filled}${empty}</span>`;
 }
 
 // Rendering
@@ -135,6 +144,7 @@ function renderJob(job) {
 
     card.innerHTML = `
         <div class="card-header">
+            ${renderStars(job.rating || 3)}
             <span class="type-badge ${job.type}">
                 <span class="type-emoji">${typeEmoji}</span>
                 ${typeName}
@@ -189,6 +199,12 @@ function openJobDetails(jobId) {
         document.getElementById('salary').value = job.salary || '';
         document.getElementById('status').value = job.status;
         document.getElementById('comments').value = job.comments;
+
+        // Set rating
+        const ratingInput = document.querySelector(`input[name="rating"][value="${job.rating || 3}"]`);
+        if (ratingInput) ratingInput.checked = true;
+        updateRatingDisplay();
+
         deleteBtn.style.display = 'block';
     } else {
         // New entry
@@ -216,6 +232,20 @@ function toggleFieldsByType(type) {
     }
 }
 
+// Update rating display to highlight selected stars
+function updateRatingDisplay() {
+    const selectedRating = parseInt(document.querySelector('input[name="rating"]:checked')?.value || 3);
+    const labels = document.querySelectorAll('.rating-input label');
+
+    labels.forEach((label, index) => {
+        if (index < selectedRating) {
+            label.classList.add('highlighted');
+        } else {
+            label.classList.remove('highlighted');
+        }
+    });
+}
+
 function closeJobPanel() {
     detailPanel.classList.remove('open');
     jobForm.reset();
@@ -241,6 +271,7 @@ function handleFormSubmit(e) {
 
         // Common fields
         status: document.getElementById('status').value,
+        rating: parseInt(document.querySelector('input[name="rating"]:checked').value) || 3,
         comments: document.getElementById('comments').value
     };
 
@@ -343,6 +374,11 @@ function setupEventListeners() {
         radio.addEventListener('change', (e) => {
             toggleFieldsByType(e.target.value);
         });
+    });
+
+    // Rating selector change - highlight stars
+    document.querySelectorAll('input[name="rating"]').forEach(radio => {
+        radio.addEventListener('change', updateRatingDisplay);
     });
 
     // Drag and drop on containers

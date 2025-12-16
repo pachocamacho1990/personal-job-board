@@ -249,7 +249,8 @@ body {
 /* Card Header with Type Badge */
 .card-header {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: var(--spacing-sm);
 }
 
@@ -277,6 +278,15 @@ body {
 
 .type-emoji {
     font-size: 12px;
+}
+
+/* Star Rating Display */
+.rating-stars {
+    display: inline-block;
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: #FFB800;
+    /* Gold for filled stars */
 }
 
 /* Card colors based on status - subtle left accent */
@@ -432,6 +442,35 @@ body {
 .type-option input[type="radio"]:checked+span {
     font-weight: var(--font-weight-medium);
     color: var(--accent);
+}
+
+/* Rating Input */
+.rating-input {
+    display: flex;
+    gap: 4px;
+    margin-top: var(--spacing-xs);
+}
+
+.rating-input input[type="radio"] {
+    display: none;
+}
+
+.rating-input label {
+    font-size: 24px;
+    color: var(--border-color);
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.1s ease;
+    user-select: none;
+}
+
+.rating-input label:hover {
+    color: #FFB800;
+    transform: scale(1.1);
+}
+
+/* Highlighted stars (set via JavaScript) */
+.rating-input label.highlighted {
+    color: #FFB800;
 }
 
 .form-actions {
