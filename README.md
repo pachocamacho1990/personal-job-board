@@ -33,53 +33,40 @@ The server will keep running until you press `Ctrl+C`. Keep it running while usi
 
 ### Working with Connections vs Jobs
 
+**Shared Data Model**: Both connections and jobs share core fields (company, position, location, salary). Connections have additional optional fields for networking context.
+
 **Connections (🤝)**: Use for networking relationships that may lead to opportunities
-- Track: Contact Name, Organization, Status, Comments
-- Example: "Sarah Chen - Y Combinator Partner"
+- Connection-specific fields: Contact Name, Organization (optional alternative to company)
+- All core fields available: Company, Position, Location, Salary
+- Example: Contact "Sarah Chen" at "Y Combinator" for "Partner" role
 - Workflow: Initial Contact → Exploring Synergy → Active Discussion → Opportunity Identified
 
 **Job Applications (💼)**: Use for formal applications to specific roles
-- Track: Position, Company, Location, Salary, Status, Comments  
-- Example: "Senior Engineer at Google"
+- Uses core fields: Company, Position, Location, Salary
+- No connection-specific fields shown
+- Example: "Senior Engineer" at "Google" in "Mountain View" - "$150k-$200k"
 - Workflow: Interested → Applied → Interview → Offer → Rejected
 
 ### Adding an Item
 
 1. Click the **"+ Add Job"** button
 2. Select type: 🤝 Connection or 💼 Job Application
-3. Fill in the appropriate fields (form changes based on type)
-4. Choose status and save
+3. **For Connections**: Fill Contact Name and optionally Organization, plus any core fields (company, position, location, salary)
+4. **For Jobs**: Fill Company, Position, and optionally Location and Salary
+5. Choose status and save
 
 ### Managing Items
 
-- **Add Job**: Click "+ Add Job" button
-- **View Details**: Click any job card
-- **Move Between Stages**: Drag and drop cards
-- **Edit**: Click a card, modify fields, and save
+- **Add**: Click "+ Add Job" button
+- **View/Edit**: Click any card to open the lateral panel
+- **Move Between Stages**: Drag and drop cards between columns
+- **Convert**: Easily convert a connection to a job by editing - all fields are already there
 - **Delete**: Open a card and click "Delete"
-- **Track Progress**: Use the comments field to log notes
-
-## Features
-
-- 5 workflow stages: Interested → Applied → Interview → Offer → Rejected
-- Lateral detail panel with all job information
-- Comments field for progress tracking
-- Drag-and-drop functionality
-- Auto-save to localStorage
-- Clean, minimalist design
+- **Track Progress**: Use the comments field to log notes, next steps, and follow-ups
 
 ## Data Storage
 
-All data is stored locally in your browser's localStorage. As long as you:
-- Use the same browser
-- Access via http://localhost:8000 (not file://)
-- Don't clear browser data
-
-Your jobs will persist indefinitely.
-
-## Data Storage
-
-All data is stored locally in your browser's localStorage. As long as you:
+All data (both connections and job applications) is stored locally in your browser's localStorage. As long as you:
 - Use the same browser
 - Access via http://localhost:8000 (not file://)
 - Don't clear browser data
