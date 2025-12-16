@@ -238,11 +238,45 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: var(--shadow-sm);
+    position: relative;
 }
 
 .job-card:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
+}
+
+/* Card Header with Type Badge */
+.card-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--spacing-sm);
+}
+
+.type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: var(--font-weight-medium);
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--text-secondary);
+}
+
+.type-badge.connection {
+    background: rgba(157, 52, 218, 0.1);
+    color: var(--color-interested);
+}
+
+.type-badge.job {
+    background: rgba(11, 106, 219, 0.1);
+    color: var(--color-applied);
+}
+
+.type-emoji {
+    font-size: 12px;
 }
 
 /* Card colors based on status - subtle left accent */
@@ -364,6 +398,40 @@ body {
 
 .form-group textarea {
     resize: vertical;
+}
+
+/* Type Selector */
+.type-selector {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xs);
+}
+
+.type-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.type-option:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--accent);
+}
+
+.type-option input[type="radio"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.type-option input[type="radio"]:checked+span {
+    font-weight: var(--font-weight-medium);
+    color: var(--accent);
 }
 
 .form-actions {

@@ -139,6 +139,68 @@ Rounded corners for modern, friendly feel:
 
 ---
 
+---
+
+## Dual Entity System
+
+![Dual Entity System](dual-entity-system.png)
+
+The board supports two entity types on the same Kanban board:
+
+1. **🤝 Connections**: Networking relationships that may lead to opportunities
+   - Focus on relationship building
+   - Track people and organizations
+   - Example: "Sarah Chen - Y Combinator Partner"
+
+2. **💼 Job Applications**: Formal applications to specific roles
+   - Traditional job hunt tracking
+   - Focus on position details
+   - Example: "Senior Engineer at Google"
+
+### Visual Distinction
+
+**Type Badges:**
+- Connection cards: 🤝 emoji + "Connection" badge (purple tint)
+- Job cards: 💼 emoji + "Job" badge (blue tint)
+
+**Field Display:**
+- Connections show: Contact Name, Organization
+- Jobs show: Position Title, Company, Location, Salary
+
+### Column Interpretation
+
+Columns serve dual purposes:
+
+| Column | Job Meaning | Connection Meaning |
+|--------|-------------|-------------------|
+| Interested | Haven't applied yet | Initial Contact |
+| Applied | Application submitted | Exploring Synergy |
+| Interview | Interview scheduled | Active Discussion |
+| Offer | Offer received | Opportunity Identified |
+| Rejected | Rejected/No fit | No Fit (archived) |
+
+### Data Structure
+
+```javascript
+{
+  type: "connection" | "job",
+  
+  // Connection fields
+  contactName: "Person name",
+  organization: "Company/Org",
+  
+  // Job fields
+  position: "Job title",
+  company: "Company name",
+  location: "City",
+  salary: "$XXk-$XXk"
+}
+```
+
+This unified approach allows tracking the full journey from initial networking contact to formal job application.
+
+---
+
 ## Component Patterns
 
 ### Kanban Columns

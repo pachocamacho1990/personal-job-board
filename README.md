@@ -2,7 +2,17 @@
 
 ![Job Board Preview](preview.png)
 
-A minimalist Kanban-style job board to track your job applications.
+A minimalist Kanban-style job board to track your job applications **and** networking connections.
+
+## Features
+
+- **Dual Entity System**: Track both 🤝 **Connections** (networking relationships) and 💼 **Job Applications** (formal roles) on the same board
+- Visual distinction with emoji icons and type badges
+- Conditional fields based on entity type
+- Drag-and-drop between workflow stages
+- Lateral detail panel for editing
+- Comments field for progress tracking
+- localStorage persistence (all data stays local)
 
 ## Quick Start
 
@@ -14,10 +24,33 @@ python3 server.py
 
 Then open **http://localhost:8000** in your browser.
 
+The server will keep running until you press `Ctrl+C`. Keep it running while using the app.
+
 > **Why do I need a server?**  
 > Browsers restrict localStorage for `file://` URLs for security reasons. Running a local server fixes this and ensures your data persists properly.
 
 ## Usage
+
+### Working with Connections vs Jobs
+
+**Connections (🤝)**: Use for networking relationships that may lead to opportunities
+- Track: Contact Name, Organization, Status, Comments
+- Example: "Sarah Chen - Y Combinator Partner"
+- Workflow: Initial Contact → Exploring Synergy → Active Discussion → Opportunity Identified
+
+**Job Applications (💼)**: Use for formal applications to specific roles
+- Track: Position, Company, Location, Salary, Status, Comments  
+- Example: "Senior Engineer at Google"
+- Workflow: Interested → Applied → Interview → Offer → Rejected
+
+### Adding an Item
+
+1. Click the **"+ Add Job"** button
+2. Select type: 🤝 Connection or 💼 Job Application
+3. Fill in the appropriate fields (form changes based on type)
+4. Choose status and save
+
+### Managing Items
 
 - **Add Job**: Click "+ Add Job" button
 - **View Details**: Click any job card

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +8,14 @@
     <title>Job Board - Application Tracker</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="app-container">
         <!-- Kanban Board Section -->
         <main class="board-section">
             <header class="app-header">
                 <h1>Job Applications</h1>
-                <button id="addJobBtn" class="btn-primary">+ Add Job</button>
+                <button id="addJobBtn" class="btn-primary">+ Add Card</button>
             </header>
 
             <div class="kanban-board">
@@ -69,27 +71,58 @@
 
                 <form id="jobForm" class="job-form">
                     <input type="hidden" id="jobId">
-                    
-                    <div class="form-group">
-                        <label for="company">Company</label>
-                        <input type="text" id="company" required>
-                    </div>
 
                     <div class="form-group">
-                        <label for="position">Position</label>
-                        <input type="text" id="position" required>
+                        <label>Type</label>
+                        <div class="type-selector">
+                            <label class="type-option">
+                                <input type="radio" name="type" value="connection">
+                                <span>🤝 Connection</span>
+                            </label>
+                            <label class="type-option">
+                                <input type="radio" name="type" value="job" checked>
+                                <span>💼 Job Application</span>
+                            </label>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="location">Location</label>
-                        <input type="text" id="location">
+                    <!-- Connection-specific fields -->
+                    <div class="connection-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="contactName">Contact Name</label>
+                            <input type="text" id="contactName">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="organization">Organization</label>
+                            <input type="text" id="organization">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="salary">Salary Range</label>
-                        <input type="text" id="salary" placeholder="e.g., $80k-$100k">
+                    <!-- Job-specific fields -->
+                    <div class="job-fields">
+                        <div class="form-group">
+                            <label for="company">Company</label>
+                            <input type="text" id="company">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="position">Position</label>
+                            <input type="text" id="position">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="salary">Salary Range</label>
+                            <input type="text" id="salary" placeholder="e.g., $80k-$100k">
+                        </div>
                     </div>
 
+                    <!-- Common fields -->
                     <div class="form-group">
                         <label for="status">Status</label>
                         <select id="status" required>
@@ -103,7 +136,8 @@
 
                     <div class="form-group">
                         <label for="comments">Comments / Progress Notes</label>
-                        <textarea id="comments" rows="8" placeholder="Track your progress, interview notes, follow-ups, etc..."></textarea>
+                        <textarea id="comments" rows="8"
+                            placeholder="Track your progress, interview notes, follow-ups, etc..."></textarea>
                     </div>
 
                     <div class="form-actions">
@@ -117,4 +151,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>

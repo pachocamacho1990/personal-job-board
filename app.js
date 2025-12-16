@@ -23,7 +23,14 @@ function loadJobs() {
     try {
         const stored = localStorage.getItem('jobApplications');
         jobs = stored ? JSON.parse(stored) : [];
-        console.log(`✓ Loaded ${jobs.length} job(s) from localStorage`);
+
+        // Auto-migrate: add type field to old entries
+        jobs = jobs.map(job => ({
+            type: job.type || 'job',  // default existing entries to 'job'
+            ...job
+        }));
+
+        console.log(`✓ Loaded ${jobs.length} item(s) from localStorage`);
     } catch (error) {
         console.error('Error loading jobs from localStorage:', error);
         jobs = [];
@@ -33,7 +40,7 @@ function loadJobs() {
 function saveJobs() {
     try {
         localStorage.setItem('jobApplications', JSON.stringify(jobs));
-        console.log(`✓ Saved ${jobs.length} job(s) to localStorage`);
+        console.log(`✓ Saved ${jobs.length} item(s) to localStorage`);
     } catch (error) {
         console.error('Error saving jobs to localStorage:', error);
     }
@@ -43,10 +50,19 @@ function saveJobs() {
 function createJob(jobData) {
     const job = {
         id: Date.now().toString(),
-        company: jobData.company,
-        position: jobData.position,
+        type: jobData.type || 'job',
+
+        // Connection fields
+        contactName: jobData.contactName || '',
+        organization: jobData.organization || '',
+
+        // Job fields
+        company: jobData.company || '',
+        position: jobData.position || '',
         location: jobData.location || '',
         salary: jobData.salary || '',
+
+        // Common fields
         status: jobData.status,
         comments: jobData.comments || '',
         dateAdded: new Date().toISOString()
@@ -97,12 +113,26 @@ function renderJob(job) {
     card.className = 'job-card';
     card.draggable = true;
     card.dataset.jobId = job.id;
+    card.dataset.type = job.type;
+
+    // Determine what to display based on type
+    const isConnection = job.type === 'connection';
+    const title = isConnection ? job.contactName : job.position;
+    const subtitle = isConnection ? job.organization : job.company;
+    const typeEmoji = isConnection ? '🤝' : '💼';
+    const typeName = isConnection ? 'Connection' : 'Job';
 
     card.innerHTML = `
-        <h3>${job.position}</h3>
-        <p class="company">${job.company}</p>
-        ${job.location ? `<p>${job.location}</p>` : ''}
-        ${job.salary ? `<p>${job.salary}</p>` : ''}
+        <div class="card-header">
+            <span class="type-badge ${job.type}">
+                <span class="type-emoji">${typeEmoji}</span>
+                ${typeName}
+            </span>
+        </div>
+        <h3>${title || 'Untitled'}</h3>
+        <p class="company">${subtitle || ''}</p>
+        ${!isConnection && job.location ? `<p>${job.location}</p>` : ''}
+        ${!isConnection && job.salary ? `<p>${job.salary}</p>` : ''}
     `;
 
     // Click to view details
@@ -130,24 +160,50 @@ function openJobDetails(jobId) {
     const job = getJob(jobId);
 
     if (job) {
-        // Edit existing job
-        document.getElementById('panelTitle').textContent = 'Edit Job';
+        // Edit existing entry
+        const isConnection = job.type === 'connection';
+        document.getElementById('panelTitle').textContent = isConnection ? 'Edit Connection' : 'Edit Job';
         document.getElementById('jobId').value = job.id;
-        document.getElementById('company').value = job.company;
-        document.getElementById('position').value = job.position;
-        document.getElementById('location').value = job.location;
-        document.getElementById('salary').value = job.salary;
+
+        // Set type
+        document.querySelector(`input[name="type"][value="${job.type}"]`).checked = true;
+        toggleFieldsByType(job.type);
+
+        // Populate all fields
+        document.getElementById('contactName').value = job.contactName || '';
+        document.getElementById('organization').value = job.organization || '';
+        document.getElementById('company').value = job.company || '';
+        document.getElementById('position').value = job.position || '';
+        document.getElementById('location').value = job.location || '';
+        document.getElementById('salary').value = job.salary || '';
         document.getElementById('status').value = job.status;
         document.getElementById('comments').value = job.comments;
         deleteBtn.style.display = 'block';
     } else {
-        // New job
-        document.getElementById('panelTitle').textContent = 'Add New Job';
+        // New entry
+        document.getElementById('panelTitle').textContent = 'Add New Item';
         jobForm.reset();
+        // Default to job type
+        document.querySelector('input[name="type"][value="job"]').checked = true;
+        toggleFieldsByType('job');
         deleteBtn.style.display = 'none';
     }
 
     detailPanel.classList.add('open');
+}
+
+// Toggle field visibility based on type
+function toggleFieldsByType(type) {
+    const connectionFields = document.querySelector('.connection-fields');
+    const jobFields = document.querySelector('.job-fields');
+
+    if (type === 'connection') {
+        connectionFields.style.display = 'block';
+        jobFields.style.display = 'none';
+    } else {
+        connectionFields.style.display = 'none';
+        jobFields.style.display = 'block';
+    }
 }
 
 function closeJobPanel() {
@@ -161,10 +217,19 @@ function handleFormSubmit(e) {
     e.preventDefault();
 
     const formData = {
+        type: document.querySelector('input[name="type"]:checked').value,
+
+        // Connection fields
+        contactName: document.getElementById('contactName').value,
+        organization: document.getElementById('organization').value,
+
+        // Job fields
         company: document.getElementById('company').value,
         position: document.getElementById('position').value,
         location: document.getElementById('location').value,
         salary: document.getElementById('salary').value,
+
+        // Common fields
         status: document.getElementById('status').value,
         comments: document.getElementById('comments').value
     };
@@ -262,6 +327,13 @@ function setupEventListeners() {
 
     // Delete button
     deleteBtn.addEventListener('click', handleDelete);
+
+    // Type selector change
+    document.querySelectorAll('input[name="type"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            toggleFieldsByType(e.target.value);
+        });
+    });
 
     // Drag and drop on containers
     document.querySelectorAll('.cards-container').forEach(container => {
