@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Board Unit Tests</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .test-suite {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-suite h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .test {
+            padding: 8px 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test.pass {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .test.fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .test.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .test-name {
+            flex: 1;
+        }
+
+        .test-status {
+            font-weight: bold;
+        }
+
+        .summary {
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .summary.all-pass {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .summary.has-fails {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        #run-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        #run-btn:hover {
+            background: #0056b3;
+        }
+
+        .error-details {
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 5px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 Job Board Unit Tests</h1>
+    <button id="run-btn" onclick="runAllTests()">Run All Tests</button>
+
+    <div id="results"></div>
+
+    <script>
+        // ========================================
+        // Test Framework (Minimal)
+        // ========================================
+        let testResults = [];
+        let currentSuite = '';
+
+        function describe(suiteName, fn) {
+            currentSuite = suiteName;
+            fn();
+        }
+
+        function it(testName, fn) {
+            try {
+                fn();
+                testResults.push({ suite: currentSuite, name: testName, status: 'pass' });
+            } catch (error) {
+                testResults.push({ suite: currentSuite, name: testName, status: 'fail', error: error.message });
+            }
+        }
+
+        function expect(actual) {
+            return {
+                toBe(expected) {
+                    if (actual !== expected) {
+                        throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+                    }
+                },
+                toEqual(expected) {
+                    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+                        throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+                    }
+                },
+                toBeTruthy() {
+                    if (!actual) {
+                        throw new Error(`Expected truthy value, got ${JSON.stringify(actual)}`);
+                    }
+                },
+                toBeFalsy() {
+                    if (actual) {
+                        throw new Error(`Expected falsy value, got ${JSON.stringify(actual)}`);
+                    }
+                },
+                toBeNull() {
+                    if (actual !== null) {
+                        throw new Error(`Expected null, got ${JSON.stringify(actual)}`);
+                    }
+                },
+                toContain(expected) {
+                    if (!actual.includes(expected)) {
+                        throw new Error(`Expected ${JSON.stringify(actual)} to contain ${JSON.stringify(expected)}`);
+                    }
+                },
+                toBeGreaterThan(expected) {
+                    if (actual <= expected) {
+                        throw new Error(`Expected ${actual} to be greater than ${expected}`);
+                    }
+                },
+                toHaveLength(expected) {
+                    if (actual.length !== expected) {
+                        throw new Error(`Expected length ${expected}, got ${actual.length}`);
+                    }
+                }
+            };
+        }
+
+        // ========================================
+        // Mock localStorage
+        // ========================================
+        const mockStorage = {};
+        const originalLocalStorage = window.localStorage;
+
+        function setupMockLocalStorage() {
+            Object.keys(mockStorage).forEach(k => delete mockStorage[k]);
+            window.localStorage = {
+                getItem: (key) => mockStorage[key] || null,
+                setItem: (key, value) => { mockStorage[key] = value; },
+                removeItem: (key) => { delete mockStorage[key]; },
+                clear: () => { Object.keys(mockStorage).forEach(k => delete mockStorage[k]); }
+            };
+        }
+
+        function restoreLocalStorage() {
+            window.localStorage = originalLocalStorage;
+        }
+
+        // ========================================
+        // App State Management for Tests
+        // ========================================
+        function resetAppState() {
+            jobs = [];
+            currentJobId = null;
+        }
+
+        // ========================================
+        // TEST SUITES
+        // ========================================
+
+        function runAllTests() {
+            testResults = [];
+            setupMockLocalStorage();
+
+            // ---- CRUD Operations ----
+            describe('CRUD Operations', () => {
+
+                it('createJob should generate a unique ID', () => {
+                    resetAppState();
+                    const job1 = createJob({ company: 'Test1', status: 'interested' });
+                    const job2 = createJob({ company: 'Test2', status: 'interested' });
+                    expect(job1.id).toBeTruthy();
+                    expect(job2.id).toBeTruthy();
+                    expect(job1.id === job2.id).toBe(false);
+                });
+
+                it('createJob should add job to jobs array', () => {
+                    resetAppState();
+                    expect(jobs.length).toBe(0);
+                    createJob({ company: 'TestCo', status: 'interested' });
+                    expect(jobs.length).toBe(1);
+                });
+
+                it('createJob should set default values', () => {
+                    resetAppState();
+                    const job = createJob({ company: 'TestCo', status: 'applied' });
+                    expect(job.type).toBe('job');
+                    expect(job.rating).toBe(3);
+                    expect(job.comments).toBe('');
+                });
+
+                it('createJob should preserve custom values', () => {
+                    resetAppState();
+                    const job = createJob({
+                        company: 'TestCo',
+                        status: 'applied',
+                        type: 'connection',
+                        rating: 5,
+                        contactName: 'John Doe'
+                    });
+                    expect(job.type).toBe('connection');
+                    expect(job.rating).toBe(5);
+                    expect(job.contactName).toBe('John Doe');
+                });
+
+                it('getJob should find job by ID', () => {
+                    resetAppState();
+                    const created = createJob({ company: 'FindMe', status: 'interested' });
+                    const found = getJob(created.id);
+                    expect(found.company).toBe('FindMe');
+                });
+
+                it('getJob should return undefined for non-existent ID', () => {
+                    resetAppState();
+                    const found = getJob('nonexistent-id');
+                    expect(found).toBe(undefined);
+                });
+
+                it('updateJob should modify existing job', () => {
+                    resetAppState();
+                    const job = createJob({ company: 'Original', status: 'interested' });
+                    updateJob(job.id, { company: 'Updated' });
+                    const updated = getJob(job.id);
+                    expect(updated.company).toBe('Updated');
+                });
+
+                it('updateJob should preserve unchanged fields', () => {
+                    resetAppState();
+                    const job = createJob({ company: 'Test', position: 'Dev', status: 'interested' });
+                    updateJob(job.id, { company: 'NewCo' });
+                    const updated = getJob(job.id);
+                    expect(updated.position).toBe('Dev');
+                });
+
+                it('updateJob should return null for non-existent ID', () => {
+                    resetAppState();
+                    const result = updateJob('fake-id', { company: 'Test' });
+                    expect(result).toBeNull();
+                });
+
+                it('deleteJob should remove job from array', () => {
+                    resetAppState();
+                    const job = createJob({ company: 'ToDelete', status: 'interested' });
+                    expect(jobs.length).toBe(1);
+                    deleteJob(job.id);
+                    expect(jobs.length).toBe(0);
+                });
+
+                it('deleteJob should only delete matching ID', () => {
+                    resetAppState();
+                    // Create jobs with explicitly different IDs to avoid Date.now() collision
+                    const job1 = {
+                        id: 'keep-job-id',
+                        company: 'Keep',
+                        status: 'interested',
+                        type: 'job',
+                        rating: 3
+                    };
+                    const job2 = {
+                        id: 'delete-job-id',
+                        company: 'Delete',
+                        status: 'interested',
+                        type: 'job',
+                        rating: 3
+                    };
+                    jobs.push(job1);
+                    jobs.push(job2);
+                    expect(jobs.length).toBe(2);
+                    deleteJob('delete-job-id');
+                    expect(jobs.length).toBe(1);
+                    expect(jobs[0].company).toBe('Keep');
+                });
+            });
+
+            // ---- State Management ----
+            describe('State Management (currentJobId)', () => {
+
+                it('currentJobId should be null initially', () => {
+                    resetAppState();
+                    expect(currentJobId).toBeNull();
+                });
+
+                it('openJobDetails(null) should set currentJobId to null', () => {
+                    resetAppState();
+                    currentJobId = 'some-old-id';
+                    openJobDetails(null);
+                    expect(currentJobId).toBeNull();
+                });
+
+                it('openJobDetails(id) should set currentJobId to that id', () => {
+                    resetAppState();
+                    const job = createJob({ company: 'Test', status: 'interested' });
+                    openJobDetails(job.id);
+                    expect(currentJobId).toBe(job.id);
+                });
+
+                it('closeJobPanel should reset currentJobId to null', () => {
+                    resetAppState();
+                    currentJobId = 'some-id';
+                    closeJobPanel();
+                    expect(currentJobId).toBeNull();
+                });
+
+                it('closeJobPanel after editing should clear currentJobId', () => {
+                    resetAppState();
+                    const job = createJob({ company: 'Test', status: 'interested' });
+                    openJobDetails(job.id);
+                    expect(currentJobId).toBe(job.id);
+                    closeJobPanel();
+                    expect(currentJobId).toBeNull();
+                });
+            });
+
+            // ---- Form Submission Logic ----
+            describe('Form Submission Logic', () => {
+
+                it('handleFormSubmit should create new job when currentJobId is null', () => {
+                    resetAppState();
+                    currentJobId = null;
+
+                    // Mock form values
+                    document.getElementById('company').value = 'NewCompany';
+                    document.getElementById('position').value = 'NewPosition';
+                    document.getElementById('status').value = 'interested';
+                    document.querySelector('input[name="type"][value="job"]').checked = true;
+                    document.querySelector('input[name="rating"][value="3"]').checked = true;
+
+                    const initialCount = jobs.length;
+                    handleFormSubmit({ preventDefault: () => { } });
+
+                    expect(jobs.length).toBe(initialCount + 1);
+                    expect(jobs[jobs.length - 1].company).toBe('NewCompany');
+                });
+
+                it('handleFormSubmit should update existing job when currentJobId is set', () => {
+                    resetAppState();
+                    const job = createJob({ company: 'Original', status: 'interested' });
+                    currentJobId = job.id;
+
+                    // Mock form values
+                    document.getElementById('company').value = 'Modified';
+                    document.getElementById('position').value = 'ModPosition';
+                    document.getElementById('status').value = 'applied';
+                    document.querySelector('input[name="type"][value="job"]').checked = true;
+                    document.querySelector('input[name="rating"][value="4"]').checked = true;
+
+                    const initialCount = jobs.length;
+                    handleFormSubmit({ preventDefault: () => { } });
+
+                    expect(jobs.length).toBe(initialCount); // No new job created
+                    const updated = getJob(job.id);
+                    expect(updated.company).toBe('Modified');
+                });
+
+                it('CRITICAL: After view->close->add, new job should be created, not update', () => {
+                    resetAppState();
+
+                    // Step 1: Create an existing job
+                    const existingJob = createJob({
+                        company: 'ExistingCo',
+                        position: 'ExistingPos',
+                        status: 'interested'
+                    });
+                    const existingId = existingJob.id;
+
+                    // Step 2: Simulate opening that job for editing
+                    openJobDetails(existingId);
+                    expect(currentJobId).toBe(existingId);
+
+                    // Step 3: Close the panel
+                    closeJobPanel();
+                    expect(currentJobId).toBeNull();
+
+                    // Step 4: Open the "Add New" panel
+                    openJobDetails(null);
+                    expect(currentJobId).toBeNull();
+
+                    // Step 5: Fill form and submit
+                    document.getElementById('company').value = 'BrandNewCo';
+                    document.getElementById('position').value = 'BrandNewPos';
+                    document.getElementById('status').value = 'applied';
+                    document.querySelector('input[name="type"][value="job"]').checked = true;
+                    document.querySelector('input[name="rating"][value="5"]').checked = true;
+
+                    handleFormSubmit({ preventDefault: () => { } });
+
+                    // Verify: Should have 2 jobs now
+                    expect(jobs.length).toBe(2);
+
+                    // Verify: Original job unchanged
+                    const original = getJob(existingId);
+                    expect(original.company).toBe('ExistingCo');
+                    expect(original.position).toBe('ExistingPos');
+
+                    // Verify: New job exists with new data
+                    const newJob = jobs.find(j => j.id !== existingId);
+                    expect(newJob.company).toBe('BrandNewCo');
+                    expect(newJob.position).toBe('BrandNewPos');
+                });
+            });
+
+            // ---- LocalStorage Persistence ----
+            describe('LocalStorage Persistence', () => {
+
+                it('saveJobs should persist to localStorage', () => {
+                    resetAppState();
+                    createJob({ company: 'Persisted', status: 'interested' });
+                    const stored = JSON.parse(mockStorage['jobApplications']);
+                    expect(stored.length).toBe(1);
+                    expect(stored[0].company).toBe('Persisted');
+                });
+
+                it('loadJobs should restore from localStorage', () => {
+                    resetAppState();
+                    mockStorage['jobApplications'] = JSON.stringify([
+                        { id: '123', company: 'Loaded', status: 'applied' }
+                    ]);
+                    loadJobs();
+                    expect(jobs.length).toBe(1);
+                    expect(jobs[0].company).toBe('Loaded');
+                });
+
+                it('loadJobs should migrate old entries without type', () => {
+                    resetAppState();
+                    mockStorage['jobApplications'] = JSON.stringify([
+                        { id: '123', company: 'OldData', status: 'applied' }
+                    ]);
+                    loadJobs();
+                    expect(jobs[0].type).toBe('job');
+                    expect(jobs[0].rating).toBe(3);
+                });
+            });
+
+            // ---- Helper Functions ----
+            describe('Helper Functions', () => {
+
+                it('renderStars should generate correct star string', () => {
+                    expect(renderStars(1)).toContain('★☆☆☆☆');
+                    expect(renderStars(3)).toContain('★★★☆☆');
+                    expect(renderStars(5)).toContain('★★★★★');
+                });
+            });
+
+            restoreLocalStorage();
+            displayResults();
+        }
+
+        function displayResults() {
+            const container = document.getElementById('results');
+            const suites = {};
+
+            testResults.forEach(r => {
+                if (!suites[r.suite]) suites[r.suite] = [];
+                suites[r.suite].push(r);
+            });
+
+            let html = '';
+            let passed = 0, failed = 0;
+
+            for (const [suite, tests] of Object.entries(suites)) {
+                html += `<div class="test-suite"><h2>${suite}</h2>`;
+                tests.forEach(t => {
+                    if (t.status === 'pass') passed++;
+                    else failed++;
+
+                    html += `<div class="test ${t.status}">
+                        <span class="test-name">${t.name}</span>
+                        <span class="test-status">${t.status === 'pass' ? '✓ PASS' : '✗ FAIL'}</span>
+                    </div>`;
+                    if (t.error) {
+                        html += `<div class="error-details">${t.error}</div>`;
+                    }
+                });
+                html += '</div>';
+            }
+
+            const summaryClass = failed === 0 ? 'all-pass' : 'has-fails';
+            html += `<div class="summary ${summaryClass}">
+                <strong>Results:</strong> ${passed} passed, ${failed} failed
+            </div>`;
+
+            container.innerHTML = html;
+        }
+    </script>
+
+    <!-- Include the app.js to get access to its functions -->
+    <!-- We need the DOM elements the app expects -->
+    <div style="display:none;">
+        <button id="addJobBtn"></button>
+        <div id="detailPanel">
+            <button id="closePanel"></button>
+            <form id="jobForm">
+                <input type="hidden" id="jobId">
+                <input type="radio" name="type" value="connection">
+                <input type="radio" name="type" value="job" checked>
+                <input type="text" id="contactName">
+                <input type="text" id="organization">
+                <input type="text" id="company">
+                <input type="text" id="position">
+                <input type="text" id="location">
+                <input type="text" id="salary">
+                <select id="status">
+                    <option value="interested">Interested</option>
+                    <option value="applied">Applied</option>
+                    <option value="interview">Interview</option>
+                    <option value="offer">Offer</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+                <input type="radio" name="rating" value="1">
+                <input type="radio" name="rating" value="2">
+                <input type="radio" name="rating" value="3" checked>
+                <input type="radio" name="rating" value="4">
+                <input type="radio" name="rating" value="5">
+                <textarea id="comments"></textarea>
+                <button type="submit">Save</button>
+            </form>
+            <button id="deleteBtn"></button>
+            <h2 id="panelTitle"></h2>
+            <div class="connection-fields"></div>
+            <div class="rating-input">
+                <label></label><label></label><label></label><label></label><label></label>
+            </div>
+        </div>
+        <div class="cards-container" data-status="interested"></div>
+        <div class="cards-container" data-status="applied"></div>
+        <div class="cards-container" data-status="interview"></div>
+        <div class="cards-container" data-status="offer"></div>
+        <div class="cards-container" data-status="rejected"></div>
+        <div class="column" data-status="interested"><span class="count-badge"></span></div>
+        <div class="column" data-status="applied"><span class="count-badge"></span></div>
+        <div class="column" data-status="interview"><span class="count-badge"></span></div>
+        <div class="column" data-status="offer"><span class="count-badge"></span></div>
+        <div class="column" data-status="rejected"><span class="count-badge"></span></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

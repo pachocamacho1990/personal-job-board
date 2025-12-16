@@ -208,9 +208,11 @@ function openJobDetails(jobId) {
         deleteBtn.style.display = 'block';
     } else {
         // New entry
+        currentJobId = null; // Ensure global state is cleared
         document.getElementById('panelTitle').textContent = 'Add New Item';
-        document.getElementById('jobId').value = '';  // Clear the hidden jobId field
         jobForm.reset();
+        document.getElementById('jobId').value = '';  // Clear hidden field AFTER reset to ensure it stays empty
+
         // Default to job type
         document.querySelector('input[name="type"][value="job"]').checked = true;
         toggleFieldsByType('job');
@@ -251,6 +253,7 @@ function updateRatingDisplay() {
 function closeJobPanel() {
     detailPanel.classList.remove('open');
     jobForm.reset();
+    document.getElementById('jobId').value = ''; // Explicitly clear hidden ID
     currentJobId = null;
 }
 
@@ -277,11 +280,10 @@ function handleFormSubmit(e) {
         comments: document.getElementById('comments').value
     };
 
-    const jobId = document.getElementById('jobId').value;
-
-    if (jobId) {
+    // Use global state instead of hidden input for reliability
+    if (currentJobId) {
         // Update existing job
-        updateJob(jobId, formData);
+        updateJob(currentJobId, formData);
     } else {
         // Create new job
         createJob(formData);
