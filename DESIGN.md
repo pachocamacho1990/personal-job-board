@@ -2,7 +2,9 @@
 
 Minimalist Notion-inspired design for the personal job board.
 
-![Design System](dual-entity-system.png)
+![Design System Overview](design-system.png)
+
+![Dual Entity System](dual-entity-system.png)
 
 ## Colors
 
