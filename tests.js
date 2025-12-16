@@ -7,6 +7,7 @@
  * - State management (currentJobId tracking)
  * - The critical bug: view→close→add workflow
  * - Data persistence (localStorage)
+ * - View preferences (compact/comfortable toggle)
  */
 
 // Mock DOM and localStorage
@@ -21,7 +22,8 @@ const mockElements = {
     'jobId': { value: '' },
     'company': { value: '' },
     'position': { value: '' },
-    'status': { value: 'interested' }
+    'status': { value: 'interested' },
+    'viewIcon': { textContent: '⊟' }
 };
 
 global.document = {
@@ -35,6 +37,7 @@ global.document = {
 // App code
 let jobs = [];
 let currentJobId = null;
+let isCompactView = false;
 
 function loadJobs() {
     const stored = localStorage.getItem('jobApplications');
@@ -103,6 +106,30 @@ function handleFormSubmit(formData) {
     closeJobPanel();
 }
 
+// View preference functions
+function loadViewPreference() {
+    const saved = localStorage.getItem('viewPreference');
+    isCompactView = saved === 'compact';
+    updateViewIcon();
+}
+
+function saveViewPreference() {
+    localStorage.setItem('viewPreference', isCompactView ? 'compact' : 'comfortable');
+}
+
+function toggleViewMode() {
+    isCompactView = !isCompactView;
+    saveViewPreference();
+    updateViewIcon();
+}
+
+function updateViewIcon() {
+    const icon = document.getElementById('viewIcon');
+    if (icon) {
+        icon.textContent = isCompactView ? '⊞' : '⊟';
+    }
+}
+
 // Simple test framework
 let passed = 0;
 let failed = 0;
@@ -126,6 +153,8 @@ function assert(condition, message) {
 function reset() {
     jobs = [];
     currentJobId = null;
+    isCompactView = false;
+    mockElements['viewIcon'].textContent = '⊟';
     localStorage.clear();
 }
 
@@ -241,6 +270,58 @@ test('Load migrates old data', () => {
     loadJobs();
     assert(jobs[0].type === 'job', 'Expected default type');
     assert(jobs[0].rating === 3, 'Expected default rating');
+});
+
+console.log('\n5. View Preferences');
+test('View defaults to comfortable mode', () => {
+    reset();
+    loadViewPreference();
+    assert(isCompactView === false, 'Expected default comfortable view');
+    assert(mockElements['viewIcon'].textContent === '⊟', 'Expected ⊟ icon');
+});
+
+test('Toggle switches view mode', () => {
+    reset();
+    toggleViewMode();
+    assert(isCompactView === true, 'Expected compact view after toggle');
+    assert(mockElements['viewIcon'].textContent === '⊞', 'Expected ⊞ icon');
+    toggleViewMode();
+    assert(isCompactView === false, 'Expected comfortable view after second toggle');
+    assert(mockElements['viewIcon'].textContent === '⊟', 'Expected ⊟ icon again');
+});
+
+test('Save persists view preference', () => {
+    reset();
+    isCompactView = true;
+    saveViewPreference();
+    assert(mockStorage['viewPreference'] === 'compact', 'Expected compact saved');
+
+    isCompactView = false;
+    saveViewPreference();
+    assert(mockStorage['viewPreference'] === 'comfortable', 'Expected comfortable saved');
+});
+
+test('Load restores view preference', () => {
+    reset();
+    mockStorage['viewPreference'] = 'compact';
+    loadViewPreference();
+    assert(isCompactView === true, 'Expected compact view loaded');
+    assert(mockElements['viewIcon'].textContent === '⊞', 'Expected ⊞ icon');
+});
+
+test('View preference persists across sessions', () => {
+    reset();
+    // Simulate user setting compact view
+    toggleViewMode();
+    const savedPref = mockStorage['viewPreference'];
+
+    // Simulate page reload
+    isCompactView = false;
+    loadViewPreference();
+
+    // View should be restored
+    assert(isCompactView === true, 'Expected view preference restored');
+    assert(savedPref === 'compact', 'Expected compact in storage');
 });
 
 // Summary

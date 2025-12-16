@@ -104,6 +104,12 @@ body {
     color: var(--text-primary);
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
 /* Kanban Board */
 .kanban-board {
     display: flex;
@@ -332,6 +338,61 @@ body {
 .job-card .company {
     color: var(--text-primary);
     font-weight: var(--font-weight-medium);
+}
+
+/* Compact View Styles */
+.job-card.compact {
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+}
+
+.job-card.compact .card-header {
+    margin-bottom: 0;
+    gap: var(--spacing-xs);
+}
+
+.job-card.compact h3 {
+    font-size: var(--font-size-sm);
+    margin-bottom: 2px;
+    display: inline;
+    margin-left: var(--spacing-xs);
+}
+
+.job-card.compact p {
+    font-size: var(--font-size-xs);
+    margin-bottom: 0;
+    display: inline;
+}
+
+.job-card.compact .company {
+    font-size: var(--font-size-xs);
+}
+
+.job-card.compact .rating-stars {
+    font-size: 12px;
+    letter-spacing: 0;
+}
+
+.job-card.compact .type-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+}
+
+.job-card.compact .type-emoji {
+    font-size: 10px;
+}
+
+/* Compact view metadata line */
+.job-card.compact .metadata {
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    margin-top: 2px;
+    display: block;
+}
+
+.job-card.compact .metadata-separator {
+    margin: 0 4px;
+    color: var(--text-tertiary);
 }
 
 /* Detail Panel */

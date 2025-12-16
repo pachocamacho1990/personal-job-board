@@ -6,7 +6,7 @@
 node tests.js
 ```
 
-## Test Coverage (13 tests)
+## Test Coverage (18 tests)
 
 ### 1. CRUD Operations (5 tests)
 - **Create**: Adds job to array with defaults
@@ -28,6 +28,13 @@ node tests.js
 - **Load**: Restores from localStorage  
 - **Migration**: Handles old data without type/rating fields
 
+### 5. View Preferences (5 tests)
+- **Defaults**: View starts in comfortable mode
+- **Toggle**: Icon and state update correctly
+- **Save**: View preference persists to localStorage
+- **Load**: View preference restores from localStorage
+- **Session persistence**: Preference survives page reload
+
 ## Design Philosophy
 
 **Simple, not exhaustive**: Tests cover core behaviors needed for confidence, not every edge case.
@@ -45,11 +52,16 @@ node tests.js
 - Event listener binding (covered by manual testing)
 - Browser-specific behavior (use browser's dev tools)
 
-## Why 13 Tests?
+## Why 18 Tests?
+
+Started with 13 core tests, then added 5 focused tests for the compact view feature:
+- View preference state management
+- Toggle functionality
+- localStorage persistence
 
 The original 23-test suite had redundancies:
-- **Removed**: Tests that checked same behavior from different angles (e.g., "createJob generates unique ID" + "createJob adds to array")
+- **Removed**: Tests that checked same behavior from different angles
 - **Combined**: Related assertions into single tests
-- **Eliminated**: Overly detailed state checks that repeated basic behavior
+- **Added**: Compact view tests for new functionality
 
-**Result**: 43% fewer tests, same critical coverage.
+**Result**: Comprehensive coverage with minimal redundancy.

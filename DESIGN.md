@@ -45,6 +45,12 @@ Minimalist Notion-inspired design for the personal job board.
 - **Display**: Gold filled (★), gray empty (☆), 14px
 - **Input**: 5 clickable stars (24px), JavaScript highlights
 
+### View Toggle
+- **Button**: Icon button in header (⊟/⊞)
+- **Comfortable mode** (⊟): Full padding (16px), multi-line layout, larger fonts
+- **Compact mode** (⊞): Reduced padding (8px), inline layout, ~50% height reduction
+- **Persistence**: View preference saved to localStorage
+
 ## Data Model
 
 ```javascript
@@ -72,3 +78,4 @@ Minimalist Notion-inspired design for the personal job board.
 - Click card → open lateral panel  
 - Hover: cards lift, buttons brighten
 - Star click: auto-highlight up to rating
+- View toggle: switch between comfortable/compact modes (persists across sessions)

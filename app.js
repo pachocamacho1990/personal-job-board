@@ -3,6 +3,7 @@
 // State
 let jobs = [];
 let currentJobId = null;
+let isCompactView = false; // View mode state
 
 // DOM Elements
 const addJobBtn = document.getElementById('addJobBtn');
@@ -14,6 +15,7 @@ const deleteBtn = document.getElementById('deleteBtn');
 // Initialize app
 function init() {
     loadJobs();
+    loadViewPreference();
     renderAllJobs();
     setupEventListeners();
 }
@@ -100,6 +102,42 @@ function renderStars(rating) {
     return `<span class="rating-stars">${filled}${empty}</span>`;
 }
 
+// View preference management
+function loadViewPreference() {
+    try {
+        const saved = localStorage.getItem('viewPreference');
+        isCompactView = saved === 'compact';
+        updateViewIcon();
+        console.log(`✓ Loaded view preference: ${isCompactView ? 'compact' : 'comfortable'}`);
+    } catch (error) {
+        console.error('Error loading view preference:', error);
+        isCompactView = false;
+    }
+}
+
+function saveViewPreference() {
+    try {
+        localStorage.setItem('viewPreference', isCompactView ? 'compact' : 'comfortable');
+        console.log(`✓ Saved view preference: ${isCompactView ? 'compact' : 'comfortable'}`);
+    } catch (error) {
+        console.error('Error saving view preference:', error);
+    }
+}
+
+function toggleViewMode() {
+    isCompactView = !isCompactView;
+    saveViewPreference();
+    updateViewIcon();
+    renderAllJobs();
+}
+
+function updateViewIcon() {
+    const icon = document.getElementById('viewIcon');
+    if (icon) {
+        icon.textContent = isCompactView ? '⊞' : '⊟';
+    }
+}
+
 // Rendering
 function renderAllJobs() {
     // Clear all containers
@@ -119,7 +157,7 @@ function renderJob(job) {
     if (!container) return;
 
     const card = document.createElement('div');
-    card.className = 'job-card';
+    card.className = isCompactView ? 'job-card compact' : 'job-card';
     card.draggable = true;
     card.dataset.jobId = job.id;
     card.dataset.type = job.type;
@@ -142,19 +180,41 @@ function renderJob(job) {
     const typeEmoji = isConnection ? '🤝' : '💼';
     const typeName = isConnection ? 'Connection' : 'Job';
 
-    card.innerHTML = `
-        <div class="card-header">
-            ${renderStars(job.rating || 3)}
-            <span class="type-badge ${job.type}">
-                <span class="type-emoji">${typeEmoji}</span>
-                ${typeName}
-            </span>
-        </div>
-        <h3>${title}</h3>
-        <p class="company">${subtitle}</p>
-        ${job.location ? `<p>${job.location}</p>` : ''}
-        ${job.salary ? `<p>${job.salary}</p>` : ''}
-    `;
+    // Build metadata array for compact view
+    const metadata = [];
+    if (subtitle) metadata.push(subtitle);
+    if (job.location) metadata.push(job.location);
+    if (job.salary) metadata.push(job.salary);
+
+    if (isCompactView) {
+        // Compact layout: rating + title + badge on one line, metadata below
+        card.innerHTML = `
+            <div class="card-header">
+                ${renderStars(job.rating || 3)}
+                <h3>${title}</h3>
+                <span class="type-badge ${job.type}">
+                    <span class="type-emoji">${typeEmoji}</span>
+                    ${typeName}
+                </span>
+            </div>
+            ${metadata.length > 0 ? `<div class="metadata">${metadata.join(' • ')}</div>` : ''}
+        `;
+    } else {
+        // Comfortable layout: original multi-line format
+        card.innerHTML = `
+            <div class="card-header">
+                ${renderStars(job.rating || 3)}
+                <span class="type-badge ${job.type}">
+                    <span class="type-emoji">${typeEmoji}</span>
+                    ${typeName}
+                </span>
+            </div>
+            <h3>${title}</h3>
+            <p class="company">${subtitle}</p>
+            ${job.location ? `<p>${job.location}</p>` : ''}
+            ${job.salary ? `<p>${job.salary}</p>` : ''}
+        `;
+    }
 
     // Click to view details
     card.addEventListener('click', () => openJobDetails(job.id));
@@ -399,6 +459,9 @@ function setupEventListeners() {
             closeJobPanel();
         }
     });
+
+    // View toggle button
+    document.getElementById('viewToggle').addEventListener('click', toggleViewMode);
 }
 
 // Start the app
