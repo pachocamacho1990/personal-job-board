@@ -61,3 +61,4 @@ Data lives in your browser's localStorage. To keep your data:
 - `styles.css` - Design system
 - `app.js` - Core logic
 - `server.py` - Local HTTP server
+- `AI-GUIDE.md` - Compact reference for AI-assisted development (token-efficient)
