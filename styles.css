@@ -35,6 +35,9 @@
     --color-rejected: #787774;
     --color-rejected-bg: #f7f6f5;
     --color-rejected-light: #e9e9e8;
+    --color-forgotten: #9e8b6e;
+    --color-forgotten-bg: #faf8f5;
+    --color-forgotten-light: #ebe5da;
 
     /* Spacing - More generous like Notion */
     --spacing-xs: 4px;
@@ -211,6 +214,19 @@ body {
     background: var(--color-rejected-bg);
 }
 
+.column[data-status="forgotten"] .column-header {
+    background: var(--color-forgotten-light);
+    border-color: var(--color-forgotten);
+}
+
+.column[data-status="forgotten"] .column-header h2 {
+    color: var(--color-forgotten);
+}
+
+.column[data-status="forgotten"] .cards-container {
+    background: var(--color-forgotten-bg);
+}
+
 .count-badge {
     background: rgba(0, 0, 0, 0.08);
     padding: 2px 8px;
@@ -316,6 +332,11 @@ body {
     border-left: 3px solid var(--color-rejected);
 }
 
+.column[data-status="forgotten"] .job-card {
+    border-left: 3px solid var(--color-forgotten);
+    opacity: 0.85;
+}
+
 .job-card.dragging {
     opacity: 0.5;
     transform: rotate(2deg);
@@ -393,6 +414,64 @@ body {
 .job-card.compact .metadata-separator {
     margin: 0 4px;
     color: var(--text-tertiary);
+}
+
+/* Card footer for compact view */
+.job-card.compact .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2px;
+}
+
+/* Timestamp on cards - subtle and minimal */
+.job-card .timestamp {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-style: normal;
+    opacity: 0.7;
+    margin-top: 6px;
+}
+
+.job-card.compact .timestamp {
+    font-size: 9px;
+    margin-top: 0;
+}
+
+/* Timestamp info section in detail panel */
+.timestamp-info {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-xs);
+}
+
+.timestamp-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+}
+
+.timestamp-row:first-child {
+    padding-top: 0;
+}
+
+.timestamp-row:last-child {
+    padding-bottom: 0;
+}
+
+.timestamp-label {
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-normal);
+    font-size: 11px;
+}
+
+.timestamp-value {
+    color: var(--text-secondary);
+    font-size: 11px;
 }
 
 /* Detail Panel */

@@ -17,6 +17,7 @@ Minimalist Notion-inspired design for the personal job board.
 ### Status
 - Interested: `#9d34da` (purple)
 - Applied: `#0b6adb` (blue)
+- Forgotten: `#9e8b6e` (muted amber)
 - Interview: `#eb8909` (orange)
 - Offer: `#0f7b6c` (teal)
 - Rejected: `#787774` (gray)
@@ -75,7 +76,11 @@ Minimalist Notion-inspired design for the personal job board.
   contactName, organization,
   
   // Common
-  status, comments, dateAdded
+  status, comments, dateAdded,
+  
+  // Timestamps (auto-managed)
+  created_at,   // Set on creation, never changes
+  updated_at    // Updated on every save
 }
 ```
 
