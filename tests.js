@@ -41,7 +41,26 @@ let isCompactView = false;
 
 function loadJobs() {
     const stored = localStorage.getItem('jobApplications');
-    jobs = stored ? JSON.parse(stored).map(j => ({ type: j.type || 'job', rating: j.rating || 3, ...j })) : [];
+    jobs = stored ? JSON.parse(stored) : [];
+
+    // Auto-migrate: add missing fields to old entries
+    jobs = jobs.map(job => {
+        const migrated = {
+            type: job.type || 'job',
+            rating: job.rating || 3,
+            ...job
+        };
+
+        // Migrate timestamps for old cards
+        if (!migrated.created_at) {
+            migrated.created_at = job.dateAdded || new Date().toISOString();
+        }
+        if (!migrated.updated_at) {
+            migrated.updated_at = migrated.created_at;
+        }
+
+        return migrated;
+    });
 }
 
 function saveJobs() {
@@ -49,6 +68,7 @@ function saveJobs() {
 }
 
 function createJob(jobData) {
+    const now = new Date().toISOString();
     const job = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         type: jobData.type || 'job',
@@ -56,6 +76,9 @@ function createJob(jobData) {
         position: jobData.position || '',
         status: jobData.status,
         rating: jobData.rating || 3,
+        dateAdded: now,
+        created_at: now,
+        updated_at: now,
         ...jobData
     };
     jobs.push(job);
@@ -66,7 +89,11 @@ function createJob(jobData) {
 function updateJob(id, jobData) {
     const index = jobs.findIndex(j => j.id === id);
     if (index !== -1) {
-        jobs[index] = { ...jobs[index], ...jobData };
+        jobs[index] = {
+            ...jobs[index],
+            ...jobData,
+            updated_at: new Date().toISOString()
+        };
         saveJobs();
         return jobs[index];
     }
@@ -322,6 +349,55 @@ test('View preference persists across sessions', () => {
     // View should be restored
     assert(isCompactView === true, 'Expected view preference restored');
     assert(savedPref === 'compact', 'Expected compact in storage');
+});
+
+console.log('\n6. Timestamps');
+test('Create sets both timestamps', () => {
+    reset();
+    const before = new Date().toISOString();
+    const job = createJob({ company: 'Test', status: 'applied' });
+    const after = new Date().toISOString();
+
+    assert(job.created_at !== undefined, 'Expected created_at to be set');
+    assert(job.updated_at !== undefined, 'Expected updated_at to be set');
+    assert(job.created_at >= before && job.created_at <= after, 'created_at should be current time');
+    assert(job.created_at === job.updated_at, 'Both timestamps should be equal on creation');
+});
+
+test('Update changes updated_at but not created_at', () => {
+    reset();
+    const job = createJob({ company: 'Test', status: 'applied' });
+    const originalCreated = job.created_at;
+    const originalUpdated = job.updated_at;
+
+    // Wait a tiny bit to ensure different timestamp
+    const updated = updateJob(job.id, { company: 'Updated' });
+
+    assert(updated.created_at === originalCreated, 'created_at should not change');
+    assert(updated.updated_at >= originalUpdated, 'updated_at should be updated');
+});
+
+test('Migration adds timestamps to old data', () => {
+    reset();
+    const oldDate = '2025-01-01T00:00:00.000Z';
+    mockStorage['jobApplications'] = JSON.stringify([
+        { id: '1', company: 'Old', status: 'applied', dateAdded: oldDate }
+    ]);
+    loadJobs();
+
+    assert(jobs[0].created_at === oldDate, 'created_at should use dateAdded');
+    assert(jobs[0].updated_at === oldDate, 'updated_at should equal created_at');
+});
+
+test('Migration handles data without dateAdded', () => {
+    reset();
+    mockStorage['jobApplications'] = JSON.stringify([
+        { id: '1', company: 'Very Old', status: 'applied' }
+    ]);
+    loadJobs();
+
+    assert(jobs[0].created_at !== undefined, 'created_at should be set');
+    assert(jobs[0].updated_at !== undefined, 'updated_at should be set');
 });
 
 // Summary

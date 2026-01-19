@@ -6,6 +6,39 @@ let currentJobId = null;
 let isCompactView = false; // View mode state
 let isPreviewMode = false; // Markdown preview mode
 
+// Date formatting helpers
+function formatRelativeTime(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = Math.floor(diffDays / 30);
+
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffWeeks < 4) return `${diffWeeks}w ago`;
+    return `${diffMonths}mo ago`;
+}
+
+function formatFullDate(dateString) {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+}
+
 // DOM Elements
 const addJobBtn = document.getElementById('addJobBtn');
 const detailPanel = document.getElementById('detailPanel');
@@ -30,12 +63,35 @@ function loadJobs() {
         const stored = localStorage.getItem('jobApplications');
         jobs = stored ? JSON.parse(stored) : [];
 
-        // Auto-migrate: add type and rating fields to old entries
-        jobs = jobs.map(job => ({
-            type: job.type || 'job',  // default existing entries to 'job'
-            rating: job.rating || 3,  // default to 3 stars (moderate interest)
-            ...job
-        }));
+        // Auto-migrate: add missing fields to old entries
+        let needsSave = false;
+        jobs = jobs.map(job => {
+            const migrated = {
+                type: job.type || 'job',  // default existing entries to 'job'
+                rating: job.rating || 3,  // default to 3 stars (moderate interest)
+                ...job
+            };
+
+            // Migrate timestamps for old cards
+            if (!migrated.created_at) {
+                // Use existing dateAdded if available, otherwise use current time
+                migrated.created_at = job.dateAdded || new Date().toISOString();
+                needsSave = true;
+            }
+            if (!migrated.updated_at) {
+                // For old cards, set to same as created_at (we don't know real last update)
+                migrated.updated_at = migrated.created_at;
+                needsSave = true;
+            }
+
+            return migrated;
+        });
+
+        // Save migrated data if changes were made
+        if (needsSave && jobs.length > 0) {
+            saveJobs();
+            console.log(`✓ Migrated ${jobs.length} item(s) with timestamps`);
+        }
 
         console.log(`✓ Loaded ${jobs.length} item(s) from localStorage`);
     } catch (error) {
@@ -55,6 +111,7 @@ function saveJobs() {
 
 // CRUD operations
 function createJob(jobData) {
+    const now = new Date().toISOString();
     const job = {
         id: Date.now().toString(),
         type: jobData.type || 'job',
@@ -73,7 +130,11 @@ function createJob(jobData) {
         status: jobData.status,
         rating: jobData.rating || 3,  // Default to 3 stars
         comments: jobData.comments || '',
-        dateAdded: new Date().toISOString()
+
+        // Timestamps
+        dateAdded: now,      // Legacy field for compatibility
+        created_at: now,     // New: creation timestamp
+        updated_at: now      // New: last update timestamp
     };
     jobs.push(job);
     saveJobs();
@@ -83,7 +144,11 @@ function createJob(jobData) {
 function updateJob(id, jobData) {
     const index = jobs.findIndex(j => j.id === id);
     if (index !== -1) {
-        jobs[index] = { ...jobs[index], ...jobData };
+        jobs[index] = {
+            ...jobs[index],
+            ...jobData,
+            updated_at: new Date().toISOString()  // Update timestamp on every change
+        };
         saveJobs();
         return jobs[index];
     }
@@ -192,6 +257,7 @@ function renderJob(job) {
 
     if (isCompactView) {
         // Compact layout: rating + title + badge on one line, metadata below
+        const relativeTime = formatRelativeTime(job.updated_at);
         card.innerHTML = `
             <div class="card-header">
                 ${renderStars(job.rating || 3)}
@@ -201,10 +267,14 @@ function renderJob(job) {
                     ${typeName}
                 </span>
             </div>
-            ${metadata.length > 0 ? `<div class="metadata">${metadata.join(' • ')}</div>` : ''}
+            <div class="card-footer">
+                ${metadata.length > 0 ? `<span class="metadata">${metadata.join(' • ')}</span>` : ''}
+                ${relativeTime ? `<span class="timestamp">${relativeTime}</span>` : ''}
+            </div>
         `;
     } else {
-        // Comfortable layout: original multi-line format
+        // Comfortable layout: original multi-line format with timestamp
+        const relativeTime = formatRelativeTime(job.updated_at);
         card.innerHTML = `
             <div class="card-header">
                 ${renderStars(job.rating || 3)}
@@ -217,6 +287,7 @@ function renderJob(job) {
             <p class="company">${subtitle}</p>
             ${job.location ? `<p>${job.location}</p>` : ''}
             ${job.salary ? `<p>${job.salary}</p>` : ''}
+            ${relativeTime ? `<p class="timestamp">Updated ${relativeTime}</p>` : ''}
         `;
     }
 
@@ -231,7 +302,7 @@ function renderJob(job) {
 }
 
 function updateColumnCounts() {
-    const statuses = ['interested', 'applied', 'interview', 'offer', 'rejected'];
+    const statuses = ['interested', 'applied', 'forgotten', 'interview', 'offer', 'rejected'];
     statuses.forEach(status => {
         const count = jobs.filter(j => j.status === status).length;
         const badge = document.querySelector(`.column[data-status="${status}"] .count-badge`);
@@ -269,6 +340,22 @@ function openJobDetails(jobId) {
         if (ratingInput) ratingInput.checked = true;
         updateRatingDisplay();
 
+        // Display timestamps in the info section
+        const timestampInfo = document.getElementById('timestampInfo');
+        if (timestampInfo) {
+            timestampInfo.innerHTML = `
+                <div class="timestamp-row">
+                    <span class="timestamp-label">Created:</span>
+                    <span class="timestamp-value">${formatFullDate(job.created_at)}</span>
+                </div>
+                <div class="timestamp-row">
+                    <span class="timestamp-label">Updated:</span>
+                    <span class="timestamp-value">${formatFullDate(job.updated_at)}</span>
+                </div>
+            `;
+            timestampInfo.style.display = 'block';
+        }
+
         deleteBtn.style.display = 'block';
     } else {
         // New entry
@@ -281,6 +368,13 @@ function openJobDetails(jobId) {
         document.querySelector('input[name="type"][value="job"]').checked = true;
         toggleFieldsByType('job');
         updateRatingDisplay();  // Reset star display to default (3 stars)
+
+        // Hide timestamps for new entries
+        const timestampInfo = document.getElementById('timestampInfo');
+        if (timestampInfo) {
+            timestampInfo.style.display = 'none';
+        }
+
         deleteBtn.style.display = 'none';
     }
 

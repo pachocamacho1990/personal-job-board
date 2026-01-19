@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Personal job application tracker with Kanban board interface">
     <title>Job Board - Application Tracker</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=2">
 </head>
 
 <body>
@@ -38,6 +38,14 @@
                         <span class="count-badge">0</span>
                     </div>
                     <div class="cards-container" data-status="applied"></div>
+                </div>
+
+                <div class="column forgotten" data-status="forgotten">
+                    <div class="column-header">
+                        <h2>Forgotten</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="forgotten"></div>
                 </div>
 
                 <div class="column" data-status="interview">
@@ -76,6 +84,9 @@
 
                 <form id="jobForm" class="job-form">
                     <input type="hidden" id="jobId">
+
+                    <!-- Timestamp info (read-only, populated by JS) -->
+                    <div id="timestampInfo" class="timestamp-info" style="display: none;"></div>
 
                     <div class="form-group">
                         <label>Type</label>
@@ -147,6 +158,7 @@
                         <select id="status" required>
                             <option value="interested">Interested</option>
                             <option value="applied">Applied</option>
+                            <option value="forgotten">Forgotten</option>
                             <option value="interview">Interview</option>
                             <option value="offer">Offer</option>
                             <option value="rejected">Rejected</option>
@@ -178,7 +190,7 @@ Supports markdown:
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
-    <script src="app.js?v=3"></script>
+    <script src="app.js?v=4"></script>
 </body>
 
 </html>

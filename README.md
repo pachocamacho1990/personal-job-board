@@ -9,9 +9,10 @@ A minimalist Kanban board to track job applications and networking connections.
 - 🤝 **Dual Entity System**: Track connections and job applications together
 - ⭐ **Star Ratings**: 1-5 stars to prioritize opportunities
 - 🎯 **Visual Badges**: Emoji icons and type badges for quick scanning
-- 📋 **Kanban Workflow**: Drag-and-drop through 5 stages
+- 📋 **Kanban Workflow**: Drag-and-drop through 6 stages
 - 🗜️ **Compact View**: Toggle between comfortable and compact card layouts
 - 📝 **Markdown Comments**: Format notes with headings, lists, code, and more
+- 🕐 **Timestamps**: Track when cards were created and last updated
 - 💾 **Local Storage**: All data stays on your machine
 
 ## Quick Start
@@ -44,7 +45,9 @@ Open **http://localhost:8000** in your browser.
 - **Comfortable view** (⊟): Full-size cards with multi-line layout
 - **Compact view** (⊞): Condensed cards (~50% smaller) for seeing more at once
 
-**Workflow**: Interested → Applied → Interview → Offer → Rejected
+**Workflow**: Interested → Applied → Forgotten → Interview → Offer → Rejected
+
+> **Forgotten Column**: For applications that have been in "Applied" status for 2+ weeks with no response. Manually move stale cards here to keep your "Applied" column focused on fresh applications.
 
 ## Data Storage
 

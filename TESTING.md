@@ -6,7 +6,7 @@
 node tests.js
 ```
 
-## Test Coverage (18 tests)
+## Test Coverage (22 tests)
 
 ### 1. CRUD Operations (5 tests)
 - **Create**: Adds job to array with defaults
@@ -35,6 +35,12 @@ node tests.js
 - **Load**: View preference restores from localStorage
 - **Session persistence**: Preference survives page reload
 
+### 6. Timestamps (4 tests)
+- **Create timestamps**: Both `created_at` and `updated_at` set on creation
+- **Update behavior**: Only `updated_at` changes on update
+- **Migration with dateAdded**: Old cards use `dateAdded` for `created_at`
+- **Migration without dateAdded**: Fallback to current time
+
 ## Design Philosophy
 
 **Simple, not exhaustive**: Tests cover core behaviors needed for confidence, not every edge case.
@@ -52,16 +58,15 @@ node tests.js
 - Event listener binding (covered by manual testing)
 - Browser-specific behavior (use browser's dev tools)
 
-## Why 18 Tests?
+## Why 22 Tests?
 
-Started with 13 core tests, then added 5 focused tests for the compact view feature:
-- View preference state management
-- Toggle functionality
-- localStorage persistence
+Started with 13 core tests, then expanded incrementally:
+- **+5**: View preference tests for compact/comfortable toggle
+- **+4**: Timestamp tests for `created_at`/`updated_at` and migration
 
 The original 23-test suite had redundancies:
 - **Removed**: Tests that checked same behavior from different angles
 - **Combined**: Related assertions into single tests
-- **Added**: Compact view tests for new functionality
+- **Added**: Feature tests for new functionality
 
 **Result**: Comprehensive coverage with minimal redundancy.
