@@ -1,97 +1,74 @@
-# Design System
+# Design System & Architecture
 
-Minimalist Notion-inspired design for the personal job board.
+## Architecture Overview
 
-![Design System Overview](design-system.png)
+The application has moved from a client-side only (localStorage) model to a robust **Client-Server-Database** architecture using Docker containers.
 
-![Dual Entity System](dual-entity-system.png)
+```mermaid
+graph TD
+    Client[Browser] -->|HTTP/80| Nginx[Nginx Reverse Proxy]
+    Nginx -->|/api/*| API[Node.js Express API]
+    Nginx -->|/*| Static[Static Frontend Files]
+    API -->|TCP/5432| DB[PostgreSQL Database]
+```
 
-## Colors
+### Components
 
-### Base
-- Background: `#f7f6f3` (warm off-white)
-- Border: `#e3e2df`
-- Text: `#37352f` (dark), `#787774` (gray)
-- Accent: `#2383e2` (blue)
-
-### Status
-- Interested: `#9d34da` (purple)
-- Applied: `#0b6adb` (blue)
-- Forgotten: `#9e8b6e` (muted amber)
-- Interview: `#eb8909` (orange)
-- Offer: `#0f7b6c` (teal)
-- Rejected: `#787774` (gray)
-- Star Rating: `#FFB800` (gold)
-
-## Typography
-
-- **Font**: System UI (-apple-system, SF Pro, Segoe UI)
-- **Sizes**: 12px - 30px
-- **Weights**: 400 (normal), 500 (medium), 600 (semibold)
-
-## Spacing
-
-4px increments: 4px (xs), 8px (sm), 12px (md), 16px (lg), 24px (xl), 32px (2xl)
-
-## Components
-
-### Cards
-- White background, 6px radius
-- 3px colored left border (status color)
-- Hover: lift 2px + shadow
-- **Header**: Stars (left) + Type badge (right)
-
-### Type Badges
-- 🤝 Connection (purple tint) | 💼 Job (blue tint)
-
-### Star Rating
-- **Display**: Gold filled (★), gray empty (☆), 14px
-- **Input**: 5 clickable stars (24px), JavaScript highlights
-
-### View Toggle
-- **Button**: Icon button in header (⊟/⊞)
-- **Comfortable mode** (⊟): Full padding (16px), multi-line layout, larger fonts
-- **Compact mode** (⊞): Reduced padding (8px), inline layout, ~50% height reduction
-- **Persistence**: View preference saved to localStorage
-
-### Markdown Comments
-- **Library**: marked.js (CDN, ~5KB)
-- **Toggle**: Preview/Edit button in detail panel
-- **Edit mode**: Standard textarea with markdown syntax
-- **Preview mode**: Rendered HTML with styled markdown
-- **Supported**: Headings, bold, italic, lists, code blocks, links, blockquotes, horizontal rules
-- **Storage**: Raw markdown saved to localStorage
+1.  **Frontend (Public)**: Vanilla JS SPA. Fetches data via REST API.
+2.  **API (Server)**: Express.js application handling Auth and CRUD.
+3.  **Database (Persistence)**: PostgreSQL storing Users and Jobs.
+4.  **Gateway (Nginx)**: Handles routing, static file serving, and CORS.
 
 ## Data Model
 
-```javascript
-{
-  type: "connection" | "job",
-  rating: 1-5,  // Star priority
-  
-  // Core (both types)
-  company, position, location, salary,
-  
-  // Connection-specific
-  contactName, organization,
-  
-  // Common
-  status, comments, dateAdded,
-  
-  // Timestamps (auto-managed)
-  created_at,   // Set on creation, never changes
-  updated_at    // Updated on every save
-}
-```
+### Database Schema
 
-**Connections**: All fields available (contactName + organization optional additions)  
-**Jobs**: Core fields only
+#### `users` Table
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | SERIAL | Primary Key |
+| `email` | VARCHAR | Unique, login identifier |
+| `password_hash` | VARCHAR | Bcrypt hashed password |
+| `created_at` | TIMESTAMP | Account creation date |
 
-## Interactions
+#### `jobs` Table
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | SERIAL | Primary Key |
+| `user_id` | INTEGER | FK -> users.id (Isolation) |
+| `type` | VARCHAR | 'job' or 'connection' |
+| `rating` | INTEGER | 1-5 Priority |
+| `status` | VARCHAR | interested, applied, etc. |
+| `company` | VARCHAR | |
+| `position` | VARCHAR | |
+| `contact_name` | VARCHAR | (Mapped to `contactName` in API) |
+| `...` | ... | Other fields (location, salary, etc) |
 
-- Drag-and-drop between columns
-- Click card → open lateral panel  
-- Hover: cards lift, buttons brighten
-- Star click: auto-highlight up to rating
-- View toggle: switch between comfortable/compact modes (persists across sessions)
-- Markdown toggle: switch between edit and preview for comments (resets to edit when closing panel)
+## API Design
+
+### Authentication (JWT)
+- **POST /auth/signup**: Create account -> Return Token
+- **POST /auth/login**: Validate creds -> Return Token
+- **Token Storage**: Client stores JWT in `localStorage`
+- **Security**: Passwords hashed with `bcrypt`. API limits rate (5 req/15min).
+
+### Endpoints
+- **GET /api/jobs**: Fetch all jobs for *authenticated user*.
+- **POST /api/jobs**: Create new job.
+- **PUT /api/jobs/:id**: Update job.
+- **DELETE /api/jobs/:id**: Delete job.
+
+*Note: All `/api/jobs` endpoints require a valid `Authorization: Bearer <token>` header.*
+
+## Design System (UI)
+
+Minimalist Notion-inspired design.
+
+### Colors
+- **Status Colors**: Consistent color mapping for job stages (Purple/Blue/Amber/Orange/Teal/Gray).
+- **Dark Mode Compatible**: Variables defined in `root`.
+
+### UX Patterns
+- **Immediate Feedback**: Optimistic UI updates where possible.
+- **Error Handling**: Non-blocking toast/alert messages.
+- **View Toggle**: User preference (Compact/Comfortable) persists across sessions.

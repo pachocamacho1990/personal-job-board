@@ -5,6 +5,12 @@ __pycache__/
 *.so
 .Python
 
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
 # Virtual environments
 venv/
 env/
@@ -30,3 +36,10 @@ Thumbs.db
 
 # Browser artifacts
 .gemini/
+
+# Environment variables (contain secrets)
+.env
+
+# Docker volumes
+postgres_data/
+migration-data.json
