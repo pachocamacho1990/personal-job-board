@@ -1,6 +1,6 @@
 # Job Board - Personal Application Tracker
 
-![Job Board Preview](preview.webp)
+![Job Board Preview](preview.png)
 
 A minimalist Kanban board to track job applications and networking connections.
 
