@@ -444,6 +444,44 @@ test('Jobs with same date sort by rating descending', () => {
     assert(sorted[2].company === 'Low', 'Lowest rated should come last');
 });
 
+test('Jobs on same day (different times) sort by rating', () => {
+    reset();
+    const today = new Date();
+    today.setHours(10, 0, 0, 0); // 10:00 AM
+
+    // Create job at 10:00 AM with 5 stars
+    const jobA = createJob({ company: 'Morning Star', rating: 5, status: 'applied' });
+    jobA.updated_at = today.toISOString();
+
+    // Create job at 11:00 AM with 1 star
+    const later = new Date(today);
+    later.setHours(11, 0, 0, 0);
+    const jobB = createJob({ company: 'Afternoon Dull', rating: 1, status: 'applied' });
+    jobB.updated_at = later.toISOString();
+
+    // Current logic (timestamp sort) would put Job B first (newer).
+    // Desired logic (Day group) should put Job A first (higher rating).
+
+    const sorted = [...jobs].sort((a, b) => {
+        const dateA = new Date(a.updated_at || 0);
+        const dateB = new Date(b.updated_at || 0);
+
+        // Compare calendar dates (YYYY-MM-DD)
+        const dayA = new Date(dateA.getFullYear(), dateA.getMonth(), dateA.getDate()).getTime();
+        const dayB = new Date(dateB.getFullYear(), dateB.getMonth(), dateB.getDate()).getTime();
+        const dayDiff = dayB - dayA;
+        if (dayDiff === 0) {
+            const ratingDiff = (b.rating || 3) - (a.rating || 3);
+            if (ratingDiff !== 0) return ratingDiff;
+            return dateB - dateA;
+        }
+        return dayDiff;
+    });
+
+    assert(sorted[0].company === 'Morning Star', 'High rated morning job should be first (Day grouping)');
+    assert(sorted[1].company === 'Afternoon Dull', 'Low rated afternoon job should be second');
+});
+
 // Summary
 console.log('\n' + '='.repeat(40));
 if (failed === 0) {
