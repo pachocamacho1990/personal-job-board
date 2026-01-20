@@ -214,8 +214,15 @@ function renderAllJobs() {
         container.innerHTML = '';
     });
 
+    // Sort jobs by updated_at (most recently updated first)
+    const sortedJobs = [...jobs].sort((a, b) => {
+        const dateA = new Date(a.updated_at || a.created_at || a.dateAdded || 0);
+        const dateB = new Date(b.updated_at || b.created_at || b.dateAdded || 0);
+        return dateB - dateA; // Descending order (newest first)
+    });
+
     // Render jobs in their respective columns
-    jobs.forEach(job => renderJob(job));
+    sortedJobs.forEach(job => renderJob(job));
 
     // Update counts
     updateColumnCounts();
