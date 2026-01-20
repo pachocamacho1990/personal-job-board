@@ -214,11 +214,28 @@ function renderAllJobs() {
         container.innerHTML = '';
     });
 
-    // Sort jobs by updated_at (most recently updated first)
+    // Sort jobs by updated_at (Calendar Day), then by rating (highest first)
     const sortedJobs = [...jobs].sort((a, b) => {
         const dateA = new Date(a.updated_at || a.created_at || a.dateAdded || 0);
         const dateB = new Date(b.updated_at || b.created_at || b.dateAdded || 0);
-        return dateB - dateA; // Descending order (newest first)
+
+        // Compare calendar dates (YYYY-MM-DD) - Reset time to midnight
+        const dayA = new Date(dateA.getFullYear(), dateA.getMonth(), dateA.getDate()).getTime();
+        const dayB = new Date(dateB.getFullYear(), dateB.getMonth(), dateB.getDate()).getTime();
+
+        const dayDiff = dayB - dayA;
+
+        // If same day, sort by rating (highest first)
+        if (dayDiff === 0) {
+            const ratingDiff = (b.rating || 3) - (a.rating || 3);
+            // If ratings are equal, fallback to newest time first
+            if (ratingDiff === 0) {
+                return dateB - dateA;
+            }
+            return ratingDiff;
+        }
+
+        return dayDiff;
     });
 
     // Render jobs in their respective columns
