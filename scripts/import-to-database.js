@@ -61,7 +61,10 @@ async function importJob(job, token) {
         salary: job.salary || '',
         contact_name: job.contactName || '',
         organization: job.organization || '',
-        comments: job.comments || ''
+        comments: job.comments || '',
+        // Preserve original timestamps
+        created_at: job.created_at || job.dateAdded || null,
+        updated_at: job.updated_at || job.dateAdded || null
     };
 
     const response = await fetch(`${API_BASE}/jobs`, {

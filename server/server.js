@@ -29,7 +29,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -49,7 +49,7 @@ app.use(errorHandler);
 app.listen(PORT, () => {
     console.log(`✓ Server running on port ${PORT}`);
     console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`✓ Health check: http://localhost:${PORT}/health`);
+    console.log(`✓ Health check: http://localhost:${PORT}/api/health`);
 });
 
 // Graceful shutdown

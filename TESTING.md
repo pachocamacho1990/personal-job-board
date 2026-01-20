@@ -1,72 +1,49 @@
-# Testing Guide
+# Testing Strategy
 
-## Running Tests
+The project uses a hybrid testing strategy: **Automated Backend Tests** for logic/security and **Manual verification** for UI flows.
 
+## 1. Automated Backend Tests (Jest)
+
+The API is fully tested using `jest` and `supertest`.
+
+### Running Tests
 ```bash
-node tests.js
+cd server
+npm test
 ```
 
-## Test Coverage (22 tests)
+### Coverage
+The suite (`server/tests/api.test.js`) covers:
+- **Authentication**: Signup, Login, Duplicate emails, Invalid passwords.
+- **Authorization**: Accessing protected routes without tokens.
+- **CRUD Operations**: Creating, Reading, Updating, and Deleting jobs.
+- **Data Isolation**: Verifying User A cannot interact with User B's data.
+- **Timestamps**: Verifying auto-update behavior.
 
-### 1. CRUD Operations (5 tests)
-- **Create**: Adds job to array with defaults
-- **Read**: Finds job by ID  
-- **Update**: Modifies existing job
-- **Delete**: Removes job from array
+## 2. Manual Verification (Acceptance Testing)
 
-### 2. State Management (2 tests)
-- **Opening**: Sets `currentJobId`
-- **Closing**: Clears `currentJobId`
+Since the frontend is a Vanilla JS SPA, visual verification is the most effective testing method.
 
-### 3. Form Submission (3 tests)
-- **Create**: When `currentJobId` is null
-- **Update**: When `currentJobId` is set
-- **Critical Bug**: view→close→add workflow creates new job (doesn't overwrite)
+### Test Checklist
 
-### 4. Persistence (3 tests)
-- **Save**: Persists to localStorage
-- **Load**: Restores from localStorage  
-- **Migration**: Handles old data without type/rating fields
+#### Authentication
+- [ ] Try accessing `index.html` without login -> Redirect to Login
+- [ ] Signup with new user -> Success
+- [ ] Login with wrong password -> Error message
+- [ ] Logout -> Redirect to Login
 
-### 5. View Preferences (5 tests)
-- **Defaults**: View starts in comfortable mode
-- **Toggle**: Icon and state update correctly
-- **Save**: View preference persists to localStorage
-- **Load**: View preference restores from localStorage
-- **Session persistence**: Preference survives page reload
+#### Persistence
+- [ ] Create a job -> Refresh page -> Job persists
+- [ ] Stop Docker containers (`docker-compose stop`) -> Start them -> Data persists
 
-### 6. Timestamps (4 tests)
-- **Create timestamps**: Both `created_at` and `updated_at` set on creation
-- **Update behavior**: Only `updated_at` changes on update
-- **Migration with dateAdded**: Old cards use `dateAdded` for `created_at`
-- **Migration without dateAdded**: Fallback to current time
+#### User Isolation (Security)
+- [ ] Create User A -> Add "Job A"
+- [ ] Open Incognito -> Create User B -> Verify "Job A" is NOT visible
 
-## Design Philosophy
+#### UI Features
+- [ ] **View Toggle**: Switch to Compact view -> Refresh -> Remains Compact.
+- [ ] **Stars**: Sorting works (5 stars -> 1 star).
+- [ ] **Drag & Drop**: Moving card updates column status.
 
-**Simple, not exhaustive**: Tests cover core behaviors needed for confidence, not every edge case.
-
-**One assertion per concept**: Each test validates one clear behavior.
-
-**Minimal mocking**: Only mocks DOM elements actually used by tested functions.
-
-**Fast feedback**: All tests run in <100ms.
-
-## What's NOT Tested
-
-- UI rendering (hard to mock, easy to verify visually)
-- Drag-and-drop (integration test territory)
-- Event listener binding (covered by manual testing)
-- Browser-specific behavior (use browser's dev tools)
-
-## Why 22 Tests?
-
-Started with 13 core tests, then expanded incrementally:
-- **+5**: View preference tests for compact/comfortable toggle
-- **+4**: Timestamp tests for `created_at`/`updated_at` and migration
-
-The original 23-test suite had redundancies:
-- **Removed**: Tests that checked same behavior from different angles
-- **Combined**: Related assertions into single tests
-- **Added**: Feature tests for new functionality
-
-**Result**: Comprehensive coverage with minimal redundancy.
+## 3. Legacy Unit Tests
+*Note: `tests.js` contains legacy unit tests for the old architecture. They are kept for reference but are superseded by the Backend Integration tests.*

@@ -45,8 +45,11 @@ async function apiRequest(endpoint, options = {}) {
 
         // Handle unauthorized (token expired or invalid)
         if (response.status === 401) {
-            clearToken();
-            window.location.href = '/login.html';
+            // Only redirect if not on the login endpoint itself
+            if (!endpoint.includes('/auth/login') && !endpoint.includes('/auth/signup')) {
+                clearToken();
+                window.location.href = '/login.html';
+            }
             throw new Error('Unauthorized');
         }
 

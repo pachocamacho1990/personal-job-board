@@ -58,9 +58,13 @@ async function init() {
         return;
     }
 
-    await loadJobs();
     loadViewPreference();
+    await loadJobs();
     setupEventListeners();
+
+    // Hide loading overlay
+    const loader = document.getElementById('appLoading');
+    if (loader) loader.style.display = 'none';
 }
 
 // API functions

@@ -8,10 +8,11 @@ const getAllJobs = async (req, res, next) => {
     try {
         const result = await pool.query(
             `SELECT id, type, rating, status, company, position, location, salary,
-                    contact_name, organization, comments, created_at, updated_at
+                    contact_name AS "contactName", organization, comments, 
+                    created_at AS "created_at", updated_at AS "updated_at"
              FROM jobs 
              WHERE user_id = $1 
-             ORDER BY updated_at DESC`,
+             ORDER BY rating DESC, updated_at DESC`,
             [req.userId]
         );
 
@@ -37,7 +38,9 @@ const createJob = async (req, res, next) => {
             salary,
             contact_name,
             organization,
-            comments
+            comments,
+            created_at,  // Optional: for migration imports
+            updated_at   // Optional: for migration imports
         } = req.body;
 
         // Validation
@@ -48,11 +51,14 @@ const createJob = async (req, res, next) => {
         const result = await pool.query(
             `INSERT INTO jobs 
              (user_id, type, rating, status, company, position, location, salary, 
-              contact_name, organization, comments)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-             RETURNING *`,
+              contact_name, organization, comments, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 
+                     COALESCE($12::timestamptz, NOW()), COALESCE($13::timestamptz, NOW()))
+             RETURNING id, type, rating, status, company, position, location, salary,
+                       contact_name AS "contactName", organization, comments,
+                       created_at AS "created_at", updated_at AS "updated_at"`,
             [req.userId, type, rating, status, company, position, location, salary,
-                contact_name, organization, comments]
+                contact_name, organization, comments, created_at || null, updated_at || null]
         );
 
         res.status(201).json(result.rows[0]);
@@ -105,7 +111,9 @@ const updateJob = async (req, res, next) => {
                  organization = COALESCE($9, organization),
                  comments = COALESCE($10, comments)
              WHERE id = $11 AND user_id = $12
-             RETURNING *`,
+             RETURNING id, type, rating, status, company, position, location, salary,
+                       contact_name AS "contactName", organization, comments,
+                       created_at AS "created_at", updated_at AS "updated_at"`,
             [type, rating, status, company, position, location, salary,
                 contact_name, organization, comments, id, req.userId]
         );
