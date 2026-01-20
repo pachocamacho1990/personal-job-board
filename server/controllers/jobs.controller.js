@@ -12,7 +12,7 @@ const getAllJobs = async (req, res, next) => {
                     created_at AS "created_at", updated_at AS "updated_at"
              FROM jobs 
              WHERE user_id = $1 
-             ORDER BY rating DESC, updated_at DESC`,
+             ORDER BY updated_at DESC, rating DESC`,
             [req.userId]
         );
 
