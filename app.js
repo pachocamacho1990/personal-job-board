@@ -214,11 +214,16 @@ function renderAllJobs() {
         container.innerHTML = '';
     });
 
-    // Sort jobs by updated_at (most recently updated first)
+    // Sort jobs by updated_at (most recently updated first), then by rating (highest first)
     const sortedJobs = [...jobs].sort((a, b) => {
         const dateA = new Date(a.updated_at || a.created_at || a.dateAdded || 0);
         const dateB = new Date(b.updated_at || b.created_at || b.dateAdded || 0);
-        return dateB - dateA; // Descending order (newest first)
+        const dateDiff = dateB - dateA;
+        // If dates are equal, sort by rating (highest first)
+        if (dateDiff === 0) {
+            return (b.rating || 3) - (a.rating || 3);
+        }
+        return dateDiff;
     });
 
     // Render jobs in their respective columns

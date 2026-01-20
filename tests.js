@@ -400,6 +400,50 @@ test('Migration handles data without dateAdded', () => {
     assert(jobs[0].updated_at !== undefined, 'updated_at should be set');
 });
 
+console.log('\n7. Sorting');
+test('Jobs sort by updated_at descending', () => {
+    reset();
+    createJob({ company: 'Older', status: 'applied' });
+    createJob({ company: 'Newer', status: 'applied' });
+    // Make second job have later timestamp
+    jobs[1].updated_at = new Date(Date.now() + 1000).toISOString();
+
+    const sorted = [...jobs].sort((a, b) => {
+        const dateA = new Date(a.updated_at || 0);
+        const dateB = new Date(b.updated_at || 0);
+        const dateDiff = dateB - dateA;
+        if (dateDiff === 0) {
+            return (b.rating || 3) - (a.rating || 3);
+        }
+        return dateDiff;
+    });
+    assert(sorted[0].company === 'Newer', 'Newer should come first');
+});
+
+test('Jobs with same date sort by rating descending', () => {
+    reset();
+    const now = new Date().toISOString();
+    createJob({ company: 'Low', rating: 1, status: 'applied' });
+    createJob({ company: 'High', rating: 5, status: 'applied' });
+    createJob({ company: 'Mid', rating: 3, status: 'applied' });
+    // Set all to same timestamp
+    jobs.forEach(j => j.updated_at = now);
+
+    const sorted = [...jobs].sort((a, b) => {
+        const dateA = new Date(a.updated_at || 0);
+        const dateB = new Date(b.updated_at || 0);
+        const dateDiff = dateB - dateA;
+        if (dateDiff === 0) {
+            return (b.rating || 3) - (a.rating || 3);
+        }
+        return dateDiff;
+    });
+
+    assert(sorted[0].company === 'High', 'Highest rated should come first');
+    assert(sorted[1].company === 'Mid', 'Mid rated should come second');
+    assert(sorted[2].company === 'Low', 'Lowest rated should come last');
+});
+
 // Summary
 console.log('\n' + '='.repeat(40));
 if (failed === 0) {
