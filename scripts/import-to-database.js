@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Configuration
-const API_BASE = process.env.API_URL || 'http://localhost/api';
+const API_BASE = process.env.API_URL || 'http://localhost/jobboard/api';
 
 //Get command line arguments
 const args = process.argv.slice(2);
