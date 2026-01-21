@@ -3,7 +3,7 @@
  * Handles all communication with the backend REST API
  */
 
-const API_BASE = '/api';
+const API_BASE = '/jobboard/api';
 
 /**
  * Get JWT token from localStorage
@@ -48,7 +48,7 @@ async function apiRequest(endpoint, options = {}) {
             // Only redirect if not on the login endpoint itself
             if (!endpoint.includes('/auth/login') && !endpoint.includes('/auth/signup')) {
                 clearToken();
-                window.location.href = '/login.html';
+                window.location.href = '/jobboard/login.html';
             }
             throw new Error('Unauthorized');
         }
@@ -117,7 +117,7 @@ const api = {
          */
         logout: () => {
             clearToken();
-            window.location.href = '/login.html';
+            window.location.href = '/jobboard/login.html';
         }
     },
 

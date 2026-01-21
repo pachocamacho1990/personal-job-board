@@ -84,7 +84,7 @@ async function handleSubmit(e) {
         }
 
         // Redirect to main app on success
-        window.location.href = '/index.html';
+        window.location.href = '/jobboard/index.html';
     } catch (error) {
         showError(error.message || 'Authentication failed. Please try again.');
         submitBtn.disabled = false;
@@ -105,5 +105,5 @@ passwordInput.addEventListener('input', clearError);
 
 // Check if already logged in
 if (localStorage.getItem('authToken')) {
-    window.location.href = '/index.html';
+    window.location.href = '/jobboard/index.html';
 }
