@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.0] - 2026-01-22
+## [2.1.0] - 2026-01-22
 
 ### Added
 - **Focus Mode 🎯**: A new feature to filter the board for high-priority items.
