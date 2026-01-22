@@ -8,23 +8,25 @@
     <title>Job Board - Login</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Authentication page specific styles */
+        /* Authentication page specific styles - Aurora Theme */
         .auth-container {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 24px;
-            background: var(--bg-primary);
+            background-color: var(--color-surface);
         }
 
         .auth-card {
-            background: white;
-            border-radius: 8px;
+            background: var(--color-canvas);
+            border-radius: var(--radius-lg);
             padding: 40px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--color-border);
             width: 100%;
             max-width: 400px;
+            transition: all 0.3s ease;
         }
 
         .auth-header {
@@ -33,16 +35,18 @@
         }
 
         .auth-header h1 {
-            font-size: 30px;
+            font-size: 24px;
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--color-text-main);
             margin: 0 0 8px 0;
+            letter-spacing: -0.02em;
         }
 
         .auth-header p {
-            font-size: 14px;
-            color: var(--text-secondary);
+            font-size: 15px;
+            color: var(--color-text-muted);
             margin: 0;
+            line-height: 1.5;
         }
 
         .auth-form {
@@ -54,74 +58,86 @@
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
 
         .form-group label {
             font-size: 14px;
             font-weight: 500;
-            color: var(--text-primary);
+            color: var(--color-text-main);
         }
 
         .form-group input {
             padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
             font-size: 14px;
             font-family: inherit;
-            transition: border-color 0.2s;
+            color: var(--color-text-main);
+            background: var(--color-canvas);
+            transition: all 0.2s ease;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: var(--accent);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            /* Aurora Indigo Ring */
         }
 
         .error-message {
             display: none;
             padding: 12px;
-            background: #ffebee;
-            border: 1px solid #ef5350;
-            border-radius: 4px;
-            color: #c62828;
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: var(--radius-sm);
+            color: var(--color-danger);
             font-size: 14px;
         }
 
         .btn-submit {
             padding: 12px;
-            background: var(--accent);
+            background: var(--color-primary);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: var(--radius-sm);
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-submit:hover:not(:disabled) {
-            background: #1c6fc9;
+            background: var(--color-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
         }
 
         .btn-submit:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
 
         .toggle-mode {
             text-align: center;
             font-size: 14px;
-            color: var(--text-secondary);
-            margin-top: 16px;
+            color: var(--color-text-muted);
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--color-border);
         }
 
         .toggle-mode a {
-            color: var(--accent);
+            color: var(--color-primary);
             cursor: pointer;
             text-decoration: none;
+            font-weight: 500;
         }
 
         .toggle-mode a:hover {
+            color: var(--color-primary-hover);
             text-decoration: underline;
         }
     </style>

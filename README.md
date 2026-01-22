@@ -2,6 +2,11 @@
 
 ![Job Board Preview](preview.png)
 
+<div align="center">
+  <img src="docs/assets/login-preview.png" width="45%" alt="Login Screen" />
+  <img src="docs/assets/detail-preview.png" width="45%" alt="Job Detail View" />
+</div>
+
 A minimalist, **self-hosted Kanban board** to track job applications and networking opportunities. Now powered by **Docker**, **PostgreSQL**, and a secure **User Authentication** system.
 
 ## 🚀 Key Features

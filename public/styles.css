@@ -6,75 +6,116 @@
 }
 
 :root {
-    /* Minimalist Color Palette - Notion-inspired */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f7f6f3;
-    --bg-tertiary: #ffffff;
-    --border-color: #e3e2df;
-    --text-primary: #37352f;
-    --text-secondary: #787774;
-    --text-tertiary: #9b9a97;
-    --accent: #2383e2;
-    --accent-hover: #1d6cbe;
-    --danger: #eb5757;
-    --success: #4CAF50;
+    /* 1. Color Palette: Aurora Indigo */
+    --color-primary: #4F46E5;
+    /* Indigo 600 */
+    --color-primary-hover: #4338CA;
+    /* Indigo 700 */
+    --color-accent: #A855F7;
+    /* Purple 500 */
 
-    /* Status Colors (Notion-style) */
-    --color-interested: #9d34da;
-    --color-interested-bg: #f6f3f9;
-    --color-interested-light: #e9d7f7;
-    --color-applied: #0b6adb;
-    --color-applied-bg: #edf5fd;
-    --color-applied-light: #d3e5fd;
-    --color-interview: #eb8909;
-    --color-interview-bg: #fef5e7;
-    --color-interview-light: #fbe4bc;
-    --color-offer: #0f7b6c;
-    --color-offer-bg: #edfbf6;
-    --color-offer-light: #d4f4ea;
-    --color-rejected: #787774;
-    --color-rejected-bg: #f7f6f5;
-    --color-rejected-light: #e9e9e8;
-    --color-forgotten: #9e8b6e;
-    --color-forgotten-bg: #faf8f5;
-    --color-forgotten-light: #ebe5da;
+    /* Neutrals */
+    --color-surface: #F8FAFC;
+    /* Slate 50 */
+    --color-canvas: #FFFFFF;
+    /* White */
+    --color-tertiary: #F1F5F9;
+    /* Slate 100 (for headers/hover) */
+    --color-text-main: #0F172A;
+    /* Slate 900 */
+    --color-text-muted: #64748B;
+    /* Slate 500 */
+    --color-text-light: #94A3B8;
+    /* Slate 400 */
+    --color-border: #E2E8F0;
+    /* Slate 200 */
 
-    /* Spacing - More generous like Notion */
+    /* Functional */
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+    --color-danger: #EF4444;
+
+    /* Legacy Mappings (to prevent breakage) */
+    --bg-primary: var(--color-surface);
+    --bg-secondary: var(--color-surface);
+    --bg-tertiary: var(--color-canvas);
+    --border-color: var(--color-border);
+    --text-primary: var(--color-text-main);
+    --text-secondary: var(--color-text-muted);
+    --text-tertiary: var(--color-text-light);
+    --accent: var(--color-primary);
+    --accent-hover: var(--color-primary-hover);
+    --danger: var(--color-danger);
+
+    /* Status Colors (Refined for Aurora) */
+    --color-interested: #A855F7;
+    /* Purple */
+    --color-interested-bg: #FAF5FF;
+    --color-interested-light: #F3E8FF;
+
+    --color-applied: #3B82F6;
+    /* Blue */
+    --color-applied-bg: #EFF6FF;
+    --color-applied-light: #DBEAFE;
+
+    --color-interview: #F59E0B;
+    /* Amber */
+    --color-interview-bg: #FFFBEB;
+    --color-interview-light: #FEF3C7;
+
+    --color-offer: #10B981;
+    /* Emerald */
+    --color-offer-bg: #ECFDF5;
+    --color-offer-light: #D1FAE5;
+
+    --color-rejected: #64748B;
+    /* Slate */
+    --color-rejected-bg: #F1F5F9;
+    --color-rejected-light: #E2E8F0;
+
+    --color-forgotten: #78716C;
+    /* Stone */
+    --color-forgotten-bg: #FAFAF9;
+    --color-forgotten-light: #E7E5E4;
+
+    /* Spacing */
     --spacing-xs: 4px;
     --spacing-sm: 8px;
-    --spacing-md: 12px;
-    --spacing-lg: 16px;
-    --spacing-xl: 24px;
-    --spacing-2xl: 32px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 40px;
 
-    /* Typography - Notion-like */
-    --font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif;
+    /* Typography */
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
     --font-size-base: 0.9375rem;
-    --font-size-lg: 1rem;
+    --font-size-lg: 1.125rem;
     --font-size-xl: 1.25rem;
-    --font-size-2xl: 1.875rem;
+    --font-size-2xl: 1.5rem;
     --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
 
-    /* Shadows - Subtle like Notion */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.06), 0 4px 6px rgba(0, 0, 0, 0.04);
-    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.08);
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
     /* Border Radius */
-    --radius-sm: 3px;
-    --radius-md: 6px;
-    --radius-lg: 8px;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-full: 9999px;
 }
 
 body {
     font-family: var(--font-family);
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
+    background-color: var(--color-surface);
+    color: var(--color-text-main);
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* App Container */
@@ -93,18 +134,20 @@ body {
 }
 
 .app-header {
-    padding: var(--spacing-xl) var(--spacing-2xl);
-    background: var(--bg-tertiary);
-    border-bottom: 1px solid var(--border-color);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    background: var(--color-canvas);
+    border-bottom: 1px solid var(--color-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: var(--shadow-sm);
+    z-index: 10;
 }
 
 .app-header h1 {
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-xl);
     font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
+    color: var(--color-text-main);
 }
 
 .header-actions {
@@ -117,35 +160,38 @@ body {
 .kanban-board {
     display: flex;
     gap: var(--spacing-lg);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg);
     overflow-x: auto;
     flex: 1;
-    background: var(--bg-secondary);
+    background: var(--color-surface);
 }
 
 .column {
     flex: 1;
-    min-width: 280px;
-    max-width: 320px;
+    min-width: 300px;
+    max-width: 350px;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md);
 }
 
 .column-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-md) var(--spacing-lg);
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     margin-bottom: var(--spacing-xs);
+    box-shadow: var(--shadow-sm);
 }
 
 .column-header h2 {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 /* Column-specific colors */
@@ -252,20 +298,24 @@ body {
 
 /* Job Card */
 .job-card {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
     margin-bottom: var(--spacing-md);
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: var(--shadow-sm);
     position: relative;
+    /* Clean up left borders, using badges for color instead (optional, but requested clean look) */
+    /* We will keep left border for now as it's a good indicator */
 }
 
 .job-card:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
+    border-color: #cbd5e1;
+    /* Slightly darker border on hover */
 }
 
 /* Card Header with Type Badge */
@@ -777,27 +827,75 @@ body {
 /* Buttons */
 .btn-primary,
 .btn-danger,
+.btn-secondary,
 .btn-icon {
-    padding: var(--spacing-sm) var(--spacing-lg);
-    border: none;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid transparent;
     border-radius: var(--radius-sm);
     font-family: var(--font-family);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    line-height: 1.2;
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: var(--color-primary);
     color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--color-canvas);
+    border-color: var(--color-border);
+    color: var(--color-text-main);
+}
+
+.btn-secondary:hover {
+    background: var(--color-surface);
+    border-color: #cbd5e1;
+}
+
+.btn-danger {
+    background: #FEF2F2;
+    color: var(--color-danger);
+    border: 1px solid #FECACA;
+}
+
+.btn-danger:hover {
+    background: #FEE2E2;
+    transform: translateY(-1px);
+}
+
+.btn-icon {
+    background: transparent;
+    color: var(--color-text-muted);
+    padding: 6px;
+    font-size: 1.25rem;
+}
+
+.btn-icon:hover {
+    background: var(--color-surface);
+    color: var(--color-text-main);
 }
 
 /* Focus Mode Styles */
 .btn-icon.active {
-    background: var(--accent);
+    background: var(--color-primary);
     color: white;
-    border-color: var(--accent);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-sm);
 }
 
 body.focus-mode .column[data-status="rejected"],
@@ -814,32 +912,6 @@ body.focus-mode .job-card.dimmed {
     filter: grayscale(100%);
 }
 
-
-.btn-danger {
-    background: transparent;
-    color: var(--danger);
-    border: 1px solid var(--border-color);
-}
-
-.btn-danger:hover {
-    background: var(--danger);
-    color: white;
-    border-color: var(--danger);
-}
-
-.btn-icon {
-    background: transparent;
-    color: var(--text-secondary);
-    padding: var(--spacing-xs);
-    font-size: 24px;
-    line-height: 1;
-}
-
-.btn-icon:hover {
-    color: var(--text-primary);
-    background: rgba(0, 0, 0, 0.04);
-}
-
 /* Responsive */
 @media (max-width: 1024px) {
     .detail-panel {
@@ -849,5 +921,72 @@ body.focus-mode .job-card.dimmed {
         right: 0;
         height: 100%;
         z-index: 100;
+    }
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.4);
+    /* Slate 900 with opacity */
+    backdrop-filter: blur(2px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    animation: fadeIn 0.2s forwards;
+}
+
+.modal {
+    background: var(--color-canvas);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    width: 90%;
+    max-width: 400px;
+    transform: scale(0.95);
+    animation: scaleIn 0.2s forwards;
+    border: 1px solid var(--color-border);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.modal-header h2 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-main);
+}
+
+.modal-body p {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-lg);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    to {
+        transform: scale(1);
     }
 }
