@@ -1,10 +1,9 @@
-// Job Board Application - Multi-user API-based job tracker
-
 // State
 let jobs = [];
 let currentJobId = null;
 let isCompactView = false; // View mode state
 let isPreviewMode = false; // Markdown preview mode
+let isFocusMode = false; // Focus mode state 🎯 (New)
 
 // Date formatting helpers
 function formatRelativeTime(dateString) {
@@ -59,6 +58,7 @@ async function init() {
     }
 
     loadViewPreference();
+    loadFocusPreference(); // Load focus mode state
     await loadJobs();
     setupEventListeners();
 
@@ -171,6 +171,48 @@ function updateViewIcon() {
     }
 }
 
+// Focus Mode Management 🎯
+function loadFocusPreference() {
+    try {
+        const saved = localStorage.getItem('focusMode');
+        isFocusMode = saved === 'true';
+        updateFocusUI();
+        console.log(`✓ Loaded focus mode: ${isFocusMode ? 'ON' : 'OFF'}`);
+    } catch (error) {
+        console.error('Error loading focus preference:', error);
+        isFocusMode = false;
+    }
+}
+
+function saveFocusPreference() {
+    try {
+        localStorage.setItem('focusMode', isFocusMode);
+        console.log(`✓ Saved focus mode: ${isFocusMode ? 'ON' : 'OFF'}`);
+    } catch (error) {
+        console.error('Error saving focus preference:', error);
+    }
+}
+
+function toggleFocusMode() {
+    isFocusMode = !isFocusMode;
+    saveFocusPreference();
+    updateFocusUI();
+    renderAllJobs(); // Re-render to filter items
+}
+
+function updateFocusUI() {
+    const btn = document.getElementById('focusToggle');
+    if (btn) {
+        if (isFocusMode) {
+            btn.classList.add('active');
+            document.body.classList.add('focus-mode');
+        } else {
+            btn.classList.remove('active');
+            document.body.classList.remove('focus-mode');
+        }
+    }
+}
+
 // Rendering
 function renderAllJobs() {
     // Clear all containers
@@ -178,11 +220,24 @@ function renderAllJobs() {
         container.innerHTML = '';
     });
 
-    // Render jobs in their respective columns
-    jobs.forEach(job => renderJob(job));
+    // 🎯 Filter jobs based on Focus Mode
+    // If Focus Mode is ON:
+    // 1. Hide jobs with rating < 3
+    // 2. Hide jobs in 'rejected' or 'forgotten' (columns are hidden via CSS, but we also filter items)
+    const jobsToRender = isFocusMode
+        ? jobs.filter(job => {
+            const isHighRated = (job.rating || 3) >= 3;
+            const isRelevantStatus = !['rejected', 'forgotten'].includes(job.status);
+            return isHighRated && isRelevantStatus;
+        })
+        : jobs;
 
-    // Update counts
-    updateColumnCounts();
+    // Render jobs in their respective columns
+    jobsToRender.forEach(job => renderJob(job));
+
+    // Update counts (show total count, even hidden ones, or filtered count?)
+    // Let's show the filtered count to match visual state
+    updateColumnCounts(jobsToRender);
 }
 
 function renderJob(job) {
@@ -265,10 +320,13 @@ function renderJob(job) {
     container.appendChild(card);
 }
 
-function updateColumnCounts() {
+function updateColumnCounts(visibleJobs = jobs) {
+    // If no jobs arg provided (legacy call), use global list
+    // But renderAllJobs passes visibleJobs now.
+
     const statuses = ['interested', 'applied', 'forgotten', 'interview', 'offer', 'rejected'];
     statuses.forEach(status => {
-        const count = jobs.filter(j => j.status === status).length;
+        const count = visibleJobs.filter(j => j.status === status).length;
         const badge = document.querySelector(`.column[data-status="${status}"] .count-badge`);
         if (badge) badge.textContent = count;
     });
@@ -558,6 +616,12 @@ function setupEventListeners() {
 
     // View toggle button
     document.getElementById('viewToggle').addEventListener('click', toggleViewMode);
+
+    // Focus toggle button (New)
+    const focusToggle = document.getElementById('focusToggle');
+    if (focusToggle) {
+        focusToggle.addEventListener('click', toggleFocusMode);
+    }
 
     // Markdown preview toggle
     togglePreviewBtn.addEventListener('click', togglePreviewMode);

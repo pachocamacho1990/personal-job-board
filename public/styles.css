@@ -793,10 +793,27 @@ body {
     color: white;
 }
 
-.btn-primary:hover {
-    background: var(--accent-hover);
-    box-shadow: var(--shadow-sm);
+/* Focus Mode Styles */
+.btn-icon.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
 }
+
+body.focus-mode .column[data-status="rejected"],
+body.focus-mode .column[data-status="forgotten"] {
+    display: none;
+}
+
+body.focus-mode .job-card {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+body.focus-mode .job-card.dimmed {
+    opacity: 0.3;
+    filter: grayscale(100%);
+}
+
 
 .btn-danger {
     background: transparent;
