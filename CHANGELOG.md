@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2026-01-22
+
+### Added
+- **Aurora Design System**: A complete visual overhaul of the application.
+    - **Color Palette**: New Indigo & Slate theme for a cleaner, more professional look.
+    - **Typography**: Standardized on Inter/System UI font stack.
+    - **Components**: New "Frozen Glass" card style, refined buttons, and inputs.
+    - **Login & Modals**: Redesigned authentication screens and dialogs.
+- **Documentation**: Added `DESIGN_SYSTEM.md` and updated README screenshots.
+
 ## [2.1.0] - 2026-01-22
 
 ### Added
