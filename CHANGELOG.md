@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.3.0] - 2026-01-23
+
+### Added
+- **Job Origin Indicator**:
+    - **Created By Field**: Distinguish between jobs created by human 👤 vs AI Agent 🤖.
+    - **Visual Badges**: New icons in standard and compact views.
+    - **Unseen Shine Effect**: Agent-created jobs glow purple until clicked/seen.
+    - **Database**: Added `origin` (enum) and `is_unseen` (bool) columns.
+
 ## [2.2.0] - 2026-01-22
 
 ### Added

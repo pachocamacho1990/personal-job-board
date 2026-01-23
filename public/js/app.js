@@ -268,6 +268,11 @@ function renderJob(job) {
     const typeEmoji = isConnection ? '🤝' : '💼';
     const typeName = isConnection ? 'Connection' : 'Job';
 
+    // Origin Emoji (Human vs Agent)
+    const isAgent = job.origin === 'agent';
+    const originClass = isAgent ? 'origin-agent' : 'origin-human';
+    const originEmoji = isAgent ? '🤖' : '👤';
+
     // Build metadata array for compact view
     const metadata = [];
     if (subtitle) metadata.push(subtitle);
@@ -275,16 +280,21 @@ function renderJob(job) {
     if (job.salary) metadata.push(job.salary);
 
     if (isCompactView) {
-        // Compact layout: rating + title + badge on one line, metadata below
+        // Compact layout: rating + title + badges on one line
         const relativeTime = formatRelativeTime(job.updated_at);
         card.innerHTML = `
             <div class="card-header">
                 ${renderStars(job.rating || 3)}
                 <h3>${title}</h3>
-                <span class="type-badge ${job.type}">
-                    <span class="type-emoji">${typeEmoji}</span>
-                    ${typeName}
-                </span>
+                <div style="display:flex; gap:4px; margin-left: auto;">
+                    <span class="type-badge ${job.type}">
+                         <span class="type-emoji">${typeEmoji}</span>
+                         ${typeName}
+                    </span>
+                    <span class="type-badge ${originClass}" title="Created by ${isAgent ? 'AI Agent' : 'Human'}">
+                         <span class="type-emoji">${originEmoji}</span>
+                    </span>
+                </div>
             </div>
             <div class="card-footer">
                 ${metadata.length > 0 ? `<span class="metadata">${metadata.join(' • ')}</span>` : ''}
@@ -297,10 +307,15 @@ function renderJob(job) {
         card.innerHTML = `
             <div class="card-header">
                 ${renderStars(job.rating || 3)}
-                <span class="type-badge ${job.type}">
-                    <span class="type-emoji">${typeEmoji}</span>
-                    ${typeName}
-                </span>
+                 <div style="display:flex; gap:4px">
+                    <span class="type-badge ${job.type}">
+                        <span class="type-emoji">${typeEmoji}</span>
+                        ${typeName}
+                    </span>
+                    <span class="type-badge ${originClass}" title="Created by ${isAgent ? 'AI Agent' : 'Human'}">
+                        <span class="type-emoji">${originEmoji}</span>
+                    </span>
+                 </div>
             </div>
             <h3>${title}</h3>
             <p class="company">${subtitle}</p>
@@ -316,6 +331,11 @@ function renderJob(job) {
     // Drag and drop
     card.addEventListener('dragstart', handleDragStart);
     card.addEventListener('dragend', handleDragEnd);
+
+    // Shine Effect for Unseen Jobs
+    if (job.is_unseen) {
+        card.classList.add('shining');
+    }
 
     container.appendChild(card);
 }
@@ -338,6 +358,18 @@ function openJobDetails(jobId) {
     const job = getJob(jobId);
 
     if (job) {
+        // Handle Unseen State (Dismiss Shine)
+        if (job.is_unseen) {
+            // Optimistic update locally
+            job.is_unseen = false;
+            // Remove class from DOM immediately
+            const card = document.querySelector(`.job-card[data-job-id="${jobId}"]`);
+            if (card) card.classList.remove('shining');
+
+            // Send API update silently
+            api.jobs.update(jobId, { is_unseen: false }).catch(err => console.error("Failed to dismiss shine", err));
+        }
+
         // Edit existing entry
         const isConnection = job.type === 'connection';
         document.getElementById('panelTitle').textContent = isConnection ? 'Edit Connection' : 'Edit Job';
@@ -346,6 +378,11 @@ function openJobDetails(jobId) {
         // Set type
         document.querySelector(`input[name="type"][value="${job.type}"]`).checked = true;
         toggleFieldsByType(job.type);
+
+        // Set Origin (Human/Agent)
+        const originVal = job.origin || 'human'; // Default to human if null
+        const originInput = document.querySelector(`input[name="origin"][value="${originVal}"]`);
+        if (originInput) originInput.checked = true;
 
         // Populate all fields
         document.getElementById('contactName').value = job.contactName || '';
@@ -388,6 +425,9 @@ function openJobDetails(jobId) {
 
         // Default to job type
         document.querySelector('input[name="type"][value="job"]').checked = true;
+        // Default to human origin
+        document.querySelector('input[name="origin"][value="human"]').checked = true;
+
         toggleFieldsByType('job');
         updateRatingDisplay();  // Reset star display to default (3 stars)
 
@@ -448,6 +488,7 @@ async function handleFormSubmit(e) {
 
     const formData = {
         type: document.querySelector('input[name="type"]:checked').value,
+        origin: document.querySelector('input[name="origin"]:checked').value,
 
         // Connection fields
         contact_name: document.getElementById('contactName').value,
