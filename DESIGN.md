@@ -39,6 +39,8 @@ graph TD
 | `type` | VARCHAR | 'job' or 'connection' |
 | `rating` | INTEGER | 1-5 Priority |
 | `status` | VARCHAR | interested, applied, etc. |
+| `origin` | VARCHAR | 'human' or 'agent' |
+| `is_unseen` | BOOLEAN | True if agent-created & not viewed |
 | `company` | VARCHAR | |
 | `position` | VARCHAR | |
 | `contact_name` | VARCHAR | (Mapped to `contactName` in API) |

@@ -14,8 +14,10 @@ A minimalist, **self-hosted Kanban board** to track job applications and network
 - **🔐 Multi-User Authentication**: Secure signup/login with password hashing and JWT sessions.
 - **🐳 Dockerized Deployment**: One command to start Database, API, and Web Server.
 - **💾 PostgreSQL Database**: Robust data persistence (no more browser localStorage limits).
-- **🤝 Dual Entity System**: Track both **Connections** (networking) and **Jobs** (applications).
-- **⭐ Star Ratings**: Prioritize opportunities with a 1-5 star rating system.
+-   **🤝 Dual Entity System**: Track both **Connections** (networking) and **Jobs** (applications).
+-   **🤖 Job Origin Indicator**: Distinguish between Human 👤 and AI Agent 🤖 created jobs.
+-   **✨ Shine Effect**: New Agent-created jobs glow purple until viewed (unseen state).
+-   **⭐ Star Ratings**: Prioritize opportunities with a 1-5 star rating system.
 - **📱 Responsive & Fast**: Optimized mobile view and lightweight frontend.
 - **🔄 Migration Tools**: Seamlessly import data from previous localStorage versions.
 
