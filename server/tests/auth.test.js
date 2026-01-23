@@ -12,7 +12,7 @@ jest.mock('../config/db', () => ({
 }));
 
 // Mock bcrypt to avoid hashing time in tests
-jest.mock('bcrypt', () => ({
+jest.mock('bcryptjs', () => ({
     hash: jest.fn().mockResolvedValue('hashed_password'),
     compare: jest.fn().mockResolvedValue(true)
 }));
