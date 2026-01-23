@@ -45,25 +45,67 @@ describe('Jobs Routes', () => {
     });
 
     describe('POST /api/jobs', () => {
-        it('should create a new job', async () => {
+        it('should create a new job (Default: Human creation)', async () => {
             const newJob = {
                 status: 'interested',
                 company: 'Tech Co',
-                position: 'Developer',
-                type: 'job'
+                position: 'Developer'
             };
 
-            pool.query.mockResolvedValueOnce({ rows: [{ ...newJob, id: 1, user_id: 1 }] });
+            // Mock DB response
+            pool.query.mockResolvedValueOnce({
+                rows: [{
+                    ...newJob,
+                    id: 1,
+                    user_id: 1,
+                    origin: 'human',
+                    is_unseen: false
+                }]
+            });
 
             const res = await request(app)
                 .post('/api/jobs')
                 .send(newJob);
 
             expect(res.statusCode).toBe(201);
-            expect(res.body).toHaveProperty('id');
+            expect(res.body).toHaveProperty('origin', 'human');
+            expect(res.body).toHaveProperty('is_unseen', false);
+
+            // Verify Logic: origin defaults to human, is_unseen defaults to false
             expect(pool.query).toHaveBeenCalledWith(
                 expect.stringContaining('INSERT INTO jobs'),
-                expect.any(Array)
+                expect.arrayContaining(['human', false]) // origin, is_unseen
+            );
+        });
+
+        it('should create an Agent job as Unseen (Shine Effect)', async () => {
+            const agentJob = {
+                status: 'interested',
+                company: 'AI Corp',
+                position: 'Bot',
+                origin: 'agent'
+            };
+
+            // Mock DB response
+            pool.query.mockResolvedValueOnce({
+                rows: [{
+                    ...agentJob,
+                    id: 2,
+                    user_id: 1,
+                    is_unseen: true
+                }]
+            });
+
+            const res = await request(app)
+                .post('/api/jobs')
+                .send(agentJob);
+
+            expect(res.statusCode).toBe(201);
+
+            // Verify Logic: origin='agent' MUST trigger is_unseen=true
+            expect(pool.query).toHaveBeenCalledWith(
+                expect.stringContaining('INSERT INTO jobs'),
+                expect.arrayContaining(['agent', true]) // origin, is_unseen
             );
         });
 
