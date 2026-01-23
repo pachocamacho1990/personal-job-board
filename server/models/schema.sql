@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     type VARCHAR(20) CHECK (type IN ('job', 'connection')),
     rating INTEGER CHECK (rating >= 1 AND rating <= 5),
     status VARCHAR(20) CHECK (status IN ('interested', 'applied', 'forgotten', 'interview', 'offer', 'rejected')),
+    origin VARCHAR(20) DEFAULT 'human',
+    is_unseen BOOLEAN DEFAULT FALSE,
     
     -- Core fields
     company VARCHAR(255),
