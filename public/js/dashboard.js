@@ -31,7 +31,7 @@ async function loadDashboardData() {
     if (newMatchesList) newMatchesList.innerHTML = '<div class="loading-spinner">Loading...</div>';
 
     try {
-        const response = await fetchWithAuth('/api/dashboard/summary');
+        const response = await fetchWithAuth('/jobboard/api/dashboard/summary');
         const data = await response.json();
 
         renderInterviews(data.interviews);
