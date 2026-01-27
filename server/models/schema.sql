@@ -51,9 +51,44 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+
 -- Trigger to auto-update updated_at on job updates
 DROP TRIGGER IF EXISTS update_jobs_updated_at ON jobs;
 CREATE TRIGGER update_jobs_updated_at 
     BEFORE UPDATE ON jobs 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Business Entities table
+CREATE TABLE IF NOT EXISTS business_entities (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    
+    -- Entity details
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(50) CHECK (type IN ('investor', 'vc', 'accelerator', 'connection')),
+    status VARCHAR(50) CHECK (status IN ('researching', 'contacted', 'meeting', 'negotiation', 'signed', 'rejected', 'passed')),
+    
+    -- Contact info
+    contact_person VARCHAR(255),
+    email VARCHAR(255),
+    website VARCHAR(255),
+    location VARCHAR(255),
+    
+    -- Notes (supports markdown)
+    notes TEXT,
+    
+    -- Timestamps
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Index for fast user queries on business_entities
+CREATE INDEX IF NOT EXISTS idx_business_user_id ON business_entities(user_id);
+
+-- Trigger to auto-update updated_at on business_entities updates
+DROP TRIGGER IF EXISTS update_business_updated_at ON business_entities;
+CREATE TRIGGER update_business_updated_at 
+    BEFORE UPDATE ON business_entities 
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();

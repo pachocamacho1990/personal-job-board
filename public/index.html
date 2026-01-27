@@ -4,214 +4,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Personal job application tracker with Kanban board interface">
-    <title>Job Board - Application Tracker</title>
+    <title>Dashboard - Job Tracker</title>
     <link rel="stylesheet" href="styles.css?v=2">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <style>
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item:hover {
+            background-color: var(--surface);
+        }
+
+        .item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-right: 1rem;
+            background-color: var(--surface);
+        }
+
+        .interview-icon {
+            background-color: var(--color-interview-light);
+            color: var(--color-interview);
+        }
+
+        .match-icon {
+            background-color: rgba(168, 85, 247, 0.1);
+            color: var(--accent);
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+
+        .item-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .item-action {
+            font-size: 0.875rem;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .loading-spinner {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+    </style>
 </head>
 
 <body>
-    <div class="app-container">
-        <div id="appLoading"
-            style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; align-items: center; justify-content: center; font-family: sans-serif; font-size: 1.2rem; color: #666;">
-            Loading...
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="sidebar-brand">
+                <span>🚀</span> Job Tracker
+            </a>
         </div>
-        <!-- Kanban Board Section -->
-        <main class="board-section">
-            <header class="app-header">
-                <h1>Job Applications</h1>
-                <div class="header-actions">
-                    <button id="logoutBtn" class="btn-icon" title="Logout" style="margin-right: 8px;">
-                        <span>↪</span>
-                    </button>
-                    <button id="focusToggle" class="btn-icon" title="Toggle Focus Mode 🎯" style="margin-right: 8px;">
-                        <span>🎯</span>
-                    </button>
-                    <button id="viewToggle" class="btn-icon" title="Toggle compact view">
-                        <span id="viewIcon">⊟</span>
-                    </button>
-                    <button id="addJobBtn" class="btn-primary">+ Add Card</button>
+        <nav class="sidebar-nav">
+            <a href="index.html" class="nav-item active">
+                <span>🏠</span> Dashboard
+            </a>
+            <a href="jobs.html" class="nav-item">
+                <span>💼</span> Job Board
+            </a>
+            <a href="business.html" class="nav-item">
+                <span>🤝</span> Business Board
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">U</div>
+                <div class="user-info">
+                    <div class="user-name">User</div>
                 </div>
-            </header>
+                <button class="logout-trigger" title="Logout">↪</button>
+            </div>
+        </div>
+    </aside>
 
-            <div class="kanban-board">
-                <div class="column" data-status="interested">
-                    <div class="column-header">
-                        <h2>Interested</h2>
-                        <span class="count-badge">0</span>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title" id="welcomeTitle">Welcome</h1>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Upcoming Interviews -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>📅</span> Upcoming Interviews
                     </div>
-                    <div class="cards-container" data-status="interested"></div>
                 </div>
-
-                <div class="column" data-status="applied">
-                    <div class="column-header">
-                        <h2>Applied</h2>
-                        <span class="count-badge">0</span>
-                    </div>
-                    <div class="cards-container" data-status="applied"></div>
-                </div>
-
-                <div class="column forgotten" data-status="forgotten">
-                    <div class="column-header">
-                        <h2>Forgotten</h2>
-                        <span class="count-badge">0</span>
-                    </div>
-                    <div class="cards-container" data-status="forgotten"></div>
-                </div>
-
-                <div class="column" data-status="interview">
-                    <div class="column-header">
-                        <h2>Interview</h2>
-                        <span class="count-badge">0</span>
-                    </div>
-                    <div class="cards-container" data-status="interview"></div>
-                </div>
-
-                <div class="column" data-status="offer">
-                    <div class="column-header">
-                        <h2>Offer</h2>
-                        <span class="count-badge">0</span>
-                    </div>
-                    <div class="cards-container" data-status="offer"></div>
-                </div>
-
-                <div class="column" data-status="rejected">
-                    <div class="column-header">
-                        <h2>Rejected</h2>
-                        <span class="count-badge">0</span>
-                    </div>
-                    <div class="cards-container" data-status="rejected"></div>
+                <div id="interviewsList">
+                    <!-- Populated by JS -->
                 </div>
             </div>
-        </main>
 
-        <!-- Lateral Detail Panel -->
-        <aside id="detailPanel" class="detail-panel">
-            <div class="panel-content">
-                <div class="panel-header">
-                    <h2 id="panelTitle">Job Details</h2>
-                    <button id="closePanel" class="btn-icon" aria-label="Close panel">&times;</button>
+            <!-- New AI Matches -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <span>🤖</span> New AI Matches
+                    </div>
                 </div>
-
-                <form id="jobForm" class="job-form">
-                    <input type="hidden" id="jobId">
-
-                    <!-- Timestamp info (read-only, populated by JS) -->
-                    <div id="timestampInfo" class="timestamp-info" style="display: none;"></div>
-
-                    <div class="form-group">
-                        <label>Type</label>
-                        <div class="type-selector">
-                            <label class="type-option">
-                                <input type="radio" name="type" value="connection">
-                                <span>🤝 Connection</span>
-                            </label>
-                            <label class="type-option">
-                                <input type="radio" name="type" value="job" checked>
-                                <span>💼 Job Application</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Origin Selector (Human/AI) -->
-                    <div class="form-group">
-                        <label>Created By</label>
-                        <div class="type-selector">
-                            <label class="type-option">
-                                <input type="radio" name="origin" value="human" checked>
-                                <span>👤 Human</span>
-                            </label>
-                            <label class="type-option">
-                                <input type="radio" name="origin" value="agent">
-                                <span>🤖 AI Agent</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Connection-specific fields (additional) -->
-                    <div class="connection-fields" style="display: none;">
-                        <div class="form-group">
-                            <label for="contactName">Contact Name</label>
-                            <input type="text" id="contactName" placeholder="Person's name">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="organization">Organization (if different from company)</label>
-                            <input type="text" id="organization" placeholder="Optional">
-                        </div>
-                    </div>
-
-                    <!-- Core fields (always visible) -->
-                    <div class="form-group">
-                        <label for="company">Company</label>
-                        <input type="text" id="company">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="position">Position / Role</label>
-                        <input type="text" id="position">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="location">Location</label>
-                        <input type="text" id="location">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="salary">Salary Range</label>
-                        <input type="text" id="salary" placeholder="e.g., $80k-$100k">
-                    </div>
-
-                    <!-- Common fields -->
-                    <div class="form-group">
-                        <label>Interest Level</label>
-                        <div class="rating-input">
-                            <input type="radio" name="rating" value="1" id="rating1">
-                            <label for="rating1" title="1 star">★</label>
-                            <input type="radio" name="rating" value="2" id="rating2">
-                            <label for="rating2" title="2 stars">★</label>
-                            <input type="radio" name="rating" value="3" id="rating3" checked>
-                            <label for="rating3" title="3 stars">★</label>
-                            <input type="radio" name="rating" value="4" id="rating4">
-                            <label for="rating4" title="4 stars">★</label>
-                            <input type="radio" name="rating" value="5" id="rating5">
-                            <label for="rating5" title="5 stars">★</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="status">Status</label>
-                        <select id="status" required>
-                            <option value="interested">Interested</option>
-                            <option value="applied">Applied</option>
-                            <option value="forgotten">Forgotten</option>
-                            <option value="interview">Interview</option>
-                            <option value="offer">Offer</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="comments-header">
-                            <label for="comments">Comments / Progress Notes</label>
-                            <button type="button" id="togglePreview" class="btn-preview">Preview</button>
-                        </div>
-                        <textarea id="comments" rows="8" placeholder="Track your progress, interview notes, follow-ups, etc...
-
-Supports markdown:
-• **bold**, _italic_
-• # Headings
-• - Lists
-• `code`"></textarea>
-                        <div id="commentsPreview" class="markdown-preview" style="display: none;"></div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary">Save</button>
-                        <button type="button" id="deleteBtn" class="btn-danger">Delete</button>
-                    </div>
-                </form>
+                <div id="newMatchesList">
+                    <!-- Populated by JS -->
+                </div>
             </div>
-        </aside>
+        </div>
 
         <!-- Logout Confirmation Modal -->
         <div id="logoutModal" class="modal-overlay" style="display: none;">
@@ -230,10 +156,8 @@ Supports markdown:
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/logout.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/dashboard.js"></script>
 </body>
 
 </html>
