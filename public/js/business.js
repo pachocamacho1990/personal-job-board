@@ -4,6 +4,7 @@
 
 let entities = [];
 let dragSource = null;
+let isCompactView = false;
 
 // DOM Elements
 const addBtn = document.getElementById('addBtn');
@@ -14,6 +15,8 @@ const deleteBtn = document.getElementById('deleteBtn');
 const togglePreview = document.getElementById('togglePreview');
 const commentsInput = document.getElementById('comments');
 const commentsPreview = document.getElementById('commentsPreview');
+const viewToggle = document.getElementById('viewToggle');
+const viewIcon = document.getElementById('viewIcon');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -23,6 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/jobboard/login.html';
         return;
     }
+
+    // Load saved view preference
+    isCompactView = localStorage.getItem('businessBoardCompactView') === 'true';
+    updateViewToggleIcon();
 
     fetchEntities();
     setupEventListeners();
@@ -59,6 +66,23 @@ function setupEventListeners() {
             togglePreview.classList.add('active');
         }
     });
+
+    // View toggle (compact/comfortable)
+    if (viewToggle) {
+        viewToggle.addEventListener('click', () => {
+            isCompactView = !isCompactView;
+            localStorage.setItem('businessBoardCompactView', isCompactView);
+            updateViewToggleIcon();
+            renderBoard();
+        });
+    }
+}
+
+function updateViewToggleIcon() {
+    if (viewIcon) {
+        viewIcon.textContent = isCompactView ? '⊞' : '⊟';
+        viewToggle.title = isCompactView ? 'Switch to comfortable view' : 'Switch to compact view';
+    }
 }
 
 async function fetchEntities() {
@@ -99,6 +123,7 @@ function renderBoard() {
 function createCard(entity) {
     const card = document.createElement('div');
     card.className = 'job-card'; // Reusing job-card class for consistent styling
+    if (isCompactView) card.classList.add('compact');
     card.draggable = true;
     card.dataset.id = entity.id;
 
@@ -108,14 +133,23 @@ function createCard(entity) {
     if (entity.type === 'vc') typeEmoji = '🏛️';
     if (entity.type === 'accelerator') typeEmoji = '🚀';
 
-    card.innerHTML = `
-        <div class="card-header">
-            <span class="type-badge">${typeEmoji} ${capitalize(entity.type)}</span>
-        </div>
-        <h3>${escapeHtml(entity.name)}</h3>
-        <p class="company">${escapeHtml(entity.contact_person || 'No Contact')}</p>
-        <p>${escapeHtml(entity.location || '')}</p>
-    `;
+    if (isCompactView) {
+        card.innerHTML = `
+            <div class="compact-row">
+                <span class="type-emoji">${typeEmoji}</span>
+                <h3>${escapeHtml(entity.name)}</h3>
+            </div>
+        `;
+    } else {
+        card.innerHTML = `
+            <div class="card-header">
+                <span class="type-badge">${typeEmoji} ${capitalize(entity.type)}</span>
+            </div>
+            <h3>${escapeHtml(entity.name)}</h3>
+            <p class="company">${escapeHtml(entity.contact_person || 'No Contact')}</p>
+            <p>${escapeHtml(entity.location || '')}</p>
+        `;
+    }
 
     // Drag events
     card.addEventListener('dragstart', (e) => {

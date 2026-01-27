@@ -605,6 +605,16 @@ body {
     font-size: 10px;
 }
 
+.job-card.compact .compact-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.job-card.compact .compact-row h3 {
+    margin-left: 0;
+}
+
 /* Compact view metadata line */
 .job-card.compact .metadata {
     color: var(--text-secondary);
