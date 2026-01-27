@@ -1,10 +1,10 @@
-# Multi-User Job Board - Deployment Guide
+# Job Board v3.0.0 - Deployment Guide
 
 ## Quick Start with Docker
 
 ### Prerequisites
 - Docker & Docker Compose installed
-- Tailscale (for VPN access)
+- Tailscale (optional, for VPN access)
 
 ### 1. Create Environment File
 
@@ -38,36 +38,51 @@ docker-compose ps
 docker-compose logs -f
 
 # Test health endpoint
-curl http://localhost/api/health
+curl http://localhost/jobboard/api/health
 ```
 
-### 4. Tailscale Access
+### 4. Access the Application
+
+Open browser: **http://localhost/jobboard/**
+
+You'll be redirected to login. Create an account to access:
+- **Dashboard**: Home view with widgets
+- **Job Board**: Track job applications
+- **Business Board**: Track business relationships
+
+## Database Schema
+
+The database includes three main tables:
+
+1. **users**: User accounts with hashed passwords
+2. **jobs**: Job applications and connections
+3. **business_entities**: Business relationships (v3.0.0+)
+
+On first start, the schema is auto-initialized from `server/models/schema.sql`.
+
+### Running Migrations
+
+If upgrading from v2.x, the `business_entities` table needs to be created:
 
 ```bash
-# Get Tailscale IP
-tailscale ip -4
+# Connect to database
+docker-compose exec postgres psql -U jobboard_user -d jobboard
 
-# Access from any Tailscale device
-http://<tailscale-ip>
-```
-
-## Data Migration from v1 (localStorage)
-
-### Export from Old Version (v1)
-
-1. Open the old version at `http://localhost:8089`
-2. Open browser console (F12 → Console)
-3. Paste contents of `scripts/export-from-localstorage.js`
-4. Press Enter - data will auto-download as JSON
-
-### Import to New Version (v2)
-
-1. Create account in v2 at `http://localhost/login.html`
-2. Run import script:
-
-```bash
-cd scripts
-node import-to-database.js ../migration-data.json your@email.com yourpassword
+# Run migration (if not auto-created)
+CREATE TABLE business_entities (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(50) DEFAULT 'connection',
+    status VARCHAR(50) DEFAULT 'researching',
+    contact_person VARCHAR(255),
+    email VARCHAR(255),
+    website VARCHAR(255),
+    location VARCHAR(255),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 ## Database Management
@@ -80,7 +95,10 @@ docker-compose exec postgres psql -U jobboard_user -d jobboard
 SELECT id, email, created_at FROM users;
 
 # View jobs
-SELECT * FROM jobs;
+SELECT id, company, status FROM jobs WHERE user_id = 1;
+
+# View business entities
+SELECT id, name, type, status FROM business_entities WHERE user_id = 1;
 
 # Backup
 docker-compose exec postgres pg_dump -U jobboard_user jobboard > backup.sql
@@ -95,6 +113,16 @@ docker-compose exec -T postgres psql -U jobboard_user jobboard < backup.sql
 git pull
 docker-compose down
 docker-compose up -d --build
+```
+
+## Tailscale Access
+
+```bash
+# Get Tailscale IP
+tailscale ip -4
+
+# Access from any Tailscale device
+http://<tailscale-ip>/jobboard/
 ```
 
 ## Troubleshooting
@@ -126,6 +154,9 @@ cd server && npm install
 # Run API in dev mode
 npm run dev
 
+# Run tests
+npm test
+
 # Frontend changes - just refresh browser
 ```
 
@@ -133,29 +164,51 @@ npm run dev
 
 ```
 .
-├── docker-compose.yml       # Multi-container setup
-├── .env                     # Environment variables (secrets)
+├── docker-compose.yml           # Multi-container setup
+├── .env                         # Environment variables (secrets)
 ├── nginx/
-│   └── nginx.conf          # Reverse proxy config
-├── public/                 # Frontend files
-│   ├── index.html
-│   ├── login.html
-│   ├── styles.css
+│   └── nginx.conf              # Reverse proxy config
+├── public/                     # Frontend files
+│   ├── index.html              # Dashboard (home)
+│   ├── jobs.html               # Job Board
+│   ├── business.html           # Business Board
+│   ├── login.html              # Authentication
+│   ├── styles.css              # Main stylesheet
+│   ├── css/
+│   │   ├── layout.css          # Dashboard layout
+│   │   └── sidebar.css         # Navigation styles
 │   └── js/
-│       ├── api.js          # API client
-│       ├── app.js          # Main app logic
-│       └── auth.js         # Authentication UI
+│       ├── api.js              # API client
+│       ├── app.js              # Job Board logic
+│       ├── business.js         # Business Board logic
+│       ├── dashboard.js        # Dashboard widgets
+│       ├── sidebar.js          # Navigation
+│       ├── logout.js           # Logout modal
+│       └── auth.js             # Authentication UI
 ├── scripts/
 │   ├── export-from-localstorage.js
 │   └── import-to-database.js
-└── server/                 # Backend API
+└── server/                     # Backend API
     ├── Dockerfile
-    ├── server.js           # Express app
-    ├── config/             # DB & auth config
-    ├── controllers/        # Business logic
-    ├── middleware/         # Auth & error handling
-    ├── models/             # Database schema
-    └── routes/             # API endpoints
+    ├── server.js               # Express app
+    ├── config/                 # DB & auth config
+    ├── controllers/
+    │   ├── auth.controller.js
+    │   ├── jobs.controller.js
+    │   ├── business.controller.js
+    │   └── dashboard.controller.js
+    ├── middleware/             # Auth & error handling
+    ├── models/                 # Database schema
+    ├── routes/
+    │   ├── auth.routes.js
+    │   ├── jobs.routes.js
+    │   ├── business.routes.js
+    │   └── dashboard.routes.js
+    └── tests/
+        ├── auth.test.js
+        ├── jobs.test.js
+        ├── business.test.js
+        └── dashboard.test.js
 ```
 
 ## Security Notes
@@ -165,10 +218,16 @@ npm run dev
 - Rate limiting: 5 login attempts per 15 minutes
 - PostgreSQL only accessible within Docker network
 - Tailscale provides encrypted VPN tunnel
+- All data endpoints require authenticated JWT
 
-## Next Steps
+## Data Migration (v1 to v3)
 
-- Set up automated backups
-- Configure monitoring (Docker logs)
-- Add SSL certificate (when going public)
-- Customize authentication (OAuth, password reset)
+For migrating from the old localStorage-based version:
+
+1. Export data: Run code from `scripts/export-from-localstorage.js` in browser console
+2. Import to database:
+   ```bash
+   node scripts/import-to-database.js migration-data.json user@email.com password
+   ```
+
+Note: This only migrates jobs. Business entities are a new feature in v3.0.0.
