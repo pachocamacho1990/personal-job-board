@@ -161,5 +161,28 @@ const api = {
                 method: 'DELETE'
             });
         }
+    },
+
+    business: {
+        getAll: async () => {
+            return await apiRequest('/business');
+        },
+        create: async (entityData) => {
+            return await apiRequest('/business', {
+                method: 'POST',
+                body: JSON.stringify(entityData)
+            });
+        },
+        update: async (id, entityData) => {
+            return await apiRequest(`/business/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(entityData)
+            });
+        },
+        delete: async (id) => {
+            return await apiRequest(`/business/${id}`, {
+                method: 'DELETE'
+            });
+        }
     }
 };

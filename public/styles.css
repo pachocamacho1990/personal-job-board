@@ -78,6 +78,32 @@
     --color-forgotten-bg: #FAFAF9;
     --color-forgotten-light: #E7E5E4;
 
+    /* Business Board Status Colors */
+    --color-researching: #6366F1;
+    /* Indigo */
+    --color-researching-bg: #EEF2FF;
+    --color-researching-light: #E0E7FF;
+
+    --color-contacted: #0891B2;
+    /* Cyan */
+    --color-contacted-bg: #ECFEFF;
+    --color-contacted-light: #CFFAFE;
+
+    --color-meeting: #8B5CF6;
+    /* Violet */
+    --color-meeting-bg: #F5F3FF;
+    --color-meeting-light: #EDE9FE;
+
+    --color-negotiation: #EA580C;
+    /* Orange */
+    --color-negotiation-bg: #FFF7ED;
+    --color-negotiation-light: #FFEDD5;
+
+    --color-signed: #059669;
+    /* Emerald Dark */
+    --color-signed-bg: #ECFDF5;
+    --color-signed-light: #D1FAE5;
+
     /* Spacing */
     --spacing-xs: 4px;
     --spacing-sm: 8px;
@@ -271,6 +297,72 @@ body {
 
 .column[data-status="forgotten"] .cards-container {
     background: var(--color-forgotten-bg);
+}
+
+/* Business Board Column Status Colors */
+.column[data-status="researching"] .column-header {
+    background: var(--color-researching-light);
+    border-color: var(--color-researching);
+}
+
+.column[data-status="researching"] .column-header h2 {
+    color: var(--color-researching);
+}
+
+.column[data-status="researching"] .cards-container {
+    background: var(--color-researching-bg);
+}
+
+.column[data-status="contacted"] .column-header {
+    background: var(--color-contacted-light);
+    border-color: var(--color-contacted);
+}
+
+.column[data-status="contacted"] .column-header h2 {
+    color: var(--color-contacted);
+}
+
+.column[data-status="contacted"] .cards-container {
+    background: var(--color-contacted-bg);
+}
+
+.column[data-status="meeting"] .column-header {
+    background: var(--color-meeting-light);
+    border-color: var(--color-meeting);
+}
+
+.column[data-status="meeting"] .column-header h2 {
+    color: var(--color-meeting);
+}
+
+.column[data-status="meeting"] .cards-container {
+    background: var(--color-meeting-bg);
+}
+
+.column[data-status="negotiation"] .column-header {
+    background: var(--color-negotiation-light);
+    border-color: var(--color-negotiation);
+}
+
+.column[data-status="negotiation"] .column-header h2 {
+    color: var(--color-negotiation);
+}
+
+.column[data-status="negotiation"] .cards-container {
+    background: var(--color-negotiation-bg);
+}
+
+.column[data-status="signed"] .column-header {
+    background: var(--color-signed-light);
+    border-color: var(--color-signed);
+}
+
+.column[data-status="signed"] .column-header h2 {
+    color: var(--color-signed);
+}
+
+.column[data-status="signed"] .cards-container {
+    background: var(--color-signed-bg);
 }
 
 .count-badge {
@@ -511,6 +603,16 @@ body {
 
 .job-card.compact .type-emoji {
     font-size: 10px;
+}
+
+.job-card.compact .compact-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.job-card.compact .compact-row h3 {
+    margin-left: 0;
 }
 
 /* Compact view metadata line */

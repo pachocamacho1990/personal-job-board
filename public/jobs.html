@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Board - Applications</title>
+    <link rel="stylesheet" href="styles.css?v=3">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="sidebar-brand">
+                <span>🚀</span> Job Tracker
+            </a>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="index.html" class="nav-item">
+                <span>🏠</span> Dashboard
+            </a>
+            <a href="jobs.html" class="nav-item active">
+                <span>💼</span> Job Board
+            </a>
+            <a href="business.html" class="nav-item">
+                <span>🤝</span> Business Board
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">U</div>
+                <div class="user-info">
+                    <div class="user-name">User</div>
+                </div>
+                <button class="logout-trigger" title="Logout">↪</button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div id="appLoading"
+            style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; align-items: center; justify-content: center; font-family: sans-serif; font-size: 1.2rem; color: #666;">
+            Loading...
+        </div>
+
+        <main class="board-section">
+            <div class="page-header">
+                <h1 class="page-title">Job Applications</h1>
+                <div class="header-actions">
+                    <button id="focusToggle" class="btn-icon" title="Toggle Focus Mode 🎯">
+                        <span>🎯</span>
+                    </button>
+                    <button id="viewToggle" class="btn-icon" title="Toggle compact view">
+                        <span id="viewIcon">⊟</span>
+                    </button>
+                    <button id="addJobBtn" class="btn-primary">+ Add Card</button>
+                </div>
+            </div>
+
+            <div class="kanban-board">
+                <div class="column" data-status="interested">
+                    <div class="column-header">
+                        <h2>Interested</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="interested"></div>
+                </div>
+
+                <div class="column" data-status="applied">
+                    <div class="column-header">
+                        <h2>Applied</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="applied"></div>
+                </div>
+
+                <div class="column forgotten" data-status="forgotten">
+                    <div class="column-header">
+                        <h2>Forgotten</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="forgotten"></div>
+                </div>
+
+                <div class="column" data-status="interview">
+                    <div class="column-header">
+                        <h2>Interview</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="interview"></div>
+                </div>
+
+                <div class="column" data-status="offer">
+                    <div class="column-header">
+                        <h2>Offer</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="offer"></div>
+                </div>
+
+                <div class="column" data-status="rejected">
+                    <div class="column-header">
+                        <h2>Rejected</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="rejected"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Lateral Detail Panel -->
+        <aside id="detailPanel" class="detail-panel"
+            style="position: fixed; right: 0; top: 0; height: 100vh; z-index: 200;">
+            <div class="panel-content">
+                <div class="panel-header">
+                    <h2 id="panelTitle">Job Details</h2>
+                    <button id="closePanel" class="btn-icon" aria-label="Close panel">&times;</button>
+                </div>
+
+                <form id="jobForm" class="job-form">
+                    <input type="hidden" id="jobId">
+
+                    <!-- Timestamp info (read-only) -->
+                    <div id="timestampInfo" class="timestamp-info" style="display: none;"></div>
+
+                    <div class="form-group">
+                        <label>Type</label>
+                        <div class="type-selector">
+                            <label class="type-option">
+                                <input type="radio" name="type" value="connection">
+                                <span>🤝 Connection</span>
+                            </label>
+                            <label class="type-option">
+                                <input type="radio" name="type" value="job" checked>
+                                <span>💼 Job Application</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Created By</label>
+                        <div class="type-selector">
+                            <label class="type-option">
+                                <input type="radio" name="origin" value="human" checked>
+                                <span>👤 Human</span>
+                            </label>
+                            <label class="type-option">
+                                <input type="radio" name="origin" value="agent">
+                                <span>🤖 AI Agent</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="connection-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="contactName">Contact Name</label>
+                            <input type="text" id="contactName" placeholder="Person's name">
+                        </div>
+                        <div class="form-group">
+                            <label for="organization">Organization</label>
+                            <input type="text" id="organization" placeholder="Optional">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company">Company</label>
+                        <input type="text" id="company">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="position">Position / Role</label>
+                        <input type="text" id="position">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="salary">Salary Range</label>
+                        <input type="text" id="salary" placeholder="e.g., $80k-$100k">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Interest Level</label>
+                        <div class="rating-input">
+                            <input type="radio" name="rating" value="1" id="rating1"><label for="rating1">★</label>
+                            <input type="radio" name="rating" value="2" id="rating2"><label for="rating2">★</label>
+                            <input type="radio" name="rating" value="3" id="rating3" checked><label
+                                for="rating3">★</label>
+                            <input type="radio" name="rating" value="4" id="rating4"><label for="rating4">★</label>
+                            <input type="radio" name="rating" value="5" id="rating5"><label for="rating5">★</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" required>
+                            <option value="interested">Interested</option>
+                            <option value="applied">Applied</option>
+                            <option value="forgotten">Forgotten</option>
+                            <option value="interview">Interview</option>
+                            <option value="offer">Offer</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="comments-header">
+                            <label for="comments">Comments</label>
+                            <button type="button" id="togglePreview" class="btn-preview">Preview</button>
+                        </div>
+                        <textarea id="comments" rows="8"></textarea>
+                        <div id="commentsPreview" class="markdown-preview" style="display: none;"></div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Save</button>
+                        <button type="button" id="deleteBtn" class="btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Logout Confirmation Modal -->
+        <div id="logoutModal" class="modal-overlay" style="display: none;">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Confirm Logout</h2>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to log out?</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancelLogout" class="btn-secondary">Cancel</button>
+                    <button id="confirmLogout" class="btn-danger">Log Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/logout.js"></script>
+    <script src="js/sidebar.js"></script>
+    <!-- Reusing app.js for job board logic -->
+    <script src="js/app.js"></script>
+</body>
+
+</html>
