@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // Check auth
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     if (!token) {
-        window.location.href = 'login.html';
+        window.location.href = '/jobboard/login.html';
         return;
     }
 
@@ -86,7 +86,7 @@ function renderNewMatches(matches) {
 
 // Helper to use existing auth API wrapper if available, or fetch directly
 async function fetchWithAuth(url, options = {}) {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
@@ -95,8 +95,8 @@ async function fetchWithAuth(url, options = {}) {
 
     const response = await fetch(url, { ...options, headers });
     if (response.status === 401) {
-        localStorage.removeItem('token');
-        window.location.href = 'login.html';
+        localStorage.removeItem('authToken');
+        window.location.href = '/jobboard/login.html';
         throw new Error('Unauthorized');
     }
     return response;

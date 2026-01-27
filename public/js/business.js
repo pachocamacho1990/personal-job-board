@@ -17,6 +17,13 @@ const commentsPreview = document.getElementById('commentsPreview');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Check authentication
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        window.location.href = '/jobboard/login.html';
+        return;
+    }
+
     fetchEntities();
     setupEventListeners();
 });
