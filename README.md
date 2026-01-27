@@ -7,25 +7,39 @@
   <img src="docs/assets/detail-preview.png" width="45%" alt="Job Detail View" />
 </div>
 
-A minimalist, **self-hosted Kanban board** to track job applications and networking opportunities. Now powered by **Docker**, **PostgreSQL**, and a secure **User Authentication** system.
+A minimalist, **self-hosted Kanban board** to track job applications, networking opportunities, and business connections. Powered by **Docker**, **PostgreSQL**, and a secure **User Authentication** system.
 
 ## 🚀 Key Features
 
-- **🔐 Multi-User Authentication**: Secure signup/login with password hashing and JWT sessions.
-- **🐳 Dockerized Deployment**: One command to start Database, API, and Web Server.
-- **💾 PostgreSQL Database**: Robust data persistence (no more browser localStorage limits).
--   **🤝 Dual Entity System**: Track both **Connections** (networking) and **Jobs** (applications).
--   **🤖 Job Origin Indicator**: Distinguish between Human 👤 and AI Agent 🤖 created jobs.
--   **✨ Shine Effect**: New Agent-created jobs glow purple until viewed (unseen state).
--   **⭐ Star Ratings**: Prioritize opportunities with a 1-5 star rating system.
-- **📱 Responsive & Fast**: Optimized mobile view and lightweight frontend.
-- **🔄 Migration Tools**: Seamlessly import data from previous localStorage versions.
+### 🏠 Home Dashboard
+- **Upcoming Interviews**: Quick view of jobs in interview stage
+- **New AI Matches**: Unseen jobs created by your AI agent
+- **Unified Navigation**: Sidebar access to all boards
+
+### 💼 Job Board
+- **Kanban Columns**: Interested → Applied → Interview → Offer → Rejected
+- **Job/Connection Types**: Track both networking and applications
+- **AI Agent Integration**: Jobs created by AI agents are highlighted with a glow effect
+- **Star Ratings**: Prioritize opportunities (1-5 stars)
+- **Compact/Comfortable View**: Toggle between dense and detailed card layouts
+
+### 🤝 Business Board
+- **Track Business Relationships**: Investors, VCs, Accelerators, Connections
+- **Kanban Stages**: Researching → Contacted → Meeting → Negotiation → Signed/Rejected
+- **Color-Coded Columns**: Each stage has distinct visual styling
+- **Drag & Drop**: Move entities between stages
+- **Compact/Comfortable View**: Same view toggle as Job Board
+
+### 🔐 Authentication
+- Secure signup/login with password hashing (bcrypt)
+- JWT session tokens
+- Per-user data isolation
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Vanilla JS (ES6+), CSS3 Variables, Semantic HTML
 - **Backend**: Node.js, Express, JWT Authentication
-- **Database**: PostgreSQL 15
+- **Database**: PostgreSQL 16
 - **Infrastructure**: Docker Compose, Nginx (Reverse Proxy)
 
 ## 🏃 Quick Start
@@ -33,21 +47,57 @@ A minimalist, **self-hosted Kanban board** to track job applications and network
 ### Prerequisites
 - Docker & Docker Compose installed
 
-### 1. Start the Application
-Run this single command to launch everything:
+### 1. Clone & Configure
+```bash
+git clone https://github.com/pachocamacho1990/personal-job-board.git
+cd personal-job-board
+cp .env.example .env  # Edit with your settings
+```
 
+### 2. Start the Application
 ```bash
 docker-compose up -d
 ```
 
-### 2. Access the Job Board
-Open your browser and navigate to:
-**http://localhost**
+### 3. Access the Job Board
+Open your browser: **http://localhost/jobboard/**
 
-### 3. Create an Account
-1. You will be redirected to `/login.html`.
-2. Click **"Sign up"**.
-3. Create your account to access your private job board.
+### 4. Create an Account
+1. Click **"Sign up"** on the login page
+2. Create your account
+3. You'll be redirected to your personal Dashboard
+
+## 📁 Project Structure
+
+```
+personal-job-board/
+├── public/                   # Frontend files
+│   ├── index.html           # Dashboard (home)
+│   ├── jobs.html            # Job Board
+│   ├── business.html        # Business Board
+│   ├── login.html           # Authentication
+│   ├── styles.css           # Main stylesheet
+│   ├── css/
+│   │   ├── layout.css       # Dashboard layout
+│   │   └── sidebar.css      # Navigation styles
+│   └── js/
+│       ├── api.js           # API client
+│       ├── app.js           # Job Board logic
+│       ├── business.js      # Business Board logic
+│       ├── dashboard.js     # Dashboard widgets
+│       ├── sidebar.js       # Navigation
+│       ├── logout.js        # Logout modal
+│       └── auth.js          # Login/signup
+├── server/                   # Backend API
+│   ├── server.js            # Express entry point
+│   ├── controllers/         # Request handlers
+│   ├── routes/              # API routes
+│   ├── middleware/          # Auth middleware
+│   ├── models/              # Database schema
+│   └── tests/               # Jest tests
+├── docker-compose.yml       # Container orchestration
+└── nginx/                   # Reverse proxy config
+```
 
 ## 🔧 Management
 
@@ -55,19 +105,24 @@ Open your browser and navigate to:
 ```bash
 docker-compose down
 ```
-*(Your data will persist in the Docker volume)*
+*(Your data persists in the Docker volume)*
 
 ### Viewing Logs
 ```bash
-docker-compose logs -f
+docker-compose logs -f api
+```
+
+### Rebuilding After Changes
+```bash
+docker-compose up -d --build
 ```
 
 ## 📦 Data Migration (from v1)
 
 If you have data from the old localStorage version:
 
-1. **Export**: Open old version console -> run code in `scripts/export-from-localstorage.js`.
-2. **Import**: Use the Node.js script:
+1. **Export**: Open old version console → run `scripts/export-from-localstorage.js`
+2. **Import**:
    ```bash
    node scripts/import-to-database.js migration-data.json your@email.com yourpassword
    ```
@@ -76,15 +131,49 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed migration steps.
 
 ## 🧪 Testing
 
-The project includes automated backend tests (Jest) and manual verification checklists.
-
 ```bash
 # Run backend tests
 cd server
 npm test
 ```
 
+Tests include:
+- `auth.test.js` - Authentication flows
+- `jobs.test.js` - Job CRUD operations
+- `business.test.js` - Business entity CRUD
+- `dashboard.test.js` - Summary data
+
 See [TESTING.md](TESTING.md) for full testing strategy.
+
+## 🗺️ API Endpoints
+
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/signup` | Create account |
+| POST | `/api/auth/login` | Get JWT token |
+| POST | `/api/auth/logout` | Invalidate session |
+
+### Jobs
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/jobs` | List all jobs |
+| POST | `/api/jobs` | Create job |
+| PUT | `/api/jobs/:id` | Update job |
+| DELETE | `/api/jobs/:id` | Delete job |
+
+### Business Entities
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/business` | List all entities |
+| POST | `/api/business` | Create entity |
+| PUT | `/api/business/:id` | Update entity |
+| DELETE | `/api/business/:id` | Delete entity |
+
+### Dashboard
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/dashboard/summary` | Get widget data |
 
 ## 📄 License
 MIT
