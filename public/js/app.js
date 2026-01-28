@@ -669,4 +669,257 @@ function setupEventListeners() {
 }
 
 // Start the app
+// Start the app
 init();
+
+/* --- New Features: Center Peek & Journey Map --- */
+
+const centerPeekModal = document.getElementById('centerPeekModal');
+const closeCenterPeekBtn = document.getElementById('closeCenterPeek');
+const peekContent = document.getElementById('peekContent');
+
+// Update statuses to include 'pending'
+const ALL_STATUSES = ['interested', 'applied', 'interview', 'pending', 'offer', 'rejected', 'forgotten'];
+
+// Override updateColumnCounts to use new status list
+function updateColumnCounts(visibleJobs = jobs) {
+    ALL_STATUSES.forEach(status => {
+        const count = visibleJobs.filter(j => j.status === status).length;
+        const badge = document.querySelector(`.column[data-status="${status}"] .count-badge`);
+        if (badge) badge.textContent = count;
+    });
+}
+
+/**
+ * Open the Center Peek Modal (Journey Map View)
+ */
+async function openCenterPeek(jobId) {
+    const job = getJob(jobId);
+    if (!job) return;
+
+    currentJobId = jobId;
+
+    // Show modal loading state
+    centerPeekModal.classList.add('open');
+    peekContent.innerHTML = '<div style="color:white; padding:2rem;">Loading history...</div>';
+
+    try {
+        // Fetch history
+        const history = await api.jobs.getHistory(jobId);
+        renderCenterPeekContent(job, history);
+    } catch (error) {
+        console.error("Failed to load history", error);
+        peekContent.innerHTML = '<div style="color:var(--color-danger); padding:2rem;">Failed to load history.</div>';
+    }
+}
+
+function closeCenterPeek() {
+    centerPeekModal.classList.remove('open');
+    peekContent.innerHTML = '';
+}
+
+if (closeCenterPeekBtn) {
+    closeCenterPeekBtn.addEventListener('click', closeCenterPeek);
+    // Close on background click
+    centerPeekModal.addEventListener('click', (e) => {
+        if (e.target === centerPeekModal) closeCenterPeek();
+    });
+}
+
+function renderCenterPeekContent(job, history) {
+    // 1. Structure
+    peekContent.innerHTML = `
+        <div class="journey-map-section">
+            <div class="journey-header">
+                <h1>${job.position || 'Untitled'}</h1>
+                <p class="company">${job.company || 'Unknown Company'}</p>
+            </div>
+            <div class="journey-graph-container" id="journeyGraph">
+                <!-- SVG injected here -->
+            </div>
+        </div>
+        <div class="job-details-section">
+            <div class="detail-row">
+                <div class="detail-label">Status</div>
+                <div class="detail-value">
+                    <span class="type-badge ${job.type}" style="font-size: 1rem; padding: 4px 12px;">
+                        ${job.status.toUpperCase()}
+                    </span>
+                 </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Location</div>
+                <div class="detail-value">${job.location || '-'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Salary</div>
+                <div class="detail-value">${job.salary || '-'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Comments</div>
+                <div class="detail-value markdown-body">${job.comments ? marked.parse(job.comments) : 'No comments'}</div>
+            </div>
+            <div style="margin-top: 2rem;">
+                <button id="editJobFromPeek" class="btn-primary" style="width:100%">Edit Details</button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('editJobFromPeek').addEventListener('click', () => {
+        closeCenterPeek();
+        // Use the original openJobDetails (exposed on window) to bypass the Center Peek redirect
+        window.openRealEditPanel(job.id);
+    });
+
+    // 2. Render Graph
+    setTimeout(() => renderJourneyMap(history, job.status), 0);
+}
+
+/**
+ * Render SVG Journey Map
+ * X-axis: Statuses
+ * Y-axis: Time (History Entries)
+ */
+function renderJourneyMap(history, currentStatus) {
+    const container = document.getElementById('journeyGraph');
+    if (!container) return;
+
+    // Dimensions
+    const width = container.clientWidth || 600;
+    const height = Math.max(400, history.length * 100 + 100);
+    const padding = { top: 60, right: 40, bottom: 40, left: 80 };
+
+    // Columns config
+    const columns = ['applied', 'interview', 'pending', 'offer']; // Main flow
+    const colWidth = (width - padding.left - padding.right) / (columns.length - 1);
+
+    // Combine history + current state if not redundant
+    // Sort history by date desc (newest first) -> effectively bottom up?
+    // Let's visualize Top = Oldest, Bottom = Newest (Time flows down)
+    const sortedHistory = [...history].sort((a, b) => new Date(a.changed_at) - new Date(b.changed_at));
+
+    // Add "Start" node? Or just first history status
+    // Ensure we map status to an X coordinate
+    function getX(status) {
+        let idx = columns.indexOf(status);
+        if (idx === -1) {
+            // Handle edge cases (interested, rejected, forgotten)
+            if (status === 'interested') return padding.left - 40; // Left of Applied
+            if (status === 'rejected' || status === 'forgotten') return width - padding.right + 20; // Right of Offer
+            idx = 0; // Default
+        }
+        return padding.left + (idx * colWidth);
+    }
+
+    // Generate Nodes
+    const nodes = sortedHistory.map((entry, i) => ({
+        x: getX(entry.new_status),
+        y: padding.top + (i * 80),
+        status: entry.new_status,
+        date: entry.changed_at,
+        label: formatFullDate(entry.changed_at),
+        isCurrent: false
+    }));
+
+    // If no history, show current status as single node
+    if (nodes.length === 0) {
+        nodes.push({
+            x: getX(currentStatus),
+            y: padding.top,
+            status: currentStatus,
+            date: new Date().toISOString(),
+            label: 'Current Status',
+            isCurrent: true
+        });
+    } else {
+        // Mark last as current
+        nodes[nodes.length - 1].isCurrent = true;
+    }
+
+    // SVG Content
+    let svgHtml = `<svg width="${width}" height="${height}" style="overflow: visible;">`;
+
+    // 1. Draw Column Lines & Labels
+    columns.forEach((col, i) => {
+        const x = padding.left + (i * colWidth);
+        // Line
+        svgHtml += `<line x1="${x}" y1="${padding.top - 20}" x2="${x}" y2="${height}" stroke="#334155" stroke-dasharray="4" />`;
+        // Label
+        svgHtml += `<text x="${x}" y="${padding.top - 30}" class="status-column-label">${col}</text>`;
+    });
+
+    // 2. Draw Paths
+    let pathD = "";
+    if (nodes.length > 1) {
+        pathD = `M ${nodes[0].x} ${nodes[0].y}`;
+        for (let i = 1; i < nodes.length; i++) {
+            // Bezier curve or straight line? Straight zig-zag is clearer for "Journey"
+            // Let's use simple lines with rounded corners logic if possible, or just L
+            pathD += ` L ${nodes[i].x} ${nodes[i].y}`;
+        }
+        svgHtml += `<path d="${pathD}" class="journey-path active" />`;
+    }
+
+    // 3. Draw Nodes
+    nodes.forEach(node => {
+        const r = node.isCurrent ? 8 : 5;
+        const classes = `journey-node ${node.isCurrent ? 'active' : ''}`;
+        svgHtml += `<circle cx="${node.x}" cy="${node.y}" r="${r}" class="${classes}" />`;
+
+        // Date Label (Left)
+        svgHtml += `<text x="${node.x - 15}" y="${node.y + 4}" class="time-label">${formatRelativeTime(node.date)}</text>`;
+
+        // Status Label (Right - optional if column is clear)
+        // svgHtml += `<text x="${node.x + 15}" y="${node.y + 4}" fill="#94A3B8" font-size="10">${node.status}</text>`;
+    });
+
+    svgHtml += `</svg>`;
+    container.innerHTML = svgHtml;
+}
+
+// Intercept clicks on job cards to open Center Peek instead
+// We need to override the existing event listeners or just attach new ones that stop propagation?
+// The existing `renderJob` adds `card.addEventListener('click', () => openJobDetails(job.id));`
+// We can overwrite `renderJob` entirely or hack it.
+// Since we are appending code, we can't easily overwrite `renderJob` inside `app.js` without rewriting the whole function.
+// However, `renderJob` uses `openJobDetails`. We can re-define `openJobDetails` efficiently?
+// No, `openJobDetails` is defined earlier. Re-defining it here (since var/function hoisting or overwrite) might work if it's global scope.
+// `openJobDetails` is a function declaration at top level. We can overwrite it.
+
+// Redefine openJobDetails to redirect to Center Peek
+// BUT standard edit functionality is needed.
+// Strategy: openJobDetails is "Edit Mode". We want "View Mode" (Center Peek) on Card Click.
+// We should update `renderJob` to call `openCenterPeek`.
+// Since we can't easily replace `renderJob`, let's redefine `openJobDetails` to act as a router?
+// "If clicking card -> Center Peek. If clicking 'Edit' in Center Peek -> Real Edit Panel."
+// The card click calls `openJobDetails(job.id)`.
+// So if we redefine `openJobDetails` to call `openCenterPeek`, we achieve the goal.
+// THEN we need a function `openEditPanel` (the old `openJobDetails`) for the actual edit form.
+
+const originalOpenJobDetails = openJobDetails;
+openJobDetails = function (jobId) {
+    if (jobId === null) {
+        // "Add Job" button passes null -> Go straight to Edit Panel (Add Mode)
+        originalOpenJobDetails(null);
+    } else {
+        // Open Center Peek
+        openCenterPeek(jobId);
+    }
+};
+
+// We need to expose the "Real" open edit panel for the "Edit Details" button in Peek
+// We can attach it to window or just call originalOpenJobDetails
+window.openRealEditPanel = originalOpenJobDetails;
+
+// Fix the Edit Button listener in renderCenterPeekContent to use originalOpenJobDetails
+// Rewriting renderCenterPeekContent's listener above:
+/*
+    document.getElementById('editJobFromPeek').addEventListener('click', () => {
+        closeCenterPeek();
+        originalOpenJobDetails(job.id);
+    });
+*/
+// We need to make sure `originalOpenJobDetails` is available in that scope.
+// Since `renderCenterPeekContent` is defined after `originalOpenJobDetails` assignment, it works.
+
+

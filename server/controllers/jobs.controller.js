@@ -155,9 +155,39 @@ const deleteJob = async (req, res, next) => {
     }
 };
 
+/**
+ * Get job history
+ * GET /api/jobs/:id/history
+ */
+const getJobHistory = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        // Verify job belongs to user
+        const checkResult = await pool.query(
+            'SELECT id FROM jobs WHERE id = $1 AND user_id = $2',
+            [id, req.userId]
+        );
+
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Job not found' });
+        }
+
+        const result = await pool.query(
+            'SELECT * FROM job_history WHERE job_id = $1 ORDER BY changed_at ASC',
+            [id]
+        );
+
+        res.json(result.rows);
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getAllJobs,
     createJob,
     updateJob,
-    deleteJob
+    deleteJob,
+    getJobHistory
 };
