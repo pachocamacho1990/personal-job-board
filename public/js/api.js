@@ -160,6 +160,14 @@ const api = {
             return await apiRequest(`/jobs/${id}`, {
                 method: 'DELETE'
             });
+        },
+
+        /**
+         * Get job history
+         * @param {number} id
+         */
+        getHistory: async (id) => {
+            return await apiRequest(`/jobs/${id}/history`);
         }
     },
 

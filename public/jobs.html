@@ -94,6 +94,14 @@
                     <div class="cards-container" data-status="interview"></div>
                 </div>
 
+                <div class="column" data-status="pending">
+                    <div class="column-header">
+                        <h2>Pending Next Step</h2>
+                        <span class="count-badge">0</span>
+                    </div>
+                    <div class="cards-container" data-status="pending"></div>
+                </div>
+
                 <div class="column" data-status="offer">
                     <div class="column-header">
                         <h2>Offer</h2>
@@ -226,6 +234,16 @@
                 </form>
             </div>
         </aside>
+
+        <!-- Center Peek Modal -->
+        <div id="centerPeekModal" class="center-peek-overlay">
+            <div class="center-peek-container glass-panel">
+                <button id="closeCenterPeek" class="btn-icon close-peek" title="Close">×</button>
+                <div id="peekContent" class="peek-content">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
 
         <!-- Logout Confirmation Modal -->
         <div id="logoutModal" class="modal-overlay" style="display: none;">
