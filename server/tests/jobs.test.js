@@ -142,4 +142,96 @@ describe('Jobs Routes', () => {
             expect(res.body).toHaveProperty('error', 'Job not found');
         });
     });
+
+    describe('GET /api/jobs/:id/history', () => {
+        it('should return history for a valid job', async () => {
+            const mockHistory = [
+                { id: 1, job_id: 1, previous_status: null, new_status: 'interested', changed_at: '2026-01-01T00:00:00Z' },
+                { id: 2, job_id: 1, previous_status: 'interested', new_status: 'applied', changed_at: '2026-01-02T00:00:00Z' }
+            ];
+
+            // First query: check job ownership
+            pool.query.mockResolvedValueOnce({ rows: [{ id: 1 }] });
+            // Second query: get history
+            pool.query.mockResolvedValueOnce({ rows: mockHistory });
+
+            const res = await request(app).get('/api/jobs/1/history');
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toEqual(mockHistory);
+            expect(res.body).toHaveLength(2);
+        });
+
+        it('should return 404 if job does not exist', async () => {
+            // Job ownership check returns empty
+            pool.query.mockResolvedValueOnce({ rows: [] });
+
+            const res = await request(app).get('/api/jobs/999/history');
+
+            expect(res.statusCode).toBe(404);
+            expect(res.body).toHaveProperty('error', 'Job not found');
+        });
+
+        it('should return empty array for job with no history', async () => {
+            // Job ownership check passes
+            pool.query.mockResolvedValueOnce({ rows: [{ id: 1 }] });
+            // History query returns empty
+            pool.query.mockResolvedValueOnce({ rows: [] });
+
+            const res = await request(app).get('/api/jobs/1/history');
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toEqual([]);
+        });
+    });
+
+    describe('Pending Status Support', () => {
+        it('should create a job with pending status', async () => {
+            const pendingJob = {
+                status: 'pending',
+                company: 'Waiting Corp',
+                position: 'On Hold'
+            };
+
+            pool.query.mockResolvedValueOnce({
+                rows: [{
+                    ...pendingJob,
+                    id: 10,
+                    user_id: 1,
+                    origin: 'human',
+                    is_unseen: false
+                }]
+            });
+
+            const res = await request(app)
+                .post('/api/jobs')
+                .send(pendingJob);
+
+            expect(res.statusCode).toBe(201);
+            expect(res.body).toHaveProperty('status', 'pending');
+        });
+
+        it('should update a job to pending status', async () => {
+            const updateData = { status: 'pending' };
+
+            // First query: ownership check
+            pool.query.mockResolvedValueOnce({ rows: [{ id: 1 }] });
+            // Second query: update
+            pool.query.mockResolvedValueOnce({
+                rows: [{
+                    id: 1,
+                    status: 'pending',
+                    company: 'Test Corp',
+                    position: 'Tester'
+                }]
+            });
+
+            const res = await request(app)
+                .put('/api/jobs/1')
+                .send(updateData);
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toHaveProperty('status', 'pending');
+        });
+    });
 });
