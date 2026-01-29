@@ -808,14 +808,38 @@ function renderJourneyMap(history, currentStatus) {
     }
 
     // Generate Nodes
-    const nodes = sortedHistory.map((entry, i) => ({
-        x: getX(entry.new_status),
-        y: padding.top + (i * 80),
-        status: entry.new_status,
-        date: entry.changed_at,
-        label: formatFullDate(entry.changed_at),
-        isCurrent: false
-    }));
+    const nodes = [];
+
+    // 1. Add Start Node (from first history entry's previous_status)
+    if (sortedHistory.length > 0) {
+        const firstEntry = sortedHistory[0];
+        if (firstEntry.previous_status) {
+            nodes.push({
+                x: getX(firstEntry.previous_status),
+                y: padding.top,
+                status: firstEntry.previous_status,
+                date: firstEntry.changed_at, // Use same date as change? Or slightly earlier?
+                label: 'Start',
+                isCurrent: false,
+                isStart: true
+            });
+        }
+    }
+
+    // 2. Add History Nodes (new_status)
+    sortedHistory.forEach((entry, i) => {
+        // Offset y to accommodate start node
+        const yOffset = (nodes.length > 0 && nodes[0].isStart) ? ((i + 1) * 80) : (i * 80);
+
+        nodes.push({
+            x: getX(entry.new_status),
+            y: padding.top + yOffset,
+            status: entry.new_status,
+            date: entry.changed_at,
+            label: formatFullDate(entry.changed_at),
+            isCurrent: false
+        });
+    });
 
     // If no history, show current status as single node
     if (nodes.length === 0) {
