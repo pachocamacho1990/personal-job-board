@@ -784,14 +784,15 @@ function renderJourneyMap(history, currentStatus) {
     const container = document.getElementById('journeyGraph');
     if (!container) return;
 
-    // Dimensions - with proper internal spacing
-    const width = container.clientWidth || 600;
-    const height = Math.max(350, history.length * 80 + 120);
-    const padding = { top: 50, right: 30, bottom: 30, left: 30 };
-
     // Columns config - Matches job board column order
     const columns = ['interested', 'applied', 'forgotten', 'interview', 'pending', 'offer', 'rejected'];
-    const colWidth = (width - padding.left - padding.right) / (columns.length - 1);
+
+    // Fixed width per column for horizontal scroll
+    const colWidth = 100;
+    const padding = { top: 50, right: 30, bottom: 30, left: 30 };
+    const totalWidth = padding.left + (columns.length - 1) * colWidth + padding.right;
+    const width = Math.max(container.clientWidth || 500, totalWidth);
+    const height = Math.max(350, history.length * 80 + 120);
 
     // Combine history + current state if not redundant
     // Sort history by date desc (newest first) -> effectively bottom up?
@@ -840,9 +841,10 @@ function renderJourneyMap(history, currentStatus) {
     columns.forEach((col, i) => {
         const x = padding.left + (i * colWidth);
         // Line - lighter color, contained within SVG bounds
-        svgHtml += `<line x1="${x}" y1="${padding.top}" x2="${x}" y2="${height - padding.bottom}" stroke="#E2E8F0" stroke-dasharray="4" />`;
-        // Label - positioned at top of column
-        svgHtml += `<text x="${x}" y="${padding.top - 10}" class="status-column-label">${col}</text>`;
+        svgHtml += `<line x1="${x}" y1="${padding.top + 10}" x2="${x}" y2="${height - padding.bottom}" stroke="#E2E8F0" stroke-dasharray="4" />`;
+        // Label - full name, centered on column
+        const label = col.charAt(0).toUpperCase() + col.slice(1);
+        svgHtml += `<text x="${x}" y="${padding.top - 5}" class="status-column-label">${label}</text>`;
     });
 
     // 2. Draw Paths
@@ -859,15 +861,12 @@ function renderJourneyMap(history, currentStatus) {
 
     // 3. Draw Nodes
     nodes.forEach(node => {
-        const r = node.isCurrent ? 8 : 5;
+        const r = node.isCurrent ? 10 : 6;
         const classes = `journey-node ${node.isCurrent ? 'active' : ''}`;
         svgHtml += `<circle cx="${node.x}" cy="${node.y}" r="${r}" class="${classes}" />`;
 
-        // Date Label (Left)
-        svgHtml += `<text x="${node.x - 15}" y="${node.y + 4}" class="time-label">${formatRelativeTime(node.date)}</text>`;
-
-        // Status Label (Right - optional if column is clear)
-        // svgHtml += `<text x="${node.x + 15}" y="${node.y + 4}" fill="#94A3B8" font-size="10">${node.status}</text>`;
+        // Date Label - positioned consistently to the right of node
+        svgHtml += `<text x="${node.x + 15}" y="${node.y + 4}" class="time-label">${formatRelativeTime(node.date)}</text>`;
     });
 
     svgHtml += `</svg>`;

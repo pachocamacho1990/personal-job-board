@@ -1290,7 +1290,7 @@ body.focus-mode .job-card.dimmed {
     color: var(--color-text-muted);
 }
 
-/* SVG Graph - Light Theme */
+/* SVG Graph - Light Theme with Horizontal Scroll */
 .journey-graph-container {
     flex: 1;
     min-height: 300px;
@@ -1299,22 +1299,25 @@ body.focus-mode .job-card.dimmed {
     background: var(--color-canvas);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: var(--spacing-lg) var(--spacing-xl);
-    overflow: hidden;
-    /* Clip overflowing lines */
+    padding: var(--spacing-lg) var(--spacing-md);
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .journey-node {
-    fill: var(--color-canvas);
-    stroke: var(--color-border);
+    fill: var(--color-primary);
+    stroke: white;
     stroke-width: 2px;
     transition: all 0.3s ease;
+    opacity: 0.6;
 }
 
 .journey-node.active {
-    stroke: var(--color-primary);
-    fill: rgba(79, 70, 229, 0.1);
-    filter: drop-shadow(0 0 4px rgba(79, 70, 229, 0.3));
+    fill: var(--color-primary);
+    stroke: white;
+    stroke-width: 3px;
+    opacity: 1;
+    filter: drop-shadow(0 0 6px rgba(79, 70, 229, 0.5));
 }
 
 .journey-path {
@@ -1327,22 +1330,24 @@ body.focus-mode .job-card.dimmed {
 .journey-path.active {
     stroke: var(--color-primary);
     stroke-dasharray: none;
-    stroke-width: 2px;
+    stroke-width: 3px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .status-column-label {
-    font-size: var(--font-size-xs);
+    font-size: 11px;
     fill: var(--color-text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.08em;
+    font-weight: var(--font-weight-semibold);
     text-anchor: middle;
 }
 
 .time-label {
-    font-size: var(--font-size-xs);
+    font-size: 10px;
     fill: var(--color-text-light);
-    text-anchor: end;
+    text-anchor: start;
 }
 
 /* Detail Fields - Light Theme */
