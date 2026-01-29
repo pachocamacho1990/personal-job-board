@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.2] - 2026-01-28
+
+### Fixed
+- **Journey Map Visualization**: Corrected an issue where the first status change (e.g., Interview → Pending) was missing the starting node in the visualization. Now correctly displays the full path.
+
+## [3.1.1] - 2026-01-28
+
+### Fixed
+- **Login Rate Limiter**: Improved logic to only count failed attempts (`4xx/5xx`) against the quota.
+- **Increased Limits**: Raised limit from 5 to 15 failed attempts per 15 minutes to prevent lockout during normal use.
+
 ## [3.1.0] - 2026-01-28
 
 ### 🚀 Advanced Job Tracking & Journey Map
