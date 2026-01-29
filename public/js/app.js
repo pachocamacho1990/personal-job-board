@@ -784,10 +784,10 @@ function renderJourneyMap(history, currentStatus) {
     const container = document.getElementById('journeyGraph');
     if (!container) return;
 
-    // Dimensions
+    // Dimensions - with proper internal spacing
     const width = container.clientWidth || 600;
-    const height = Math.max(400, history.length * 100 + 100);
-    const padding = { top: 60, right: 40, bottom: 40, left: 80 };
+    const height = Math.max(350, history.length * 80 + 120);
+    const padding = { top: 50, right: 30, bottom: 30, left: 30 };
 
     // Columns config - Matches job board column order
     const columns = ['interested', 'applied', 'forgotten', 'interview', 'pending', 'offer', 'rejected'];
@@ -839,10 +839,10 @@ function renderJourneyMap(history, currentStatus) {
     // 1. Draw Column Lines & Labels
     columns.forEach((col, i) => {
         const x = padding.left + (i * colWidth);
-        // Line
-        svgHtml += `<line x1="${x}" y1="${padding.top - 20}" x2="${x}" y2="${height}" stroke="#334155" stroke-dasharray="4" />`;
-        // Label
-        svgHtml += `<text x="${x}" y="${padding.top - 30}" class="status-column-label">${col}</text>`;
+        // Line - lighter color, contained within SVG bounds
+        svgHtml += `<line x1="${x}" y1="${padding.top}" x2="${x}" y2="${height - padding.bottom}" stroke="#E2E8F0" stroke-dasharray="4" />`;
+        // Label - positioned at top of column
+        svgHtml += `<text x="${x}" y="${padding.top - 10}" class="status-column-label">${col}</text>`;
     });
 
     // 2. Draw Paths

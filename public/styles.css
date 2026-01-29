@@ -1299,7 +1299,9 @@ body.focus-mode .job-card.dimmed {
     background: var(--color-canvas);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    overflow: hidden;
+    /* Clip overflowing lines */
 }
 
 .journey-node {
