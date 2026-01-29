@@ -789,8 +789,8 @@ function renderJourneyMap(history, currentStatus) {
     const height = Math.max(400, history.length * 100 + 100);
     const padding = { top: 60, right: 40, bottom: 40, left: 80 };
 
-    // Columns config - Full job flow
-    const columns = ['interested', 'applied', 'interview', 'pending', 'offer'];
+    // Columns config - Complete job flow including end states
+    const columns = ['interested', 'applied', 'interview', 'pending', 'offer', 'rejected', 'forgotten'];
     const colWidth = (width - padding.left - padding.right) / (columns.length - 1);
 
     // Combine history + current state if not redundant
@@ -803,9 +803,7 @@ function renderJourneyMap(history, currentStatus) {
     function getX(status) {
         let idx = columns.indexOf(status);
         if (idx === -1) {
-            // Handle edge cases (rejected, forgotten - not in main flow)
-            if (status === 'rejected' || status === 'forgotten') return width - padding.right + 20;
-            idx = 0; // Default to first column
+            idx = 0; // Default to first column for unknown statuses
         }
         return padding.left + (idx * colWidth);
     }
