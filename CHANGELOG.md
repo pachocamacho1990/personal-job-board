@@ -2,6 +2,63 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0] - 2026-01-28
+
+### 🚀 Advanced Job Tracking & Journey Map
+
+This release adds non-linear job tracking with the new "Pending Next Step" status and a visual Journey Map to see how jobs progress through different stages over time.
+
+### Added
+
+#### Pending Next Step Status
+- **New Kanban Column**: "Pending Next Step" between Interview and Offer
+- **Non-Linear Workflow**: Jobs can move back and forth (e.g., Interview → Pending → Interview)
+- **Database Update**: Added 'pending' to job status enum
+
+#### Job History Tracking
+- **History Table**: New `job_history` table logs all status changes
+- **Database Trigger**: Automatic logging on INSERT/UPDATE via PostgreSQL trigger
+- **API Endpoint**: `GET /api/jobs/:id/history` returns status change history
+
+#### Center Peek Modal
+- **Journey Map Visualization**: Interactive SVG diagram showing job progression
+- **Horizontal Scroll**: Spacious column layout with full status names
+- **Visual Path**: Indigo line connecting status changes over time
+- **Timeline Labels**: Relative timestamps (e.g., "2h ago") at each node
+- **Quick Edit**: "Edit Details" button opens the full edit panel
+
+### Changed
+- **Card Click Behavior**: Clicking a job card now opens Center Peek (view mode)
+- **Add Job**: "Add Job" button still opens the edit panel directly
+
+### Technical Details
+
+#### New Database Objects
+```sql
+-- History tracking table
+CREATE TABLE job_history (
+    id SERIAL PRIMARY KEY,
+    job_id INTEGER REFERENCES jobs(id) ON DELETE CASCADE,
+    previous_status VARCHAR(50),
+    new_status VARCHAR(50) NOT NULL,
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Automatic trigger
+CREATE TRIGGER trigger_log_job_status_change
+AFTER INSERT OR UPDATE OF status ON jobs
+FOR EACH ROW EXECUTE FUNCTION log_job_status_change();
+```
+
+#### New Test Cases (5 added)
+- History endpoint returns data for valid job
+- History endpoint returns 404 for non-existent job
+- History endpoint returns empty array for no history
+- Create job with 'pending' status
+- Update job to 'pending' status
+
+---
+
 ## [3.0.0] - 2026-01-27
 
 ### 🚀 Major Release: Business Board & Dashboard

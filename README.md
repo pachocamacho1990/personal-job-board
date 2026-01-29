@@ -17,7 +17,9 @@ A minimalist, **self-hosted Kanban board** to track job applications, networking
 - **Unified Navigation**: Sidebar access to all boards
 
 ### 💼 Job Board
-- **Kanban Columns**: Interested → Applied → Interview → Offer → Rejected
+- **Kanban Columns**: Interested → Applied → Forgotten → Interview → **Pending** → Offer → Rejected
+- **Center Peek Modal**: Click any card to view detailed info with Journey Map
+- **Journey Map Visualization**: Interactive SVG showing status progression over time
 - **Job/Connection Types**: Track both networking and applications
 - **AI Agent Integration**: Jobs created by AI agents are highlighted with a glow effect
 - **Star Ratings**: Prioritize opportunities (1-5 stars)
@@ -161,6 +163,7 @@ See [TESTING.md](TESTING.md) for full testing strategy.
 | POST | `/api/jobs` | Create job |
 | PUT | `/api/jobs/:id` | Update job |
 | DELETE | `/api/jobs/:id` | Delete job |
+| GET | `/api/jobs/:id/history` | Get status change history |
 
 ### Business Entities
 | Method | Endpoint | Description |
