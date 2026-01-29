@@ -4,11 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
+**Version**: 3.1.2
+
 A self-hosted career management platform with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
 
 ### Core Boards
 
-1. **Job Board** (`/jobs.html`): Track job applications through stages (Interested → Applied → Interview → Offer → Rejected)
+1. **Job Board** (`/jobs.html`): Track job applications through 7 stages (Interested → Applied → Forgotten → Interview → Pending Next Step → Offer → Rejected)
 2. **Business Board** (`/business.html`): Track professional relationships (Investors, VCs, Accelerators, Connections)
 3. **Dashboard** (`/index.html`): Home view with upcoming interviews and AI match widgets
 
@@ -20,9 +22,14 @@ A self-hosted career management platform with **Kanban boards** for tracking job
 - Both share: `type`, `rating` (1-5 stars), `status`, `origin` (human/agent), `is_unseen`, `comments` (markdown)
 
 **Business Entities Table** (`business_entities`):
-- **Investors** 💸, **VCs** 🏛️, **Accelerators** 🚀, **Connections** 🤝
+- **Investors**, **VCs**, **Accelerators**, **Connections**
 - Fields: `name`, `type`, `status`, `contact_person`, `email`, `website`, `location`, `notes`
-- Statuses: `researching`, `contacted`, `meeting`, `negotiation`, `signed`, `rejected`
+- Statuses: `researching`, `contacted`, `meeting`, `negotiation`, `signed`, `rejected`, `passed`
+
+**Job History Table** (`job_history`):
+- Automatically tracks all job status changes via PostgreSQL trigger
+- Fields: `job_id`, `previous_status`, `new_status`, `changed_at`
+- Powers the Journey Map visualization feature
 
 ## Architecture
 
@@ -34,7 +41,7 @@ A self-hosted career management platform with **Kanban boards** for tracking job
    - `business.html`: Business Board Kanban
    - `login.html`: Authentication page
    - `js/api.js`: REST API client with JWT token management
-   - `js/app.js`: Job Board logic (Kanban rendering, drag-and-drop, CRUD)
+   - `js/app.js`: Job Board logic (Kanban, drag-and-drop, Center Peek modal, Journey Map)
    - `js/business.js`: Business Board logic + compact view toggle
    - `js/dashboard.js`: Dashboard widget logic
    - `js/sidebar.js`: Navigation highlighting
@@ -46,22 +53,26 @@ A self-hosted career management platform with **Kanban boards** for tracking job
 2. **Backend** (`/server`): Node.js/Express API
    - `server.js`: Application entry point, middleware, route mounting
    - `routes/`:
-     - `auth.routes.js`: POST /signup, /login, GET /me
-     - `jobs.routes.js`: GET, POST, PUT, DELETE /jobs
+     - `auth.routes.js`: POST /signup, /login, GET /me (with rate limiting)
+     - `jobs.routes.js`: GET, POST, PUT, DELETE /jobs, GET /jobs/:id/history
      - `business.routes.js`: GET, POST, PUT, DELETE /business
      - `dashboard.routes.js`: GET /dashboard/summary
    - `controllers/`:
      - `auth.controller.js`: User authentication
-     - `jobs.controller.js`: Job CRUD operations
+     - `jobs.controller.js`: Job CRUD + history retrieval
      - `business.controller.js`: Business entity CRUD
      - `dashboard.controller.js`: Summary data aggregation
-   - `middleware/auth.js`: JWT verification middleware
-   - `config/db.js`: PostgreSQL connection pool
-   - `models/schema.sql`: Database schema with both tables
+   - `middleware/`:
+     - `auth.js`: JWT verification middleware
+     - `errorHandler.js`: Global error handler
+   - `config/`:
+     - `db.js`: PostgreSQL connection pool (20 max connections)
+     - `auth.js`: JWT/bcrypt configuration
+   - `models/schema.sql`: Database schema with tables and triggers
 
 3. **Infrastructure** (`docker-compose.yml`):
    - **postgres**: PostgreSQL 16 with persistent volume
-   - **api**: Node.js backend (port 3000)
+   - **api**: Node.js backend (port 3000, health check at `/api/health`)
    - **nginx**: Reverse proxy serving frontend + proxying `/api` to backend (port 80)
 
 ### Authentication Flow
@@ -71,13 +82,15 @@ A self-hosted career management platform with **Kanban boards** for tracking job
 - All protected routes require JWT via `authMiddleware`
 - Token includes `userId` and `email` claims for user-specific data isolation
 - 401 responses trigger automatic redirect to `/login.html`
+- Rate limiting: 15 failed attempts per 15 minutes on auth routes
 
 ### Navigation Flow
 
 1. User logs in → Redirects to Dashboard (`index.html`)
 2. Dashboard shows: Upcoming Interviews, New AI Matches
 3. Sidebar enables navigation: Dashboard ↔ Job Board ↔ Business Board
-4. Logout confirmation modal prevents accidental logouts
+4. Focus Mode (Job Board): Toggle sidebar visibility for maximized workspace
+5. Logout confirmation modal prevents accidental logouts
 
 ## Development Commands
 
@@ -103,13 +116,13 @@ Access at `http://localhost/jobboard/` after startup.
 
 ```bash
 cd server
-npm test                    # Run Jest test suite (26 tests)
+npm test                    # Run Jest test suite
 npm run dev                 # Start with nodemon for hot-reload
 ```
 
 Tests cover:
-- `auth.test.js`: Authentication flows
-- `jobs.test.js`: Job CRUD operations
+- `auth.test.js`: Authentication flows, rate limiting
+- `jobs.test.js`: Job CRUD, history endpoint, pending status
 - `business.test.js`: Business entity CRUD + validation
 - `dashboard.test.js`: Summary endpoint + error handling
 
@@ -123,6 +136,7 @@ docker exec -it jobboard-db psql -U jobboard_user -d jobboard
 SELECT * FROM users;
 SELECT * FROM jobs WHERE user_id = 1;
 SELECT * FROM business_entities WHERE user_id = 1;
+SELECT * FROM job_history WHERE job_id = 1;
 ```
 
 ## API Endpoints
@@ -141,6 +155,7 @@ SELECT * FROM business_entities WHERE user_id = 1;
 | POST | `/api/jobs` | Create job |
 | PUT | `/api/jobs/:id` | Update job |
 | DELETE | `/api/jobs/:id` | Delete job |
+| GET | `/api/jobs/:id/history` | Get job status change history |
 
 ### Business Entities
 | Method | Endpoint | Description |
@@ -155,33 +170,67 @@ SELECT * FROM business_entities WHERE user_id = 1;
 |--------|----------|-------------|
 | GET | `/api/dashboard/summary` | Get interviews + AI matches |
 
+### Health
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | API health status |
+
 ## Key Technical Details
 
 ### Database Schema
 
 **jobs table**:
 - Uses CHECK constraints for `type`, `rating`, `status`, `origin` validation
+- Status values: `interested`, `applied`, `forgotten`, `interview`, `pending`, `offer`, `rejected`
 - `updated_at` auto-updates via PostgreSQL trigger
 - `origin` field: 'human' (default) or 'agent' (AI-created)
 - `is_unseen` field: true for agent-created jobs not yet viewed
 
+**job_history table**:
+- Automatically populated by `trigger_log_job_status_change` on INSERT/UPDATE
+- Tracks `previous_status`, `new_status`, `changed_at` for each status change
+- Cascades delete when parent job is deleted
+
 **business_entities table**:
 - `type`: investor, vc, accelerator, connection
-- `status`: researching, contacted, meeting, negotiation, signed, rejected
+- `status`: researching, contacted, meeting, negotiation, signed, rejected, passed
 - User ownership enforced via `user_id` foreign key
 
 ### Frontend State Management
 
 - Global arrays: `jobs[]` for Job Board, `entities[]` for Business Board
 - CRUD operations update local state optimistically, then sync with API
-- View preferences (`isCompactView`) persisted to localStorage
+- localStorage keys:
+  - `authToken`: JWT token
+  - `user`: User object (JSON)
+  - `isCompactView`: Job Board view preference
+  - `businessBoardCompactView`: Business Board view preference
+  - `focusMode`: Focus Mode state (sidebar hidden)
 - Sidebar navigation highlighting via `sidebar.js`
 
 ### Color-Coded Columns
 
 Both boards use `data-status` attributes for CSS styling:
-- Job Board: interested (purple), applied (blue), interview (orange), offer (green), rejected (gray)
+- Job Board: interested (purple), applied (blue), forgotten (gray), interview (orange), pending (amber), offer (green), rejected (dark gray)
 - Business Board: researching (indigo), contacted (cyan), meeting (violet), negotiation (orange), signed (green)
+
+### UI Interaction Patterns
+
+**Job Board Card Interactions**:
+1. Click card → Opens **Center Peek modal** (read-only view with Journey Map)
+2. Click "Edit Details" in Center Peek → Opens **Edit Panel** (right sidebar)
+3. Drag card → Updates status via API
+
+**Journey Map**:
+- SVG visualization showing job status progression over time
+- Displays all 7 status columns with connecting lines between transitions
+- Timestamps shown at each status change node
+- Automatically populated from `job_history` table
+
+**Focus Mode**:
+- Toggle via focus button in Job Board header
+- Hides sidebar for maximum board space
+- State persisted to localStorage
 
 ## Important Patterns
 
@@ -199,6 +248,14 @@ Both boards use `data-status` attributes for CSS styling:
 3. Update frontend form in `public/business.html`
 4. Add field to `public/js/business.js` form handling and card rendering
 
+### Adding New Job Status
+
+1. Update CHECK constraint in `server/models/schema.sql` for jobs table
+2. Add column HTML in `public/jobs.html` with appropriate `data-status`
+3. Add column rendering in `public/js/app.js` `renderBoard()` function
+4. Add column styling in `public/styles.css`
+5. Update Journey Map column mapping in `app.js`
+
 ### Adding New Routes
 
 1. Create route in `server/routes/*.routes.js`
@@ -213,3 +270,21 @@ Both boards use `data-status` attributes for CSS styling:
 - Always filter queries by `req.userId` from JWT claims
 - Use parameterized queries to prevent SQL injection
 - Helmet.js and CORS configured in `server.js`
+- Rate limiting on auth routes (15 failed attempts per 15 min)
+
+## Recent Changes (v3.1.x)
+
+### v3.1.2
+- Fixed Docker health check URL (`/health` → `/api/health`)
+
+### v3.1.1
+- Improved rate limiter to only count failed attempts (4xx/5xx)
+- Increased limit from 5 to 15 failed attempts per 15 minutes
+
+### v3.1.0
+- Added "Pending Next Step" status column (7th stage)
+- Added Job History tracking with PostgreSQL trigger
+- Added Journey Map visualization (SVG timeline in Center Peek modal)
+- Added Center Peek modal (view-only mode on card click)
+- Added Focus Mode (toggle sidebar visibility)
+- Added `GET /api/jobs/:id/history` endpoint
