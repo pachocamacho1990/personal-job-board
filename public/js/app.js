@@ -789,8 +789,8 @@ function renderJourneyMap(history, currentStatus) {
     const height = Math.max(400, history.length * 100 + 100);
     const padding = { top: 60, right: 40, bottom: 40, left: 80 };
 
-    // Columns config - Complete job flow including end states
-    const columns = ['interested', 'applied', 'interview', 'pending', 'offer', 'rejected', 'forgotten'];
+    // Columns config - Matches job board column order
+    const columns = ['interested', 'applied', 'forgotten', 'interview', 'pending', 'offer', 'rejected'];
     const colWidth = (width - padding.left - padding.right) / (columns.length - 1);
 
     // Combine history + current state if not redundant
