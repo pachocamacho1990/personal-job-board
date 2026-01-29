@@ -678,10 +678,8 @@ const centerPeekModal = document.getElementById('centerPeekModal');
 const closeCenterPeekBtn = document.getElementById('closeCenterPeek');
 const peekContent = document.getElementById('peekContent');
 
-// Update statuses to include 'pending'
+// All status types including the new 'pending' status
 const ALL_STATUSES = ['interested', 'applied', 'interview', 'pending', 'offer', 'rejected', 'forgotten'];
-
-// Override updateColumnCounts to use new status list
 function updateColumnCounts(visibleJobs = jobs) {
     ALL_STATUSES.forEach(status => {
         const count = visibleJobs.filter(j => j.status === status).length;
@@ -852,8 +850,6 @@ function renderJourneyMap(history, currentStatus) {
     if (nodes.length > 1) {
         pathD = `M ${nodes[0].x} ${nodes[0].y}`;
         for (let i = 1; i < nodes.length; i++) {
-            // Bezier curve or straight line? Straight zig-zag is clearer for "Journey"
-            // Let's use simple lines with rounded corners logic if possible, or just L
             pathD += ` L ${nodes[i].x} ${nodes[i].y}`;
         }
         svgHtml += `<path d="${pathD}" class="journey-path active" />`;
@@ -873,49 +869,15 @@ function renderJourneyMap(history, currentStatus) {
     container.innerHTML = svgHtml;
 }
 
-// Intercept clicks on job cards to open Center Peek instead
-// We need to override the existing event listeners or just attach new ones that stop propagation?
-// The existing `renderJob` adds `card.addEventListener('click', () => openJobDetails(job.id));`
-// We can overwrite `renderJob` entirely or hack it.
-// Since we are appending code, we can't easily overwrite `renderJob` inside `app.js` without rewriting the whole function.
-// However, `renderJob` uses `openJobDetails`. We can re-define `openJobDetails` efficiently?
-// No, `openJobDetails` is defined earlier. Re-defining it here (since var/function hoisting or overwrite) might work if it's global scope.
-// `openJobDetails` is a function declaration at top level. We can overwrite it.
-
-// Redefine openJobDetails to redirect to Center Peek
-// BUT standard edit functionality is needed.
-// Strategy: openJobDetails is "Edit Mode". We want "View Mode" (Center Peek) on Card Click.
-// We should update `renderJob` to call `openCenterPeek`.
-// Since we can't easily replace `renderJob`, let's redefine `openJobDetails` to act as a router?
-// "If clicking card -> Center Peek. If clicking 'Edit' in Center Peek -> Real Edit Panel."
-// The card click calls `openJobDetails(job.id)`.
-// So if we redefine `openJobDetails` to call `openCenterPeek`, we achieve the goal.
-// THEN we need a function `openEditPanel` (the old `openJobDetails`) for the actual edit form.
-
+// Override openJobDetails to show Center Peek for existing jobs, Edit Panel for new jobs
 const originalOpenJobDetails = openJobDetails;
 openJobDetails = function (jobId) {
     if (jobId === null) {
-        // "Add Job" button passes null -> Go straight to Edit Panel (Add Mode)
-        originalOpenJobDetails(null);
+        originalOpenJobDetails(null); // Add Mode → Edit Panel
     } else {
-        // Open Center Peek
-        openCenterPeek(jobId);
+        openCenterPeek(jobId); // View Mode → Center Peek
     }
 };
 
-// We need to expose the "Real" open edit panel for the "Edit Details" button in Peek
-// We can attach it to window or just call originalOpenJobDetails
+// Expose original edit function for "Edit Details" button in Center Peek
 window.openRealEditPanel = originalOpenJobDetails;
-
-// Fix the Edit Button listener in renderCenterPeekContent to use originalOpenJobDetails
-// Rewriting renderCenterPeekContent's listener above:
-/*
-    document.getElementById('editJobFromPeek').addEventListener('click', () => {
-        closeCenterPeek();
-        originalOpenJobDetails(job.id);
-    });
-*/
-// We need to make sure `originalOpenJobDetails` is available in that scope.
-// Since `renderCenterPeekContent` is defined after `originalOpenJobDetails` assignment, it works.
-
-
