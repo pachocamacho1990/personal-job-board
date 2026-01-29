@@ -41,7 +41,7 @@ graph TD
 | `user_id` | INTEGER | FK → users.id (Isolation) |
 | `type` | VARCHAR | 'job' or 'connection' |
 | `rating` | INTEGER | 1-5 Priority |
-| `status` | VARCHAR | interested, applied, forgotten, interview, offer, rejected |
+| `status` | VARCHAR | interested, applied, forgotten, interview, **pending**, offer, rejected |
 | `origin` | VARCHAR | 'human' or 'agent' |
 | `is_unseen` | BOOLEAN | True if agent-created & not viewed |
 | `company` | VARCHAR | |
@@ -69,6 +69,15 @@ graph TD
 | `created_at` | TIMESTAMP | |
 | `updated_at` | TIMESTAMP | |
 
+#### `job_history` Table
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | SERIAL | Primary Key |
+| `job_id` | INTEGER | FK → jobs.id (CASCADE delete) |
+| `previous_status` | VARCHAR | Status before change (null on insert) |
+| `new_status` | VARCHAR | Status after change |
+| `changed_at` | TIMESTAMP | When the change occurred |
+
 ## API Design
 
 ### Authentication (JWT)
@@ -86,6 +95,7 @@ graph TD
 | POST | `/api/jobs` | Create new job |
 | PUT | `/api/jobs/:id` | Update job |
 | DELETE | `/api/jobs/:id` | Delete job |
+| GET | `/api/jobs/:id/history` | Fetch status change history |
 
 #### Business Entities
 | Method | Endpoint | Description |
