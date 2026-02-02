@@ -17,7 +17,7 @@ npm test
 | File | Tests | Coverage |
 |------|-------|----------|
 | `auth.test.js` | 6 | Signup, Login, Duplicate emails, Token validation |
-| `jobs.test.js` | 5 | CRUD operations, Data isolation |
+| `jobs.test.js` | 9 | CRUD ops, Data isolation, **Archive/Restore** |
 | `business.test.js` | 10 | CRUD, Type validation, Ownership checks |
 | `dashboard.test.js` | 5 | Summary endpoint, Query validation, Error handling |
 
@@ -59,6 +59,12 @@ Since the frontend is a Vanilla JS SPA, visual verification complements automate
 - [ ] Toggle compact view → Cards shrink, preference persists
 - [ ] Edit job → Changes save correctly
 - [ ] Delete job → Confirmation, card removed
+
+#### Archive Vault
+- [ ] Archive a job → Confirmation modal → Card removed from board
+- [ ] Open Archive Vault (Header) → Shows archived jobs
+- [ ] Open Archive Vault (Detail Panel) → Shows archived jobs
+- [ ] Restore job → Job reappears on board with correct status
 
 #### Business Board
 - [ ] Navigate to Business Board via sidebar

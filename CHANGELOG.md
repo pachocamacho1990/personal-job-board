@@ -152,6 +152,21 @@ CREATE TABLE business_entities (
 
 ---
 
+## [3.2.0] - 2026-02-02
+
+### Added
+- **Archive Vault 📦**:
+    - **Archived Status**: New status for jobs to keep them off the main board but preserved in history.
+    - **Archive Modal**: Dedicated view for archived jobs with list layout and "Restore" functionality.
+    - **One-Click Archiving**: "Archive 📦" button added to the Job Detail panel.
+    - **Journey Map Update**: Now includes 'Archived' as the final stage in the visualization.
+- **UI Enhancements**:
+    - **Custom Confirmation Modal**: Replaced native browser confirm dialogs with styled HTML/CSS modals for Archiving.
+    - **Status Dropdown**: Added missing "Pending Next Step" option to Archive Modal and Detail Panel.
+    - **Refined Styles**: Consistent glassmorphism styling for new modals.
+
+---
+
 ## [2.3.0] - 2026-01-23
 
 ### Added

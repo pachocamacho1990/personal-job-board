@@ -17,13 +17,14 @@ A minimalist, **self-hosted Kanban board** to track job applications, networking
 - **Unified Navigation**: Sidebar access to all boards
 
 ### 💼 Job Board
-- **Kanban Columns**: Interested → Applied → Forgotten → Interview → **Pending** → Offer → Rejected
+- **Kanban Columns**: Interested → Applied → Forgotten → Interview → **Pending** → Offer → Rejected (→ Archived)
 - **Center Peek Modal**: Click any card to view detailed info with Journey Map
 - **Journey Map Visualization**: Interactive SVG showing status progression over time
 - **Job/Connection Types**: Track both networking and applications
 - **AI Agent Integration**: Jobs created by AI agents are highlighted with a glow effect
 - **Star Ratings**: Prioritize opportunities (1-5 stars)
 - **Compact/Comfortable View**: Toggle between dense and detailed card layouts
+- **Archive Vault 📦**: Archive completed or old jobs to declutter your board while preserving history. Accessible via the header or card detail panel.
 
 ### 🤝 Business Board
 - **Track Business Relationships**: Investors, VCs, Accelerators, Connections
