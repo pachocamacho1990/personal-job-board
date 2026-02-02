@@ -1016,15 +1016,46 @@ function renderArchiveList(archivedJobs) {
 
 // Archive Action from Panel
 if (archiveJobBtnPanel) {
-    archiveJobBtnPanel.addEventListener('click', async () => {
-        if (currentJobId && confirm('Move this card to the Archive Vault?')) {
-            try {
-                await updateJob(currentJobId, { status: 'archived' });
-                closeJobPanel();
-                renderAllJobs();
-            } catch (error) {
-                console.error("Failed to archive job", error);
+    const archiveConfirmModal = document.getElementById('archiveConfirmModal');
+    const confirmArchiveBtn = document.getElementById('confirmArchive');
+    const cancelArchiveBtn = document.getElementById('cancelArchive');
+
+    // Open Modal
+    archiveJobBtnPanel.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (currentJobId) {
+            archiveConfirmModal.style.display = 'flex';
+        }
+    });
+
+    // Handle Confirm - using global handler pattern or re-attaching safe? 
+    // Since this runs once on load, we attach handlers once. They will use currentJobId when clicked.
+    if (confirmArchiveBtn) {
+        confirmArchiveBtn.onclick = async () => {
+            if (currentJobId) {
+                try {
+                    await updateJob(currentJobId, { status: 'archived' });
+                    archiveConfirmModal.style.display = 'none';
+                    closeJobPanel();
+                    renderAllJobs();
+                } catch (error) {
+                    console.error("Failed to archive job", error);
+                }
             }
+        };
+    }
+
+    if (cancelArchiveBtn) {
+        cancelArchiveBtn.onclick = () => {
+            archiveConfirmModal.style.display = 'none';
+        };
+    }
+
+    // Close on background click
+    archiveConfirmModal.addEventListener('click', (e) => {
+        if (e.target === archiveConfirmModal) {
+            archiveConfirmModal.style.display = 'none';
         }
     });
 }
