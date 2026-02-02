@@ -219,7 +219,6 @@
                             <option value="pending">Pending Next Step</option>
                             <option value="offer">Offer</option>
                             <option value="rejected">Rejected</option>
-                            <option value="archived">Archived 📦</option>
                         </select>
                     </div>
 
@@ -279,6 +278,21 @@
                 <div class="modal-footer">
                     <button id="cancelLogout" class="btn-secondary">Cancel</button>
                     <button id="confirmLogout" class="btn-danger">Log Out</button>
+                </div>
+            </div>
+        </div>
+        <!-- Archive Confirmation Modal -->
+        <div id="archiveConfirmModal" class="modal-overlay" style="display: none;">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Archive this Card?</h2>
+                </div>
+                <div class="modal-body">
+                    <p>It will be moved to the Vault. You can restore it later.</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancelArchive" class="btn-secondary">Cancel</button>
+                    <button id="confirmArchive" class="btn-primary">Archive</button>
                 </div>
             </div>
         </div>
