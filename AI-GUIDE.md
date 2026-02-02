@@ -1,4 +1,4 @@
-# AI Development Guide - Personal Job Board v3.0.0
+# AI Development Guide - Personal Job Board v3.2.0
 
 **Purpose**: Token-efficient reference for AI-assisted development. For human docs, see README.md and DESIGN.md.
 
@@ -23,7 +23,7 @@ Multi-board career management platform with PostgreSQL backend. Three main views
   salary: string,
   contact_name: string,                // For connections
   organization: string,                // For connections
-  status: "interested" | "applied" | "forgotten" | "interview" | "offer" | "rejected",
+  status: "interested" | "applied" | "forgotten" | "interview" | "pending" | "offer" | "rejected" | "archived",
   rating: 1-5,                         // Star rating
   origin: "human" | "agent",           // Who created it
   is_unseen: boolean,                  // Agent-created, not viewed

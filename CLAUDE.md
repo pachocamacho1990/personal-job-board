@@ -4,15 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Version**: 3.1.2
+**Version**: 3.2.0
 
 A self-hosted career management platform with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
 
 ### Core Boards
 
-1. **Job Board** (`/jobs.html`): Track job applications through 7 stages (Interested → Applied → Forgotten → Interview → Pending Next Step → Offer → Rejected)
+1. **Job Board** (`/jobs.html`): Track job applications through 8 stages (Interested → Applied → Forgotten → Interview → Pending Next Step → Offer → Rejected → Archived)
 2. **Business Board** (`/business.html`): Track professional relationships (Investors, VCs, Accelerators, Connections)
 3. **Dashboard** (`/index.html`): Home view with upcoming interviews and AI match widgets
+4. **Archive Vault** (Modal): View and restore archived jobs
 
 ### Core Entities
 
@@ -20,6 +21,7 @@ A self-hosted career management platform with **Kanban boards** for tracking job
 - **Jobs**: Traditional job applications with `company`, `position`, `location`, `salary` fields
 - **Connections**: Networking opportunities with `contact_name`, `organization` fields
 - Both share: `type`, `rating` (1-5 stars), `status`, `origin` (human/agent), `is_unseen`, `comments` (markdown)
+- **Status Enum**: `interested`, `applied`, `forgotten`, `interview`, `pending`, `offer`, `rejected`, `archived`
 
 **Business Entities Table** (`business_entities`):
 - **Investors**, **VCs**, **Accelerators**, **Connections**
@@ -272,7 +274,12 @@ Both boards use `data-status` attributes for CSS styling:
 - Helmet.js and CORS configured in `server.js`
 - Rate limiting on auth routes (15 failed attempts per 15 min)
 
-## Recent Changes (v3.1.x)
+## Recent Changes (v3.2.x)
+
+### v3.2.0
+- **Archive Vault**: Added functionality to archive/restore jobs.
+- **UI**: Added custom confirmation modals and updated Journey Map.
+- **Fixes**: Resolved dropdown status issues and Chrome dialog bugs.
 
 ### v3.1.2
 - Fixed Docker health check URL (`/health` → `/api/health`)

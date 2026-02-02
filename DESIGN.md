@@ -41,7 +41,7 @@ graph TD
 | `user_id` | INTEGER | FK → users.id (Isolation) |
 | `type` | VARCHAR | 'job' or 'connection' |
 | `rating` | INTEGER | 1-5 Priority |
-| `status` | VARCHAR | interested, applied, forgotten, interview, **pending**, offer, rejected |
+| `status` | VARCHAR | interested, applied, forgotten, interview, pending, offer, rejected, **archived** |
 | `origin` | VARCHAR | 'human' or 'agent' |
 | `is_unseen` | BOOLEAN | True if agent-created & not viewed |
 | `company` | VARCHAR | |
@@ -124,7 +124,9 @@ Aurora Design System - Modern, clean aesthetic with color-coded status columns.
 | Interview | Amber | #F59E0B |
 | Offer | Green | #22C55E |
 | Rejected | Slate | #64748B |
+| Rejected | Slate | #64748B |
 | Forgotten | Gray | #9CA3AF |
+| Archived | Black/Opacity | (Glass Effect) |
 
 ### Status Colors - Business Board
 | Status | Color | Hex |
