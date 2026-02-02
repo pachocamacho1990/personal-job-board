@@ -234,4 +234,76 @@ describe('Jobs Routes', () => {
             expect(res.body).toHaveProperty('status', 'pending');
         });
     });
+    describe('Archive Feature Support', () => {
+        it('should create a job with archived status', async () => {
+            const archivedJob = {
+                status: 'archived',
+                company: 'Old Corp',
+                position: 'Past Role'
+            };
+
+            pool.query.mockResolvedValueOnce({
+                rows: [{
+                    ...archivedJob,
+                    id: 11,
+                    user_id: 1,
+                    origin: 'human',
+                    is_unseen: false
+                }]
+            });
+
+            const res = await request(app)
+                .post('/api/jobs')
+                .send(archivedJob);
+
+            expect(res.statusCode).toBe(201);
+            expect(res.body).toHaveProperty('status', 'archived');
+        });
+
+        it('should update a job to archived status', async () => {
+            const updateData = { status: 'archived' };
+
+            // First query: ownership check
+            pool.query.mockResolvedValueOnce({ rows: [{ id: 1 }] });
+            // Second query: update
+            pool.query.mockResolvedValueOnce({
+                rows: [{
+                    id: 1,
+                    status: 'archived',
+                    company: 'Test Corp',
+                    position: 'Tester'
+                }]
+            });
+
+            const res = await request(app)
+                .put('/api/jobs/1')
+                .send(updateData);
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toHaveProperty('status', 'archived');
+        });
+
+        it('should restore an archived job', async () => {
+            const updateData = { status: 'interested' };
+
+            // First query: ownership check
+            pool.query.mockResolvedValueOnce({ rows: [{ id: 1 }] });
+            // Second query: update
+            pool.query.mockResolvedValueOnce({
+                rows: [{
+                    id: 1,
+                    status: 'interested',
+                    company: 'Test Corp',
+                    position: 'Tester'
+                }]
+            });
+
+            const res = await request(app)
+                .put('/api/jobs/1')
+                .send(updateData);
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toHaveProperty('status', 'interested');
+        });
+    });
 });
