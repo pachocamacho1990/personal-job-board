@@ -976,6 +976,7 @@ function renderArchiveList(archivedJobs) {
                     <option value="interested">Interested</option>
                     <option value="applied">Applied</option>
                     <option value="interview">Interview</option>
+                    <option value="pending">Pending Next Step</option>
                     <option value="offer">Offer</option>
                     <option value="rejected">Rejected</option>
                 </select>
