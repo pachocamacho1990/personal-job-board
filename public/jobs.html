@@ -57,6 +57,9 @@
                     <button id="viewToggle" class="btn-icon" title="Toggle compact view">
                         <span id="viewIcon">⊟</span>
                     </button>
+                    <button id="archiveBtn" class="btn-icon" title="View Archive 📦" style="font-size: 1.2rem;">
+                        📦
+                    </button>
                     <button id="addJobBtn" class="btn-primary">+ Add Card</button>
                 </div>
             </div>
@@ -216,6 +219,7 @@
                             <option value="pending">Pending Next Step</option>
                             <option value="offer">Offer</option>
                             <option value="rejected">Rejected</option>
+                            <option value="archived">Archived 📦</option>
                         </select>
                     </div>
 
@@ -230,6 +234,8 @@
 
                     <div class="form-actions">
                         <button type="submit" class="btn-primary">Save</button>
+                        <button type="button" id="archiveJobBtn" class="btn-secondary"
+                            style="margin-right: auto;">Archive 📦</button>
                         <button type="button" id="deleteBtn" class="btn-danger">Delete</button>
                     </div>
                 </form>
@@ -241,6 +247,21 @@
             <div class="center-peek-container glass-panel">
                 <button id="closeCenterPeek" class="btn-icon close-peek" title="Close">×</button>
                 <div id="peekContent" class="peek-content">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Archive Modal -->
+        <div id="archiveModal" class="center-peek-overlay">
+            <div class="center-peek-container glass-panel" style="max-width: 800px;">
+                <button id="closeArchiveModal" class="btn-icon close-peek" title="Close">×</button>
+                <div class="archive-header" style="padding: 2rem 2rem 0; border-bottom: 1px solid var(--border);">
+                    <h2>Archived Jobs</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Vault of processed cards. Restore them
+                        to bring them back to the board.</p>
+                </div>
+                <div id="archiveContent" class="peek-content" style="padding: 0;">
                     <!-- Populated by JS -->
                 </div>
             </div>

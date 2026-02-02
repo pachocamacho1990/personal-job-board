@@ -227,10 +227,11 @@ function renderAllJobs() {
     const jobsToRender = isFocusMode
         ? jobs.filter(job => {
             const isHighRated = (job.rating || 3) >= 3;
-            const isRelevantStatus = !['rejected', 'forgotten'].includes(job.status);
+            // Focus Mode: Hide rejected, forgotten, and archived
+            const isRelevantStatus = !['rejected', 'forgotten', 'archived'].includes(job.status);
             return isHighRated && isRelevantStatus;
         })
-        : jobs;
+        : jobs.filter(job => job.status !== 'archived'); // Default: Hide archived jobs, show everything else including rejected
 
     // Render jobs in their respective columns
     jobsToRender.forEach(job => renderJob(job));
@@ -679,7 +680,7 @@ const closeCenterPeekBtn = document.getElementById('closeCenterPeek');
 const peekContent = document.getElementById('peekContent');
 
 // All status types including the new 'pending' status
-const ALL_STATUSES = ['interested', 'applied', 'interview', 'pending', 'offer', 'rejected', 'forgotten'];
+const ALL_STATUSES = ['interested', 'applied', 'interview', 'pending', 'offer', 'rejected', 'forgotten', 'archived'];
 function updateColumnCounts(visibleJobs = jobs) {
     ALL_STATUSES.forEach(status => {
         const count = visibleJobs.filter(j => j.status === status).length;
@@ -783,7 +784,7 @@ function renderJourneyMap(history, currentStatus) {
     if (!container) return;
 
     // Columns config - Matches job board column order
-    const columns = ['interested', 'applied', 'forgotten', 'interview', 'pending', 'offer', 'rejected'];
+    const columns = ['interested', 'applied', 'forgotten', 'interview', 'pending', 'offer', 'rejected', 'archived'];
 
     // Fixed width per column for horizontal scroll
     const colWidth = 100;
@@ -792,12 +793,14 @@ function renderJourneyMap(history, currentStatus) {
     const width = Math.max(container.clientWidth || 500, totalWidth);
     const height = Math.max(350, history.length * 80 + 120);
 
+
     // Combine history + current state if not redundant
     // Sort history by date desc (newest first) -> effectively bottom up?
     // Let's visualize Top = Oldest, Bottom = Newest (Time flows down)
     const sortedHistory = [...history].sort((a, b) => new Date(a.changed_at) - new Date(b.changed_at));
 
     // Add "Start" node? Or just first history status
+
     // Ensure we map status to an X coordinate
     function getX(status) {
         let idx = columns.indexOf(status);
@@ -905,3 +908,135 @@ openJobDetails = function (jobId) {
 
 // Expose original edit function for "Edit Details" button in Center Peek
 window.openRealEditPanel = originalOpenJobDetails;
+
+/* --- Archive Vault Logic --- */
+
+const archiveModal = document.getElementById('archiveModal');
+const closeArchiveModalBtn = document.getElementById('closeArchiveModal');
+const archiveContent = document.getElementById('archiveContent');
+const archiveBtnHeader = document.getElementById('archiveBtn');
+const archiveJobBtnPanel = document.getElementById('archiveJobBtn');
+
+function openArchiveModal() {
+    const archivedJobs = jobs.filter(j => j.status === 'archived');
+    renderArchiveList(archivedJobs);
+    archiveModal.classList.add('open');
+}
+
+function closeArchiveModal() {
+    archiveModal.classList.remove('open');
+}
+
+function renderArchiveList(archivedJobs) {
+    if (archivedJobs.length === 0) {
+        archiveContent.innerHTML = `
+            <div class="archive-empty">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+                <h3>The Vault is Empty</h3>
+                <p>Jobs you archive will appear here.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const listContainer = document.createElement('div');
+    listContainer.className = 'archive-list';
+
+    // Header Row
+    const headerRow = document.createElement('div');
+    headerRow.className = 'archive-row';
+    headerRow.style.background = 'var(--bg-secondary)';
+    headerRow.style.borderBottom = '2px solid var(--border-color)';
+    headerRow.style.fontWeight = '600';
+    headerRow.style.color = 'var(--text-secondary)';
+    headerRow.style.fontSize = 'var(--font-size-xs)';
+    headerRow.style.textTransform = 'uppercase';
+    headerRow.innerHTML = `
+        <div class="archive-col-main">Job Details</div>
+        <div class="archive-col-status">Status</div>
+    `;
+    listContainer.appendChild(headerRow);
+
+    archivedJobs.forEach(job => {
+        const row = document.createElement('div');
+        row.className = 'archive-row';
+
+        const isConnection = job.type === 'connection';
+        const title = isConnection ? (job.contactName || job.position) : job.position;
+        const subtitle = isConnection ? (job.organization || job.company) : job.company;
+
+        row.innerHTML = `
+            <div class="archive-col-main">
+                <div class="archive-title">${title || 'Untitled'}</div>
+                <div class="archive-company">${subtitle || 'Unknown'}</div>
+            </div>
+            <div class="archive-col-status">
+                <select class="archive-status-select" data-job-id="${job.id}">
+                    <option value="archived" selected>📦 Archived</option>
+                    <option value="interested">Interested</option>
+                    <option value="applied">Applied</option>
+                    <option value="interview">Interview</option>
+                    <option value="offer">Offer</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+        `;
+        listContainer.appendChild(row);
+    });
+
+    archiveContent.innerHTML = '';
+    archiveContent.appendChild(listContainer);
+
+    // Event listeners for status changes (Restore)
+    document.querySelectorAll('.archive-status-select').forEach(select => {
+        select.addEventListener('change', async (e) => {
+            const jobId = e.target.dataset.jobId;
+            const newStatus = e.target.value;
+
+            if (newStatus !== 'archived') {
+                // Restore item
+                try {
+                    await updateJob(jobId, { status: newStatus });
+
+                    // Remove row with animation
+                    const row = e.target.closest('.archive-row');
+                    row.style.opacity = '0';
+                    setTimeout(() => {
+                        openArchiveModal(); // Re-render list
+                        renderAllJobs(); // Update board in background
+                    }, 200);
+                } catch (error) {
+                    console.error("Failed to restore job", error);
+                    e.target.value = 'archived'; // Revert on failure
+                }
+            }
+        });
+    });
+}
+
+// Archive Action from Panel
+if (archiveJobBtnPanel) {
+    archiveJobBtnPanel.addEventListener('click', async () => {
+        if (currentJobId && confirm('Move this card to the Archive Vault?')) {
+            try {
+                await updateJob(currentJobId, { status: 'archived' });
+                closeJobPanel();
+                renderAllJobs();
+            } catch (error) {
+                console.error("Failed to archive job", error);
+            }
+        }
+    });
+}
+
+// Event Listeners for Archive UI
+if (archiveBtnHeader) {
+    archiveBtnHeader.addEventListener('click', openArchiveModal);
+}
+
+if (closeArchiveModalBtn) {
+    closeArchiveModalBtn.addEventListener('click', closeArchiveModal);
+    archiveModal.addEventListener('click', (e) => {
+        if (e.target === archiveModal) closeArchiveModal();
+    });
+}

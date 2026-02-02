@@ -1374,3 +1374,68 @@ body.focus-mode .job-card.dimmed {
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
 }
+/* Archive Modal Styles */
+.archive-header {
+    background: var(--color-canvas);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.archive-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.archive-row {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-bottom: 1px solid var(--border-color);
+    background: var(--color-canvas);
+    transition: background 0.15s ease;
+}
+
+.archive-row:hover {
+    background: var(--color-surface);
+}
+
+.archive-row:last-child {
+    border-bottom: none;
+}
+
+.archive-col-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.archive-title {
+    font-weight: var(--font-weight-medium);
+    margin-bottom: 2px;
+}
+
+.archive-company {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.archive-col-status {
+    width: 180px;
+    margin-left: var(--spacing-lg);
+}
+
+.archive-status-select {
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    font-size: var(--font-size-sm);
+    background: var(--color-surface);
+    cursor: pointer;
+}
+
+.archive-empty {
+    padding: var(--spacing-2xl);
+    text-align: center;
+    color: var(--text-secondary);
+}
