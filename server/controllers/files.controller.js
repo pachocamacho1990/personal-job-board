@@ -150,7 +150,10 @@ const downloadFile = async (req, res, next) => {
         }
 
         res.setHeader('Content-Type', mimetype);
-        res.setHeader('Content-Disposition', `inline; filename="${original_name}"`);
+
+        // Use 'inline' if explicitly requested for preview (e.g., embedding), otherwise 'attachment' for download
+        const disposition = req.query.preview === 'true' ? 'inline' : 'attachment';
+        res.setHeader('Content-Disposition', `${disposition}; filename="${original_name}"`);
 
         const fileStream = fs.createReadStream(filePath);
         fileStream.pipe(res);

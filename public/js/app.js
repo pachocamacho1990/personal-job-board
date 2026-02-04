@@ -610,6 +610,7 @@ function handleDrop(e) {
 
 /* --- File Attachments --- */
 let currentJobFiles = [];
+let fileToDeleteId = null;
 
 async function loadJobFiles(jobId) {
     const filesList = document.getElementById('filesList');
@@ -687,17 +688,10 @@ async function handleFileUpload(e) {
     }
 }
 
-async function handleFileDelete(fileId) {
-    if (!confirm('Delete this file?')) return;
-
-    try {
-        await api.files.delete(currentJobId, fileId);
-        currentJobFiles = currentJobFiles.filter(f => f.id !== fileId);
-        renderFilesList();
-    } catch (error) {
-        console.error('Error deleting file:', error);
-        alert('Failed to delete file: ' + error.message);
-    }
+function handleFileDelete(fileId) {
+    fileToDeleteId = fileId;
+    const modal = document.getElementById('fileDeleteConfirmModal');
+    modal.style.display = 'flex';
 }
 
 function openFilePreview(fileId) {
@@ -711,19 +705,24 @@ function openFilePreview(fileId) {
 
     const downloadUrl = api.files.getDownloadUrl(currentJobId, file.id);
     const token = localStorage.getItem('authToken');
-    const authedUrl = `${downloadUrl}?token=${encodeURIComponent(token)}`;
+
+    // URL for download/link (attachment disposition)
+    const downloadLinkUrl = `${downloadUrl}?token=${encodeURIComponent(token)}`;
+
+    // URL for preview (inline disposition)
+    const previewUrl = `${downloadUrl}?token=${encodeURIComponent(token)}&preview=true`;
 
     previewFileName.textContent = file.originalName;
-    downloadBtn.href = authedUrl;
+    downloadBtn.href = downloadLinkUrl;
 
     if (file.mimetype === 'application/pdf') {
-        previewContent.innerHTML = `<embed src="${authedUrl}" type="application/pdf" width="100%" height="100%">`;
+        previewContent.innerHTML = `<embed src="${previewUrl}" type="application/pdf" width="100%" height="100%">`;
     } else if (file.mimetype.startsWith('image/')) {
-        previewContent.innerHTML = `<img src="${authedUrl}" alt="${file.originalName}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+        previewContent.innerHTML = `<img src="${previewUrl}" alt="${file.originalName}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
     } else {
         previewContent.innerHTML = `<div class="preview-fallback">
             <p>Preview not available for this file type.</p>
-            <a href="${authedUrl}" class="btn-primary" download>Download File</a>
+            <a href="${downloadLinkUrl}" class="btn-primary" download>Download File</a>
         </div>`;
     }
 
@@ -1241,5 +1240,46 @@ if (closeArchiveModalBtn) {
     closeArchiveModalBtn.addEventListener('click', closeArchiveModal);
     archiveModal.addEventListener('click', (e) => {
         if (e.target === archiveModal) closeArchiveModal();
+    });
+}
+
+// File Delete Confirmation Modal Listeners
+const fileDeleteConfirmModal = document.getElementById('fileDeleteConfirmModal');
+const confirmFileDeleteBtn = document.getElementById('confirmFileDelete');
+const cancelFileDeleteBtn = document.getElementById('cancelFileDelete');
+
+if (fileDeleteConfirmModal) {
+    // Confirm delete
+    if (confirmFileDeleteBtn) {
+        confirmFileDeleteBtn.onclick = async () => {
+            if (fileToDeleteId && currentJobId) {
+                try {
+                    await api.files.delete(currentJobId, fileToDeleteId);
+                    currentJobFiles = currentJobFiles.filter(f => f.id !== fileToDeleteId);
+                    renderFilesList();
+                    fileDeleteConfirmModal.style.display = 'none';
+                    fileToDeleteId = null;
+                } catch (error) {
+                    console.error('Error deleting file:', error);
+                    alert('Failed to delete file: ' + error.message);
+                }
+            }
+        };
+    }
+
+    // Cancel delete
+    if (cancelFileDeleteBtn) {
+        cancelFileDeleteBtn.onclick = () => {
+            fileDeleteConfirmModal.style.display = 'none';
+            fileToDeleteId = null;
+        };
+    }
+
+    // Close on background click
+    fileDeleteConfirmModal.addEventListener('click', (e) => {
+        if (e.target === fileDeleteConfirmModal) {
+            fileDeleteConfirmModal.style.display = 'none';
+            fileToDeleteId = null;
+        }
     });
 }
