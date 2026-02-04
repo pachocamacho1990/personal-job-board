@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.4.0] - 2026-02-04
+
+### 🚀 Feature: File Attachments
+- **Upload & Manage**: Attach PDFs, DOCX, and Images to job cards.
+- **Preview**: Inline preview modal for documents.
+- **Secure Downloads**: Cross-browser compatible download handling (Safari/Chrome specific support).
+
+### Technical
+- **Sanitization**: Strict backend filename sanitization for reliable `Content-Disposition`.
+- **Database**: New `job_files` table linked to jobs.
+
 ## [3.1.2] - 2026-01-28
 
 ### Fixed
