@@ -192,5 +192,66 @@ const api = {
                 method: 'DELETE'
             });
         }
+    },
+
+    files: {
+        /**
+         * Get all files for a job
+         * @param {number} jobId 
+         */
+        getAll: async (jobId) => {
+            return await apiRequest(`/jobs/${jobId}/files`);
+        },
+
+        /**
+         * Upload a file to a job
+         * @param {number} jobId 
+         * @param {File} file 
+         */
+        upload: async (jobId, file) => {
+            const token = getToken();
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch(`${API_BASE}/jobs/${jobId}/files`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (response.status === 401) {
+                clearToken();
+                window.location.href = '/jobboard/login.html';
+                throw new Error('Unauthorized');
+            }
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+            return data;
+        },
+
+        /**
+         * Delete a file
+         * @param {number} jobId 
+         * @param {number} fileId 
+         */
+        delete: async (jobId, fileId) => {
+            return await apiRequest(`/jobs/${jobId}/files/${fileId}`, {
+                method: 'DELETE'
+            });
+        },
+
+        /**
+         * Get download URL for a file
+         * @param {number} jobId 
+         * @param {number} fileId 
+         */
+        getDownloadUrl: (jobId, fileId) => {
+            return `${API_BASE}/jobs/${jobId}/files/${fileId}/download`;
+        }
     }
 };
