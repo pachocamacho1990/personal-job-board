@@ -238,3 +238,22 @@ cd server && npm test    # 26 tests
 3. **Reference function names** - All functions are single-purpose
 4. **Pattern consistency** - All CRUD follows: API call → update array → re-render
 5. **Check CLAUDE.md** - More detailed route/controller info
+
+## Development Insights (v3.2.0)
+
+### File Downloads & Browser Quirks
+1. **Safari**:
+   - ❌ strict about opening new tabs (`target="_blank"`) for downloads. Often blocks them without warning.
+   - ✅ Use `<a href="..." download>` (same-page navigation). Relies on `Content-Disposition: attachment` header to prevent page replacement.
+2. **Chrome**:
+   - ❌ Can interpret internal storage filenames (e.g., UUIDs) if headers are ambiguous.
+   - ✅ Use `<a download="filename.ext">` to explicitly override the filename, providing a robust fallback.
+3. **Backend**:
+   - Always sanitize filenames! Spaces and special characters in `Content-Disposition` headers can break parsing in some browsers.
+   - Use `res.download(path, sanitizedName)` for best results.
+
+### Testing
+- **Mocking Streams**: When testing `res.download`, `supertest` requires a robust `fs` mock.
+  - Mock `fs.stat` with `{ isFile: ()=>true, isDirectory: ()=>false, size: 1024, mtime: new Date(), ino: 0 }`.
+  - Mock `fs.createReadStream` returning `Readable.from(['data'])` (from `stream` module), NOT a simple object with `pipe`.
+  - Use `jest.requireActual('fs')` to preserve unmocked classes like `ReadStream`.
