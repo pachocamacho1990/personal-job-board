@@ -69,6 +69,7 @@ Multi-board career management platform with PostgreSQL backend. Three main views
 | `css/layout.css` | Dashboard grid |
 | `css/sidebar.css` | Navigation styles |
 | `styles.css` | Main design system |
+| `WIREFRAMING_GUIDE.md` | Protocols for AI image generation |
 
 ### Backend (`/server`)
 | File | Purpose |
@@ -238,6 +239,7 @@ cd server && npm test    # 26 tests
 3. **Reference function names** - All functions are single-purpose
 4. **Pattern consistency** - All CRUD follows: API call → update array → re-render
 5. **Check CLAUDE.md** - More detailed route/controller info
+6. **UI/Wireframing** - Always consult `WIREFRAMING_GUIDE.md` before generating UI mockups.
 
 ## Development Insights (v3.2.0)
 
