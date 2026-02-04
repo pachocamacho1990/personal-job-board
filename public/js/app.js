@@ -649,7 +649,7 @@ function renderFilesList() {
                 <span class="file-name">${file.originalName}</span>
                 <div class="file-actions">
                     ${isPreviewable ? `<button type="button" class="btn-icon btn-view" title="View" onclick="event.stopPropagation(); openFilePreview(${file.id})">👁</button>` : ''}
-                    <a href="${authedDownloadUrl}" class="btn-icon btn-download" title="Download" download="${file.originalName}" onclick="event.stopPropagation();">⬇</a>
+                    <a href="${authedDownloadUrl}" class="btn-icon btn-download" title="Download" download="${file.originalName}" target="_blank" onclick="event.stopPropagation();">⬇</a>
                     <button type="button" class="btn-icon btn-delete-file" title="Delete" onclick="event.stopPropagation(); handleFileDelete(${file.id})">🗑</button>
                 </div>
             </div>

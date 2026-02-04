@@ -149,14 +149,25 @@ const downloadFile = async (req, res, next) => {
             return res.status(404).json({ error: 'File not found on disk' });
         }
 
-        res.setHeader('Content-Type', mimetype);
-
-        // Use 'inline' if explicitly requested for preview (e.g., embedding), otherwise 'attachment' for download
-        const disposition = req.query.preview === 'true' ? 'inline' : 'attachment';
-        res.setHeader('Content-Disposition', `${disposition}; filename="${original_name}"`);
-
-        const fileStream = fs.createReadStream(filePath);
-        fileStream.pipe(res);
+        // Use 'inline' if explicitly requested for preview
+        if (req.query.preview === 'true') {
+            res.setHeader('Content-Type', mimetype);
+            // Basic sanitization to prevent header injection
+            const safeName = original_name.replace(/"/g, '');
+            res.setHeader('Content-Disposition', `inline; filename="${safeName}"`);
+            const fileStream = fs.createReadStream(filePath);
+            fileStream.pipe(res);
+        } else {
+            // Use Express res.download for robust attachment handling
+            res.download(filePath, original_name, (err) => {
+                if (err) {
+                    // Only handle error if headers haven't been sent
+                    if (!res.headersSent) {
+                        next(err);
+                    }
+                }
+            });
+        }
     } catch (error) {
         next(error);
     }
