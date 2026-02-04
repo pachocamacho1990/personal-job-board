@@ -149,17 +149,18 @@ const downloadFile = async (req, res, next) => {
             return res.status(404).json({ error: 'File not found on disk' });
         }
 
+        // Sanitize filename for maximum browser compatibility (replace spaces/symbols with underscores)
+        const sanitizedFilename = original_name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+
         // Use 'inline' if explicitly requested for preview
         if (req.query.preview === 'true') {
             res.setHeader('Content-Type', mimetype);
-            // Basic sanitization to prevent header injection
-            const safeName = original_name.replace(/"/g, '');
-            res.setHeader('Content-Disposition', `inline; filename="${safeName}"`);
+            res.setHeader('Content-Disposition', `inline; filename="${sanitizedFilename}"`);
             const fileStream = fs.createReadStream(filePath);
             fileStream.pipe(res);
         } else {
-            // Use Express res.download for robust attachment handling
-            res.download(filePath, original_name, (err) => {
+            // Use Express res.download but override filename with sanitized version
+            res.download(filePath, sanitizedFilename, (err) => {
                 if (err) {
                     // Only handle error if headers haven't been sent
                     if (!res.headersSent) {
