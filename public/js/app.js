@@ -416,6 +416,13 @@ function openJobDetails(jobId) {
             timestampInfo.style.display = 'block';
         }
 
+        // Show attachments section and load files for existing jobs
+        const attachmentsSection = document.getElementById('attachmentsSection');
+        if (attachmentsSection) {
+            attachmentsSection.style.display = 'block';
+            loadJobFiles(job.id);
+        }
+
         deleteBtn.style.display = 'block';
     } else {
         // New entry
@@ -436,6 +443,13 @@ function openJobDetails(jobId) {
         const timestampInfo = document.getElementById('timestampInfo');
         if (timestampInfo) {
             timestampInfo.style.display = 'none';
+        }
+
+        // Hide attachments section for new jobs (no ID yet)
+        const attachmentsSection = document.getElementById('attachmentsSection');
+        if (attachmentsSection) {
+            attachmentsSection.style.display = 'none';
+            document.getElementById('filesList').innerHTML = '';
         }
 
         deleteBtn.style.display = 'none';
@@ -594,6 +608,137 @@ function handleDrop(e) {
     return false;
 }
 
+/* --- File Attachments --- */
+let currentJobFiles = [];
+
+async function loadJobFiles(jobId) {
+    const filesList = document.getElementById('filesList');
+    if (!filesList) return;
+
+    filesList.innerHTML = '<div class="loading-files">Loading files...</div>';
+
+    try {
+        currentJobFiles = await api.files.getAll(jobId);
+        renderFilesList();
+    } catch (error) {
+        console.error('Error loading files:', error);
+        filesList.innerHTML = '<div class="files-error">Failed to load files</div>';
+    }
+}
+
+function renderFilesList() {
+    const filesList = document.getElementById('filesList');
+    if (!filesList) return;
+
+    if (currentJobFiles.length === 0) {
+        filesList.innerHTML = '<div class="no-files">No files attached</div>';
+        return;
+    }
+
+    filesList.innerHTML = currentJobFiles.map(file => {
+        const isPreviewable = file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/');
+        const fileIcon = getFileIcon(file.mimetype);
+        const downloadUrl = api.files.getDownloadUrl(currentJobId, file.id);
+
+        return `
+            <div class="file-item" data-file-id="${file.id}">
+                <span class="file-icon">${fileIcon}</span>
+                <span class="file-name">${file.originalName}</span>
+                <div class="file-actions">
+                    ${isPreviewable ? `<button type="button" class="btn-icon btn-view" title="View" onclick="openFilePreview(${file.id})">👁</button>` : ''}
+                    <a href="${downloadUrl}" class="btn-icon btn-download" title="Download" target="_blank">⬇</a>
+                    <button type="button" class="btn-icon btn-delete-file" title="Delete" onclick="handleFileDelete(${file.id})">🗑</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function getFileIcon(mimetype) {
+    if (mimetype === 'application/pdf') return '📄';
+    if (mimetype.startsWith('image/')) return '🖼️';
+    if (mimetype.includes('word') || mimetype.includes('document')) return '📝';
+    if (mimetype === 'text/plain') return '📃';
+    return '📎';
+}
+
+async function handleFileUpload(e) {
+    const file = e.target.files[0];
+    if (!file || !currentJobId) return;
+
+    const addFileBtn = document.getElementById('addFileBtn');
+    const originalText = addFileBtn.textContent;
+    addFileBtn.textContent = 'Uploading...';
+    addFileBtn.disabled = true;
+
+    try {
+        const uploaded = await api.files.upload(currentJobId, file);
+        currentJobFiles.unshift(uploaded);
+        renderFilesList();
+    } catch (error) {
+        console.error('Error uploading file:', error);
+        alert('Failed to upload file: ' + error.message);
+    } finally {
+        addFileBtn.textContent = originalText;
+        addFileBtn.disabled = false;
+        e.target.value = ''; // Reset input
+    }
+}
+
+async function handleFileDelete(fileId) {
+    if (!confirm('Delete this file?')) return;
+
+    try {
+        await api.files.delete(currentJobId, fileId);
+        currentJobFiles = currentJobFiles.filter(f => f.id !== fileId);
+        renderFilesList();
+    } catch (error) {
+        console.error('Error deleting file:', error);
+        alert('Failed to delete file: ' + error.message);
+    }
+}
+
+function openFilePreview(fileId) {
+    const file = currentJobFiles.find(f => f.id === fileId);
+    if (!file) return;
+
+    const modal = document.getElementById('filePreviewModal');
+    const previewFileName = document.getElementById('previewFileName');
+    const previewContent = document.getElementById('filePreviewContent');
+    const downloadBtn = document.getElementById('previewDownloadBtn');
+
+    const downloadUrl = api.files.getDownloadUrl(currentJobId, file.id);
+    const token = localStorage.getItem('authToken');
+    const authedUrl = `${downloadUrl}?token=${encodeURIComponent(token)}`;
+
+    previewFileName.textContent = file.originalName;
+    downloadBtn.href = authedUrl;
+
+    if (file.mimetype === 'application/pdf') {
+        previewContent.innerHTML = `<embed src="${authedUrl}" type="application/pdf" width="100%" height="100%">`;
+    } else if (file.mimetype.startsWith('image/')) {
+        previewContent.innerHTML = `<img src="${authedUrl}" alt="${file.originalName}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+    } else {
+        previewContent.innerHTML = `<div class="preview-fallback">
+            <p>Preview not available for this file type.</p>
+            <a href="${authedUrl}" class="btn-primary" download>Download File</a>
+        </div>`;
+    }
+
+    modal.classList.add('open');
+}
+
+function closeFilePreview() {
+    const modal = document.getElementById('filePreviewModal');
+    const previewContent = document.getElementById('filePreviewContent');
+    modal.classList.remove('open');
+    previewContent.innerHTML = '';
+}
+
+// Expose functions to global scope for onclick handlers
+window.openFilePreview = openFilePreview;
+window.handleFileDelete = handleFileDelete;
+
 // Markdown Preview Toggle
 function togglePreviewMode() {
     isPreviewMode = !isPreviewMode;
@@ -667,6 +812,30 @@ function setupEventListeners() {
 
     // Markdown preview toggle
     togglePreviewBtn.addEventListener('click', togglePreviewMode);
+
+    // File attachment handlers
+    const addFileBtn = document.getElementById('addFileBtn');
+    const fileInput = document.getElementById('fileInput');
+    const closeFilePreviewBtn = document.getElementById('closeFilePreview');
+    const filePreviewModal = document.getElementById('filePreviewModal');
+
+    if (addFileBtn) {
+        addFileBtn.addEventListener('click', () => fileInput.click());
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileUpload);
+    }
+
+    if (closeFilePreviewBtn) {
+        closeFilePreviewBtn.addEventListener('click', closeFilePreview);
+    }
+
+    if (filePreviewModal) {
+        filePreviewModal.addEventListener('click', (e) => {
+            if (e.target === filePreviewModal) closeFilePreview();
+        });
+    }
 }
 
 // Start the app

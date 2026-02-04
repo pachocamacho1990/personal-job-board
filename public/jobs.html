@@ -222,6 +222,21 @@
                         </select>
                     </div>
 
+                    <!-- Attachments Section -->
+                    <div class="form-group attachments-section" id="attachmentsSection" style="display: none;">
+                        <label>Attachments</label>
+                        <div id="filesList" class="files-list">
+                            <!-- Files rendered by JS -->
+                        </div>
+                        <div class="file-upload-area">
+                            <input type="file" id="fileInput" style="display: none;"
+                                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.txt">
+                            <button type="button" id="addFileBtn" class="btn-secondary btn-sm">
+                                + Add File
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <div class="comments-header">
                             <label for="comments">Comments</label>
@@ -262,6 +277,22 @@
                 </div>
                 <div id="archiveContent" class="peek-content" style="padding: 0;">
                     <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- File Preview Modal -->
+        <div id="filePreviewModal" class="center-peek-overlay">
+            <div class="center-peek-container glass-panel file-preview-container">
+                <div class="file-preview-header">
+                    <h3 id="previewFileName">File Preview</h3>
+                    <div class="file-preview-actions">
+                        <a id="previewDownloadBtn" href="#" class="btn-secondary btn-sm" download>Download</a>
+                        <button id="closeFilePreview" class="btn-icon close-peek" title="Close">×</button>
+                    </div>
+                </div>
+                <div id="filePreviewContent" class="file-preview-body">
+                    <!-- PDF embed or fallback message -->
                 </div>
             </div>
         </div>
