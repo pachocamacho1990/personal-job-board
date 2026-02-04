@@ -160,3 +160,13 @@ Aurora Design System - Modern, clean aesthetic with color-coded status columns.
 - **View Toggle**: Compact/Comfortable persists per board
 - **Drag & Drop**: Status changes via column drops
 - **Color Coding**: Visual status indicators on column headers
+
+### File Handling
+- **Downloads**:
+  - **Safari**: Use `<a download>` *without* `target="_blank"`. Relies on `Content-Disposition: attachment` header.
+  - **Chrome**: Use `<a download="filename.ext">` to force correct naming and override internal identifiers.
+  - **Backend**: Always sanitize filenames (replace spaces/symbols with underscores) to ensure header compatibility.
+
+### UI Components
+- **Confirmation Modals**: Use generic overlay with `confirm/cancel` actions for destructive operations (Delete, Archive, Logout).
+
