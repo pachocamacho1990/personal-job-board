@@ -639,15 +639,17 @@ function renderFilesList() {
         const isPreviewable = file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/');
         const fileIcon = getFileIcon(file.mimetype);
         const downloadUrl = api.files.getDownloadUrl(currentJobId, file.id);
+        const token = localStorage.getItem('authToken');
+        const authedDownloadUrl = `${downloadUrl}?token=${encodeURIComponent(token)}`;
 
         return `
             <div class="file-item" data-file-id="${file.id}">
                 <span class="file-icon">${fileIcon}</span>
                 <span class="file-name">${file.originalName}</span>
                 <div class="file-actions">
-                    ${isPreviewable ? `<button type="button" class="btn-icon btn-view" title="View" onclick="openFilePreview(${file.id})">👁</button>` : ''}
-                    <a href="${downloadUrl}" class="btn-icon btn-download" title="Download" target="_blank">⬇</a>
-                    <button type="button" class="btn-icon btn-delete-file" title="Delete" onclick="handleFileDelete(${file.id})">🗑</button>
+                    ${isPreviewable ? `<button type="button" class="btn-icon btn-view" title="View" onclick="event.stopPropagation(); openFilePreview(${file.id})">👁</button>` : ''}
+                    <a href="${authedDownloadUrl}" class="btn-icon btn-download" title="Download" download="${file.originalName}" onclick="event.stopPropagation();">⬇</a>
+                    <button type="button" class="btn-icon btn-delete-file" title="Delete" onclick="event.stopPropagation(); handleFileDelete(${file.id})">🗑</button>
                 </div>
             </div>
         `;
