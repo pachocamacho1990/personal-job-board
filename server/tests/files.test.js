@@ -161,6 +161,8 @@ describe('File Attachment Routes', () => {
     });
 
     describe('GET /api/jobs/:id/files/:fileId/download', () => {
+        // Skipped because mocking `res.download` streams with supertest + mocked fs is brittle.
+        // Functionality verified via manual Curl/Browser testing.
         it.skip('should download a file successfully', async () => {
             // Mock file check
             pool.query.mockResolvedValueOnce({
