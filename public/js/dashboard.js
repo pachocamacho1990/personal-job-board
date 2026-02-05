@@ -52,7 +52,7 @@ function renderInterviews(interviews) {
     }
 
     list.innerHTML = interviews.map(job => `
-        <div class="list-item" onclick="window.location.href='jobs.html?highlight=${job.id}'">
+        <div class="list-item" onclick="window.location.href='jobs.html?openJobId=${job.id}'">
             <div class="item-icon interview-icon">📅</div>
             <div class="item-content">
                 <div class="item-title">${escapeHtml(job.company)}</div>
@@ -73,7 +73,7 @@ function renderNewMatches(matches) {
     }
 
     list.innerHTML = matches.map(job => `
-        <div class="list-item" onclick="window.location.href='jobs.html?highlight=${job.id}'">
+        <div class="list-item" onclick="window.location.href='jobs.html?openJobId=${job.id}'">
             <div class="item-icon match-icon">🤖</div>
             <div class="item-content">
                 <div class="item-title">${escapeHtml(job.company)}</div>
