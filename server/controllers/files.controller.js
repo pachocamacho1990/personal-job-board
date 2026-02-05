@@ -92,6 +92,7 @@ const deleteFile = async (req, res, next) => {
         const { id: jobId, fileId } = req.params;
 
         // Verify job belongs to user and file exists
+        // Verify job belongs to user and file exists
         const fileCheck = await pool.query(
             `SELECT jf.id, jf.filename 
              FROM job_files jf

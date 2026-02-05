@@ -36,6 +36,7 @@ const confirmFileDeleteBtn = document.getElementById('confirmFileDelete');
 const cancelFileDeleteBtn = document.getElementById('cancelFileDelete');
 
 let fileToDeleteId = null;
+let currentEntityIdForDelete = null;
 
 
 // Initialize
@@ -104,14 +105,7 @@ function setupEventListeners() {
     fileInput.addEventListener('change', handleFileUpload);
 
     // File Preview Modal
-    closeFilePreviewBtn.addEventListener('click', () => {
-        filePreviewModal.style.display = 'none';
-        filePreviewContent.innerHTML = '';
-        // revoke object URLs to free memory
-        if (filePreviewContent.querySelector('img')) {
-            URL.revokeObjectURL(filePreviewContent.querySelector('img').src);
-        }
-    });
+    closeFilePreviewBtn.addEventListener('click', closeFilePreview);
 
     // File Delete Modal
     cancelFileDeleteBtn.addEventListener('click', () => {
@@ -119,7 +113,7 @@ function setupEventListeners() {
         fileToDeleteId = null;
     });
 
-    confirmFileDeleteBtn.addEventListener('click', confirmFileDelete);
+    confirmFileDeleteBtn.addEventListener('click', handleConfirmFileDelete);
 }
 
 function updateViewToggleIcon() {
@@ -463,7 +457,7 @@ function renderFilesList(files, entityId) {
                     <a href="${api.business.files.getDownloadUrl(entityId, file.id)}" class="btn-icon" title="Download" download>
                         ⬇️
                     </a>
-                    <button type="button" class="btn-icon delete-file" onclick="initiateFileDelete('${file.id}')" title="Delete">
+                    <button type="button" class="btn-icon delete-file" onclick="handleFileDelete('${file.id}')" title="Delete">
                         🗑️
                     </button>
                 </div>
@@ -474,16 +468,92 @@ function renderFilesList(files, entityId) {
     filesList.innerHTML = html;
 }
 
+// Global scope for onclick handlers
+window.removeQueuedFile = function (index) {
+    filesToUpload.splice(index, 1);
+    const entityId = document.getElementById('entityId').value;
+    renderFilesList(currentFiles, entityId); // renderFilesList needs actual files list, might need to store it globally or pass it
+    // Actually renderFilesList signature is (files, entityId). 
+    // We need 'currentFiles' to be available.
+};
+
+
+// Missing File Functions
+
+// Store current files for reference
+let currentEntityFiles = [];
+
+// Handle file delete button click - show confirmation modal
+function handleFileDelete(fileId) {
+    fileToDeleteId = fileId;
+    currentEntityIdForDelete = document.getElementById('entityId').value;
+    fileDeleteConfirmModal.style.display = 'flex';
+}
+
+// Confirm and execute file deletion
+async function handleConfirmFileDelete() {
+    if (!fileToDeleteId || !currentEntityIdForDelete) return;
+
+    try {
+        await api.business.files.delete(currentEntityIdForDelete, fileToDeleteId);
+        fileDeleteConfirmModal.style.display = 'none';
+        fileToDeleteId = null;
+        await loadEntityFiles(currentEntityIdForDelete);
+    } catch (error) {
+        alert('Failed to delete file: ' + error.message);
+    }
+}
+
+function openFilePreview(entityId, fileId, mimetype, filename) {
+    const modal = document.getElementById('filePreviewModal');
+    const content = document.getElementById('filePreviewContent');
+    const title = document.getElementById('previewFileName');
+    const downloadBtn = document.getElementById('previewDownloadBtn');
+
+    title.textContent = filename || 'File Preview';
+    const downloadUrl = api.business.files.getDownloadUrl(entityId, fileId);
+
+    // Add token for auth
+    const token = localStorage.getItem('authToken');
+    const downloadLinkUrl = `${downloadUrl}?token=${encodeURIComponent(token)}`;
+    const previewUrl = `${downloadUrl}?token=${encodeURIComponent(token)}&preview=true`;
+
+    downloadBtn.href = downloadLinkUrl;
+
+    // Clear previous content
+    content.innerHTML = '';
+
+    if (mimetype === 'application/pdf') {
+        content.innerHTML = `<embed src="${previewUrl}" type="application/pdf" width="100%" height="100%">`;
+    } else if (mimetype.startsWith('image/')) {
+        content.innerHTML = `<img src="${previewUrl}" alt="${filename}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+    } else {
+        content.innerHTML = `
+            <div class="preview-fallback">
+                <p>Preview not available for this file type.</p>
+                <a href="${downloadLinkUrl}" class="btn-primary" download>Download File</a>
+            </div>
+        `;
+    }
+
+    modal.classList.add('open');
+}
+
+function closeFilePreview() {
+    const modal = document.getElementById('filePreviewModal');
+    const content = document.getElementById('filePreviewContent');
+    modal.classList.remove('open');
+    content.innerHTML = '';
+}
+
 // Queue management
 let filesToUpload = [];
 
 function removeQueuedFile(index) {
     filesToUpload.splice(index, 1);
     const entityId = document.getElementById('entityId').value;
-    // We need to re-render, but renderFilesList expects the list of existing files.
-    // We can just reload the files if we have an ID, or pass empty if not.
     if (entityId) {
-        loadEntityFiles(entityId); // This is safe but might flicker.
+        loadEntityFiles(entityId);
     } else {
         renderFilesList([], null);
     }
@@ -524,62 +594,6 @@ async function handleFileUpload(e) {
         addFileBtn.disabled = false;
     }
 }
-
-// Make globally available for onclick handlers
-window.initiateFileDelete = function (fileId) {
-    fileToDeleteId = fileId;
-    fileDeleteConfirmModal.style.display = 'flex';
-};
-
-async function confirmFileDelete() {
-    if (!fileToDeleteId) return;
-
-    const entityId = document.getElementById('entityId').value;
-
-    try {
-        await api.business.files.delete(entityId, fileToDeleteId);
-        fileDeleteConfirmModal.style.display = 'none';
-        fileToDeleteId = null;
-        loadEntityFiles(entityId);
-    } catch (error) {
-        alert('Failed to delete file: ' + error.message);
-    }
-}
-
-// Make globally available for onclick handlers
-window.openFilePreview = function (entityId, fileId, mimetype, filename) {
-    previewFileName.textContent = filename;
-    previewDownloadBtn.href = api.business.files.getDownloadUrl(entityId, fileId);
-
-    filePreviewContent.innerHTML = '<div class="loading-spinner">Loading preview...</div>';
-    filePreviewModal.style.display = 'flex';
-
-    if (mimetype.startsWith('image/')) {
-        const img = document.createElement('img');
-        img.src = api.business.files.getDownloadUrl(entityId, fileId) + '?preview=true'; // Add preview param if backend supports inline
-        img.style.maxWidth = '100%';
-        img.style.maxHeight = '100%';
-        img.style.objectFit = 'contain';
-        filePreviewContent.innerHTML = '';
-        filePreviewContent.appendChild(img);
-    } else if (mimetype === 'application/pdf') {
-        const iframe = document.createElement('iframe');
-        iframe.src = api.business.files.getDownloadUrl(entityId, fileId) + '?preview=true';
-        iframe.style.width = '100%';
-        iframe.style.height = '100%';
-        iframe.style.border = 'none';
-        filePreviewContent.innerHTML = '';
-        filePreviewContent.appendChild(iframe);
-    } else {
-        filePreviewContent.innerHTML = `
-            <div class="no-preview">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">📄</div>
-                <p>Preview not available for this file type.</p>
-                <a href="${api.business.files.getDownloadUrl(entityId, fileId)}" class="btn-primary" download>Download File</a>
-            </div>
-        `;
-    }
-};
 
 function getFileIcon(mimetype) {
     if (mimetype.startsWith('image/')) return '🖼️';
