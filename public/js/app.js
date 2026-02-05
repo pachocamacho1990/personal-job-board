@@ -457,12 +457,13 @@ function openJobDetails(jobId) {
             timestampInfo.style.display = 'none';
         }
 
-        // Hide attachments section for new jobs (no ID yet)
+        // Show attachments section for new jobs too (files will be queued)
         const attachmentsSection = document.getElementById('attachmentsSection');
         if (attachmentsSection) {
-            attachmentsSection.style.display = 'none';
-            document.getElementById('filesList').innerHTML = '';
+            attachmentsSection.style.display = 'block';
+            document.getElementById('filesList').innerHTML = '<div class="no-files">No files attached</div>';
         }
+        filesToUpload = []; // Reset queue
 
         deleteBtn.style.display = 'none';
     }
@@ -540,7 +541,23 @@ async function handleFormSubmit(e) {
             await updateJob(currentJobId, formData);
         } else {
             // Create new job
-            await createJob(formData);
+            const newJob = await createJob(formData);
+
+            // Process queued files
+            if (filesToUpload.length > 0) {
+                // We need to upload sequentially or parallel
+                // Not blocking the UI too much, but ideally we should wait
+                // Let's show a toast or something, but for now just await
+                for (const file of filesToUpload) {
+                    try {
+                        await api.files.upload(newJob.id, file);
+                    } catch (err) {
+                        console.error('Failed to upload queued file:', err);
+                        // Ideally notify user
+                    }
+                }
+                filesToUpload = [];
+            }
         }
 
         renderAllJobs();
@@ -623,6 +640,7 @@ function handleDrop(e) {
 /* --- File Attachments --- */
 let currentJobFiles = [];
 let fileToDeleteId = null;
+let filesToUpload = []; // Queue for new jobs
 
 async function loadJobFiles(jobId) {
     const filesList = document.getElementById('filesList');
@@ -643,33 +661,57 @@ function renderFilesList() {
     const filesList = document.getElementById('filesList');
     if (!filesList) return;
 
-    if (currentJobFiles.length === 0) {
+    if (currentJobFiles.length === 0 && filesToUpload.length === 0) {
         filesList.innerHTML = '<div class="no-files">No files attached</div>';
         return;
     }
 
-    filesList.innerHTML = currentJobFiles.map(file => {
-        const isPreviewable = file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/');
-        const fileIcon = getFileIcon(file.mimetype);
-        const downloadUrl = api.files.getDownloadUrl(currentJobId, file.id);
-        const token = localStorage.getItem('authToken');
-        const authedDownloadUrl = `${downloadUrl}?token=${encodeURIComponent(token)}`;
+    let html = '';
 
-        return `
-            <div class="file-item" data-file-id="${file.id}">
-                <span class="file-icon">${fileIcon}</span>
-                <span class="file-name">${file.originalName}</span>
-                <div class="file-actions">
-                    ${isPreviewable ? `<button type="button" class="btn-icon btn-view" title="View" onclick="event.stopPropagation(); openFilePreview(${file.id})">👁</button>` : ''}
-                    <a href="${authedDownloadUrl}" class="btn-icon btn-download" title="Download" download="${file.originalName.replace(/"/g, '&quot;')}" onclick="event.stopPropagation();">⬇</a>
-                    <button type="button" class="btn-icon btn-delete-file" title="Delete" onclick="event.stopPropagation(); handleFileDelete(${file.id})">🗑</button>
+    // Render queued files (for new jobs)
+    if (filesToUpload.length > 0) {
+        html += filesToUpload.map((file, index) => {
+            const fileIcon = getFileIcon(file.type);
+            return `
+                <div class="file-item pending-upload">
+                    <span class="file-icon">${fileIcon}</span>
+                    <span class="file-name">${file.name} (Pending)</span>
+                    <div class="file-actions">
+                        <button type="button" class="btn-icon btn-delete-file" title="Remove" onclick="event.stopPropagation(); removeQueuedFile(${index})">🗑</button>
+                    </div>
                 </div>
-            </div>
-        `;
-    }).join('');
+            `;
+        }).join('');
+    }
+
+    // Render existing files
+    if (currentJobFiles.length > 0) {
+        html += currentJobFiles.map(file => {
+            const isPreviewable = file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/');
+            const fileIcon = getFileIcon(file.mimetype);
+            const downloadUrl = api.files.getDownloadUrl(currentJobId, file.id);
+            const token = localStorage.getItem('authToken');
+            const authedDownloadUrl = `${downloadUrl}?token=${encodeURIComponent(token)}`;
+
+            return `
+                <div class="file-item" data-file-id="${file.id}">
+                    <span class="file-icon">${fileIcon}</span>
+                    <span class="file-name">${file.originalName}</span>
+                    <div class="file-actions">
+                        ${isPreviewable ? `<button type="button" class="btn-icon btn-view" title="View" onclick="event.stopPropagation(); openFilePreview(${file.id})">👁</button>` : ''}
+                        <a href="${authedDownloadUrl}" class="btn-icon btn-download" title="Download" download="${file.originalName.replace(/"/g, '&quot;')}" onclick="event.stopPropagation();">⬇</a>
+                        <button type="button" class="btn-icon btn-delete-file" title="Delete" onclick="event.stopPropagation(); handleFileDelete(${file.id})">🗑</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    filesList.innerHTML = html;
 }
 
 function getFileIcon(mimetype) {
+    if (!mimetype) return '📎';
     if (mimetype === 'application/pdf') return '📄';
     if (mimetype.startsWith('image/')) return '🖼️';
     if (mimetype.includes('word') || mimetype.includes('document')) return '📝';
@@ -677,10 +719,25 @@ function getFileIcon(mimetype) {
     return '📎';
 }
 
+function removeQueuedFile(index) {
+    filesToUpload.splice(index, 1);
+    renderFilesList();
+}
+window.removeQueuedFile = removeQueuedFile;
+
 async function handleFileUpload(e) {
     const file = e.target.files[0];
-    if (!file || !currentJobId) return;
+    if (!file) return;
 
+    // If new job (no ID), queue it
+    if (!currentJobId) {
+        filesToUpload.push(file);
+        renderFilesList();
+        e.target.value = ''; // Reset input
+        return;
+    }
+
+    // Existing job: upload immediately
     const addFileBtn = document.getElementById('addFileBtn');
     const originalText = addFileBtn.textContent;
     addFileBtn.textContent = 'Uploading...';
@@ -799,6 +856,57 @@ function setupEventListeners() {
         radio.addEventListener('change', updateRatingDisplay);
     });
 
+    // File Upload
+    const addFileBtn = document.getElementById('addFileBtn');
+    addFileBtn.addEventListener('click', () => {
+        document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
+    // File Preview Modal
+    const closeFilePreviewBtn = document.getElementById('closeFilePreview');
+    closeFilePreviewBtn.addEventListener('click', closeFilePreview);
+
+    // File Delete Modal
+    const cancelFileDeleteBtn = document.getElementById('cancelFileDelete');
+    cancelFileDeleteBtn.addEventListener('click', () => {
+        document.getElementById('fileDeleteConfirmModal').style.display = 'none';
+        fileToDeleteId = null;
+    });
+
+    const confirmDeleteBtn = document.getElementById('confirmFileDelete');
+    confirmDeleteBtn.addEventListener('click', async () => {
+        if (!fileToDeleteId || !currentJobId) return;
+        try {
+            await api.files.delete(currentJobId, fileToDeleteId);
+            document.getElementById('fileDeleteConfirmModal').style.display = 'none';
+            fileToDeleteId = null;
+            // Remove from local list
+            currentJobFiles = currentJobFiles.filter(f => f.id !== fileToDeleteId);
+            renderFilesList();
+        } catch (error) {
+            alert('Failed to delete file: ' + error.message);
+        }
+    });
+
+    // Archive
+    const archiveJobBtn = document.getElementById('archiveJobBtn');
+    if (archiveJobBtn) {
+        archiveJobBtn.addEventListener('click', () => {
+            if (currentJobId) showArchiveConfirm(currentJobId);
+        });
+    }
+
+    // Logout
+    const logoutTrigger = document.querySelector('.logout-trigger');
+    if (logoutTrigger) {
+        logoutTrigger.addEventListener('click', () => {
+            document.getElementById('logoutModal').style.display = 'flex';
+        });
+    }
+
+
     // Drag and drop on containers
     document.querySelectorAll('.cards-container').forEach(container => {
         container.addEventListener('dragover', handleDragOver);
@@ -825,30 +933,6 @@ function setupEventListeners() {
 
     // Markdown preview toggle
     togglePreviewBtn.addEventListener('click', togglePreviewMode);
-
-    // File attachment handlers
-    const addFileBtn = document.getElementById('addFileBtn');
-    const fileInput = document.getElementById('fileInput');
-    const closeFilePreviewBtn = document.getElementById('closeFilePreview');
-    const filePreviewModal = document.getElementById('filePreviewModal');
-
-    if (addFileBtn) {
-        addFileBtn.addEventListener('click', () => fileInput.click());
-    }
-
-    if (fileInput) {
-        fileInput.addEventListener('change', handleFileUpload);
-    }
-
-    if (closeFilePreviewBtn) {
-        closeFilePreviewBtn.addEventListener('click', closeFilePreview);
-    }
-
-    if (filePreviewModal) {
-        filePreviewModal.addEventListener('click', (e) => {
-            if (e.target === filePreviewModal) closeFilePreview();
-        });
-    }
 }
 
 // Start the app

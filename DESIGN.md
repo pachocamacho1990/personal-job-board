@@ -69,6 +69,17 @@ graph TD
 | `created_at` | TIMESTAMP | |
 | `updated_at` | TIMESTAMP | |
 
+#### `business_entity_files` Table
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | SERIAL | Primary Key |
+| `entity_id` | INTEGER | FK → business_entities.id (CASCADE delete) |
+| `filename` | VARCHAR | UUID filename on disk |
+| `original_name` | VARCHAR | User's filename |
+| `mimetype` | VARCHAR | File type |
+| `size` | INTEGER | Bytes |
+| `created_at` | TIMESTAMP | |
+
 #### `job_history` Table
 | Field | Type | Description |
 |-------|------|-------------|
