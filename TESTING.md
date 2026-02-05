@@ -19,6 +19,7 @@ npm test
 | `auth.test.js` | 6 | Signup, Login, Duplicate emails, Token validation |
 | `jobs.test.js` | 9 | CRUD ops, Data isolation, **Archive/Restore** |
 | `business.test.js` | 10 | CRUD, Type validation, Ownership checks |
+| `business-files.test.js` | 5 | Upload, Download, List, Delete, Security |
 | `dashboard.test.js` | 5 | Summary endpoint, Query validation, Error handling |
 
 **Total: 26 tests**

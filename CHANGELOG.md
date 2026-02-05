@@ -2,7 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.4.1] - 2026-02-05
+## [3.5.0] - 2026-02-05
+
+### 🚀 Feature: Business Entity Attachments & Unified File Queueing
+
+This release extends file attachment capabilities to the Business Board and standardizes the experience across the application. It also introduces a "Queue & Upload" feature for smoother item creation.
+
+### Added
+
+#### Business Board Attachments
+- **File Support**: Attach PDFs, Images, and Docs to Investors, VCs, and Connections.
+- **Full Lifecycle**: Upload, Preview (Modal), Download, and Delete.
+- **Queueing Engine**: Upload files *while* creating a new entity; they are queued and uploaded automatically upon save.
+
+#### Job Board Enhancements
+- **Connection Attachments**: Parity feature allowing "Connection" type cards to have attachments.
+- **Creation Queue**: "Add File" button is now available immediately when creating a new job; files are queued and uploaded after the job is created.
+
+### Technical Details
+
+#### Database Schema
+- New `business_entity_files` table mirroring `job_files` structure.
+
+#### Backend
+- `business-files.controller.js`: dedicated controller for business file operations.
+- `business.routes.js`: updated routes to support file endpoints.
+
+#### Testing
+- Added `server/tests/business-files.test.js` for full coverage of the new endpoints.
 
 ### 🚀 Feature: Deep Linking from Dashboard
 

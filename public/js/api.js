@@ -191,6 +191,44 @@ const api = {
             return await apiRequest(`/business/${id}`, {
                 method: 'DELETE'
             });
+        },
+        files: {
+            getAll: async (entityId) => {
+                return await apiRequest(`/business/${entityId}/files`);
+            },
+            upload: async (entityId, file) => {
+                const token = getToken();
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch(`${API_BASE}/business/${entityId}/files`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (response.status === 401) {
+                    clearToken();
+                    window.location.href = '/jobboard/login.html';
+                    throw new Error('Unauthorized');
+                }
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || `HTTP ${response.status}`);
+                }
+                return data;
+            },
+            delete: async (entityId, fileId) => {
+                return await apiRequest(`/business/${entityId}/files/${fileId}`, {
+                    method: 'DELETE'
+                });
+            },
+            getDownloadUrl: (entityId, fileId) => {
+                return `${API_BASE}/business/${entityId}/files/${fileId}/download`;
+            }
         }
     },
 

@@ -31,6 +31,7 @@ A minimalist, **self-hosted Kanban board** to track job applications, networking
 - **Kanban Stages**: Researching → Contacted → Meeting → Negotiation → Signed/Rejected
 - **Color-Coded Columns**: Each stage has distinct visual styling
 - **Drag & Drop**: Move entities between stages
+- **File Attachments**: Upload pitch decks, resumes, or notes to any entity
 - **Compact/Comfortable View**: Same view toggle as Job Board
 
 ### 🔐 Authentication
