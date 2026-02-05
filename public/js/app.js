@@ -60,6 +60,18 @@ async function init() {
     loadViewPreference();
     loadFocusPreference(); // Load focus mode state
     await loadJobs();
+
+    // Check for deep link (openJobId)
+    const urlParams = new URLSearchParams(window.location.search);
+    const openJobId = urlParams.get('openJobId');
+    if (openJobId) {
+        // Ensure job exists before trying to open
+        const jobToOpen = jobs.find(j => j.id == openJobId);
+        if (jobToOpen) {
+            openJobDetails(parseInt(openJobId));
+        }
+    }
+
     setupEventListeners();
 
     // Hide loading overlay

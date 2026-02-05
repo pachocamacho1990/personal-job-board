@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.4.1] - 2026-02-05
+
+### 🚀 Feature: Deep Linking from Dashboard
+
+Clicking on a job card in the Dashboard (Upcoming Interviews or New Matches) now directly opens the Job Board with the **Center Peek** details modal automatically activated for that specific job.
+
+### Changed
+- **Dashboard**: "View" and "Review" buttons now use `?openJobId={id}` for direct navigation.
+- **Job Board**: startup logic now checks for `openJobId` parameter and auto-opens the details panel.
+
 ## [3.4.0] - 2026-02-04
 
 ### 🚀 Feature: File Attachments & Secure Downloads
