@@ -259,3 +259,8 @@ cd server && npm test    # 26 tests
   - Mock `fs.stat` with `{ isFile: ()=>true, isDirectory: ()=>false, size: 1024, mtime: new Date(), ino: 0 }`.
   - Mock `fs.createReadStream` returning `Readable.from(['data'])` (from `stream` module), NOT a simple object with `pipe`.
   - Use `jest.requireActual('fs')` to preserve unmocked classes like `ReadStream`.
+
+## Navigation & Deep Linking
+- **Dashboard to Board**: Links from the dashboard (e.g., "Upcoming Interviews") should use `?openJobId={id}`.
+- **Auto-Open**: The Job Board (`app.js`) automatically detects this parameter and opens the **Center Peek** modal.
+- **Parameter Handling**: Do not remove the query parameter (allows for bookmarking specific job views).
