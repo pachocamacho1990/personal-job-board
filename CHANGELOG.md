@@ -4,14 +4,47 @@ All notable changes to this project will be documented in this file.
 
 ## [3.4.0] - 2026-02-04
 
-### 🚀 Feature: File Attachments
-- **Upload & Manage**: Attach PDFs, DOCX, and Images to job cards.
-- **Preview**: Inline preview modal for documents.
-- **Secure Downloads**: Cross-browser compatible download handling (Safari/Chrome specific support).
+### 🚀 Feature: File Attachments & Secure Downloads
 
-### Technical
-- **Sanitization**: Strict backend filename sanitization for reliable `Content-Disposition`.
-- **Database**: New `job_files` table linked to jobs.
+This release introduces full support for attaching files to job cards, with a focus on cross-browser compatibility and security. Users can now upload resumes, cover letters, and other documents directly to the board.
+
+### Added
+
+#### File Management
+- **Uploads**: Attach PDFs, DOCX, and Images (up to 10MB) to any job card.
+- **Inline Preview**: View PDFs and Images instantly in a dedicated modal without downloading.
+- **Management**: Easy delete workflow with confirmation modals.
+
+#### Secure & Robust Downloads
+- **Safari Support**: Optimized download behavior (same-tab navigation) to comply with strict popup policies.
+- **Chrome Support**: Explicit filename enforcement to prevent internal server paths from leaking.
+
+### Technical Details
+
+#### New Backend Files
+- `server/controllers/files.controller.js` - Handles upload, download, and delete operations.
+- `server/middleware/upload.js` - Multer configuration with UUID-based filename generation.
+- `server/tests/files.test.js` - Comprehensive integration tests for file endpoints.
+
+#### Database Schema
+New `job_files` table to track attachments:
+```sql
+CREATE TABLE job_files (
+    id SERIAL PRIMARY KEY,
+    job_id INTEGER REFERENCES jobs(id) ON DELETE CASCADE,
+    filename VARCHAR(255) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
+    mimetype VARCHAR(100),
+    size INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### Documentation
+- **WIREFRAMING_GUIDE.md**: Added new standard protocol for AI-generated UI wireframes.
+- **AI-GUIDE.md**: Updated with "Browser Quirks" section for file handling.
+
+---
 
 ## [3.1.2] - 2026-01-28
 
