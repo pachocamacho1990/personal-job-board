@@ -1339,43 +1339,4 @@ if (closeArchiveModalBtn) {
     });
 }
 
-// File Delete Confirmation Modal Listeners
-const fileDeleteConfirmModal = document.getElementById('fileDeleteConfirmModal');
-const confirmFileDeleteBtn = document.getElementById('confirmFileDelete');
-const cancelFileDeleteBtn = document.getElementById('cancelFileDelete');
 
-if (fileDeleteConfirmModal) {
-    // Confirm delete
-    if (confirmFileDeleteBtn) {
-        confirmFileDeleteBtn.onclick = async () => {
-            if (fileToDeleteId && currentJobId) {
-                try {
-                    await api.files.delete(currentJobId, fileToDeleteId);
-                    currentJobFiles = currentJobFiles.filter(f => f.id !== fileToDeleteId);
-                    renderFilesList();
-                    fileDeleteConfirmModal.style.display = 'none';
-                    fileToDeleteId = null;
-                } catch (error) {
-                    console.error('Error deleting file:', error);
-                    alert('Failed to delete file: ' + error.message);
-                }
-            }
-        };
-    }
-
-    // Cancel delete
-    if (cancelFileDeleteBtn) {
-        cancelFileDeleteBtn.onclick = () => {
-            fileDeleteConfirmModal.style.display = 'none';
-            fileToDeleteId = null;
-        };
-    }
-
-    // Close on background click
-    fileDeleteConfirmModal.addEventListener('click', (e) => {
-        if (e.target === fileDeleteConfirmModal) {
-            fileDeleteConfirmModal.style.display = 'none';
-            fileToDeleteId = null;
-        }
-    });
-}
