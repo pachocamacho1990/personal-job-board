@@ -1,6 +1,5 @@
-// Reusing app.js logic but adapted for business entities
-// In a fuller refactor we would abstract the board logic into a generic class
-// due to time constraints, I will duplicate the relevant logic and adapt.
+// Business Board - Entity management
+// Shared utilities loaded from shared/utils.js and shared/file-manager.js
 
 let entities = [];
 let dragSource = null;
@@ -17,27 +16,13 @@ const commentsInput = document.getElementById('comments');
 const commentsPreview = document.getElementById('commentsPreview');
 const viewToggle = document.getElementById('viewToggle');
 const viewIcon = document.getElementById('viewIcon');
-
-// File Elements
 const attachmentsSection = document.getElementById('attachmentsSection');
-const fileInput = document.getElementById('fileInput');
-const addFileBtn = document.getElementById('addFileBtn');
-const filesList = document.getElementById('filesList');
 
-// File Modals
-const filePreviewModal = document.getElementById('filePreviewModal');
-const closeFilePreviewBtn = document.getElementById('closeFilePreview');
-const filePreviewContent = document.getElementById('filePreviewContent');
-const previewFileName = document.getElementById('previewFileName');
-const previewDownloadBtn = document.getElementById('previewDownloadBtn');
-
-const fileDeleteConfirmModal = document.getElementById('fileDeleteConfirmModal');
-const confirmFileDeleteBtn = document.getElementById('confirmFileDelete');
-const cancelFileDeleteBtn = document.getElementById('cancelFileDelete');
-
-let fileToDeleteId = null;
-let currentEntityIdForDelete = null;
-
+// File manager instance (uses shared/file-manager.js factory)
+const fileManager = createFileManager({
+    apiFiles: api.business.files,
+    getOwnerId: () => document.getElementById('entityId').value
+});
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -97,23 +82,8 @@ function setupEventListeners() {
         });
     }
 
-    // File Upload
-    addFileBtn.addEventListener('click', () => {
-        fileInput.click();
-    });
-
-    fileInput.addEventListener('change', handleFileUpload);
-
-    // File Preview Modal
-    closeFilePreviewBtn.addEventListener('click', closeFilePreview);
-
-    // File Delete Modal
-    cancelFileDeleteBtn.addEventListener('click', () => {
-        fileDeleteConfirmModal.style.display = 'none';
-        fileToDeleteId = null;
-    });
-
-    confirmFileDeleteBtn.addEventListener('click', handleConfirmFileDelete);
+    // File management (delegated to shared file-manager.js)
+    fileManager.setupListeners();
 }
 
 function updateViewToggleIcon() {
@@ -294,7 +264,7 @@ function openPanel(entity = null) {
         // Show attachments and load
         if (attachmentsSection) {
             attachmentsSection.style.display = 'block';
-            loadEntityFiles(entity.id);
+            fileManager.loadFiles(entity.id);
         }
     } else {
         // Defaults for new
@@ -303,9 +273,8 @@ function openPanel(entity = null) {
         // Show attachments section for new entities too (files will be queued)
         if (attachmentsSection) {
             attachmentsSection.style.display = 'block';
-            filesList.innerHTML = '<div class="no-files">No attachments yet</div>';
+            fileManager.showEmpty();
         }
-        filesToUpload = []; // Reset queue
     }
 
     detailPanel.classList.add('open');
@@ -343,15 +312,16 @@ async function handleFormSubmit(e) {
             entities.push(created);
 
             // Process queued files
-            if (filesToUpload.length > 0) {
-                for (const file of filesToUpload) {
+            const queuedFiles = fileManager.getQueue();
+            if (queuedFiles.length > 0) {
+                for (const file of queuedFiles) {
                     try {
                         await api.business.files.upload(created.id, file);
                     } catch (err) {
                         console.error('Failed to upload queued file:', err);
                     }
                 }
-                filesToUpload = [];
+                fileManager.clearQueue();
             }
         }
 
@@ -376,243 +346,4 @@ async function handleDelete() {
             alert('Failed to delete: ' + error.message);
         }
     }
-}
-
-function capitalize(str) {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function escapeHtml(text) {
-    if (!text) return '';
-    return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-// File Handling Functions
-
-async function loadEntityFiles(entityId) {
-    try {
-        filesList.innerHTML = '<div class="loading-spinner">Loading files...</div>';
-        const files = await api.business.files.getAll(entityId);
-        renderFilesList(files, entityId);
-    } catch (error) {
-        console.error('Failed to load files:', error);
-        filesList.innerHTML = '<div class="error-message">Failed to load files</div>';
-    }
-}
-
-function renderFilesList(files, entityId) {
-    if ((!files || files.length === 0) && filesToUpload.length === 0) {
-        filesList.innerHTML = '<div class="no-files">No attachments yet</div>';
-        return;
-    }
-
-    let html = '';
-
-    // Render queued files
-    if (filesToUpload.length > 0) {
-        html += filesToUpload.map((file, index) => {
-            const fileIcon = getFileIcon(file.type);
-            return `
-                <div class="file-item pending-upload">
-                    <div class="file-icon">${fileIcon}</div>
-                    <div class="file-info">
-                        <div class="file-name">${file.name} (Pending)</div>
-                        <div class="file-meta">${formatFileSize(file.size)}</div>
-                    </div>
-                    <div class="file-actions">
-                        <button type="button" class="btn-icon delete-file" onclick="removeQueuedFile(${index})" title="Remove">
-                            🗑️
-                        </button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    // Render existing files
-    if (files && files.length > 0) {
-        html += files.map(file => `
-            <div class="file-item">
-                <div class="file-icon" onclick="openFilePreview('${entityId}', '${file.id}', '${file.mimetype}', '${escapeHtml(file.originalName)}')">
-                    ${getFileIcon(file.mimetype)}
-                </div>
-                <div class="file-info">
-                    <div class="file-name" onclick="openFilePreview('${entityId}', '${file.id}', '${file.mimetype}', '${escapeHtml(file.originalName)}')">
-                        ${escapeHtml(file.originalName)}
-                    </div>
-                    <div class="file-meta">
-                        ${formatDate(file.createdAt)} • ${formatFileSize(file.size)}
-                    </div>
-                </div>
-                <div class="file-actions">
-                    <button type="button" class="btn-icon" onclick="openFilePreview('${entityId}', '${file.id}', '${file.mimetype}', '${escapeHtml(file.originalName)}')" title="View">
-                        👁️
-                    </button>
-                    <a href="${api.business.files.getDownloadUrl(entityId, file.id)}" class="btn-icon" title="Download" download>
-                        ⬇️
-                    </a>
-                    <button type="button" class="btn-icon delete-file" onclick="handleFileDelete('${file.id}')" title="Delete">
-                        🗑️
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    filesList.innerHTML = html;
-}
-
-// Global scope for onclick handlers
-window.removeQueuedFile = function (index) {
-    filesToUpload.splice(index, 1);
-    const entityId = document.getElementById('entityId').value;
-    renderFilesList(currentFiles, entityId); // renderFilesList needs actual files list, might need to store it globally or pass it
-    // Actually renderFilesList signature is (files, entityId). 
-    // We need 'currentFiles' to be available.
-};
-
-
-// Missing File Functions
-
-// Store current files for reference
-let currentEntityFiles = [];
-
-// Handle file delete button click - show confirmation modal
-function handleFileDelete(fileId) {
-    fileToDeleteId = fileId;
-    currentEntityIdForDelete = document.getElementById('entityId').value;
-    fileDeleteConfirmModal.style.display = 'flex';
-}
-
-// Confirm and execute file deletion
-async function handleConfirmFileDelete() {
-    if (!fileToDeleteId || !currentEntityIdForDelete) return;
-
-    try {
-        await api.business.files.delete(currentEntityIdForDelete, fileToDeleteId);
-        fileDeleteConfirmModal.style.display = 'none';
-        fileToDeleteId = null;
-        await loadEntityFiles(currentEntityIdForDelete);
-    } catch (error) {
-        alert('Failed to delete file: ' + error.message);
-    }
-}
-
-function openFilePreview(entityId, fileId, mimetype, filename) {
-    const modal = document.getElementById('filePreviewModal');
-    const content = document.getElementById('filePreviewContent');
-    const title = document.getElementById('previewFileName');
-    const downloadBtn = document.getElementById('previewDownloadBtn');
-
-    title.textContent = filename || 'File Preview';
-    const downloadUrl = api.business.files.getDownloadUrl(entityId, fileId);
-
-    // Add token for auth
-    const token = localStorage.getItem('authToken');
-    const downloadLinkUrl = `${downloadUrl}?token=${encodeURIComponent(token)}`;
-    const previewUrl = `${downloadUrl}?token=${encodeURIComponent(token)}&preview=true`;
-
-    downloadBtn.href = downloadLinkUrl;
-
-    // Clear previous content
-    content.innerHTML = '';
-
-    if (mimetype === 'application/pdf') {
-        content.innerHTML = `<embed src="${previewUrl}" type="application/pdf" width="100%" height="100%">`;
-    } else if (mimetype.startsWith('image/')) {
-        content.innerHTML = `<img src="${previewUrl}" alt="${filename}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
-    } else {
-        content.innerHTML = `
-            <div class="preview-fallback">
-                <p>Preview not available for this file type.</p>
-                <a href="${downloadLinkUrl}" class="btn-primary" download>Download File</a>
-            </div>
-        `;
-    }
-
-    modal.classList.add('open');
-}
-
-function closeFilePreview() {
-    const modal = document.getElementById('filePreviewModal');
-    const content = document.getElementById('filePreviewContent');
-    modal.classList.remove('open');
-    content.innerHTML = '';
-}
-
-// Queue management
-let filesToUpload = [];
-
-function removeQueuedFile(index) {
-    filesToUpload.splice(index, 1);
-    const entityId = document.getElementById('entityId').value;
-    if (entityId) {
-        loadEntityFiles(entityId);
-    } else {
-        renderFilesList([], null);
-    }
-}
-window.removeQueuedFile = removeQueuedFile;
-
-async function handleFileUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const entityId = document.getElementById('entityId').value;
-
-    // If new entity (no ID), queue it
-    if (!entityId) {
-        filesToUpload.push(file);
-        renderFilesList([], null); // Re-render with queued files
-        e.target.value = '';
-        return;
-    }
-
-    try {
-        // Show uploading state
-        const originalText = addFileBtn.textContent;
-        addFileBtn.textContent = 'Uploading...';
-        addFileBtn.disabled = true;
-
-        await api.business.files.upload(entityId, file);
-
-        // Reload files
-        await loadEntityFiles(entityId);
-
-        // Reset input
-        fileInput.value = '';
-    } catch (error) {
-        alert('Failed to upload file: ' + error.message);
-    } finally {
-        addFileBtn.textContent = '+ Add File';
-        addFileBtn.disabled = false;
-    }
-}
-
-function getFileIcon(mimetype) {
-    if (mimetype.startsWith('image/')) return '🖼️';
-    if (mimetype === 'application/pdf') return '📄';
-    if (mimetype.includes('word')) return '📝';
-    if (mimetype.includes('text')) return '📝';
-    return '📁';
-}
-
-function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-}
-
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
