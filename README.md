@@ -1,6 +1,6 @@
 # Job Board - Personal Application Tracker
 
-![Version](https://img.shields.io/badge/version-3.5.0-blue.svg)
+![Version](https://img.shields.io/badge/version-3.7.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ![Job Board Preview](preview.png)
@@ -94,7 +94,7 @@ personal-job-board/
 │       ├── shared/
 │       │   ├── utils.js     # Shared utilities (escapeHtml, formatDate, etc.)
 │       │   └── file-manager.js # File upload/preview/delete factory
-│       ├── api.js           # API client
+│       ├── api.js           # API client (CRUD + file factories)
 │       ├── app.js           # Job Board logic
 │       ├── business.js      # Business Board logic
 │       ├── dashboard.js     # Dashboard widgets

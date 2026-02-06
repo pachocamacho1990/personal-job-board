@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Version**: 3.6.0
+**Version**: 3.7.0
 
 A self-hosted career management platform with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
 
@@ -279,7 +279,11 @@ Both boards use `data-status` attributes for CSS styling:
 - Helmet.js and CORS configured in `server.js`
 - Rate limiting on auth routes (15 failed attempts per 15 min)
 
-## Recent Changes (v3.6.x)
+## Recent Changes (v3.7.x)
+
+### v3.7.0
+- **Refactor**: DRY'd up `api.js` with `createCrudApi()` and `createFilesApi()` factory functions
+- **Result**: `api.js` reduced from 296 → 141 lines (52% reduction), zero consumer changes
 
 ### v3.6.0
 - **Refactor**: Consolidated backend file controllers into `files.factory.js` factory pattern
@@ -322,7 +326,7 @@ Both boards use `data-status` attributes for CSS styling:
 | `public/js/business.js` | ~350 | Board-specific logic only (entity CRUD, cards, drag-drop) |
 | `public/js/shared/file-manager.js` | ~280 | Shared file operations factory (used by both boards) |
 | `public/js/shared/utils.js` | ~74 | Pure utility functions (shared across boards) |
-| `public/js/api.js` | 296 | REST API client |
+| `public/js/api.js` | ~141 | REST API client with `createCrudApi()` and `createFilesApi()` factories |
 | `server/controllers/files.factory.js` | ~162 | Generic file controller factory (shared by jobs & business) |
 | `server/controllers/files.controller.js` | ~10 | Thin wrapper using factory |
 | `server/controllers/business-files.controller.js` | ~10 | Thin wrapper using factory |
@@ -343,6 +347,7 @@ Both boards use `data-status` attributes for CSS styling:
 - [x] ~~**Consolidate file controllers**~~ — Done: `files.factory.js` factory pattern
 - [x] ~~**Extract shared file management**~~ — Done: `shared/file-manager.js` factory
 - [x] ~~**Extract shared utilities**~~ — Done: `shared/utils.js`
+- [x] ~~**DRY up API client**~~ — Done: `createCrudApi()` and `createFilesApi()` factories in `api.js`
 
 - [ ] **Split `app.js`** further into focused modules:
   - `journey-map.js` - SVG rendering for status timeline (~140 lines)
@@ -364,7 +369,7 @@ public/js/
 ├── shared/
 │   ├── utils.js              # Pure utilities (escapeHtml, formatRelativeTime, renderStars, etc.)
 │   └── file-manager.js       # createFileManager() factory for file operations
-├── api.js                    # REST API client
+├── api.js                    # REST API client (CRUD + file factories)
 ├── app.js                    # Job Board (Kanban, Center Peek, Journey Map, Archive Vault)
 ├── business.js               # Business Board (entity CRUD, cards, drag-drop)
 ├── dashboard.js              # Dashboard widgets
