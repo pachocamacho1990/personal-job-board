@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Version**: 3.2.0
+**Version**: 3.3.0
 
 A self-hosted career management platform with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
 
@@ -43,6 +43,8 @@ A self-hosted career management platform with **Kanban boards** for tracking job
    - `business.html`: Business Board Kanban
    - `login.html`: Authentication page
    - `js/api.js`: REST API client with JWT token management
+   - `js/shared/utils.js`: Shared utility functions (escapeHtml, formatRelativeTime, renderStars, etc.)
+   - `js/shared/file-manager.js`: `createFileManager()` factory — file upload/preview/delete for both boards
    - `js/app.js`: Job Board logic (Kanban, drag-and-drop, Center Peek modal, Journey Map)
    - `js/business.js`: Business Board logic + compact view toggle
    - `js/dashboard.js`: Dashboard widget logic
@@ -64,6 +66,9 @@ A self-hosted career management platform with **Kanban boards** for tracking job
      - `jobs.controller.js`: Job CRUD + history retrieval
      - `business.controller.js`: Business entity CRUD
      - `dashboard.controller.js`: Summary data aggregation
+     - `files.factory.js`: Generic file controller factory (shared by jobs & business)
+     - `files.controller.js`: Job file operations (thin wrapper using factory)
+     - `business-files.controller.js`: Business file operations (thin wrapper using factory)
    - `middleware/`:
      - `auth.js`: JWT verification middleware
      - `errorHandler.js`: Global error handler
@@ -274,7 +279,13 @@ Both boards use `data-status` attributes for CSS styling:
 - Helmet.js and CORS configured in `server.js`
 - Rate limiting on auth routes (15 failed attempts per 15 min)
 
-## Recent Changes (v3.2.x)
+## Recent Changes (v3.3.x)
+
+### v3.3.0
+- **Refactor**: Consolidated backend file controllers into `files.factory.js` factory pattern
+- **Refactor**: Extracted shared frontend modules (`shared/utils.js`, `shared/file-manager.js`)
+- **Fix**: Business board file downloads now include auth token
+- `app.js` reduced from 1,343 → 1,101 lines; `business.js` from 619 → 349 lines
 
 ### v3.2.0
 - **Archive Vault**: Added functionality to archive/restore jobs.
@@ -305,116 +316,111 @@ Both boards use `data-status` attributes for CSS styling:
 
 ### File Size & Complexity Overview
 
-| File | Lines | Size | Concerns |
-|------|-------|------|----------|
-| `public/js/app.js` | **1343** | 47KB | ⚠️ Too large - handles Kanban, modals, drag-drop, Journey Map, Archive Vault |
-| `public/js/business.js` | 619 | 21KB | ⚠️ Duplicates patterns from `app.js` |
-| `public/js/api.js` | 296 | 8KB | File upload logic duplicated for jobs/business |
-| `server/controllers/jobs.controller.js` | ~180 | 6KB | Reasonable size |
-| `server/controllers/business.controller.js` | ~120 | 3.4KB | Reasonable size |
-| `server/controllers/files.controller.js` | ~170 | 5.7KB | Reasonable size |
-| `server/controllers/business-files.controller.js` | ~180 | 5.9KB | ⚠️ Duplicates `files.controller.js` |
+| File | Lines | Concerns |
+|------|-------|----------|
+| `public/js/app.js` | ~1,100 | Still the largest — Kanban, modals, drag-drop, Journey Map, Archive Vault |
+| `public/js/business.js` | ~350 | Board-specific logic only (entity CRUD, cards, drag-drop) |
+| `public/js/shared/file-manager.js` | ~280 | Shared file operations factory (used by both boards) |
+| `public/js/shared/utils.js` | ~74 | Pure utility functions (shared across boards) |
+| `public/js/api.js` | 296 | REST API client |
+| `server/controllers/files.factory.js` | ~162 | Generic file controller factory (shared by jobs & business) |
+| `server/controllers/files.controller.js` | ~10 | Thin wrapper using factory |
+| `server/controllers/business-files.controller.js` | ~10 | Thin wrapper using factory |
 
 ### Known Complexity Areas
 
-**1. `app.js` - The Monolith (1343 lines, 67+ functions)**
-- Mixes multiple concerns: Kanban rendering, drag-and-drop, modals, file handling, Journey Map SVG
+**1. `app.js` (~1,100 lines)**
+- Still the largest file — handles Kanban rendering, drag-and-drop, Center Peek, Journey Map, Archive Vault
 - Contains nested function overrides (`originalOpenJobDetails` pattern)
-- Heavy DOM manipulation scattered throughout
-- Global state variables at top (`jobs[]`, `currentJobId`, `isCompactView`, `isFocusMode`)
+- File management now delegated to `shared/file-manager.js`
 
-**2. Duplicated Board Logic**
-- `business.js` explicitly notes: "Reusing app.js logic... due to time constraints, I will duplicate"
-- Both files implement: `setupEventListeners()`, `renderBoard()`, `createCard()`, drag-drop, file handling
-- Shared patterns with slight variations prevent easy extraction
-
-**3. File Upload Duplication**
-- `api.js`: Separate `files.upload()` and `business.files.upload()` with identical logic
-- `controllers/files.controller.js` and `business-files.controller.js` are near-identical
-- Each has its own upload/download/delete implementations
+**2. Remaining Board Logic Duplication**
+- Both `app.js` and `business.js` still implement their own: `setupEventListeners()`, `renderBoard()`, `createCard()`, drag-drop
+- These differ meaningfully between boards, making further extraction non-trivial
 
 ### Technical Debt
 
-- [ ] **Split `app.js`** into focused modules:
-  - `kanban.js` - Board rendering, column counts, card creation
-  - `drag-drop.js` - Drag and drop handlers
-  - `modals.js` - Panel, Center Peek, Archive Vault modal logic
-  - `journey-map.js` - SVG rendering for status timeline
-  - `file-manager.js` - File upload/preview/delete handling
-  
-- [ ] **Abstract shared board logic** into a `BoardBase` class or module:
-  - Both Job Board and Business Board share: event setup, card rendering, drag-drop, file handling
-  - Could use composition or inheritance pattern
-  
-- [ ] **Consolidate file controllers**:
-  - Create generic `createFileController(entityType)` factory
-  - `files.controller.js` and `business-files.controller.js` differ only by entity reference
-  
-- [ ] **TypeScript consideration**: No type safety - all validation is manual/runtime
-  
-- [ ] **State management**: Global arrays (`jobs[]`, `entities[]`) with no structure
-  - Consider lightweight state management or at minimum a state object
+- [x] ~~**Consolidate file controllers**~~ — Done: `files.factory.js` factory pattern
+- [x] ~~**Extract shared file management**~~ — Done: `shared/file-manager.js` factory
+- [x] ~~**Extract shared utilities**~~ — Done: `shared/utils.js`
 
-### Suggested Module Splits
+- [ ] **Split `app.js`** further into focused modules:
+  - `journey-map.js` - SVG rendering for status timeline (~140 lines)
+  - `archive-vault.js` - Archive modal logic (~160 lines)
+  - `center-peek.js` - Center Peek modal (~80 lines)
+
+- [ ] **Abstract shared board logic** into a `BoardBase` class or module:
+  - Both boards share: event setup patterns, card rendering, drag-drop
+  - Could use composition or inheritance pattern
+
+- [ ] **TypeScript consideration**: No type safety - all validation is manual/runtime
+
+- [ ] **State management**: Global arrays (`jobs[]`, `entities[]`) with no structure
+
+### Current Module Structure
 
 ```
 public/js/
-├── app.js           → Split into:
-│   ├── core/
-│   │   ├── state.js           # Global state management
-│   │   ├── utils.js           # Shared utilities (formatDate, escapeHtml)
-│   │   └── board-base.js      # Abstract board functionality
-│   ├── jobs/
-│   │   ├── job-board.js       # Job-specific board logic
-│   │   ├── job-card.js        # Card rendering
-│   │   └── journey-map.js     # SVG visualization
-│   ├── business/
-│   │   └── business-board.js  # Business-specific logic
-│   ├── components/
-│   │   ├── modals.js          # All modal handlers
-│   │   ├── drag-drop.js       # Drag and drop module
-│   │   └── file-manager.js    # File upload/preview
-│   └── main.js                # Entry point, initialization
+├── shared/
+│   ├── utils.js              # Pure utilities (escapeHtml, formatRelativeTime, renderStars, etc.)
+│   └── file-manager.js       # createFileManager() factory for file operations
+├── api.js                    # REST API client
+├── app.js                    # Job Board (Kanban, Center Peek, Journey Map, Archive Vault)
+├── business.js               # Business Board (entity CRUD, cards, drag-drop)
+├── dashboard.js              # Dashboard widgets
+├── sidebar.js                # Navigation highlighting
+├── logout.js                 # Logout modal
+└── auth.js                   # Login/signup
 
 server/controllers/
-├── files.controller.js → Refactor to:
-│   └── files.factory.js       # Generic file handler factory
-│   └── jobs-files.js          # Thin wrapper using factory
-│   └── business-files.js      # Thin wrapper using factory
+├── files.factory.js           # Generic file controller factory
+├── files.controller.js        # Job file ops (thin wrapper)
+├── business-files.controller.js # Business file ops (thin wrapper)
+├── jobs.controller.js         # Job CRUD
+├── business.controller.js     # Business entity CRUD
+├── auth.controller.js         # Authentication
+└── dashboard.controller.js    # Summary data
 ```
 
 ### Data Flow & Dependencies
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         FRONTEND                                │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌───────────┐     ┌───────────┐     ┌───────────────┐         │
-│  │ auth.js   │     │ api.js    │     │ sidebar.js    │         │
-│  │ (login)   │────▶│ (REST)    │     │ (navigation)  │         │
-│  └───────────┘     └─────┬─────┘     └───────────────┘         │
-│                          │                                      │
-│         ┌────────────────┼────────────────┐                    │
-│         ▼                ▼                ▼                    │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐            │
-│  │ dashboard.js │ │   app.js     │ │ business.js  │            │
-│  │ (widgets)    │ │ (job board)  │ │ (biz board)  │            │
-│  └──────────────┘ └──────────────┘ └──────────────┘            │
-│                   ↑ duplicated logic ↑                         │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                          FRONTEND                                │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌───────────┐     ┌───────────┐     ┌───────────────┐          │
+│  │ auth.js   │     │ api.js    │     │ sidebar.js    │          │
+│  │ (login)   │────▶│ (REST)    │     │ (navigation)  │          │
+│  └───────────┘     └─────┬─────┘     └───────────────┘          │
+│                          │                                       │
+│              ┌───────────┼───────────┐                           │
+│              ▼           ▼           ▼                           │
+│  ┌──────────────┐ ┌───────────┐ ┌──────────────┐                │
+│  │ dashboard.js │ │  app.js   │ │ business.js  │                │
+│  │ (widgets)    │ │(job board)│ │ (biz board)  │                │
+│  └──────────────┘ └─────┬─────┘ └──────┬───────┘                │
+│                         │              │                         │
+│                         ▼              ▼                         │
+│                  ┌─────────────────────────────┐                 │
+│                  │      shared/utils.js        │                 │
+│                  │   shared/file-manager.js    │                 │
+│                  └─────────────────────────────┘                 │
+└──────────────────────────────────────────────────────────────────┘
                            │
                            ▼ REST API
-┌─────────────────────────────────────────────────────────────────┐
-│                         BACKEND                                 │
-├─────────────────────────────────────────────────────────────────┤
-│  server.js ─── routes/*.routes.js ─── controllers/*.controller │
-│                                                    │            │
-│                                             middleware/auth.js  │
-│                                                    │            │
-│                                              config/db.js       │
-│                                                    ▼            │
-└────────────────────────────────── PostgreSQL (jobs, entities) ──┘
+┌──────────────────────────────────────────────────────────────────┐
+│                          BACKEND                                 │
+├──────────────────────────────────────────────────────────────────┤
+│  server.js ─── routes/*.routes.js ─── controllers/*.controller  │
+│                                              │                   │
+│                                       files.factory.js           │
+│                                              │                   │
+│                                       middleware/auth.js         │
+│                                              │                   │
+│                                        config/db.js              │
+│                                              ▼                   │
+└──────────────────────────────── PostgreSQL (jobs, entities) ─────┘
 ```
 
 ### Performance Considerations

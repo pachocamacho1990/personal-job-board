@@ -91,6 +91,9 @@ personal-job-board/
 │   │   ├── layout.css       # Dashboard layout
 │   │   └── sidebar.css      # Navigation styles
 │   └── js/
+│       ├── shared/
+│       │   ├── utils.js     # Shared utilities (escapeHtml, formatDate, etc.)
+│       │   └── file-manager.js # File upload/preview/delete factory
 │       ├── api.js           # API client
 │       ├── app.js           # Job Board logic
 │       ├── business.js      # Business Board logic
