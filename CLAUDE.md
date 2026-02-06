@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Version**: 3.3.0
+**Version**: 3.6.0
 
 A self-hosted career management platform with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
 
@@ -279,9 +279,9 @@ Both boards use `data-status` attributes for CSS styling:
 - Helmet.js and CORS configured in `server.js`
 - Rate limiting on auth routes (15 failed attempts per 15 min)
 
-## Recent Changes (v3.3.x)
+## Recent Changes (v3.6.x)
 
-### v3.3.0
+### v3.6.0
 - **Refactor**: Consolidated backend file controllers into `files.factory.js` factory pattern
 - **Refactor**: Extracted shared frontend modules (`shared/utils.js`, `shared/file-manager.js`)
 - **Fix**: Business board file downloads now include auth token
