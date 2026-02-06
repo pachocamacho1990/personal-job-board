@@ -34,18 +34,30 @@ async function init() {
     loadFocusPreference(); // Load focus mode state
     await loadJobs();
 
-    // Check for deep link (openJobId)
+    setupEventListeners();
+
+    // Initialize extracted modules (must come after setupEventListeners so DOM is wired)
+    initCenterPeek({
+        getJob: getJob,
+        setCurrentJobId: (id) => { currentJobId = id; }
+    });
+    initArchiveVault({
+        getJobs: () => jobs,
+        updateJob: updateJob,
+        renderAllJobs: renderAllJobs,
+        closeJobPanel: closeJobPanel,
+        getCurrentJobId: () => currentJobId
+    });
+
+    // Check for deep link (openJobId) — after Center Peek init so it opens in peek mode
     const urlParams = new URLSearchParams(window.location.search);
     const openJobId = urlParams.get('openJobId');
     if (openJobId) {
-        // Ensure job exists before trying to open
         const jobToOpen = jobs.find(j => j.id == openJobId);
         if (jobToOpen) {
             openJobDetails(parseInt(openJobId));
         }
     }
-
-    setupEventListeners();
 
     // Hide loading overlay
     const loader = document.getElementById('appLoading');
@@ -320,10 +332,7 @@ function renderJob(job) {
 }
 
 function updateColumnCounts(visibleJobs = jobs) {
-    // If no jobs arg provided (legacy call), use global list
-    // But renderAllJobs passes visibleJobs now.
-
-    const statuses = ['interested', 'applied', 'forgotten', 'interview', 'offer', 'rejected'];
+    const statuses = ['interested', 'applied', 'forgotten', 'interview', 'pending', 'offer', 'rejected', 'archived'];
     statuses.forEach(status => {
         const count = visibleJobs.filter(j => j.status === status).length;
         const badge = document.querySelector(`.column[data-status="${status}"] .count-badge`);
@@ -649,14 +658,6 @@ function setupEventListeners() {
     // File management (delegated to shared file-manager.js)
     fileManager.setupListeners();
 
-    // Archive
-    const archiveJobBtn = document.getElementById('archiveJobBtn');
-    if (archiveJobBtn) {
-        archiveJobBtn.addEventListener('click', () => {
-            if (currentJobId) showArchiveConfirm(currentJobId);
-        });
-    }
-
     // Logout
     const logoutTrigger = document.querySelector('.logout-trigger');
     if (logoutTrigger) {
@@ -695,407 +696,4 @@ function setupEventListeners() {
 }
 
 // Start the app
-// Start the app
 init();
-
-/* --- New Features: Center Peek & Journey Map --- */
-
-const centerPeekModal = document.getElementById('centerPeekModal');
-const closeCenterPeekBtn = document.getElementById('closeCenterPeek');
-const peekContent = document.getElementById('peekContent');
-
-// All status types including the new 'pending' status
-const ALL_STATUSES = ['interested', 'applied', 'interview', 'pending', 'offer', 'rejected', 'forgotten', 'archived'];
-function updateColumnCounts(visibleJobs = jobs) {
-    ALL_STATUSES.forEach(status => {
-        const count = visibleJobs.filter(j => j.status === status).length;
-        const badge = document.querySelector(`.column[data-status="${status}"] .count-badge`);
-        if (badge) badge.textContent = count;
-    });
-}
-
-/**
- * Open the Center Peek Modal (Journey Map View)
- */
-async function openCenterPeek(jobId) {
-    const job = getJob(jobId);
-    if (!job) return;
-
-    currentJobId = jobId;
-
-    // Show modal loading state
-    centerPeekModal.classList.add('open');
-    peekContent.innerHTML = '<div style="color:white; padding:2rem;">Loading history...</div>';
-
-    try {
-        // Fetch history
-        const history = await api.jobs.getHistory(jobId);
-        renderCenterPeekContent(job, history);
-    } catch (error) {
-        console.error("Failed to load history", error);
-        peekContent.innerHTML = '<div style="color:var(--color-danger); padding:2rem;">Failed to load history.</div>';
-    }
-}
-
-function closeCenterPeek() {
-    centerPeekModal.classList.remove('open');
-    peekContent.innerHTML = '';
-}
-
-if (closeCenterPeekBtn) {
-    closeCenterPeekBtn.addEventListener('click', closeCenterPeek);
-    // Close on background click
-    centerPeekModal.addEventListener('click', (e) => {
-        if (e.target === centerPeekModal) closeCenterPeek();
-    });
-}
-
-function renderCenterPeekContent(job, history) {
-    // 1. Structure
-    peekContent.innerHTML = `
-        <div class="journey-map-section">
-            <div class="journey-header">
-                <h1>${job.position || 'Untitled'}</h1>
-                <p class="company">${job.company || 'Unknown Company'}</p>
-            </div>
-            <div class="journey-graph-container" id="journeyGraph">
-                <!-- SVG injected here -->
-            </div>
-        </div>
-        <div class="job-details-section">
-            <div class="detail-row">
-                <div class="detail-label">Status</div>
-                <div class="detail-value">
-                    <span class="type-badge ${job.type}" style="font-size: 1rem; padding: 4px 12px;">
-                        ${job.status.toUpperCase()}
-                    </span>
-                 </div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Location</div>
-                <div class="detail-value">${job.location || '-'}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Salary</div>
-                <div class="detail-value">${job.salary || '-'}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Comments</div>
-                <div class="detail-value markdown-body">${job.comments ? marked.parse(job.comments) : 'No comments'}</div>
-            </div>
-            <div style="margin-top: 2rem;">
-                <button id="editJobFromPeek" class="btn-primary" style="width:100%">Edit Details</button>
-            </div>
-        </div>
-    `;
-
-    document.getElementById('editJobFromPeek').addEventListener('click', () => {
-        closeCenterPeek();
-        // Use the original openJobDetails (exposed on window) to bypass the Center Peek redirect
-        window.openRealEditPanel(job.id);
-    });
-
-    // 2. Render Graph
-    setTimeout(() => renderJourneyMap(history, job.status), 0);
-}
-
-/**
- * Render SVG Journey Map
- * X-axis: Statuses
- * Y-axis: Time (History Entries)
- */
-function renderJourneyMap(history, currentStatus) {
-    const container = document.getElementById('journeyGraph');
-    if (!container) return;
-
-    // Columns config - Matches job board column order
-    const columns = ['interested', 'applied', 'forgotten', 'interview', 'pending', 'offer', 'rejected', 'archived'];
-
-    // Fixed width per column for horizontal scroll
-    const colWidth = 100;
-    const padding = { top: 50, right: 30, bottom: 30, left: 30 };
-    const totalWidth = padding.left + (columns.length - 1) * colWidth + padding.right;
-    const width = Math.max(container.clientWidth || 500, totalWidth);
-    const height = Math.max(350, history.length * 80 + 120);
-
-
-    // Combine history + current state if not redundant
-    // Sort history by date desc (newest first) -> effectively bottom up?
-    // Let's visualize Top = Oldest, Bottom = Newest (Time flows down)
-    const sortedHistory = [...history].sort((a, b) => new Date(a.changed_at) - new Date(b.changed_at));
-
-    // Add "Start" node? Or just first history status
-
-    // Ensure we map status to an X coordinate
-    function getX(status) {
-        let idx = columns.indexOf(status);
-        if (idx === -1) {
-            idx = 0; // Default to first column for unknown statuses
-        }
-        return padding.left + (idx * colWidth);
-    }
-
-    // Generate Nodes
-    const nodes = [];
-
-    // 1. Add Start Node (from first history entry's previous_status)
-    if (sortedHistory.length > 0) {
-        const firstEntry = sortedHistory[0];
-        if (firstEntry.previous_status) {
-            nodes.push({
-                x: getX(firstEntry.previous_status),
-                y: padding.top,
-                status: firstEntry.previous_status,
-                date: firstEntry.changed_at, // Use same date as change? Or slightly earlier?
-                label: 'Start',
-                isCurrent: false,
-                isStart: true
-            });
-        }
-    }
-
-    // 2. Add History Nodes (new_status)
-    sortedHistory.forEach((entry, i) => {
-        // Offset y to accommodate start node
-        const yOffset = (nodes.length > 0 && nodes[0].isStart) ? ((i + 1) * 80) : (i * 80);
-
-        nodes.push({
-            x: getX(entry.new_status),
-            y: padding.top + yOffset,
-            status: entry.new_status,
-            date: entry.changed_at,
-            label: formatFullDate(entry.changed_at),
-            isCurrent: false
-        });
-    });
-
-    // If no history, show current status as single node
-    if (nodes.length === 0) {
-        nodes.push({
-            x: getX(currentStatus),
-            y: padding.top,
-            status: currentStatus,
-            date: new Date().toISOString(),
-            label: 'Current Status',
-            isCurrent: true
-        });
-    } else {
-        // Mark last as current
-        nodes[nodes.length - 1].isCurrent = true;
-    }
-
-    // SVG Content
-    let svgHtml = `<svg width="${width}" height="${height}" style="overflow: visible;">`;
-
-    // 1. Draw Column Lines & Labels
-    columns.forEach((col, i) => {
-        const x = padding.left + (i * colWidth);
-        // Line - lighter color, contained within SVG bounds
-        svgHtml += `<line x1="${x}" y1="${padding.top + 10}" x2="${x}" y2="${height - padding.bottom}" stroke="#E2E8F0" stroke-dasharray="4" />`;
-        // Label - full name, centered on column
-        const label = col.charAt(0).toUpperCase() + col.slice(1);
-        svgHtml += `<text x="${x}" y="${padding.top - 5}" class="status-column-label">${label}</text>`;
-    });
-
-    // 2. Draw Paths
-    let pathD = "";
-    if (nodes.length > 1) {
-        pathD = `M ${nodes[0].x} ${nodes[0].y}`;
-        for (let i = 1; i < nodes.length; i++) {
-            pathD += ` L ${nodes[i].x} ${nodes[i].y}`;
-        }
-        svgHtml += `<path d="${pathD}" class="journey-path active" />`;
-    }
-
-    // 3. Draw Nodes
-    nodes.forEach(node => {
-        const r = node.isCurrent ? 10 : 6;
-        const classes = `journey-node ${node.isCurrent ? 'active' : ''}`;
-        svgHtml += `<circle cx="${node.x}" cy="${node.y}" r="${r}" class="${classes}" />`;
-
-        // Date Label - positioned consistently to the right of node
-        svgHtml += `<text x="${node.x + 15}" y="${node.y + 4}" class="time-label">${formatRelativeTime(node.date)}</text>`;
-    });
-
-    svgHtml += `</svg>`;
-    container.innerHTML = svgHtml;
-}
-
-// Override openJobDetails to show Center Peek for existing jobs, Edit Panel for new jobs
-const originalOpenJobDetails = openJobDetails;
-openJobDetails = function (jobId) {
-    if (jobId === null) {
-        originalOpenJobDetails(null); // Add Mode → Edit Panel
-    } else {
-        openCenterPeek(jobId); // View Mode → Center Peek
-    }
-};
-
-// Expose original edit function for "Edit Details" button in Center Peek
-window.openRealEditPanel = originalOpenJobDetails;
-
-/* --- Archive Vault Logic --- */
-
-const archiveModal = document.getElementById('archiveModal');
-const closeArchiveModalBtn = document.getElementById('closeArchiveModal');
-const archiveContent = document.getElementById('archiveContent');
-const archiveBtnHeader = document.getElementById('archiveBtn');
-const archiveJobBtnPanel = document.getElementById('archiveJobBtn');
-
-function openArchiveModal() {
-    const archivedJobs = jobs.filter(j => j.status === 'archived');
-    renderArchiveList(archivedJobs);
-    archiveModal.classList.add('open');
-}
-
-function closeArchiveModal() {
-    archiveModal.classList.remove('open');
-}
-
-function renderArchiveList(archivedJobs) {
-    if (archivedJobs.length === 0) {
-        archiveContent.innerHTML = `
-            <div class="archive-empty">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
-                <h3>The Vault is Empty</h3>
-                <p>Jobs you archive will appear here.</p>
-            </div>
-        `;
-        return;
-    }
-
-    const listContainer = document.createElement('div');
-    listContainer.className = 'archive-list';
-
-    // Header Row
-    const headerRow = document.createElement('div');
-    headerRow.className = 'archive-row';
-    headerRow.style.background = 'var(--bg-secondary)';
-    headerRow.style.borderBottom = '2px solid var(--border-color)';
-    headerRow.style.fontWeight = '600';
-    headerRow.style.color = 'var(--text-secondary)';
-    headerRow.style.fontSize = 'var(--font-size-xs)';
-    headerRow.style.textTransform = 'uppercase';
-    headerRow.innerHTML = `
-        <div class="archive-col-main">Job Details</div>
-        <div class="archive-col-status">Status</div>
-    `;
-    listContainer.appendChild(headerRow);
-
-    archivedJobs.forEach(job => {
-        const row = document.createElement('div');
-        row.className = 'archive-row';
-
-        const isConnection = job.type === 'connection';
-        const title = isConnection ? (job.contactName || job.position) : job.position;
-        const subtitle = isConnection ? (job.organization || job.company) : job.company;
-
-        row.innerHTML = `
-            <div class="archive-col-main">
-                <div class="archive-title">${title || 'Untitled'}</div>
-                <div class="archive-company">${subtitle || 'Unknown'}</div>
-            </div>
-            <div class="archive-col-status">
-                <select class="archive-status-select" data-job-id="${job.id}">
-                    <option value="archived" selected>📦 Archived</option>
-                    <option value="interested">Interested</option>
-                    <option value="applied">Applied</option>
-                    <option value="interview">Interview</option>
-                    <option value="pending">Pending Next Step</option>
-                    <option value="offer">Offer</option>
-                    <option value="rejected">Rejected</option>
-                </select>
-            </div>
-        `;
-        listContainer.appendChild(row);
-    });
-
-    archiveContent.innerHTML = '';
-    archiveContent.appendChild(listContainer);
-
-    // Event listeners for status changes (Restore)
-    document.querySelectorAll('.archive-status-select').forEach(select => {
-        select.addEventListener('change', async (e) => {
-            const jobId = e.target.dataset.jobId;
-            const newStatus = e.target.value;
-
-            if (newStatus !== 'archived') {
-                // Restore item
-                try {
-                    await updateJob(jobId, { status: newStatus });
-
-                    // Remove row with animation
-                    const row = e.target.closest('.archive-row');
-                    row.style.opacity = '0';
-                    setTimeout(() => {
-                        openArchiveModal(); // Re-render list
-                        renderAllJobs(); // Update board in background
-                    }, 200);
-                } catch (error) {
-                    console.error("Failed to restore job", error);
-                    e.target.value = 'archived'; // Revert on failure
-                }
-            }
-        });
-    });
-}
-
-// Archive Action from Panel
-if (archiveJobBtnPanel) {
-    const archiveConfirmModal = document.getElementById('archiveConfirmModal');
-    const confirmArchiveBtn = document.getElementById('confirmArchive');
-    const cancelArchiveBtn = document.getElementById('cancelArchive');
-
-    // Open Modal
-    archiveJobBtnPanel.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (currentJobId) {
-            archiveConfirmModal.style.display = 'flex';
-        }
-    });
-
-    // Handle Confirm - using global handler pattern or re-attaching safe? 
-    // Since this runs once on load, we attach handlers once. They will use currentJobId when clicked.
-    if (confirmArchiveBtn) {
-        confirmArchiveBtn.onclick = async () => {
-            if (currentJobId) {
-                try {
-                    await updateJob(currentJobId, { status: 'archived' });
-                    archiveConfirmModal.style.display = 'none';
-                    closeJobPanel();
-                    renderAllJobs();
-                } catch (error) {
-                    console.error("Failed to archive job", error);
-                }
-            }
-        };
-    }
-
-    if (cancelArchiveBtn) {
-        cancelArchiveBtn.onclick = () => {
-            archiveConfirmModal.style.display = 'none';
-        };
-    }
-
-    // Close on background click
-    archiveConfirmModal.addEventListener('click', (e) => {
-        if (e.target === archiveConfirmModal) {
-            archiveConfirmModal.style.display = 'none';
-        }
-    });
-}
-
-// Event Listeners for Archive UI
-if (archiveBtnHeader) {
-    archiveBtnHeader.addEventListener('click', openArchiveModal);
-}
-
-if (closeArchiveModalBtn) {
-    closeArchiveModalBtn.addEventListener('click', closeArchiveModal);
-    archiveModal.addEventListener('click', (e) => {
-        if (e.target === archiveModal) closeArchiveModal();
-    });
-}
-
-

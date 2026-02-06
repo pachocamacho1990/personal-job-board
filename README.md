@@ -1,6 +1,6 @@
 # Job Board - Personal Application Tracker
 
-![Version](https://img.shields.io/badge/version-3.7.0-blue.svg)
+![Version](https://img.shields.io/badge/version-3.8.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ![Job Board Preview](preview.png)
@@ -93,7 +93,10 @@ personal-job-board/
 │   └── js/
 │       ├── shared/
 │       │   ├── utils.js     # Shared utilities (escapeHtml, formatDate, etc.)
-│       │   └── file-manager.js # File upload/preview/delete factory
+│       │   ├── file-manager.js # File upload/preview/delete factory
+│       │   ├── journey-map.js  # SVG status timeline
+│       │   ├── center-peek.js  # Read-only job detail modal
+│       │   └── archive-vault.js # Archive/restore modal
 │       ├── api.js           # API client (CRUD + file factories)
 │       ├── app.js           # Job Board logic
 │       ├── business.js      # Business Board logic

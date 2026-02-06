@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Version**: 3.7.0
+**Version**: 3.8.0
 
 A self-hosted career management platform with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
 
@@ -45,7 +45,10 @@ A self-hosted career management platform with **Kanban boards** for tracking job
    - `js/api.js`: REST API client with JWT token management
    - `js/shared/utils.js`: Shared utility functions (escapeHtml, formatRelativeTime, renderStars, etc.)
    - `js/shared/file-manager.js`: `createFileManager()` factory — file upload/preview/delete for both boards
-   - `js/app.js`: Job Board logic (Kanban, drag-and-drop, Center Peek modal, Journey Map)
+   - `js/shared/journey-map.js`: `renderJourneyMap()` — SVG status timeline visualization
+   - `js/shared/center-peek.js`: `initCenterPeek()` — read-only job detail modal with Journey Map
+   - `js/shared/archive-vault.js`: `initArchiveVault()` — archive/restore modal for managing archived jobs
+   - `js/app.js`: Job Board logic (Kanban, drag-and-drop, edit panel, form handling)
    - `js/business.js`: Business Board logic + compact view toggle
    - `js/dashboard.js`: Dashboard widget logic
    - `js/sidebar.js`: Navigation highlighting
@@ -261,7 +264,7 @@ Both boards use `data-status` attributes for CSS styling:
 2. Add column HTML in `public/jobs.html` with appropriate `data-status`
 3. Add column rendering in `public/js/app.js` `renderBoard()` function
 4. Add column styling in `public/styles.css`
-5. Update Journey Map column mapping in `app.js`
+5. Update Journey Map column mapping in `shared/journey-map.js`
 
 ### Adding New Routes
 
@@ -279,7 +282,17 @@ Both boards use `data-status` attributes for CSS styling:
 - Helmet.js and CORS configured in `server.js`
 - Rate limiting on auth routes (15 failed attempts per 15 min)
 
-## Recent Changes (v3.7.x)
+## Recent Changes (v3.8.x)
+
+### v3.8.0
+- **Refactor**: Split `app.js` into three focused modules:
+  - `shared/journey-map.js` — SVG status timeline rendering (~115 lines)
+  - `shared/center-peek.js` — read-only job detail modal (~115 lines)
+  - `shared/archive-vault.js` — archive/restore modal (~175 lines)
+- **Fix**: `updateColumnCounts` now includes all 8 statuses (`pending`, `archived` were missing)
+- **Fix**: Removed dead `showArchiveConfirm()` reference from `setupEventListeners()`
+- **Behavior**: Deep links (`?openJobId=`) now open Center Peek (consistent with card clicks)
+- **Result**: `app.js` reduced from 1,101 → 700 lines (36% reduction)
 
 ### v3.7.0
 - **Refactor**: DRY'd up `api.js` with `createCrudApi()` and `createFilesApi()` factory functions
@@ -322,9 +335,12 @@ Both boards use `data-status` attributes for CSS styling:
 
 | File | Lines | Concerns |
 |------|-------|----------|
-| `public/js/app.js` | ~1,100 | Still the largest — Kanban, modals, drag-drop, Journey Map, Archive Vault |
+| `public/js/app.js` | ~700 | Job Board core — Kanban, drag-drop, edit panel, form handling |
 | `public/js/business.js` | ~350 | Board-specific logic only (entity CRUD, cards, drag-drop) |
 | `public/js/shared/file-manager.js` | ~280 | Shared file operations factory (used by both boards) |
+| `public/js/shared/archive-vault.js` | ~175 | Archive/restore modal logic |
+| `public/js/shared/center-peek.js` | ~115 | Read-only job detail modal with Journey Map |
+| `public/js/shared/journey-map.js` | ~115 | SVG status timeline rendering |
 | `public/js/shared/utils.js` | ~74 | Pure utility functions (shared across boards) |
 | `public/js/api.js` | ~141 | REST API client with `createCrudApi()` and `createFilesApi()` factories |
 | `server/controllers/files.factory.js` | ~162 | Generic file controller factory (shared by jobs & business) |
@@ -333,10 +349,10 @@ Both boards use `data-status` attributes for CSS styling:
 
 ### Known Complexity Areas
 
-**1. `app.js` (~1,100 lines)**
-- Still the largest file — handles Kanban rendering, drag-and-drop, Center Peek, Journey Map, Archive Vault
-- Contains nested function overrides (`originalOpenJobDetails` pattern)
-- File management now delegated to `shared/file-manager.js`
+**1. `app.js` (~700 lines)**
+- Job Board core — Kanban rendering, drag-and-drop, edit panel, form handling
+- Center Peek, Journey Map, and Archive Vault extracted to `shared/` modules
+- File management delegated to `shared/file-manager.js`
 
 **2. Remaining Board Logic Duplication**
 - Both `app.js` and `business.js` still implement their own: `setupEventListeners()`, `renderBoard()`, `createCard()`, drag-drop
@@ -349,10 +365,7 @@ Both boards use `data-status` attributes for CSS styling:
 - [x] ~~**Extract shared utilities**~~ — Done: `shared/utils.js`
 - [x] ~~**DRY up API client**~~ — Done: `createCrudApi()` and `createFilesApi()` factories in `api.js`
 
-- [ ] **Split `app.js`** further into focused modules:
-  - `journey-map.js` - SVG rendering for status timeline (~140 lines)
-  - `archive-vault.js` - Archive modal logic (~160 lines)
-  - `center-peek.js` - Center Peek modal (~80 lines)
+- [x] ~~**Split `app.js`**~~ — Done: extracted `shared/journey-map.js`, `shared/center-peek.js`, `shared/archive-vault.js`
 
 - [ ] **Abstract shared board logic** into a `BoardBase` class or module:
   - Both boards share: event setup patterns, card rendering, drag-drop
@@ -368,9 +381,12 @@ Both boards use `data-status` attributes for CSS styling:
 public/js/
 ├── shared/
 │   ├── utils.js              # Pure utilities (escapeHtml, formatRelativeTime, renderStars, etc.)
-│   └── file-manager.js       # createFileManager() factory for file operations
+│   ├── file-manager.js       # createFileManager() factory for file operations
+│   ├── journey-map.js        # renderJourneyMap() — SVG status timeline
+│   ├── center-peek.js        # initCenterPeek() — read-only job detail modal
+│   └── archive-vault.js      # initArchiveVault() — archive/restore modal
 ├── api.js                    # REST API client (CRUD + file factories)
-├── app.js                    # Job Board (Kanban, Center Peek, Journey Map, Archive Vault)
+├── app.js                    # Job Board core (Kanban, drag-drop, edit panel, form handling)
 ├── business.js               # Business Board (entity CRUD, cards, drag-drop)
 ├── dashboard.js              # Dashboard widgets
 ├── sidebar.js                # Navigation highlighting
@@ -410,6 +426,9 @@ server/controllers/
 │                  ┌─────────────────────────────┐                 │
 │                  │      shared/utils.js        │                 │
 │                  │   shared/file-manager.js    │                 │
+│                  │   shared/journey-map.js     │                 │
+│                  │   shared/center-peek.js     │                 │
+│                  │   shared/archive-vault.js   │                 │
 │                  └─────────────────────────────┘                 │
 └──────────────────────────────────────────────────────────────────┘
                            │
