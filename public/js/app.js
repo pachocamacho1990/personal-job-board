@@ -3,40 +3,13 @@ let jobs = [];
 let currentJobId = null;
 let isCompactView = false; // View mode state
 let isPreviewMode = false; // Markdown preview mode
-let isFocusMode = false; // Focus mode state 🎯 (New)
+let isFocusMode = false; // Focus mode state
 
-// Date formatting helpers
-function formatRelativeTime(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-    const diffWeeks = Math.floor(diffDays / 7);
-    const diffMonths = Math.floor(diffDays / 30);
-
-    if (diffMins < 1) return 'just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    if (diffWeeks < 4) return `${diffWeeks}w ago`;
-    return `${diffMonths}mo ago`;
-}
-
-function formatFullDate(dateString) {
-    if (!dateString) return 'Unknown';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-    });
-}
+// File manager instance (uses shared/file-manager.js factory)
+const fileManager = createFileManager({
+    apiFiles: api.files,
+    getOwnerId: () => currentJobId
+});
 
 // DOM Elements
 const addJobBtn = document.getElementById('addJobBtn');
@@ -138,13 +111,6 @@ async function deleteJob(id) {
 
 function getJob(id) {
     return jobs.find(j => j.id === id);
-}
-
-// Helper function to render star rating
-function renderStars(rating) {
-    const filled = '★'.repeat(rating);
-    const empty = '☆'.repeat(5 - rating);
-    return `<span class="rating-stars">${filled}${empty}</span>`;
 }
 
 // View preference management
@@ -432,7 +398,7 @@ function openJobDetails(jobId) {
         const attachmentsSection = document.getElementById('attachmentsSection');
         if (attachmentsSection) {
             attachmentsSection.style.display = 'block';
-            loadJobFiles(job.id);
+            fileManager.loadFiles(job.id);
         }
 
         deleteBtn.style.display = 'block';
@@ -461,9 +427,8 @@ function openJobDetails(jobId) {
         const attachmentsSection = document.getElementById('attachmentsSection');
         if (attachmentsSection) {
             attachmentsSection.style.display = 'block';
-            document.getElementById('filesList').innerHTML = '<div class="no-files">No files attached</div>';
+            fileManager.showEmpty();
         }
-        filesToUpload = []; // Reset queue
 
         deleteBtn.style.display = 'none';
     }
@@ -544,19 +509,16 @@ async function handleFormSubmit(e) {
             const newJob = await createJob(formData);
 
             // Process queued files
-            if (filesToUpload.length > 0) {
-                // We need to upload sequentially or parallel
-                // Not blocking the UI too much, but ideally we should wait
-                // Let's show a toast or something, but for now just await
-                for (const file of filesToUpload) {
+            const queuedFiles = fileManager.getQueue();
+            if (queuedFiles.length > 0) {
+                for (const file of queuedFiles) {
                     try {
                         await api.files.upload(newJob.id, file);
                     } catch (err) {
                         console.error('Failed to upload queued file:', err);
-                        // Ideally notify user
                     }
                 }
-                filesToUpload = [];
+                fileManager.clearQueue();
             }
         }
 
@@ -637,178 +599,6 @@ function handleDrop(e) {
     return false;
 }
 
-/* --- File Attachments --- */
-let currentJobFiles = [];
-let fileToDeleteId = null;
-let filesToUpload = []; // Queue for new jobs
-
-async function loadJobFiles(jobId) {
-    const filesList = document.getElementById('filesList');
-    if (!filesList) return;
-
-    filesList.innerHTML = '<div class="loading-files">Loading files...</div>';
-
-    try {
-        currentJobFiles = await api.files.getAll(jobId);
-        renderFilesList();
-    } catch (error) {
-        console.error('Error loading files:', error);
-        filesList.innerHTML = '<div class="files-error">Failed to load files</div>';
-    }
-}
-
-function renderFilesList() {
-    const filesList = document.getElementById('filesList');
-    if (!filesList) return;
-
-    if (currentJobFiles.length === 0 && filesToUpload.length === 0) {
-        filesList.innerHTML = '<div class="no-files">No files attached</div>';
-        return;
-    }
-
-    let html = '';
-
-    // Render queued files (for new jobs)
-    if (filesToUpload.length > 0) {
-        html += filesToUpload.map((file, index) => {
-            const fileIcon = getFileIcon(file.type);
-            return `
-                <div class="file-item pending-upload">
-                    <span class="file-icon">${fileIcon}</span>
-                    <span class="file-name">${file.name} (Pending)</span>
-                    <div class="file-actions">
-                        <button type="button" class="btn-icon btn-delete-file" title="Remove" onclick="event.stopPropagation(); removeQueuedFile(${index})">🗑</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    // Render existing files
-    if (currentJobFiles.length > 0) {
-        html += currentJobFiles.map(file => {
-            const isPreviewable = file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/');
-            const fileIcon = getFileIcon(file.mimetype);
-            const downloadUrl = api.files.getDownloadUrl(currentJobId, file.id);
-            const token = localStorage.getItem('authToken');
-            const authedDownloadUrl = `${downloadUrl}?token=${encodeURIComponent(token)}`;
-
-            return `
-                <div class="file-item" data-file-id="${file.id}">
-                    <span class="file-icon">${fileIcon}</span>
-                    <span class="file-name">${file.originalName}</span>
-                    <div class="file-actions">
-                        ${isPreviewable ? `<button type="button" class="btn-icon btn-view" title="View" onclick="event.stopPropagation(); openFilePreview(${file.id})">👁</button>` : ''}
-                        <a href="${authedDownloadUrl}" class="btn-icon btn-download" title="Download" download="${file.originalName.replace(/"/g, '&quot;')}" onclick="event.stopPropagation();">⬇</a>
-                        <button type="button" class="btn-icon btn-delete-file" title="Delete" onclick="event.stopPropagation(); handleFileDelete(${file.id})">🗑</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    filesList.innerHTML = html;
-}
-
-function getFileIcon(mimetype) {
-    if (!mimetype) return '📎';
-    if (mimetype === 'application/pdf') return '📄';
-    if (mimetype.startsWith('image/')) return '🖼️';
-    if (mimetype.includes('word') || mimetype.includes('document')) return '📝';
-    if (mimetype === 'text/plain') return '📃';
-    return '📎';
-}
-
-function removeQueuedFile(index) {
-    filesToUpload.splice(index, 1);
-    renderFilesList();
-}
-window.removeQueuedFile = removeQueuedFile;
-
-async function handleFileUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // If new job (no ID), queue it
-    if (!currentJobId) {
-        filesToUpload.push(file);
-        renderFilesList();
-        e.target.value = ''; // Reset input
-        return;
-    }
-
-    // Existing job: upload immediately
-    const addFileBtn = document.getElementById('addFileBtn');
-    const originalText = addFileBtn.textContent;
-    addFileBtn.textContent = 'Uploading...';
-    addFileBtn.disabled = true;
-
-    try {
-        const uploaded = await api.files.upload(currentJobId, file);
-        currentJobFiles.unshift(uploaded);
-        renderFilesList();
-    } catch (error) {
-        console.error('Error uploading file:', error);
-        alert('Failed to upload file: ' + error.message);
-    } finally {
-        addFileBtn.textContent = originalText;
-        addFileBtn.disabled = false;
-        e.target.value = ''; // Reset input
-    }
-}
-
-function handleFileDelete(fileId) {
-    fileToDeleteId = fileId;
-    const modal = document.getElementById('fileDeleteConfirmModal');
-    modal.style.display = 'flex';
-}
-
-function openFilePreview(fileId) {
-    const file = currentJobFiles.find(f => f.id === fileId);
-    if (!file) return;
-
-    const modal = document.getElementById('filePreviewModal');
-    const previewFileName = document.getElementById('previewFileName');
-    const previewContent = document.getElementById('filePreviewContent');
-    const downloadBtn = document.getElementById('previewDownloadBtn');
-
-    const downloadUrl = api.files.getDownloadUrl(currentJobId, file.id);
-    const token = localStorage.getItem('authToken');
-
-    // URL for download/link (attachment disposition)
-    const downloadLinkUrl = `${downloadUrl}?token=${encodeURIComponent(token)}`;
-
-    // URL for preview (inline disposition)
-    const previewUrl = `${downloadUrl}?token=${encodeURIComponent(token)}&preview=true`;
-
-    previewFileName.textContent = file.originalName;
-    downloadBtn.href = downloadLinkUrl;
-
-    if (file.mimetype === 'application/pdf') {
-        previewContent.innerHTML = `<embed src="${previewUrl}" type="application/pdf" width="100%" height="100%">`;
-    } else if (file.mimetype.startsWith('image/')) {
-        previewContent.innerHTML = `<img src="${previewUrl}" alt="${file.originalName}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
-    } else {
-        previewContent.innerHTML = `<div class="preview-fallback">
-            <p>Preview not available for this file type.</p>
-            <a href="${downloadLinkUrl}" class="btn-primary" download>Download File</a>
-        </div>`;
-    }
-
-    modal.classList.add('open');
-}
-
-function closeFilePreview() {
-    const modal = document.getElementById('filePreviewModal');
-    const previewContent = document.getElementById('filePreviewContent');
-    modal.classList.remove('open');
-    previewContent.innerHTML = '';
-}
-
-// Expose functions to global scope for onclick handlers
-window.openFilePreview = openFilePreview;
-window.handleFileDelete = handleFileDelete;
-
 // Markdown Preview Toggle
 function togglePreviewMode() {
     isPreviewMode = !isPreviewMode;
@@ -856,39 +646,8 @@ function setupEventListeners() {
         radio.addEventListener('change', updateRatingDisplay);
     });
 
-    // File Upload
-    const addFileBtn = document.getElementById('addFileBtn');
-    addFileBtn.addEventListener('click', () => {
-        document.getElementById('fileInput').click();
-    });
-
-    document.getElementById('fileInput').addEventListener('change', handleFileUpload);
-
-    // File Preview Modal
-    const closeFilePreviewBtn = document.getElementById('closeFilePreview');
-    closeFilePreviewBtn.addEventListener('click', closeFilePreview);
-
-    // File Delete Modal
-    const cancelFileDeleteBtn = document.getElementById('cancelFileDelete');
-    cancelFileDeleteBtn.addEventListener('click', () => {
-        document.getElementById('fileDeleteConfirmModal').style.display = 'none';
-        fileToDeleteId = null;
-    });
-
-    const confirmDeleteBtn = document.getElementById('confirmFileDelete');
-    confirmDeleteBtn.addEventListener('click', async () => {
-        if (!fileToDeleteId || !currentJobId) return;
-        try {
-            await api.files.delete(currentJobId, fileToDeleteId);
-            document.getElementById('fileDeleteConfirmModal').style.display = 'none';
-            fileToDeleteId = null;
-            // Remove from local list
-            currentJobFiles = currentJobFiles.filter(f => f.id !== fileToDeleteId);
-            renderFilesList();
-        } catch (error) {
-            alert('Failed to delete file: ' + error.message);
-        }
-    });
+    // File management (delegated to shared file-manager.js)
+    fileManager.setupListeners();
 
     // Archive
     const archiveJobBtn = document.getElementById('archiveJobBtn');
