@@ -1,5 +1,8 @@
 # Job Board - Personal Application Tracker
 
+![Version](https://img.shields.io/badge/version-3.5.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+
 ![Job Board Preview](preview.png)
 
 <div align="center">
@@ -20,19 +23,22 @@ A minimalist, **self-hosted Kanban board** to track job applications, networking
 - **Kanban Columns**: Interested → Applied → Forgotten → Interview → **Pending** → Offer → Rejected (→ Archived)
 - **Center Peek Modal**: Click any card to view detailed info with Journey Map
 - **Journey Map Visualization**: Interactive SVG showing status progression over time
+- **File Attachments**: Upload resumes, cover letters, PDFs, and images to any job
 - **Job/Connection Types**: Track both networking and applications
 - **AI Agent Integration**: Jobs created by AI agents are highlighted with a glow effect
 - **Star Ratings**: Prioritize opportunities (1-5 stars)
 - **Compact/Comfortable View**: Toggle between dense and detailed card layouts
-- **Archive Vault 📦**: Archive completed or old jobs to declutter your board while preserving history. Accessible via the header or card detail panel.
+- **Focus Mode 🎯**: Filter to high-priority items (hides low-rated cards and Rejected/Forgotten columns)
+- **Archive Vault 📦**: Archive completed or old jobs to declutter your board while preserving history
 
 ### 🤝 Business Board
 - **Track Business Relationships**: Investors, VCs, Accelerators, Connections
 - **Kanban Stages**: Researching → Contacted → Meeting → Negotiation → Signed/Rejected
 - **Color-Coded Columns**: Each stage has distinct visual styling
 - **Drag & Drop**: Move entities between stages
-- **File Attachments**: Upload pitch decks, resumes, or notes to any entity
+- **File Attachments**: Upload pitch decks, contracts, or notes to any entity
 - **Compact/Comfortable View**: Same view toggle as Job Board
+- **Deep Linking**: Click jobs from Dashboard to open directly in Job Board with details visible
 
 ### 🔐 Authentication
 - Secure signup/login with password hashing (bcrypt)
@@ -156,7 +162,7 @@ See [TESTING.md](TESTING.md) for full testing strategy.
 |--------|----------|-------------|
 | POST | `/api/auth/signup` | Create account |
 | POST | `/api/auth/login` | Get JWT token |
-| POST | `/api/auth/logout` | Invalidate session |
+| GET | `/api/auth/me` | Get current user info |
 
 ### Jobs
 | Method | Endpoint | Description |
@@ -166,6 +172,9 @@ See [TESTING.md](TESTING.md) for full testing strategy.
 | PUT | `/api/jobs/:id` | Update job |
 | DELETE | `/api/jobs/:id` | Delete job |
 | GET | `/api/jobs/:id/history` | Get status change history |
+| GET | `/api/jobs/:id/files` | List job files |
+| POST | `/api/jobs/:id/files` | Upload file to job |
+| DELETE | `/api/jobs/:id/files/:fileId` | Delete job file |
 
 ### Business Entities
 | Method | Endpoint | Description |
@@ -174,11 +183,26 @@ See [TESTING.md](TESTING.md) for full testing strategy.
 | POST | `/api/business` | Create entity |
 | PUT | `/api/business/:id` | Update entity |
 | DELETE | `/api/business/:id` | Delete entity |
+| GET | `/api/business/:id/files` | List entity files |
+| POST | `/api/business/:id/files` | Upload file to entity |
+| DELETE | `/api/business/:id/files/:fileId` | Delete entity file |
 
 ### Dashboard
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/dashboard/summary` | Get widget data |
+
+### Health
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | API health check |
+
+## 📚 Documentation
+
+- [CHANGELOG.md](CHANGELOG.md) - Version history and release notes
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Deployment and migration guide
+- [TESTING.md](TESTING.md) - Testing strategy
+- [CLAUDE.md](CLAUDE.md) - AI assistant codebase guide
 
 ## 📄 License
 MIT
