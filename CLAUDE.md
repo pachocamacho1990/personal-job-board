@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Version**: 3.8.0
+**Version**: 3.9.0
 
 A self-hosted career management platform with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
 
@@ -45,11 +45,12 @@ A self-hosted career management platform with **Kanban boards** for tracking job
    - `js/api.js`: REST API client with JWT token management
    - `js/shared/utils.js`: Shared utility functions (escapeHtml, formatRelativeTime, renderStars, etc.)
    - `js/shared/file-manager.js`: `createFileManager()` factory — file upload/preview/delete for both boards
+   - `js/shared/board-helpers.js`: `createBoardHelpers()` factory — shared board behaviors (drag-drop, view toggle, markdown preview, panel, ESC key)
    - `js/shared/journey-map.js`: `renderJourneyMap()` — SVG status timeline visualization
    - `js/shared/center-peek.js`: `initCenterPeek()` — read-only job detail modal with Journey Map
    - `js/shared/archive-vault.js`: `initArchiveVault()` — archive/restore modal for managing archived jobs
-   - `js/app.js`: Job Board logic (Kanban, drag-and-drop, edit panel, form handling)
-   - `js/business.js`: Business Board logic + compact view toggle
+   - `js/app.js`: Job Board logic (Kanban, edit panel, form handling, focus mode)
+   - `js/business.js`: Business Board logic (entity CRUD, cards, panel)
    - `js/dashboard.js`: Dashboard widget logic
    - `js/sidebar.js`: Navigation highlighting
    - `js/logout.js`: Logout modal handling
@@ -282,7 +283,14 @@ Both boards use `data-status` attributes for CSS styling:
 - Helmet.js and CORS configured in `server.js`
 - Rate limiting on auth routes (15 failed attempts per 15 min)
 
-## Recent Changes (v3.8.x)
+## Recent Changes (v3.9.x)
+
+### v3.9.0
+- **Refactor**: Extracted shared board behaviors into `shared/board-helpers.js` factory:
+  - Drag-and-drop, view toggle, markdown preview, panel open/close, file queue processing, ESC key handling
+  - Both boards now use `createBoardHelpers(config)` instead of duplicating these patterns
+- **Bug Fix**: Business Board markdown preview was broken (`document.getElementById('comments')` returned `null` — textarea is `id="notes"`). Factory receives correct `textareaId: 'notes'`.
+- **Result**: `app.js` reduced from 700 → 573 lines (18% reduction); `business.js` from 350 → 256 lines (27% reduction); new `board-helpers.js` ~221 lines
 
 ### v3.8.0
 - **Refactor**: Split `app.js` into three focused modules:
@@ -335,9 +343,10 @@ Both boards use `data-status` attributes for CSS styling:
 
 | File | Lines | Concerns |
 |------|-------|----------|
-| `public/js/app.js` | ~700 | Job Board core — Kanban, drag-drop, edit panel, form handling |
-| `public/js/business.js` | ~350 | Board-specific logic only (entity CRUD, cards, drag-drop) |
+| `public/js/app.js` | ~573 | Job Board core — Kanban, edit panel, form handling, focus mode |
+| `public/js/business.js` | ~256 | Board-specific logic only (entity CRUD, cards, panel) |
 | `public/js/shared/file-manager.js` | ~280 | Shared file operations factory (used by both boards) |
+| `public/js/shared/board-helpers.js` | ~221 | Shared board behaviors factory (drag-drop, view toggle, preview, panel, ESC) |
 | `public/js/shared/archive-vault.js` | ~175 | Archive/restore modal logic |
 | `public/js/shared/center-peek.js` | ~115 | Read-only job detail modal with Journey Map |
 | `public/js/shared/journey-map.js` | ~115 | SVG status timeline rendering |
@@ -349,14 +358,15 @@ Both boards use `data-status` attributes for CSS styling:
 
 ### Known Complexity Areas
 
-**1. `app.js` (~700 lines)**
-- Job Board core — Kanban rendering, drag-and-drop, edit panel, form handling
+**1. `app.js` (~573 lines)**
+- Job Board core — Kanban rendering, edit panel, form handling, focus mode
 - Center Peek, Journey Map, and Archive Vault extracted to `shared/` modules
 - File management delegated to `shared/file-manager.js`
+- Drag-drop, view toggle, markdown preview, panel, ESC key delegated to `shared/board-helpers.js`
 
-**2. Remaining Board Logic Duplication**
-- Both `app.js` and `business.js` still implement their own: `setupEventListeners()`, `renderBoard()`, `createCard()`, drag-drop
-- These differ meaningfully between boards, making further extraction non-trivial
+**2. Remaining Board-Specific Logic**
+- Both `app.js` and `business.js` still implement their own: `renderBoard()`, `createCard()`, `openPanel()`, form handling
+- These differ meaningfully between boards (different fields, card HTML, statuses) — not candidates for extraction
 
 ### Technical Debt
 
@@ -367,9 +377,7 @@ Both boards use `data-status` attributes for CSS styling:
 
 - [x] ~~**Split `app.js`**~~ — Done: extracted `shared/journey-map.js`, `shared/center-peek.js`, `shared/archive-vault.js`
 
-- [ ] **Abstract shared board logic** into a `BoardBase` class or module:
-  - Both boards share: event setup patterns, card rendering, drag-drop
-  - Could use composition or inheritance pattern
+- [x] ~~**Abstract shared board logic**~~ — Done: `shared/board-helpers.js` factory (drag-drop, view toggle, markdown preview, panel, file queue, ESC key)
 
 - [ ] **TypeScript consideration**: No type safety - all validation is manual/runtime
 
@@ -382,12 +390,13 @@ public/js/
 ├── shared/
 │   ├── utils.js              # Pure utilities (escapeHtml, formatRelativeTime, renderStars, etc.)
 │   ├── file-manager.js       # createFileManager() factory for file operations
+│   ├── board-helpers.js      # createBoardHelpers() factory for shared board behaviors
 │   ├── journey-map.js        # renderJourneyMap() — SVG status timeline
 │   ├── center-peek.js        # initCenterPeek() — read-only job detail modal
 │   └── archive-vault.js      # initArchiveVault() — archive/restore modal
 ├── api.js                    # REST API client (CRUD + file factories)
-├── app.js                    # Job Board core (Kanban, drag-drop, edit panel, form handling)
-├── business.js               # Business Board (entity CRUD, cards, drag-drop)
+├── app.js                    # Job Board core (Kanban, edit panel, form handling, focus mode)
+├── business.js               # Business Board (entity CRUD, cards, panel)
 ├── dashboard.js              # Dashboard widgets
 ├── sidebar.js                # Navigation highlighting
 ├── logout.js                 # Logout modal
@@ -426,6 +435,7 @@ server/controllers/
 │                  ┌─────────────────────────────┐                 │
 │                  │      shared/utils.js        │                 │
 │                  │   shared/file-manager.js    │                 │
+│                  │   shared/board-helpers.js   │                 │
 │                  │   shared/journey-map.js     │                 │
 │                  │   shared/center-peek.js     │                 │
 │                  │   shared/archive-vault.js   │                 │

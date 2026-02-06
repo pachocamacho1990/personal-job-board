@@ -1,27 +1,36 @@
 // Business Board - Entity management
-// Shared utilities loaded from shared/utils.js and shared/file-manager.js
+// Shared utilities loaded from shared/utils.js, shared/file-manager.js, shared/board-helpers.js
 
 let entities = [];
-let dragSource = null;
-let isCompactView = false;
 
 // DOM Elements
 const addBtn = document.getElementById('addBtn');
 const entityForm = document.getElementById('entityForm');
-const detailPanel = document.getElementById('detailPanel');
-const closePanelBtn = document.getElementById('closePanel');
 const deleteBtn = document.getElementById('deleteBtn');
-const togglePreview = document.getElementById('togglePreview');
-const commentsInput = document.getElementById('comments');
-const commentsPreview = document.getElementById('commentsPreview');
-const viewToggle = document.getElementById('viewToggle');
-const viewIcon = document.getElementById('viewIcon');
 const attachmentsSection = document.getElementById('attachmentsSection');
 
 // File manager instance (uses shared/file-manager.js factory)
 const fileManager = createFileManager({
     apiFiles: api.business.files,
     getOwnerId: () => document.getElementById('entityId').value
+});
+
+// Board helpers (uses shared/board-helpers.js factory)
+const helpers = createBoardHelpers({
+    getCardId: (card) => card.dataset.id,
+    onDrop: (id, newStatus) => api.business.update(id, { status: newStatus }),
+    onDropComplete: () => renderBoard(),
+    viewStorageKey: 'businessBoardCompactView',
+    viewIconId: 'viewIcon',
+    onViewChange: () => renderBoard(),
+    textareaId: 'notes',
+    previewId: 'commentsPreview',
+    toggleBtnId: 'togglePreview',
+    panelId: 'detailPanel',
+    formId: 'entityForm',
+    onPanelClose: null,
+    fileManager: fileManager,
+    uploadFile: (id, file) => api.business.files.upload(id, file)
 });
 
 // Initialize
@@ -33,10 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Load saved view preference
-    isCompactView = localStorage.getItem('businessBoardCompactView') === 'true';
-    updateViewToggleIcon();
-
+    helpers.loadViewPreference();
     fetchEntities();
     setupEventListeners();
 });
@@ -48,7 +54,7 @@ function setupEventListeners() {
     });
 
     // Close panel
-    closePanelBtn.addEventListener('click', closePanel);
+    document.getElementById('closePanel').addEventListener('click', () => helpers.closePanel());
 
     // Form submission
     entityForm.addEventListener('submit', handleFormSubmit);
@@ -56,41 +62,20 @@ function setupEventListeners() {
     // Delete entity
     deleteBtn.addEventListener('click', handleDelete);
 
-    // Markdown preview toggle
-    togglePreview.addEventListener('click', () => {
-        const isPreview = commentsPreview.style.display !== 'none';
-        if (isPreview) {
-            commentsPreview.style.display = 'none';
-            commentsInput.style.display = 'block';
-            togglePreview.textContent = 'Preview';
-            togglePreview.classList.remove('active');
-        } else {
-            commentsPreview.innerHTML = marked.parse(commentsInput.value);
-            commentsPreview.style.display = 'block';
-            commentsInput.style.display = 'none';
-            togglePreview.textContent = 'Edit';
-            togglePreview.classList.add('active');
-        }
-    });
+    // Markdown preview toggle (delegated to board-helpers.js)
+    document.getElementById('togglePreview').addEventListener('click', helpers.togglePreviewMode);
 
+    // View toggle (delegated to board-helpers.js)
+    const viewToggle = document.getElementById('viewToggle');
     if (viewToggle) {
-        viewToggle.addEventListener('click', () => {
-            isCompactView = !isCompactView;
-            localStorage.setItem('businessBoardCompactView', isCompactView);
-            updateViewToggleIcon();
-            renderBoard();
-        });
+        viewToggle.addEventListener('click', helpers.toggleViewMode);
     }
+
+    // Drag and drop on containers (delegated to board-helpers.js)
+    helpers.setupDropZones();
 
     // File management (delegated to shared file-manager.js)
     fileManager.setupListeners();
-}
-
-function updateViewToggleIcon() {
-    if (viewIcon) {
-        viewIcon.textContent = isCompactView ? '⊞' : '⊟';
-        viewToggle.title = isCompactView ? 'Switch to comfortable view' : 'Switch to compact view';
-    }
 }
 
 async function fetchEntities() {
@@ -131,17 +116,17 @@ function renderBoard() {
 function createCard(entity) {
     const card = document.createElement('div');
     card.className = 'job-card'; // Reusing job-card class for consistent styling
-    if (isCompactView) card.classList.add('compact');
+    if (helpers.isCompactView()) card.classList.add('compact');
     card.draggable = true;
     card.dataset.id = entity.id;
 
     // Type definition and Emoji
-    let typeEmoji = '🤝';
-    if (entity.type === 'investor') typeEmoji = '💸';
-    if (entity.type === 'vc') typeEmoji = '🏛️';
-    if (entity.type === 'accelerator') typeEmoji = '🚀';
+    let typeEmoji = '\u{1F91D}';
+    if (entity.type === 'investor') typeEmoji = '\u{1F4B8}';
+    if (entity.type === 'vc') typeEmoji = '\u{1F3DB}\uFE0F';
+    if (entity.type === 'accelerator') typeEmoji = '\u{1F680}';
 
-    if (isCompactView) {
+    if (helpers.isCompactView()) {
         card.innerHTML = `
             <div class="compact-row">
                 <span class="type-emoji">${typeEmoji}</span>
@@ -159,78 +144,14 @@ function createCard(entity) {
         `;
     }
 
-    // Drag events
-    card.addEventListener('dragstart', (e) => {
-        dragSource = card;
-        card.classList.add('dragging');
-        e.dataTransfer.setData('text/plain', entity.id);
-        e.dataTransfer.effectAllowed = 'move';
-    });
-
-    card.addEventListener('dragend', () => {
-        card.classList.remove('dragging');
-        dragSource = null;
-    });
+    // Drag events (delegated to board-helpers.js)
+    card.addEventListener('dragstart', helpers.handleDragStart);
+    card.addEventListener('dragend', helpers.handleDragEnd);
 
     // Click to edit
     card.addEventListener('click', () => openPanel(entity));
 
     return card;
-}
-
-// Drag and Drop Logic for Columns
-document.querySelectorAll('.column').forEach(column => {
-    const container = column.querySelector('.cards-container');
-
-    column.addEventListener('dragover', (e) => {
-        e.preventDefault(); // Allow drop
-        container.classList.add('drag-over');
-    });
-
-    column.addEventListener('dragleave', () => {
-        container.classList.remove('drag-over');
-    });
-
-    column.addEventListener('drop', async (e) => {
-        e.preventDefault();
-        container.classList.remove('drag-over');
-
-        const id = e.dataTransfer.getData('text/plain');
-        const newStatus = column.dataset.status;
-
-        // Find entity
-        const entity = entities.find(e => e.id == id);
-        if (entity && entity.status !== newStatus) {
-            // Optimistic update
-            const oldStatus = entity.status;
-            entity.status = newStatus;
-
-            // Move card in DOM
-            if (dragSource) {
-                container.appendChild(dragSource);
-                // Update counts
-                updateCounts();
-            }
-
-            try {
-                await api.business.update(id, { status: newStatus });
-            } catch (error) {
-                console.error('Update failed:', error);
-                // Revert
-                entity.status = oldStatus;
-                renderBoard();
-                alert('Failed to update status');
-            }
-        }
-    });
-});
-
-function updateCounts() {
-    // Simple recalculation based on DOM
-    document.querySelectorAll('.column').forEach(column => {
-        const count = column.querySelectorAll('.job-card').length;
-        column.querySelector('.count-badge').textContent = count;
-    });
 }
 
 function openPanel(entity = null) {
@@ -277,11 +198,7 @@ function openPanel(entity = null) {
         }
     }
 
-    detailPanel.classList.add('open');
-}
-
-function closePanel() {
-    detailPanel.classList.remove('open');
+    helpers.openPanel();
 }
 
 async function handleFormSubmit(e) {
@@ -312,21 +229,11 @@ async function handleFormSubmit(e) {
             entities.push(created);
 
             // Process queued files
-            const queuedFiles = fileManager.getQueue();
-            if (queuedFiles.length > 0) {
-                for (const file of queuedFiles) {
-                    try {
-                        await api.business.files.upload(created.id, file);
-                    } catch (err) {
-                        console.error('Failed to upload queued file:', err);
-                    }
-                }
-                fileManager.clearQueue();
-            }
+            await helpers.processFileQueue(created.id);
         }
 
         renderBoard();
-        closePanel();
+        helpers.closePanel();
     } catch (error) {
         alert('Failed to save entity: ' + error.message);
     }
@@ -341,7 +248,7 @@ async function handleDelete() {
             await api.business.delete(id);
             entities = entities.filter(e => e.id != id);
             renderBoard();
-            closePanel();
+            helpers.closePanel();
         } catch (error) {
             alert('Failed to delete: ' + error.message);
         }
