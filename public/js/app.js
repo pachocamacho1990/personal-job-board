@@ -1,8 +1,6 @@
 // State
 let jobs = [];
 let currentJobId = null;
-let isCompactView = false; // View mode state
-let isPreviewMode = false; // Markdown preview mode
 let isFocusMode = false; // Focus mode state
 
 // File manager instance (uses shared/file-manager.js factory)
@@ -11,15 +9,33 @@ const fileManager = createFileManager({
     getOwnerId: () => currentJobId
 });
 
+// Board helpers (uses shared/board-helpers.js factory)
+const helpers = createBoardHelpers({
+    getCardId: (card) => card.dataset.jobId,
+    onDrop: (id, newStatus) => updateJob(id, { status: newStatus }),
+    onDropComplete: () => renderAllJobs(),
+    viewStorageKey: 'viewPreference',
+    viewIconId: 'viewIcon',
+    onViewChange: () => renderAllJobs(),
+    textareaId: 'comments',
+    previewId: 'commentsPreview',
+    toggleBtnId: 'togglePreview',
+    panelId: 'detailPanel',
+    formId: 'jobForm',
+    onPanelClose: () => {
+        document.getElementById('jobId').value = '';
+        currentJobId = null;
+    },
+    fileManager: fileManager,
+    uploadFile: (id, file) => api.files.upload(id, file)
+});
+
 // DOM Elements
 const addJobBtn = document.getElementById('addJobBtn');
 const detailPanel = document.getElementById('detailPanel');
-const closePanel = document.getElementById('closePanel');
+const closePanelBtn = document.getElementById('closePanel');
 const jobForm = document.getElementById('jobForm');
 const deleteBtn = document.getElementById('deleteBtn');
-const togglePreviewBtn = document.getElementById('togglePreview');
-const commentsTextarea = document.getElementById('comments');
-const commentsPreview = document.getElementById('commentsPreview');
 
 // Initialize app
 async function init() {
@@ -30,7 +46,7 @@ async function init() {
         return;
     }
 
-    loadViewPreference();
+    helpers.loadViewPreference();
     loadFocusPreference(); // Load focus mode state
     await loadJobs();
 
@@ -125,43 +141,7 @@ function getJob(id) {
     return jobs.find(j => j.id === id);
 }
 
-// View preference management
-function loadViewPreference() {
-    try {
-        const saved = localStorage.getItem('viewPreference');
-        isCompactView = saved === 'compact';
-        updateViewIcon();
-        console.log(`✓ Loaded view preference: ${isCompactView ? 'compact' : 'comfortable'}`);
-    } catch (error) {
-        console.error('Error loading view preference:', error);
-        isCompactView = false;
-    }
-}
-
-function saveViewPreference() {
-    try {
-        localStorage.setItem('viewPreference', isCompactView ? 'compact' : 'comfortable');
-        console.log(`✓ Saved view preference: ${isCompactView ? 'compact' : 'comfortable'}`);
-    } catch (error) {
-        console.error('Error saving view preference:', error);
-    }
-}
-
-function toggleViewMode() {
-    isCompactView = !isCompactView;
-    saveViewPreference();
-    updateViewIcon();
-    renderAllJobs();
-}
-
-function updateViewIcon() {
-    const icon = document.getElementById('viewIcon');
-    if (icon) {
-        icon.textContent = isCompactView ? '⊞' : '⊟';
-    }
-}
-
-// Focus Mode Management 🎯
+// Focus Mode Management
 function loadFocusPreference() {
     try {
         const saved = localStorage.getItem('focusMode');
@@ -236,7 +216,7 @@ function renderJob(job) {
     if (!container) return;
 
     const card = document.createElement('div');
-    card.className = isCompactView ? 'job-card compact' : 'job-card';
+    card.className = helpers.isCompactView() ? 'job-card compact' : 'job-card';
     card.draggable = true;
     card.dataset.jobId = job.id;
     card.dataset.type = job.type;
@@ -270,7 +250,7 @@ function renderJob(job) {
     if (job.location) metadata.push(job.location);
     if (job.salary) metadata.push(job.salary);
 
-    if (isCompactView) {
+    if (helpers.isCompactView()) {
         // Compact layout: rating + title + badges on one line
         const relativeTime = formatRelativeTime(job.updated_at);
         card.innerHTML = `
@@ -320,8 +300,8 @@ function renderJob(job) {
     card.addEventListener('click', () => openJobDetails(job.id));
 
     // Drag and drop
-    card.addEventListener('dragstart', handleDragStart);
-    card.addEventListener('dragend', handleDragEnd);
+    card.addEventListener('dragstart', helpers.handleDragStart);
+    card.addEventListener('dragend', helpers.handleDragEnd);
 
     // Shine Effect for Unseen Jobs
     if (job.is_unseen) {
@@ -473,15 +453,7 @@ function updateRatingDisplay() {
 }
 
 function closeJobPanel() {
-    detailPanel.classList.remove('open');
-    jobForm.reset();
-    document.getElementById('jobId').value = ''; // Explicitly clear hidden ID
-    currentJobId = null;
-
-    // Reset to edit mode when closing
-    if (isPreviewMode) {
-        togglePreviewMode();
-    }
+    helpers.closePanel();
 }
 
 // Form handling
@@ -518,17 +490,7 @@ async function handleFormSubmit(e) {
             const newJob = await createJob(formData);
 
             // Process queued files
-            const queuedFiles = fileManager.getQueue();
-            if (queuedFiles.length > 0) {
-                for (const file of queuedFiles) {
-                    try {
-                        await api.files.upload(newJob.id, file);
-                    } catch (err) {
-                        console.error('Failed to upload queued file:', err);
-                    }
-                }
-                fileManager.clearQueue();
-            }
+            await helpers.processFileQueue(newJob.id);
         }
 
         renderAllJobs();
@@ -550,92 +512,13 @@ async function handleDelete() {
     }
 }
 
-// Drag and Drop
-let draggedElement = null;
-
-function handleDragStart(e) {
-    draggedElement = e.target;
-    e.target.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', e.target.innerHTML);
-}
-
-function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
-}
-
-function handleDragOver(e) {
-    if (e.preventDefault) {
-        e.preventDefault();
-    }
-    e.dataTransfer.dropEffect = 'move';
-    return false;
-}
-
-function handleDragEnter(e) {
-    if (e.target.classList.contains('cards-container')) {
-        e.target.classList.add('drag-over');
-    }
-}
-
-function handleDragLeave(e) {
-    if (e.target.classList.contains('cards-container')) {
-        e.target.classList.remove('drag-over');
-    }
-}
-
-function handleDrop(e) {
-    if (e.stopPropagation) {
-        e.stopPropagation();
-    }
-
-    e.preventDefault();
-
-    const container = e.target.closest('.cards-container');
-    if (container && draggedElement) {
-        const jobId = draggedElement.dataset.jobId;
-        const newStatus = container.dataset.status;
-
-        // Update job status
-        updateJob(jobId, { status: newStatus }).then(() => {
-            // Re-render
-            renderAllJobs();
-        });
-
-        container.classList.remove('drag-over');
-    }
-
-    return false;
-}
-
-// Markdown Preview Toggle
-function togglePreviewMode() {
-    isPreviewMode = !isPreviewMode;
-
-    if (isPreviewMode) {
-        // Switch to preview mode
-        const markdown = commentsTextarea.value;
-        commentsPreview.innerHTML = markdown ? marked.parse(markdown) : '<p style="color: var(--text-tertiary);">No comments yet...</p>';
-        commentsTextarea.style.display = 'none';
-        commentsPreview.style.display = 'block';
-        togglePreviewBtn.textContent = 'Edit';
-        togglePreviewBtn.classList.add('active');
-    } else {
-        // Switch to edit mode
-        commentsTextarea.style.display = 'block';
-        commentsPreview.style.display = 'none';
-        togglePreviewBtn.textContent = 'Preview';
-        togglePreviewBtn.classList.remove('active');
-    }
-}
-
 // Event Listeners
 function setupEventListeners() {
     // Add job button
     addJobBtn.addEventListener('click', () => openJobDetails(null));
 
     // Close panel
-    closePanel.addEventListener('click', closeJobPanel);
+    closePanelBtn.addEventListener('click', closeJobPanel);
 
     // Form submit
     jobForm.addEventListener('submit', handleFormSubmit);
@@ -667,32 +550,23 @@ function setupEventListeners() {
     }
 
 
-    // Drag and drop on containers
-    document.querySelectorAll('.cards-container').forEach(container => {
-        container.addEventListener('dragover', handleDragOver);
-        container.addEventListener('dragenter', handleDragEnter);
-        container.addEventListener('dragleave', handleDragLeave);
-        container.addEventListener('drop', handleDrop);
-    });
+    // Drag and drop on containers (delegated to board-helpers.js)
+    helpers.setupDropZones();
 
-    // Close panel on ESC
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && detailPanel.classList.contains('open')) {
-            closeJobPanel();
-        }
-    });
+    // Close panel on ESC (delegated to board-helpers.js)
+    helpers.setupEscapeKey();
 
     // View toggle button
-    document.getElementById('viewToggle').addEventListener('click', toggleViewMode);
+    document.getElementById('viewToggle').addEventListener('click', helpers.toggleViewMode);
 
-    // Focus toggle button (New)
+    // Focus toggle button
     const focusToggle = document.getElementById('focusToggle');
     if (focusToggle) {
         focusToggle.addEventListener('click', toggleFocusMode);
     }
 
     // Markdown preview toggle
-    togglePreviewBtn.addEventListener('click', togglePreviewMode);
+    document.getElementById('togglePreview').addEventListener('click', helpers.togglePreviewMode);
 }
 
 // Start the app
