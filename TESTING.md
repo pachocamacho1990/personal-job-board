@@ -67,6 +67,13 @@ Since the frontend is a Vanilla JS SPA, visual verification complements automate
 - [ ] Open Archive Vault (Detail Panel) → Shows archived jobs
 - [ ] Restore job → Job reappears on board with correct status
 
+#### Job to Business Transformation
+- [ ] Open Job Card (must be unlocked)
+- [ ] Click "Transform to Connection"
+- [ ] Verify Confirmation Modal details (Locking, Moving, Copying)
+- [ ] Confirm -> Job moves to Archive and appears ghosted/locked
+- [ ] Verify new Connection exists in Business Board with copied files
+
 #### Business Board
 - [ ] Navigate to Business Board via sidebar
 - [ ] Create entity (Investor/VC/Accelerator/Connection) → Appears correctly

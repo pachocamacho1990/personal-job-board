@@ -49,3 +49,14 @@ Used for AI/Agent related features and "Interested" status.
 
 ### Glassmorphism
 - **Modals**: Backdrop blur (`backdrop-filter: blur(4px)`) with semi-transparent dark overlay.
+
+### Locked State (Ghost)
+- **Use Case**: Jobs that have been transformed into Business Connections.
+- **Visual Style**:
+    - **Opacity**: `0.6` (Ghosted effect)
+    - **Filter**: `grayscale(0.8)` (Optional, to further distinguish)
+    - **Indicator**: Lock icon (🔒) or "Converted" badge overlay.
+- **Interaction**:
+    - **Card**: Clickable to view details (read-only).
+    - **Forms**: All inputs disabled (`pointer-events: none`).
+    - **Actions**: "Save" and "Delete" buttons hidden.

@@ -14,6 +14,7 @@ router.post('/', jobsController.createJob);
 router.put('/:id', jobsController.updateJob);
 router.delete('/:id', jobsController.deleteJob);
 router.get('/:id/history', jobsController.getJobHistory);
+router.post('/:id/transform', jobsController.transformJobToEntity);
 
 // File attachment routes
 router.get('/:id/files', filesController.getJobFiles);

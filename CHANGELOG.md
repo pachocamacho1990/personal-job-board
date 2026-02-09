@@ -2,6 +2,88 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.10.0] - 2026-02-09
+
+### 🚀 Feature: Job to Business Connection Transformation
+
+Transform job applications into business connections when a networking opportunity emerges. This creates a linked Connection card on the Business Board while preserving the original job history.
+
+### Added
+
+#### Transformation Flow
+- **Transform Button**: New "Transform to Connection 🚀" button in the Job Detail panel.
+- **Confirmation Modal**: Custom modal explains consequences (locking, creating, copying) before proceeding.
+- **File Migration**: All attachments are automatically copied to the new Business Connection.
+
+#### Locked State
+- **Visual Indicator**: Transformed jobs appear "ghosted" (grayscale, reduced opacity) with a lock icon overlay.
+- **Non-Draggable**: Locked cards cannot be moved between columns.
+- **Read-Only**: Opening a locked job shows a banner and disables all form inputs.
+
+### Technical Details
+
+#### Database Schema
+```sql
+-- Added to jobs table
+ALTER TABLE jobs ADD COLUMN is_locked BOOLEAN DEFAULT FALSE;
+```
+
+#### New Backend Endpoint
+```
+POST /api/jobs/:id/transform
+```
+
+#### New Tests
+- Added 4 tests to `jobs.test.js` for transformation endpoint (success, not found, already locked, rollback).
+
+---
+
+## [3.9.0] - 2026-02-06
+
+### Refactored
+- **Shared Board Helpers**: Extract shared board behaviors into `createBoardHelpers()` factory.
+  - Drag-and-drop, view toggle, markdown preview, panel close, file queue, ESC key handling.
+  - `app.js`: 700 → 573 lines; `business.js`: 350 → 256 lines.
+- **Bug Fix**: Business Board markdown preview now references correct id (`notes` vs `comments`).
+
+---
+
+## [3.8.0] - 2026-02-06
+
+### Refactored
+- **Module Extraction**: Split `app.js` into focused shared modules (36% reduction).
+  - `shared/journey-map.js`: SVG status timeline rendering.
+  - `shared/center-peek.js`: Read-only job detail modal with init pattern.
+  - `shared/archive-vault.js`: Archive/restore modal with init pattern.
+- **Bug Fix**: `updateColumnCounts` now includes all 8 statuses (pending, archived).
+- **Deep Links**: Now open Center Peek (consistent with card clicks).
+
+---
+
+## [3.7.0] - 2026-02-06
+
+### Refactored
+- **DRY API Client**: Replace duplicated CRUD methods with `createCrudApi` and `createFilesApi` factories.
+  - `api.js` reduced from 296 → 141 lines with zero consumer changes.
+
+---
+
+## [3.6.0] - 2026-02-06
+
+### Changed
+- **Version Correction**: Documentation version bump to align with release tags.
+
+---
+
+## [3.5.1] - 2026-02-05
+
+### Changed
+- **File Upload Limit**: Increased from 10MB to 20MB.
+  - `nginx.conf`: Added `client_max_body_size 20M`.
+  - `upload.js`: Increased `MAX_FILE_SIZE` constant.
+
+---
+
 ## [3.5.0] - 2026-02-05
 
 ### 🚀 Feature: Business Entity Attachments & Unified File Queueing
@@ -80,6 +162,20 @@ CREATE TABLE job_files (
 #### Documentation
 - **WIREFRAMING_GUIDE.md**: Added new standard protocol for AI-generated UI wireframes.
 - **AI-GUIDE.md**: Updated with "Browser Quirks" section for file handling.
+
+---
+
+## [3.4.1] - 2026-02-05
+
+### Changed
+- **Documentation**: Updated AI-GUIDE with deep linking patterns.
+
+---
+
+## [3.1.3] - 2026-01-29
+
+### Fixed
+- **Status Dropdown**: Added missing 'Pending Next Step' option to the job edit form.
 
 ---
 
@@ -287,7 +383,7 @@ CREATE TABLE business_entities (
 - **Authentication**: Secure Signup/Login flows with JWT and password hashing.
 - **Docker Support**: Full Docker Compose setup for API, DB, and Nginx.
 
-## [1.0.0] - 2026-01-15
+## [1.0.0] - 2026-01-19
 
 ### Added
 - **Forgotten Column**: New column for tracking stalled applications.
