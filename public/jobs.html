@@ -135,6 +135,13 @@
                 <form id="jobForm" class="job-form">
                     <input type="hidden" id="jobId">
 
+                    <!-- Locked Banner -->
+                    <div id="lockedBanner"
+                        style="display: none; background: #f3f4f6; color: #4b5563; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; text-align: center; border: 1px dashed #d1d5db;">
+                        🔒 <strong>Locked</strong><br>
+                        This job has been transformed into a Business Connection.
+                    </div>
+
                     <!-- Timestamp info (read-only) -->
                     <div id="timestampInfo" class="timestamp-info" style="display: none;"></div>
 
@@ -247,6 +254,9 @@
                     </div>
 
                     <div class="form-actions">
+                        <button type="button" id="transformBtn" class="btn-secondary"
+                            style="margin-right: 0.5rem; background-color: #EEF2FF; color: #4F46E5; border-color: #E0E7FF;">Transform
+                            to Connection 🚀</button>
                         <button type="submit" class="btn-primary">Save</button>
                         <button type="button" id="archiveJobBtn" class="btn-secondary"
                             style="margin-right: auto;">Archive 📦</button>
@@ -339,6 +349,30 @@
                 <div class="modal-footer">
                     <button id="cancelFileDelete" class="btn-secondary">Cancel</button>
                     <button id="confirmFileDelete" class="btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transform Confirmation Modal -->
+        <div id="transformConfirmModal" class="modal-overlay" style="display: none;">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Transform to Connection?</h2>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom: 0.5rem;">This action will:</p>
+                    <ul
+                        style="list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; color: var(--text-secondary);">
+                        <li><strong>Lock</strong> this Job card in place 🔒</li>
+                        <li>Create a new <strong>Connection card</strong> in the Business Board 🤝</li>
+                        <li>Copy all existing files 📂</li>
+                    </ul>
+                    <p>Are you sure you want to proceed?</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancelTransform" class="btn-secondary">Cancel</button>
+                    <button id="confirmTransform" class="btn-primary" style="background-color: #4F46E5;">Transform
+                        🚀</button>
                 </div>
             </div>
         </div>

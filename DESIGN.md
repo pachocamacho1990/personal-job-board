@@ -44,6 +44,7 @@ graph TD
 | `status` | VARCHAR | interested, applied, forgotten, interview, pending, offer, rejected, **archived** |
 | `origin` | VARCHAR | 'human' or 'agent' |
 | `is_unseen` | BOOLEAN | True if agent-created & not viewed |
+| `is_locked` | BOOLEAN | True if job has been transformed/archived |
 | `company` | VARCHAR | |
 | `position` | VARCHAR | |
 | `contact_name` | VARCHAR | (Mapped to `contactName` in API) |
@@ -181,3 +182,15 @@ Aurora Design System - Modern, clean aesthetic with color-coded status columns.
 ### UI Components
 - **Confirmation Modals**: Use generic overlay with `confirm/cancel` actions for destructive operations (Delete, Archive, Logout).
 
+### Feature Workflows
+
+#### Job to Business Transformation
+1.  **Trigger**: User clicks "Transform to Connection" on a Job card.
+2.  **Confirmation**: Custom modal explains the consequences before proceeding.
+3.  **Action**:
+    -   Creates a new `Business Entity` from Job data (Company → Name, etc).
+    -   Migrates all `Job Files` to `Entity Files`.
+    -   Sets `is_locked = TRUE` on the Job (status remains unchanged).
+4.  **Result**:
+    -   Job card becomes a **Ghost** (readonly, non-draggable) in its original column.
+    -   New Business Connection appears in "Researching" column on Business Board.

@@ -129,6 +129,7 @@ const api = {
     jobs: {
         ...createCrudApi('/jobs'),
         getHistory: async (id) => apiRequest(`/jobs/${id}/history`),
+        transform: async (id) => apiRequest(`/jobs/${id}/transform`, { method: 'POST' }),
     },
 
     business: {

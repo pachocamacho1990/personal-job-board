@@ -217,7 +217,7 @@ function renderJob(job) {
 
     const card = document.createElement('div');
     card.className = helpers.isCompactView() ? 'job-card compact' : 'job-card';
-    card.draggable = true;
+    card.draggable = !job.is_locked; // Locked cards cannot be dragged
     card.dataset.jobId = job.id;
     card.dataset.type = job.type;
 
@@ -308,6 +308,12 @@ function renderJob(job) {
         card.classList.add('shining');
     }
 
+    // Locked State
+    if (job.is_locked) {
+        card.classList.add('locked');
+        card.draggable = false; // Prevent dragging locked cards
+    }
+
     container.appendChild(card);
 }
 
@@ -384,19 +390,71 @@ function openJobDetails(jobId) {
         }
 
         // Show attachments section and load files for existing jobs
-        const attachmentsSection = document.getElementById('attachmentsSection');
         if (attachmentsSection) {
             attachmentsSection.style.display = 'block';
             fileManager.loadFiles(job.id);
         }
 
-        deleteBtn.style.display = 'block';
+        // Locked State Handling
+        const lockedBanner = document.getElementById('lockedBanner');
+        const transformBtn = document.getElementById('transformBtn');
+        const saveBtn = document.querySelector('#jobForm button[type="submit"]');
+        const __deleteBtn = document.getElementById('deleteBtn'); // Use local var to avoid shadowing global
+        const formInputs = document.querySelectorAll('#jobForm input, #jobForm select, #jobForm textarea, #jobForm button:not(.close-peek):not(#closePanel)');
+
+        if (job.is_locked) {
+            // Locked: Show banner, disable inputs, hide actions
+            if (lockedBanner) lockedBanner.style.display = 'block';
+            if (transformBtn) transformBtn.style.display = 'none';
+            if (saveBtn) saveBtn.style.display = 'none';
+            if (__deleteBtn) __deleteBtn.style.display = 'none';
+
+            formInputs.forEach(input => {
+                input.disabled = true;
+                input.style.pointerEvents = 'none';
+                input.style.opacity = '0.7';
+            });
+            // Re-enable close button and preview toggle
+            document.getElementById('closePanel').disabled = false;
+            document.getElementById('togglePreview').disabled = false; // Allow previewing comments
+            document.getElementById('togglePreview').style.pointerEvents = 'auto';
+
+        } else {
+            // Unlocked: Hide banner, enable inputs, show actions
+            if (lockedBanner) lockedBanner.style.display = 'none';
+            if (transformBtn) transformBtn.style.display = 'inline-block';
+            if (saveBtn) saveBtn.style.display = 'inline-block';
+            if (__deleteBtn) __deleteBtn.style.display = 'block';
+
+            formInputs.forEach(input => {
+                input.disabled = false;
+                input.style.pointerEvents = 'auto';
+                input.style.opacity = '1';
+            });
+        }
+
     } else {
         // New entry
         currentJobId = null; // Ensure global state is cleared
         document.getElementById('panelTitle').textContent = 'Add New Item';
         jobForm.reset();
         document.getElementById('jobId').value = '';  // Clear hidden field AFTER reset to ensure it stays empty
+
+        // Reset locked state UI
+        const lockedBanner = document.getElementById('lockedBanner');
+        const transformBtn = document.getElementById('transformBtn');
+        const saveBtn = document.querySelector('#jobForm button[type="submit"]');
+        const formInputs = document.querySelectorAll('#jobForm input, #jobForm select, #jobForm textarea, #jobForm button');
+
+        if (lockedBanner) lockedBanner.style.display = 'none';
+        if (transformBtn) transformBtn.style.display = 'none'; // Cannot transform new job
+        if (saveBtn) saveBtn.style.display = 'inline-block';
+
+        formInputs.forEach(input => {
+            input.disabled = false;
+            input.style.pointerEvents = 'auto';
+            input.style.opacity = '1';
+        });
 
         // Default to job type
         document.querySelector('input[name="type"][value="job"]').checked = true;
@@ -512,6 +570,50 @@ async function handleDelete() {
     }
 }
 
+// Transform Handling
+// Transform Handling
+function handleTransform() {
+    if (!currentJobId) return;
+
+    // Show confirmation modal
+    const modal = document.getElementById('transformConfirmModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+async function executeTransform() {
+    if (!currentJobId) return;
+
+    const modal = document.getElementById('transformConfirmModal');
+    const confirmBtn = document.getElementById('confirmTransform');
+
+    // Loading state
+    const originalText = confirmBtn.textContent;
+    confirmBtn.textContent = 'Transforming...';
+    confirmBtn.disabled = true;
+
+    try {
+        await api.jobs.transform(currentJobId);
+
+        // Refresh and close
+        await loadJobs();
+        closeJobPanel();
+
+        if (modal) modal.style.display = 'none';
+        alert('Job transformed successfully! Check the Business Board for the new connection.');
+
+    } catch (error) {
+        console.error('Transform failed:', error);
+        alert('Failed to transform job: ' + error.message);
+    } finally {
+        // Reset state
+        confirmBtn.textContent = originalText;
+        confirmBtn.disabled = false;
+        if (modal) modal.style.display = 'none';
+    }
+}
+
 // Event Listeners
 function setupEventListeners() {
     // Add job button
@@ -522,6 +624,36 @@ function setupEventListeners() {
 
     // Form submit
     jobForm.addEventListener('submit', handleFormSubmit);
+
+    // Sidebar: Transform button
+    const transformBtn = document.getElementById('transformBtn');
+    if (transformBtn) {
+        transformBtn.addEventListener('click', handleTransform);
+    }
+
+    // Transform Modal Actions
+    const transformModal = document.getElementById('transformConfirmModal');
+    const confirmTransformBtn = document.getElementById('confirmTransform');
+    const cancelTransformBtn = document.getElementById('cancelTransform');
+
+    if (confirmTransformBtn) {
+        confirmTransformBtn.addEventListener('click', executeTransform);
+    }
+
+    if (cancelTransformBtn) {
+        cancelTransformBtn.addEventListener('click', () => {
+            if (transformModal) transformModal.style.display = 'none';
+        });
+    }
+
+    // Close modal on outside click
+    if (transformModal) {
+        transformModal.addEventListener('click', (e) => {
+            if (e.target === transformModal) {
+                transformModal.style.display = 'none';
+            }
+        });
+    }
 
     // Delete button
     deleteBtn.addEventListener('click', handleDelete);

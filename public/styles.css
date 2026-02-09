@@ -544,6 +544,31 @@ body {
     transform: rotate(2deg);
 }
 
+/* Locked / Ghost State for Transformed Jobs */
+.job-card.locked {
+    opacity: 0.6;
+    filter: grayscale(0.8);
+    cursor: default;
+    border-style: dashed;
+}
+
+.job-card.locked:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+    border-color: var(--color-border);
+}
+
+.job-card.locked::after {
+    content: "🔒";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
 .job-card h3 {
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);

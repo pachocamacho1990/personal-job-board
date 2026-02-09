@@ -306,4 +306,86 @@ describe('Jobs Routes', () => {
             expect(res.body).toHaveProperty('status', 'interested');
         });
     });
+    describe('POST /api/jobs/:id/transform', () => {
+        let mockClient;
+
+        beforeEach(() => {
+            mockClient = {
+                query: jest.fn(),
+                release: jest.fn()
+            };
+            pool.connect = jest.fn().mockResolvedValue(mockClient);
+        });
+
+        it('should transform a job successfully (Transaction)', async () => {
+            // Mock Data
+            const jobData = {
+                id: 1,
+                user_id: 1,
+                company: 'Transformed Corp',
+                status: 'interview',
+                is_locked: false,
+                comments: 'Great job'
+            };
+            const filesData = [{ filename: 'resume.pdf', original_name: 'resume.pdf' }];
+
+            // Mock Query Sequence
+            mockClient.query
+                .mockResolvedValueOnce({}) // BEGIN
+                .mockResolvedValueOnce({ rows: [jobData] }) // SELECT job
+                .mockResolvedValueOnce({ rows: [{ id: 100 }] }) // INSERT entity
+                .mockResolvedValueOnce({ rows: filesData }) // SELECT files
+                .mockResolvedValueOnce({}) // INSERT file 1
+                .mockResolvedValueOnce({}) // UPDATE job
+                .mockResolvedValueOnce({}); // COMMIT
+
+            const res = await request(app).post('/api/jobs/1/transform');
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toHaveProperty('entityId', 100);
+
+            // Verify Transaction Flow
+            expect(mockClient.query).toHaveBeenNthCalledWith(1, 'BEGIN');
+            expect(mockClient.query).toHaveBeenCalledWith(expect.stringContaining('UPDATE jobs'), expect.anything());
+            expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+            expect(mockClient.release).toHaveBeenCalled();
+        });
+
+        it('should return 404 if job not found', async () => {
+            mockClient.query
+                .mockResolvedValueOnce({}) // BEGIN
+                .mockResolvedValueOnce({ rows: [] }) // SELECT job (empty)
+                .mockResolvedValueOnce({}); // ROLLBACK
+
+            const res = await request(app).post('/api/jobs/999/transform');
+
+            expect(res.statusCode).toBe(404);
+            expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
+        });
+
+        it('should return 400 if job is already locked', async () => {
+            mockClient.query
+                .mockResolvedValueOnce({}) // BEGIN
+                .mockResolvedValueOnce({ rows: [{ id: 1, is_locked: true }] }) // SELECT job
+                .mockResolvedValueOnce({}); // ROLLBACK
+
+            const res = await request(app).post('/api/jobs/1/transform');
+
+            expect(res.statusCode).toBe(400);
+            expect(res.body.error).toMatch(/already transformed/);
+            expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
+        });
+
+        it('should rollback transaction on error', async () => {
+            mockClient.query
+                .mockResolvedValueOnce({}) // BEGIN
+                .mockRejectedValueOnce(new Error('Database error')); // SELECT fails
+
+            const res = await request(app).post('/api/jobs/1/transform');
+
+            expect(res.statusCode).toBe(500); // Or whatever global error handler returns
+            expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
+            expect(mockClient.release).toHaveBeenCalled();
+        });
+    });
 });

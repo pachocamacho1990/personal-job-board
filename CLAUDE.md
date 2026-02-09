@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Version**: 3.9.0
+**Version**: 3.6.0
 
 A self-hosted career management platform with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
 
@@ -167,6 +167,7 @@ SELECT * FROM job_history WHERE job_id = 1;
 | PUT | `/api/jobs/:id` | Update job |
 | DELETE | `/api/jobs/:id` | Delete job |
 | GET | `/api/jobs/:id/history` | Get job status change history |
+| POST | `/api/jobs/:id/transform` | Transform job to business connection |
 
 ### Business Entities
 | Method | Endpoint | Description |
@@ -196,6 +197,7 @@ SELECT * FROM job_history WHERE job_id = 1;
 - `updated_at` auto-updates via PostgreSQL trigger
 - `origin` field: 'human' (default) or 'agent' (AI-created)
 - `is_unseen` field: true for agent-created jobs not yet viewed
+- `is_locked` field: true for jobs transformed to business connections (non-editable, non-draggable)
 
 **job_history table**:
 - Automatically populated by `trigger_log_job_status_change` on INSERT/UPDATE
