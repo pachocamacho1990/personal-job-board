@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Version**: 3.6.0
+**Version**: 3.10.0
 
 A self-hosted career management platform with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
 
@@ -62,7 +62,7 @@ A self-hosted career management platform with **Kanban boards** for tracking job
    - `server.js`: Application entry point, middleware, route mounting
    - `routes/`:
      - `auth.routes.js`: POST /signup, /login, GET /me (with rate limiting)
-     - `jobs.routes.js`: GET, POST, PUT, DELETE /jobs, GET /jobs/:id/history
+     - `jobs.routes.js`: GET, POST, PUT, DELETE /jobs, GET /jobs/:id/history, POST /jobs/:id/transform
      - `business.routes.js`: GET, POST, PUT, DELETE /business
      - `dashboard.routes.js`: GET /dashboard/summary
    - `controllers/`:
@@ -193,7 +193,7 @@ SELECT * FROM job_history WHERE job_id = 1;
 
 **jobs table**:
 - Uses CHECK constraints for `type`, `rating`, `status`, `origin` validation
-- Status values: `interested`, `applied`, `forgotten`, `interview`, `pending`, `offer`, `rejected`
+- Status values: `interested`, `applied`, `forgotten`, `interview`, `pending`, `offer`, `rejected`, `archived`
 - `updated_at` auto-updates via PostgreSQL trigger
 - `origin` field: 'human' (default) or 'agent' (AI-created)
 - `is_unseen` field: true for agent-created jobs not yet viewed
@@ -236,7 +236,7 @@ Both boards use `data-status` attributes for CSS styling:
 
 **Journey Map**:
 - SVG visualization showing job status progression over time
-- Displays all 7 status columns with connecting lines between transitions
+- Displays all 8 status columns with connecting lines between transitions
 - Timestamps shown at each status change node
 - Automatically populated from `job_history` table
 
@@ -285,7 +285,19 @@ Both boards use `data-status` attributes for CSS styling:
 - Helmet.js and CORS configured in `server.js`
 - Rate limiting on auth routes (15 failed attempts per 15 min)
 
-## Recent Changes (v3.9.x)
+## Recent Changes (v3.10.x)
+
+### v3.10.0
+- **Feature**: Job to Business Connection Transformation
+  - Transform button in Job Detail panel creates a linked Connection on the Business Board
+  - Confirmation modal explains consequences before proceeding
+  - All file attachments automatically copied to the new Business Connection
+- **Locked State**: Transformed jobs become read-only with visual "ghosted" treatment (grayscale, reduced opacity, lock icon overlay)
+  - Locked cards are non-draggable and non-editable
+  - Opening a locked job shows a banner and disables all form inputs
+- **Database**: `ALTER TABLE jobs ADD COLUMN is_locked BOOLEAN DEFAULT FALSE`
+- **Endpoint**: `POST /api/jobs/:id/transform`
+- **Tests**: 4 new tests for transformation flow (success, not found, already locked, rollback)
 
 ### v3.9.0
 - **Refactor**: Extracted shared board behaviors into `shared/board-helpers.js` factory:
@@ -345,13 +357,13 @@ Both boards use `data-status` attributes for CSS styling:
 
 | File | Lines | Concerns |
 |------|-------|----------|
-| `public/js/app.js` | ~573 | Job Board core — Kanban, edit panel, form handling, focus mode |
+| `public/js/app.js` | ~705 | Job Board core — Kanban, edit panel, form handling, focus mode, transform |
 | `public/js/business.js` | ~256 | Board-specific logic only (entity CRUD, cards, panel) |
-| `public/js/shared/file-manager.js` | ~280 | Shared file operations factory (used by both boards) |
+| `public/js/shared/file-manager.js` | ~281 | Shared file operations factory (used by both boards) |
 | `public/js/shared/board-helpers.js` | ~221 | Shared board behaviors factory (drag-drop, view toggle, preview, panel, ESC) |
-| `public/js/shared/archive-vault.js` | ~175 | Archive/restore modal logic |
-| `public/js/shared/center-peek.js` | ~115 | Read-only job detail modal with Journey Map |
-| `public/js/shared/journey-map.js` | ~115 | SVG status timeline rendering |
+| `public/js/shared/archive-vault.js` | ~217 | Archive/restore modal logic |
+| `public/js/shared/center-peek.js` | ~135 | Read-only job detail modal with Journey Map |
+| `public/js/shared/journey-map.js` | ~120 | SVG status timeline rendering |
 | `public/js/shared/utils.js` | ~74 | Pure utility functions (shared across boards) |
 | `public/js/api.js` | ~141 | REST API client with `createCrudApi()` and `createFilesApi()` factories |
 | `server/controllers/files.factory.js` | ~162 | Generic file controller factory (shared by jobs & business) |
@@ -360,8 +372,8 @@ Both boards use `data-status` attributes for CSS styling:
 
 ### Known Complexity Areas
 
-**1. `app.js` (~573 lines)**
-- Job Board core — Kanban rendering, edit panel, form handling, focus mode
+**1. `app.js` (~705 lines)**
+- Job Board core — Kanban rendering, edit panel, form handling, focus mode, transform flow
 - Center Peek, Journey Map, and Archive Vault extracted to `shared/` modules
 - File management delegated to `shared/file-manager.js`
 - Drag-drop, view toggle, markdown preview, panel, ESC key delegated to `shared/board-helpers.js`

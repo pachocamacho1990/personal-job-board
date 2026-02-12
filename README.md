@@ -1,6 +1,6 @@
 # Job Board - Personal Application Tracker
 
-![Version](https://img.shields.io/badge/version-3.9.0-blue.svg)
+![Version](https://img.shields.io/badge/version-3.10.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ![Job Board Preview](preview.png)
@@ -30,6 +30,7 @@ A minimalist, **self-hosted Kanban board** to track job applications, networking
 - **Compact/Comfortable View**: Toggle between dense and detailed card layouts
 - **Focus Mode 🎯**: Filter to high-priority items (hides low-rated cards and Rejected/Forgotten columns)
 - **Archive Vault 📦**: Archive completed or old jobs to declutter your board while preserving history
+- **Transform to Connection 🚀**: Convert job applications into Business Board connections with file migration and locked state
 
 ### 🤝 Business Board
 - **Track Business Relationships**: Investors, VCs, Accelerators, Connections
@@ -179,6 +180,7 @@ See [TESTING.md](TESTING.md) for full testing strategy.
 | PUT | `/api/jobs/:id` | Update job |
 | DELETE | `/api/jobs/:id` | Delete job |
 | GET | `/api/jobs/:id/history` | Get status change history |
+| POST | `/api/jobs/:id/transform` | Transform job to business connection |
 | GET | `/api/jobs/:id/files` | List job files |
 | POST | `/api/jobs/:id/files` | Upload file to job |
 | DELETE | `/api/jobs/:id/files/:fileId` | Delete job file |
