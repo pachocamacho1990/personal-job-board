@@ -62,27 +62,33 @@ On first start, the schema is auto-initialized from `server/models/schema.sql`.
 
 ### Running Migrations
 
-If upgrading from v2.x, the `business_entities` table needs to be created:
+Database schema migrations are stored as `.sql` files in the root-level `migrations/` folder, named chronologically (e.g., `migration_v3_6_boards.sql`).
+
+To run a specific migration against the running database container:
 
 ```bash
-# Connect to database
-docker-compose exec postgres psql -U jobboard_user -d jobboard
+docker exec -i jobboard-db psql -U jobboard_user -d jobboard < migrations/migration_name.sql
+```
 
-# Run migration (if not auto-created)
-CREATE TABLE business_entities (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL,
-    type VARCHAR(50) DEFAULT 'connection',
-    status VARCHAR(50) DEFAULT 'researching',
-    contact_person VARCHAR(255),
-    email VARCHAR(255),
-    website VARCHAR(255),
-    location VARCHAR(255),
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+#### Legacy Migrations Reference
+
+If upgrading an old v2.x database, you can apply migrations sequentially:
+
+```bash
+# 1. Archive vault update
+docker exec -i jobboard-db psql -U jobboard_user -d jobboard < migrations/migration_v3_0_archive.sql
+
+# 2. File uploads table
+docker exec -i jobboard-db psql -U jobboard_user -d jobboard < migrations/migration_v3_3_files.sql
+
+# 3. Business entity files
+docker exec -i jobboard-db psql -U jobboard_user -d jobboard < migrations/migration_v3_4_business_files.sql
+
+# 4. Lock column
+docker exec -i jobboard-db psql -U jobboard_user -d jobboard < migrations/migration_v3_5_locked.sql
+
+# 5. Boards Support
+docker exec -i jobboard-db psql -U jobboard_user -d jobboard < migrations/migration_v3_6_boards.sql
 ```
 
 ## Database Management

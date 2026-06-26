@@ -31,7 +31,12 @@ async function loadDashboardData() {
     if (newMatchesList) newMatchesList.innerHTML = '<div class="loading-spinner">Loading...</div>';
 
     try {
-        const response = await fetchWithAuth('/jobboard/api/dashboard/summary');
+        const activeBoardId = localStorage.getItem('activeBoardId');
+        const url = activeBoardId 
+            ? `/jobboard/api/dashboard/summary?boardId=${activeBoardId}`
+            : '/jobboard/api/dashboard/summary';
+
+        const response = await fetchWithAuth(url);
         const data = await response.json();
 
         renderInterviews(data.interviews);

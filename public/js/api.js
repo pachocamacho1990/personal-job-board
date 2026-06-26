@@ -15,6 +15,7 @@ function saveToken(token) {
 
 function clearToken() {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
 }
 
 /**
@@ -60,7 +61,10 @@ async function apiRequest(endpoint, options = {}) {
  */
 function createCrudApi(basePath) {
     return {
-        getAll: async () => apiRequest(basePath),
+        getAll: async (params) => {
+            const query = params ? `?${new URLSearchParams(params).toString()}` : '';
+            return apiRequest(`${basePath}${query}`);
+        },
         create: async (data) => apiRequest(basePath, { method: 'POST', body: JSON.stringify(data) }),
         update: async (id, data) => apiRequest(`${basePath}/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
         delete: async (id) => apiRequest(`${basePath}/${id}`, { method: 'DELETE' }),
@@ -109,6 +113,7 @@ const api = {
                 body: JSON.stringify({ email, password })
             });
             if (data.token) saveToken(data.token);
+            if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
             return data;
         },
         login: async (email, password) => {
@@ -117,6 +122,7 @@ const api = {
                 body: JSON.stringify({ email, password })
             });
             if (data.token) saveToken(data.token);
+            if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
             return data;
         },
         me: async () => apiRequest('/auth/me'),
@@ -128,6 +134,7 @@ const api = {
 
     jobs: {
         ...createCrudApi('/jobs'),
+        getOne: async (id) => apiRequest(`/jobs/${id}`),
         getHistory: async (id) => apiRequest(`/jobs/${id}/history`),
         transform: async (id) => apiRequest(`/jobs/${id}/transform`, { method: 'POST' }),
     },
@@ -136,6 +143,8 @@ const api = {
         ...createCrudApi('/business'),
         files: createFilesApi('/business'),
     },
+
+    boards: createCrudApi('/boards'),
 
     files: createFilesApi('/jobs'),
 };

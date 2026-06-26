@@ -11,6 +11,7 @@ router.use(authMiddleware);
 // Job CRUD routes
 router.get('/', jobsController.getAllJobs);
 router.post('/', jobsController.createJob);
+router.get('/:id', jobsController.getJobById);
 router.put('/:id', jobsController.updateJob);
 router.delete('/:id', jobsController.deleteJob);
 router.get('/:id/history', jobsController.getJobHistory);

@@ -30,30 +30,46 @@ const signup = async (req, res, next) => {
         // Hash password
         const passwordHash = await bcrypt.hash(password, bcryptRounds);
 
-        // Insert user into database
-        const result = await pool.query(
-            'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, created_at',
-            [email.toLowerCase(), passwordHash]
-        );
+        // Start database transaction
+        await pool.query('BEGIN');
 
-        const user = result.rows[0];
+        try {
+            // Insert user into database
+            const result = await pool.query(
+                'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, created_at',
+                [email.toLowerCase(), passwordHash]
+            );
 
-        // Generate JWT token
-        const token = jwt.sign(
-            { userId: user.id, email: user.email },
-            jwtSecret,
-            { expiresIn: jwtExpiresIn }
-        );
+            const user = result.rows[0];
 
-        res.status(201).json({
-            message: 'User created successfully',
-            token,
-            user: {
-                id: user.id,
-                email: user.email,
-                createdAt: user.created_at
-            }
-        });
+            // Create default board for new user
+            await pool.query(
+                "INSERT INTO boards (user_id, name) VALUES ($1, 'Mi Tablero')",
+                [user.id]
+            );
+
+            await pool.query('COMMIT');
+
+            // Generate JWT token
+            const token = jwt.sign(
+                { userId: user.id, email: user.email },
+                jwtSecret,
+                { expiresIn: jwtExpiresIn }
+            );
+
+            res.status(201).json({
+                message: 'User created successfully',
+                token,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    createdAt: user.created_at
+                }
+            });
+        } catch (txError) {
+            await pool.query('ROLLBACK');
+            throw txError;
+        }
     } catch (error) {
         // Duplicate email error
         if (error.code === '23505') {

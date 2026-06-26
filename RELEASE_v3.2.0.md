@@ -34,7 +34,7 @@ The **Archive Vault** allows you to move interested, applied, or rejected jobs o
 Run the archive migration script to add the new status enum value:
 
 ```bash
-docker exec -i jobboard-db psql -U jobboard_user -d jobboard < migration_v3_0_archive.sql
+docker exec -i jobboard-db psql -U jobboard_user -d jobboard < migrations/migration_v3_0_archive.sql
 ```
 
 (Note: If you've been following the PRs, this might have already been applied).

@@ -6,14 +6,29 @@ const { pool } = require('../config/db');
  */
 const getAllJobs = async (req, res, next) => {
     try {
+        const { boardId } = req.query;
+        let targetBoardId = boardId;
+
+        if (!targetBoardId) {
+            const boardResult = await pool.query(
+                'SELECT id FROM boards WHERE user_id = $1 ORDER BY id ASC LIMIT 1',
+                [req.userId]
+            );
+            if (boardResult.rows.length > 0) {
+                targetBoardId = boardResult.rows[0].id;
+            } else {
+                return res.json([]);
+            }
+        }
+
         const result = await pool.query(
-            `SELECT id, type, rating, status, origin, is_unseen, is_locked, company, position, location, salary,
+            `SELECT id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary,
                     contact_name AS "contactName", organization, comments, 
                     created_at AS "created_at", updated_at AS "updated_at"
              FROM jobs 
-             WHERE user_id = $1 
+             WHERE user_id = $1 AND board_id = $2
              ORDER BY updated_at DESC, rating DESC`,
-            [req.userId]
+            [req.userId, targetBoardId]
         );
 
         res.json(result.rows);
@@ -41,7 +56,8 @@ const createJob = async (req, res, next) => {
             organization,
             comments,
             created_at,  // Optional: for migration imports
-            updated_at   // Optional: for migration imports
+            updated_at,   // Optional: for migration imports
+            boardId
         } = req.body;
 
         // Validation
@@ -52,16 +68,38 @@ const createJob = async (req, res, next) => {
         // Auto-set is_unseen: true for agents, false for humans
         const is_unseen = (origin === 'agent');
 
+        let targetBoardId = boardId;
+        if (!targetBoardId) {
+            const boardResult = await pool.query(
+                'SELECT id FROM boards WHERE user_id = $1 ORDER BY id ASC LIMIT 1',
+                [req.userId]
+            );
+            if (boardResult.rows.length > 0) {
+                targetBoardId = boardResult.rows[0].id;
+            } else {
+                return res.status(400).json({ error: 'A board is required to create a job' });
+            }
+        } else {
+            // Verify board ownership
+            const boardCheck = await pool.query(
+                'SELECT id FROM boards WHERE id = $1 AND user_id = $2',
+                [targetBoardId, req.userId]
+            );
+            if (boardCheck.rows.length === 0) {
+                return res.status(404).json({ error: 'Board not found' });
+            }
+        }
+
         const result = await pool.query(
             `INSERT INTO jobs 
-             (user_id, type, rating, status, origin, is_unseen, company, position, location, salary, 
+             (user_id, board_id, type, rating, status, origin, is_unseen, company, position, location, salary, 
               contact_name, organization, comments, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
-                     COALESCE($14::timestamptz, NOW()), COALESCE($15::timestamptz, NOW()))
-             RETURNING id, type, rating, status, origin, is_unseen, is_locked, company, position, location, salary,
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
+                     COALESCE($15::timestamptz, NOW()), COALESCE($16::timestamptz, NOW()))
+             RETURNING id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary,
                        contact_name AS "contactName", organization, comments,
                        created_at AS "created_at", updated_at AS "updated_at"`,
-            [req.userId, type, rating, status, origin, is_unseen, company, position, location, salary,
+            [req.userId, targetBoardId, type, rating, status, origin, is_unseen, company, position, location, salary,
                 contact_name, organization, comments, created_at || null, updated_at || null]
         );
 
@@ -90,7 +128,8 @@ const updateJob = async (req, res, next) => {
             salary,
             contact_name,
             organization,
-            comments
+            comments,
+            boardId
         } = req.body;
 
         // First, verify job belongs to user
@@ -101,6 +140,17 @@ const updateJob = async (req, res, next) => {
 
         if (checkResult.rows.length === 0) {
             return res.status(404).json({ error: 'Job not found' });
+        }
+
+        // If changing board, verify new board belongs to user
+        if (boardId) {
+            const boardCheck = await pool.query(
+                'SELECT id FROM boards WHERE id = $1 AND user_id = $2',
+                [boardId, req.userId]
+            );
+            if (boardCheck.rows.length === 0) {
+                return res.status(404).json({ error: 'Target board not found' });
+            }
         }
 
         // Update job (updated_at timestamp handled by trigger)
@@ -117,13 +167,14 @@ const updateJob = async (req, res, next) => {
                  salary = COALESCE($9, salary),
                  contact_name = COALESCE($10, contact_name),
                  organization = COALESCE($11, organization),
-                 comments = COALESCE($12, comments)
-             WHERE id = $13 AND user_id = $14
-             RETURNING id, type, rating, status, origin, is_unseen, is_locked, company, position, location, salary,
+                 comments = COALESCE($12, comments),
+                 board_id = COALESCE($13, board_id)
+             WHERE id = $14 AND user_id = $15
+             RETURNING id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary,
                        contact_name AS "contactName", organization, comments,
                        created_at AS "created_at", updated_at AS "updated_at"`,
             [type, rating, status, origin, is_unseen, company, position, location, salary,
-                contact_name, organization, comments, id, req.userId]
+                contact_name, organization, comments, boardId || null, id, req.userId]
         );
 
         res.json(result.rows[0]);
@@ -270,11 +321,39 @@ const transformJobToEntity = async (req, res, next) => {
     }
 };
 
+/**
+ * Get single job by ID
+ * GET /api/jobs/:id
+ */
+const getJobById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const result = await pool.query(
+            `SELECT id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary,
+                    contact_name AS "contactName", organization, comments,
+                    created_at AS "created_at", updated_at AS "updated_at"
+             FROM jobs 
+             WHERE id = $1 AND user_id = $2`,
+            [id, req.userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Job not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getAllJobs,
     createJob,
     updateJob,
     deleteJob,
     getJobHistory,
-    transformJobToEntity
+    transformJobToEntity,
+    getJobById
 };

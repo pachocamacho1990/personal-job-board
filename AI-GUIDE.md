@@ -1,4 +1,4 @@
-# AI Development Guide - Personal Job Board v3.2.0
+# AI Development Guide - Personal Job Board v3.6.0
 
 **Purpose**: Token-efficient reference for AI-assisted development. For human docs, see README.md and DESIGN.md.
 
@@ -6,16 +6,28 @@
 
 Multi-board career management platform with PostgreSQL backend. Three main views:
 1. **Dashboard** (`index.html`) - Home with interview/AI match widgets
-2. **Job Board** (`jobs.html`) - Kanban for job applications
+2. **Job Board** (`jobs.html`) - Kanban for job applications supporting multiple board instances (similar to ChatGPT sidebar history)
 3. **Business Board** (`business.html`) - Kanban for professional relationships
 
 ## Data Schema
+
+### Boards Table (boards)
+```javascript
+{
+  id: serial,                          // Auto-increment PK
+  user_id: integer,                    // FK → users.id
+  name: string,                        // Board name (e.g. "Mi Tablero")
+  created_at: timestamp,
+  updated_at: timestamp
+}
+```
 
 ### Jobs Table (jobs)
 ```javascript
 {
   id: serial,                          // Auto-increment PK
   user_id: integer,                    // FK → users.id
+  board_id: integer,                   // FK → boards.id (Supports separation of board instances)
   type: "job" | "connection",          // Entity type
   company: string,                     // Company name
   position: string,                    // Job title
@@ -60,47 +72,53 @@ Multi-board career management platform with PostgreSQL backend. Three main views
 | `jobs.html` | Job Board Kanban |
 | `business.html` | Business Board Kanban |
 | `login.html` | Auth page |
-| `js/api.js` | REST client with JWT |
-| `js/app.js` | Job Board logic |
+| `js/api.js` | REST client with JWT and cache-busting versioning |
+| `js/app.js` | Job Board logic (with board management) |
 | `js/business.js` | Business Board logic |
 | `js/dashboard.js` | Dashboard widgets |
 | `js/sidebar.js` | Nav highlighting |
 | `js/logout.js` | Logout modal |
 | `css/layout.css` | Dashboard grid |
-| `css/sidebar.css` | Navigation styles |
+| `css/sidebar.css` | Navigation styles with boards submenu |
 | `styles.css` | Main design system |
 | `WIREFRAMING_GUIDE.md` | Protocols for AI image generation |
 
-### Backend (`/server`)
-| File | Purpose |
+### Backend, Testing & Migrations
+| Folder/File | Purpose |
 |------|---------|
 | `server.js` | Express entry, middleware |
-| `routes/auth.routes.js` | /api/auth/* |
-| `routes/jobs.routes.js` | /api/jobs/* |
-| `routes/business.routes.js` | /api/business/* |
-| `routes/dashboard.routes.js` | /api/dashboard/* |
-| `controllers/*.controller.js` | Business logic |
-| `middleware/auth.js` | JWT verification |
-| `models/schema.sql` | DB schema |
+| `routes/boards.routes.js` | /api/boards/* endpoints |
+| `controllers/boards.controller.js` | Board management logic |
+| `routes/jobs.routes.js` | /api/jobs/* endpoints |
+| `models/schema.sql` | DB schema (v3.6.0 clean setup) |
+| `migrations/` | Directory for chronological database schema updates |
+| `playwright.config.js` | Configuration for Playwright E2E browser tests |
+| `tests/boards-ui.spec.js` | E2E browser automation test for board isolation |
 
 ## API Endpoints
 
 ```
-POST /api/auth/signup          → { token }
-POST /api/auth/login           → { token }
-GET  /api/auth/me              → { user }
+POST   /api/auth/signup          → { token, user }
+POST   /api/auth/login           → { token, user }
+GET    /api/auth/me              → { user }
 
-GET  /api/jobs                 → [jobs]
-POST /api/jobs                 → { job }
-PUT  /api/jobs/:id             → { job }
-DELETE /api/jobs/:id           → { message }
+GET    /api/boards               → [boards] (Includes job counts)
+POST   /api/boards               → { board }
+PUT    /api/boards/:id           ➔ { board }
+DELETE /api/boards/:id           ➔ { message }
 
-GET  /api/business             → [entities]
-POST /api/business             → { entity }
-PUT  /api/business/:id         → { entity }
-DELETE /api/business/:id       → { message }
+GET    /api/jobs                 → [jobs] (Optionally filtered by boardId)
+POST   /api/jobs                 → { job }
+PUT    /api/jobs/:id             → { job }
+DELETE /api/jobs/:id             → { message }
+GET    /api/jobs/:id             → { job } (Deep link retrieval)
 
-GET  /api/dashboard/summary    → { interviews, newMatches }
+GET    /api/business             → [entities]
+POST   /api/business             → { entity }
+PUT    /api/business/:id         → { entity }
+DELETE /api/business/:id         → { message }
+
+GET    /api/dashboard/summary    → { interviews, newMatches } (Filtered by boardId)
 ```
 
 All except auth require `Authorization: Bearer <token>` header.
@@ -114,7 +132,9 @@ All except auth require `Authorization: Bearer <token>` header.
 
 ### Job Board (app.js)
 ```javascript
-jobs = []                  // Main array of job objects
+jobs = []                  // Array of job objects for active board
+boards = []                // Array of board objects owned by user
+activeBoardId = null       // Current active board ID
 currentJobId = null        // Selected job ID
 isCompactView = false      // View mode toggle
 isPreviewMode = false      // Markdown preview toggle
@@ -221,16 +241,29 @@ CSS uses `[data-status="..."]` selectors:
 
 ## Testing
 
+### Unit and Integration Tests (Jest)
+Tests are executed inside the `server/` directory or root depending on dependency paths:
 ```bash
-cd server && npm test    # 26 tests
+npm test    # Runs all 61 unit tests across 7 test suites
 ```
 
-| Test File | Coverage |
-|-----------|----------|
-| auth.test.js | Signup, login, tokens |
-| jobs.test.js | CRUD, validation |
-| business.test.js | CRUD, type validation |
-| dashboard.test.js | Summary endpoint |
+| Test File | Description |
+|-----------|-------------|
+| `auth.test.js` | Signup, login, tokens, password hashing |
+| `boards.test.js` | Board CRUD, data isolation, last board deletion restriction |
+| `jobs.test.js` | Job CRUD, column updates, archive/restore operations |
+| `business.test.js` | Business entity CRUD, type validation, user checks |
+| `business-files.test.js` | Business file attachment handling |
+| `files.test.js` | Job file uploads, downloads, delete operations |
+| `dashboard.test.js` | Summary widgets, interviews, AI matches |
+
+### Browser E2E Automation Tests (Playwright)
+E2E flows are located in `tests/` and run sequentially to avoid PG conflicts:
+```bash
+npm run test:ui         # Run playwright tests headless
+npm run test:ui:headed  # Run playwright tests in headed mode (shows browser)
+```
+Covers user registration, creating boards, data isolation, and deep link verification.
 
 ## Token-Saving Tips
 
@@ -240,6 +273,7 @@ cd server && npm test    # 26 tests
 4. **Pattern consistency** - All CRUD follows: API call → update array → re-render
 5. **Check CLAUDE.md** - More detailed route/controller info
 6. **UI/Wireframing** - Always consult `WIREFRAMING_GUIDE.md` before generating UI mockups.
+7. **Documentation Sync** - When modifying features, routes, or schema, always update the public [public/docs.html](file:///Users/pacho-home-server/personal-job-board/public/docs.html) to keep it in sync.
 
 ## Development Insights (v3.2.0)
 
