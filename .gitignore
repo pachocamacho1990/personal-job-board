@@ -43,3 +43,7 @@ Thumbs.db
 # Docker volumes
 postgres_data/
 migration-data.json
+
+# Playwright artifacts
+playwright-report/
+test-results/
