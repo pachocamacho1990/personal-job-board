@@ -11,23 +11,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #818CF8;
-            --primary-hover: #6366F1;
-            --accent: #C084FC;
-            --bg-gradient: radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.15) 0%, rgba(15, 23, 42, 1) 90%);
-            --surface: rgba(30, 41, 59, 0.45);
-            --surface-hover: rgba(255, 255, 255, 0.05);
-            --surface-active: rgba(99, 102, 241, 0.15);
-            --border: rgba(255, 255, 255, 0.08);
-            --border-hover: rgba(255, 255, 255, 0.15);
-            --text-main: #F8FAFC;
-            --text-muted: #94A3B8;
-            --text-light: #64748B;
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --accent: #A855F7;
+            --surface: #FFFFFF;
+            --surface-hover: #F1F5F9;
+            --surface-active: rgba(79, 70, 229, 0.08);
+            --border: #E2E8F0;
+            --border-hover: #CBD5E1;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --text-light: #94A3B8;
             --code-bg: #0F172A;
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
-            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
             --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
             --font-title: 'Outfit', sans-serif;
         }
@@ -40,7 +39,7 @@
 
         body {
             font-family: var(--font-family);
-            background: var(--bg-gradient);
+            background: #F8FAFC;
             color: var(--text-main);
             min-height: 100vh;
             line-height: 1.6;
@@ -57,8 +56,7 @@
 
         /* Sidebar Documentation Navigation */
         aside.docs-sidebar {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(10px);
+            background: #FFFFFF;
             border-right: 1px solid var(--border);
             padding: 2rem 1.5rem;
             height: 100vh;
@@ -80,9 +78,6 @@
 
         .logo-icon {
             font-size: 1.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
         .logo-text {
@@ -90,6 +85,7 @@
             font-weight: 700;
             font-size: 1.25rem;
             letter-spacing: -0.02em;
+            color: var(--primary);
         }
 
         .search-box {
@@ -98,7 +94,7 @@
 
         .search-input {
             width: 100%;
-            background: rgba(15, 23, 42, 0.6);
+            background: #F8FAFC;
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
             padding: 0.6rem 1rem 0.6rem 2.2rem;
@@ -111,7 +107,8 @@
 
         .search-input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            background: #FFFFFF;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
         }
 
         .search-icon {
@@ -119,7 +116,7 @@
             left: 0.8rem;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-muted);
+            color: var(--text-light);
             font-size: 0.875rem;
         }
 
@@ -196,7 +193,7 @@
         .mode-tabs {
             display: flex;
             gap: 0.5rem;
-            background: rgba(15, 23, 42, 0.6);
+            background: #F1F5F9;
             border: 1px solid var(--border);
             padding: 0.25rem;
             border-radius: var(--radius-md);
@@ -224,7 +221,8 @@
 
         .mode-tab.active {
             background: var(--primary);
-            color: #0F172A;
+            color: #FFFFFF;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
         }
 
         .back-link {
@@ -257,9 +255,7 @@
             font-weight: 700;
             letter-spacing: -0.03em;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, #FFFFFF, var(--text-muted));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text-main);
         }
 
         h2 {
@@ -293,19 +289,19 @@
 
         code {
             font-family: 'Courier New', Courier, monospace;
-            background: var(--code-bg);
+            background: #F1F5F9;
             border: 1px solid var(--border);
             padding: 0.2rem 0.4rem;
             border-radius: 4px;
             font-size: 0.875rem;
-            color: var(--accent);
+            color: #D946EF;
         }
 
         /* Code Blocks */
         .code-block-wrapper {
             position: relative;
             background: var(--code-bg);
-            border: 1px solid var(--border);
+            border: 1px solid #1E293B;
             border-radius: var(--radius-md);
             margin: 1.5rem 0;
             overflow: hidden;
@@ -317,8 +313,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 0.5rem 1rem;
-            background: rgba(15, 23, 42, 0.8);
-            border-bottom: 1px solid var(--border);
+            background: #1E293B;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             font-size: 0.75rem;
             color: var(--text-light);
             font-family: var(--font-title);
@@ -335,14 +331,14 @@
             background: none;
             border: none;
             padding: 0;
-            color: #A5B4FC;
+            color: #E2E8F0;
             font-size: 0.875rem;
             line-height: 1.5;
         }
 
         .copy-btn {
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-muted);
             padding: 0.25rem 0.6rem;
             border-radius: var(--radius-sm);
@@ -360,7 +356,6 @@
         .alert {
             background: var(--surface);
             border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
             padding: 1.25rem;
             border-radius: var(--radius-md);
             margin: 1.5rem 0;
@@ -378,6 +373,7 @@
 
         .alert-info {
             border-left: 4px solid var(--primary);
+            background: rgba(79, 70, 229, 0.03);
         }
 
         .alert-info::before {
@@ -386,6 +382,7 @@
 
         .alert-warning {
             border-left: 4px solid var(--accent);
+            background: rgba(168, 85, 247, 0.03);
         }
 
         .alert-warning::before {
@@ -397,7 +394,7 @@
             width: 100%;
             border-collapse: collapse;
             margin: 1.5rem 0;
-            background: rgba(15, 23, 42, 0.3);
+            background: #FFFFFF;
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             overflow: hidden;
@@ -412,7 +409,7 @@
         }
 
         th {
-            background: rgba(15, 23, 42, 0.8);
+            background: #F8FAFC;
             color: var(--text-main);
             font-family: var(--font-title);
             font-weight: 600;
@@ -429,13 +426,13 @@
         }
 
         tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
+            background: #F8FAFC;
             color: var(--text-main);
         }
 
         /* SVG Architecture diagram styling */
         .diagram-container {
-            background: rgba(15, 23, 42, 0.5);
+            background: #FFFFFF;
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             padding: 2rem;
@@ -459,9 +456,8 @@
         }
 
         .feature-card {
-            background: var(--surface);
+            background: #FFFFFF;
             border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
             padding: 1.5rem;
             border-radius: var(--radius-lg);
             transition: all 0.2s;
@@ -471,6 +467,7 @@
         .feature-card:hover {
             border-color: var(--primary);
             transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         }
 
         .feature-icon {
@@ -569,20 +566,20 @@
                     <div class="diagram-container">
                         <svg class="arch-diagram" width="600" height="200" viewBox="0 0 600 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect x="10" y="50" width="120" height="60" rx="8" fill="#4F46E5" fill-opacity="0.2" stroke="#818CF8" stroke-width="2"/>
-                            <text x="70" y="85" fill="#F8FAFC" font-family="Plus Jakarta Sans" font-size="14" font-weight="600" text-anchor="middle">Navegador</text>
+                            <text x="70" y="85" fill="#0F172A" font-family="Plus Jakarta Sans" font-size="14" font-weight="600" text-anchor="middle">Navegador</text>
                             
                             <path d="M130 80 H210" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 4"/>
                             <polygon points="210,80 200,75 200,85" fill="#94A3B8"/>
                             
                             <rect x="220" y="50" width="140" height="60" rx="8" fill="#A855F7" fill-opacity="0.2" stroke="#C084FC" stroke-width="2"/>
-                            <text x="290" y="78" fill="#F8FAFC" font-family="Plus Jakarta Sans" font-size="14" font-weight="600" text-anchor="middle">Nginx Proxy</text>
+                            <text x="290" y="78" fill="#0F172A" font-family="Plus Jakarta Sans" font-size="14" font-weight="600" text-anchor="middle">Nginx Proxy</text>
                             <text x="290" y="98" fill="#94A3B8" font-family="Plus Jakarta Sans" font-size="11" text-anchor="middle">y Node.js API</text>
                             
                             <path d="M360 80 H440" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 4"/>
                             <polygon points="440,80 430,75 430,85" fill="#94A3B8"/>
                             
                             <rect x="450" y="50" width="140" height="60" rx="8" fill="#10B981" fill-opacity="0.2" stroke="#34D399" stroke-width="2"/>
-                            <text x="520" y="78" fill="#F8FAFC" font-family="Plus Jakarta Sans" font-size="14" font-weight="600" text-anchor="middle">Base de Datos</text>
+                            <text x="520" y="78" fill="#0F172A" font-family="Plus Jakarta Sans" font-size="14" font-weight="600" text-anchor="middle">Base de Datos</text>
                             <text x="520" y="98" fill="#94A3B8" font-family="Plus Jakarta Sans" font-size="11" text-anchor="middle">PostgreSQL</text>
                         </svg>
                     </div>
