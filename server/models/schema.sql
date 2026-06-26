@@ -9,10 +9,23 @@ CREATE TABLE IF NOT EXISTS users (
     last_login TIMESTAMP
 );
 
+-- Boards table (Added in v3.6.0)
+CREATE TABLE IF NOT EXISTS boards (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Index for fast user queries on boards
+CREATE INDEX IF NOT EXISTS idx_boards_user_id ON boards(user_id);
+
 -- Jobs table
 CREATE TABLE IF NOT EXISTS jobs (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    board_id INTEGER NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
     
     -- Job metadata
     type VARCHAR(20) CHECK (type IN ('job', 'connection')),
@@ -42,6 +55,7 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 -- Index for fast user queries
 CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_board_id ON jobs(board_id);
 
 -- Trigger function to auto-update updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()

@@ -4,12 +4,23 @@ const bodyParser = require('body-parser');
 const dashboardRoutes = require('../routes/dashboard.routes');
 const { pool } = require('../config/db');
 
-// Mock db
-jest.mock('../config/db', () => ({
-    pool: {
-        query: jest.fn(),
-    }
-}));
+jest.mock('../config/db', () => {
+    const mockQuery = jest.fn();
+    const mockQueryProxy = new Proxy(mockQuery, {
+        apply(target, thisArg, argumentsList) {
+            const queryText = argumentsList[0];
+            if (queryText && (queryText.includes('FROM boards') || queryText.includes('SELECT id FROM boards'))) {
+                return Promise.resolve({ rows: [{ id: 1, name: 'Mi Tablero' }] });
+            }
+            return target.apply(thisArg, argumentsList);
+        }
+    });
+    return {
+        pool: {
+            query: mockQueryProxy,
+        }
+    };
+});
 
 // Mock auth middleware
 jest.mock('../middleware/auth', () => (req, res, next) => {

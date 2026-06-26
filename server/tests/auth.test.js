@@ -5,11 +5,23 @@ const authRoutes = require('../routes/auth.routes');
 const { pool } = require('../config/db');
 
 // Mock specific database responses
-jest.mock('../config/db', () => ({
-    pool: {
-        query: jest.fn(),
-    }
-}));
+jest.mock('../config/db', () => {
+    const mockQuery = jest.fn();
+    const mockQueryProxy = new Proxy(mockQuery, {
+        apply(target, thisArg, argumentsList) {
+            const queryText = argumentsList[0];
+            if (queryText && (queryText.includes('BEGIN') || queryText.includes('COMMIT') || queryText.includes('ROLLBACK') || queryText.includes('INSERT INTO boards') || queryText.includes('FROM boards'))) {
+                return Promise.resolve({ rows: [] });
+            }
+            return target.apply(thisArg, argumentsList);
+        }
+    });
+    return {
+        pool: {
+            query: mockQueryProxy,
+        }
+    };
+});
 
 // Mock bcrypt to avoid hashing time in tests
 jest.mock('bcryptjs', () => ({

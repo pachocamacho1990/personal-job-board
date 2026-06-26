@@ -6,21 +6,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Version**: 3.10.0
 
-A self-hosted career management platform with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
+A self-hosted career management platform supporting multiple **board instances** with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
 
 ### Core Boards
 
-1. **Job Board** (`/jobs.html`): Track job applications through 8 stages (Interested → Applied → Forgotten → Interview → Pending Next Step → Offer → Rejected → Archived)
-2. **Business Board** (`/business.html`): Track professional relationships (Investors, VCs, Accelerators, Connections)
-3. **Dashboard** (`/index.html`): Home view with upcoming interviews and AI match widgets
-4. **Archive Vault** (Modal): View and restore archived jobs
+1. **Job Board** (`/jobs.html`): Track job applications through 8 stages (Interested → Applied → Forgotten → Interview → Pending Next Step → Offer → Rejected → Archived) across multiple isolated boards.
+2. **Business Board** (`/business.html`): Track professional relationships (Investors, VCs, Accelerators, Connections).
+3. **Dashboard** (`/index.html`): Home view with upcoming interviews and AI match widgets filtered by active board.
+4. **Archive Vault** (Modal): View and restore archived jobs.
 
 ### Core Entities
 
+**Boards Table** (`boards`):
+- Tracks separate board instances owned by users.
+- Fields: `id`, `user_id` (FK → users.id), `name` (e.g. "Mi Tablero"), `created_at`, `updated_at`.
+
 **Jobs Table** (`jobs`):
-- **Jobs**: Traditional job applications with `company`, `position`, `location`, `salary` fields
-- **Connections**: Networking opportunities with `contact_name`, `organization` fields
-- Both share: `type`, `rating` (1-5 stars), `status`, `origin` (human/agent), `is_unseen`, `comments` (markdown)
+- **Jobs**: Traditional job applications with `company`, `position`, `location`, `salary` fields.
+- **Connections**: Networking opportunities with `contact_name`, `organization` fields.
+- Both share: `type`, `rating` (1-5 stars), `status`, `origin` (human/agent), `is_unseen`, `comments` (markdown), and `board_id` (FK → boards.id) for board scoping.
 - **Status Enum**: `interested`, `applied`, `forgotten`, `interview`, `pending`, `offer`, `rejected`, `archived`
 
 **Business Entities Table** (`business_entities`):
@@ -58,18 +62,20 @@ A self-hosted career management platform with **Kanban boards** for tracking job
    - `css/layout.css`: Dashboard grid layout
    - `css/sidebar.css`: Navigation styles
 
-2. **Backend** (`/server`): Node.js/Express API
+2. **Backend, Testing & Migrations** (`/server`, `/migrations`, `/tests`):
    - `server.js`: Application entry point, middleware, route mounting
    - `routes/`:
      - `auth.routes.js`: POST /signup, /login, GET /me (with rate limiting)
-     - `jobs.routes.js`: GET, POST, PUT, DELETE /jobs, GET /jobs/:id/history, POST /jobs/:id/transform
+      - `boards.routes.js`: GET, POST, PUT, DELETE /boards (Boards support)
+      - `jobs.routes.js`: GET, POST, PUT, DELETE /jobs, GET /jobs/:id/history, POST /jobs/:id/transform
      - `business.routes.js`: GET, POST, PUT, DELETE /business
      - `dashboard.routes.js`: GET /dashboard/summary
    - `controllers/`:
-     - `auth.controller.js`: User authentication
-     - `jobs.controller.js`: Job CRUD + history retrieval
+     - `auth.controller.js`: User authentication (wrapped in transactions to provision default boards)
+     - `boards.controller.js`: Board CRUD operations and job counts
+     - `jobs.controller.js`: Job CRUD + history retrieval (scoped by boardId)
      - `business.controller.js`: Business entity CRUD
-     - `dashboard.controller.js`: Summary data aggregation
+     - `dashboard.controller.js`: Summary data aggregation (scoped by boardId)
      - `files.factory.js`: Generic file controller factory (shared by jobs & business)
      - `files.controller.js`: Job file operations (thin wrapper using factory)
      - `business-files.controller.js`: Business file operations (thin wrapper using factory)
@@ -79,7 +85,10 @@ A self-hosted career management platform with **Kanban boards** for tracking job
    - `config/`:
      - `db.js`: PostgreSQL connection pool (20 max connections)
      - `auth.js`: JWT/bcrypt configuration
-   - `models/schema.sql`: Database schema with tables and triggers
+   - `models/schema.sql`: Database schema with tables and triggers (v3.6.0 clean setup)
+   - `migrations/`: Root-level folder for chronological SQL database schema modifications
+   - `tests/boards-ui.spec.js`: Playwright E2E browser test verifying board switching and isolation
+   - `playwright.config.js`: Playwright testing configuration
 
 3. **Infrastructure** (`docker-compose.yml`):
    - **postgres**: PostgreSQL 16 with persistent volume
@@ -246,6 +255,10 @@ Both boards use `data-status` attributes for CSS styling:
 - State persisted to localStorage
 
 ## Important Patterns
+
+### Documentation Sync Requirement
+
+- Every time a new feature, API route, database schema modification, or status value is added or updated, you **MUST** update [public/docs.html](file:///Users/pacho-home-server/personal-job-board/public/docs.html) to keep the User Guide and Agent/API Reference in perfect sync. This ensures both human users and external agent integrations have accurate information.
 
 ### Adding New Fields to Jobs
 
@@ -424,6 +437,17 @@ server/controllers/
 ├── business.controller.js     # Business entity CRUD
 ├── auth.controller.js         # Authentication
 └── dashboard.controller.js    # Summary data
+
+migrations/
+├── migration_v2_1.sql         # v2.1 Advanced Tracking schema
+├── migration_v3_0_archive.sql # Archive status migration
+├── migration_v3_3_files.sql   # Job files schema migration
+├── migration_v3_4_business_files.sql # Business files schema migration
+├── migration_v3_5_locked.sql   # Locked jobs column migration
+└── migration_v3_6_boards.sql   # Boards schema & data migration
+
+tests/
+└── boards-ui.spec.js          # Playwright E2E browser test
 ```
 
 ### Data Flow & Dependencies
@@ -485,3 +509,4 @@ When analyzing this codebase, start with:
 2. `public/js/business.js:DOMContentLoaded` - Business Board init
 3. `server/server.js` - API route mounting
 4. `server/models/schema.sql` - Database schema and triggers
+5. `migrations/` - Database schema migrations folder

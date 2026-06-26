@@ -10,11 +10,23 @@ jest.mock('../middleware/auth', () => (req, res, next) => {
     next();
 });
 
-jest.mock('../config/db', () => ({
-    pool: {
-        query: jest.fn(),
-    }
-}));
+jest.mock('../config/db', () => {
+    const mockQuery = jest.fn();
+    const mockQueryProxy = new Proxy(mockQuery, {
+        apply(target, thisArg, argumentsList) {
+            const queryText = argumentsList[0];
+            if (queryText && (queryText.includes('FROM boards') || queryText.includes('INSERT INTO boards') || queryText.includes('SELECT id FROM boards'))) {
+                return Promise.resolve({ rows: [{ id: 1, name: 'Mi Tablero' }] });
+            }
+            return target.apply(thisArg, argumentsList);
+        }
+    });
+    return {
+        pool: {
+            query: mockQueryProxy,
+        }
+    };
+});
 
 const app = express();
 app.use(bodyParser.json());
@@ -36,10 +48,10 @@ describe('Jobs Routes', () => {
 
             expect(res.statusCode).toBe(200);
             expect(res.body).toEqual(mockJobs);
-            // Verify query filtered by user_id
+            // Verify query filtered by user_id and board_id
             expect(pool.query).toHaveBeenCalledWith(
                 expect.stringContaining('WHERE user_id = $1'),
-                [1]
+                [1, 1]
             );
         });
     });

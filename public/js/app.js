@@ -1,5 +1,7 @@
 // State
 let jobs = [];
+let boards = [];
+let activeBoardId = null;
 let currentJobId = null;
 let isFocusMode = false; // Focus mode state
 
@@ -48,7 +50,31 @@ async function init() {
 
     helpers.loadViewPreference();
     loadFocusPreference(); // Load focus mode state
+
+    // Load boards first to establish activeBoardId context
+    await loadBoards();
+
+    // Check for deep link (openJobId)
+    const urlParams = new URLSearchParams(window.location.search);
+    const openJobId = urlParams.get('openJobId');
+    if (openJobId) {
+        try {
+            // Fetch job directly from backend to get its boardId
+            const deepJob = await api.jobs.getOne(parseInt(openJobId));
+            if (deepJob && deepJob.boardId) {
+                activeBoardId = deepJob.boardId;
+                localStorage.setItem('activeBoardId', activeBoardId);
+            }
+        } catch (err) {
+            console.error('Failed to resolve deep link job details:', err);
+        }
+    }
+
+    // Load jobs for active board
     await loadJobs();
+    
+    // Render boards list in sidebar
+    renderBoards();
 
     setupEventListeners();
 
@@ -65,10 +91,8 @@ async function init() {
         getCurrentJobId: () => currentJobId
     });
 
-    // Check for deep link (openJobId) — after Center Peek init so it opens in peek mode
-    const urlParams = new URLSearchParams(window.location.search);
-    const openJobId = urlParams.get('openJobId');
     if (openJobId) {
+        // Find in loaded jobs and open
         const jobToOpen = jobs.find(j => j.id == openJobId);
         if (jobToOpen) {
             openJobDetails(parseInt(openJobId));
@@ -83,7 +107,7 @@ async function init() {
 // API functions
 async function loadJobs() {
     try {
-        jobs = await api.jobs.getAll();
+        jobs = await api.jobs.getAll({ boardId: activeBoardId });
         console.log(`✓ Loaded ${jobs.length} item(s) from database`);
         renderAllJobs();
     } catch (error) {
@@ -97,11 +121,177 @@ async function loadJobs() {
     }
 }
 
+// Board management functions
+async function loadBoards() {
+    try {
+        boards = await api.boards.getAll();
+        
+        // Pick active board
+        const savedBoardId = localStorage.getItem('activeBoardId');
+        if (savedBoardId && boards.some(b => b.id == savedBoardId)) {
+            activeBoardId = parseInt(savedBoardId);
+        } else if (boards.length > 0) {
+            activeBoardId = boards[0].id;
+        } else {
+            activeBoardId = null;
+        }
+
+        if (activeBoardId) {
+            localStorage.setItem('activeBoardId', activeBoardId);
+        }
+    } catch (error) {
+        console.error('Error loading boards:', error);
+        boards = [];
+        activeBoardId = null;
+    }
+}
+
+function renderBoards() {
+    const subnav = document.getElementById('boardsSubnav');
+    if (!subnav) return;
+
+    if (boards.length === 0) {
+        subnav.innerHTML = '<div style="color: var(--text-muted); font-size: 0.75rem; padding: 0.5rem 0.75rem;">Sin tableros</div>';
+        return;
+    }
+
+    subnav.innerHTML = boards.map(board => {
+        const isActive = board.id === activeBoardId;
+        return `
+            <div class="board-nav-item ${isActive ? 'active' : ''}" data-board-id="${board.id}">
+                <span class="board-name" title="${escapeHtml(board.name)}">📋 ${escapeHtml(board.name)} (${board.jobCount || 0})</span>
+                <div class="board-actions">
+                    <button class="board-action-btn edit" title="Renombrar">✏️</button>
+                    <button class="board-action-btn delete" title="Eliminar">🗑️</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Update Page Header Title
+    const pageTitle = document.querySelector('.page-title');
+    if (pageTitle) {
+        const activeBoard = boards.find(b => b.id === activeBoardId);
+        pageTitle.textContent = activeBoard 
+            ? `Job Applications - ${activeBoard.name}`
+            : 'Job Applications';
+    }
+
+    // Attach event listeners to sidebar board items
+    subnav.querySelectorAll('.board-nav-item').forEach(item => {
+        const boardId = parseInt(item.dataset.boardId);
+        const board = boards.find(b => b.id === boardId);
+
+        // Click to switch board
+        item.addEventListener('click', (e) => {
+            if (!e.target.closest('.board-action-btn')) {
+                selectBoard(boardId);
+            }
+        });
+
+        // Edit button
+        const editBtn = item.querySelector('.board-action-btn.edit');
+        if (editBtn) {
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleRenameBoard(boardId, board.name);
+            });
+        }
+
+        // Delete button
+        const deleteBtn = item.querySelector('.board-action-btn.delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleDeleteBoard(boardId, board.name);
+            });
+        }
+    });
+}
+
+async function selectBoard(boardId) {
+    if (activeBoardId === boardId) return;
+    activeBoardId = boardId;
+    localStorage.setItem('activeBoardId', activeBoardId);
+    
+    // Close panel just in case
+    closeJobPanel();
+
+    // Reload
+    await loadJobs();
+    renderBoards();
+}
+
+async function handleCreateBoard() {
+    const name = prompt('Nombre del nuevo tablero:');
+    if (!name || !name.trim()) return;
+
+    try {
+        const newBoard = await api.boards.create({ name: name.trim() });
+        localStorage.setItem('activeBoardId', newBoard.id);
+        
+        await loadBoards();
+        await loadJobs();
+        renderBoards();
+    } catch (error) {
+        console.error('Error creating board:', error);
+        alert('Failed to create board: ' + error.message);
+    }
+}
+
+async function handleRenameBoard(boardId, oldName) {
+    const name = prompt('Nuevo nombre del tablero:', oldName);
+    if (!name || !name.trim() || name.trim() === oldName) return;
+
+    try {
+        await api.boards.update(boardId, { name: name.trim() });
+        await loadBoards();
+        renderBoards();
+    } catch (error) {
+        console.error('Error renaming board:', error);
+        alert('Failed to rename board: ' + error.message);
+    }
+}
+
+async function handleDeleteBoard(boardId, name) {
+    if (boards.length <= 1) {
+        alert('No puedes eliminar tu único tablero.');
+        return;
+    }
+
+    const confirmMsg = `¿Estás seguro de que quieres eliminar el tablero "${name}"?\nEsta acción eliminará permanentemente todas sus vacantes y archivos asociados.`;
+    if (!confirm(confirmMsg)) return;
+
+    try {
+        await api.boards.delete(boardId);
+        
+        // If we deleted the active board, switch to another one
+        if (activeBoardId === boardId) {
+            const remaining = boards.filter(b => b.id !== boardId);
+            if (remaining.length > 0) {
+                localStorage.setItem('activeBoardId', remaining[0].id);
+            } else {
+                localStorage.removeItem('activeBoardId');
+            }
+        }
+        
+        await loadBoards();
+        await loadJobs();
+        renderBoards();
+    } catch (error) {
+        console.error('Error deleting board:', error);
+        alert('Failed to delete board: ' + error.message);
+    }
+}
+
 // CRUD operations
 async function createJob(jobData) {
     try {
-        const newJob = await api.jobs.create(jobData);
+        const payload = { ...jobData, boardId: activeBoardId };
+        const newJob = await api.jobs.create(payload);
         jobs.push(newJob);
+        // Refresh boards count in background
+        loadBoards().then(() => renderBoards());
         renderAllJobs();
         return newJob;
     } catch (error) {
@@ -618,6 +808,12 @@ async function executeTransform() {
 function setupEventListeners() {
     // Add job button
     addJobBtn.addEventListener('click', () => openJobDetails(null));
+
+    // Setup event listener for new board button
+    const newBoardBtn = document.getElementById('newBoardBtn');
+    if (newBoardBtn) {
+        newBoardBtn.addEventListener('click', handleCreateBoard);
+    }
 
     // Close panel
     closePanelBtn.addEventListener('click', closeJobPanel);
