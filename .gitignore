@@ -47,3 +47,8 @@ migration-data.json
 # Playwright artifacts
 playwright-report/
 test-results/
+
+# Build outputs
+dist/
+server/dist/
+
