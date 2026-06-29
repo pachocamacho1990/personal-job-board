@@ -41,59 +41,49 @@ A self-hosted career management platform supporting multiple **board instances**
 
 ### Three-Tier Stack
 
-1. **Frontend** (`/public`): Vanilla JavaScript SPA
-   - `index.html`: Dashboard (home after login)
-   - `jobs.html`: Job Board Kanban
-   - `business.html`: Business Board Kanban
-   - `login.html`: Authentication page
-   - `js/api.js`: REST API client with JWT token management
-   - `js/shared/utils.js`: Shared utility functions (escapeHtml, formatRelativeTime, renderStars, etc.)
-   - `js/shared/file-manager.js`: `createFileManager()` factory — file upload/preview/delete for both boards
-   - `js/shared/board-helpers.js`: `createBoardHelpers()` factory — shared board behaviors (drag-drop, view toggle, markdown preview, panel, ESC key)
-   - `js/shared/journey-map.js`: `renderJourneyMap()` — SVG status timeline visualization
-   - `js/shared/center-peek.js`: `initCenterPeek()` — read-only job detail modal with Journey Map
-   - `js/shared/archive-vault.js`: `initArchiveVault()` — archive/restore modal for managing archived jobs
-   - `js/app.js`: Job Board logic (Kanban, edit panel, form handling, focus mode)
-   - `js/business.js`: Business Board logic (entity CRUD, cards, panel)
-   - `js/dashboard.js`: Dashboard widget logic
-   - `js/sidebar.js`: Navigation highlighting
-   - `js/logout.js`: Logout modal handling
-   - `js/auth.js`: Login/signup form handling
-   - `css/layout.css`: Dashboard grid layout
-   - `css/sidebar.css`: Navigation styles
+1. **Frontend** (`/src`): React SPA with Vite multi-page architecture
+   - `login.html`, `index.html` (Dashboard), `jobs.html` (Job Board), `business.html` (Business Board), `docs.html` (Documentation) in root pointing to corresponding React entry points in `src/pages/`.
+   - `src/types.ts`: Common types and interfaces for the frontend.
+   - `src/api.ts`: Strongly typed REST API client using Fetch.
+   - `src/utils.ts`: Pure utility functions (formatting, validation).
+   - `src/components/`: Reusable React components:
+     - `Sidebar.tsx`: Navigation bar with active board indicators and boards submenu.
+     - `DetailPanel.tsx`: Sidebar drawer for editing job application details, adding/removing attachments.
+     - `BusinessDetailPanel.tsx`: Sidebar drawer for editing business entities and their attachments.
+     - `JourneyMap.tsx`: SVG status progression map.
+     - `CenterPeek.tsx`: Read-only modal with status transitions.
+     - `ArchiveVault.tsx`: Modal for managing archived opportunities.
+   - `src/pages/`: Page components and entries:
+     - `login/main.tsx`: User registration/login flows.
+     - `index/main.tsx`: Home dashboard with widgets.
+     - `jobs/main.tsx`: Kanban-based board for job tracking.
+     - `business/main.tsx`: Kanban-based board for business connections tracking.
+     - `docs/main.tsx`: Documentation and API explorer.
 
 2. **Backend, Testing & Migrations** (`/server`, `/migrations`, `/tests`):
-   - `server.js`: Application entry point, middleware, route mounting
-   - `routes/`:
-     - `auth.routes.js`: POST /signup, /login, GET /me (with rate limiting)
-      - `boards.routes.js`: GET, POST, PUT, DELETE /boards (Boards support)
-      - `jobs.routes.js`: GET, POST, PUT, DELETE /jobs, GET /jobs/:id/history, POST /jobs/:id/transform
-     - `business.routes.js`: GET, POST, PUT, DELETE /business
-     - `dashboard.routes.js`: GET /dashboard/summary
-   - `controllers/`:
-     - `auth.controller.js`: User authentication (wrapped in transactions to provision default boards)
-     - `boards.controller.js`: Board CRUD operations and job counts
-     - `jobs.controller.js`: Job CRUD + history retrieval (scoped by boardId)
-     - `business.controller.js`: Business entity CRUD
-     - `dashboard.controller.js`: Summary data aggregation (scoped by boardId)
-     - `files.factory.js`: Generic file controller factory (shared by jobs & business)
-     - `files.controller.js`: Job file operations (thin wrapper using factory)
-     - `business-files.controller.js`: Business file operations (thin wrapper using factory)
-   - `middleware/`:
-     - `auth.js`: JWT verification middleware
-     - `errorHandler.js`: Global error handler
-   - `config/`:
-     - `db.js`: PostgreSQL connection pool (20 max connections)
-     - `auth.js`: JWT/bcrypt configuration
-   - `models/schema.sql`: Database schema with tables and triggers (v3.6.0 clean setup)
-   - `migrations/`: Root-level folder for chronological SQL database schema modifications
-   - `tests/boards-ui.spec.js`: Playwright E2E browser test verifying board switching and isolation
-   - `playwright.config.js`: Playwright testing configuration
+   - `server.ts`: Application entry point using ESModules import/export and TypeScript.
+   - `routes/`: Express routers written in TypeScript.
+     - `auth.routes.ts`: Authentication endpoints (signup, login, me).
+     - `boards.routes.ts`: Board CRUD operations.
+     - `jobs.routes.ts`: Job application CRUD + transitions.
+     - `business.routes.ts`: Business entity CRUD.
+     - `dashboard.routes.ts`: Summary widgets query.
+   - `controllers/`: Request handler controllers.
+     - `auth.controller.ts`, `boards.controller.ts`, `jobs.controller.ts`, `business.controller.ts`, `dashboard.controller.ts`.
+     - `files.factory.ts`: Shared controller factory for job and connection attachment uploads.
+     - `files.controller.ts` & `business-files.controller.ts`: Wrappers for the files factory.
+   - `middleware/`: Authentication and error handling middlewares.
+   - `config/`: Database connection pool and JWT/auth configs.
+   - `tests/`: Integration tests written in TypeScript (run via Jest/ts-jest).
+   - `models/schema.sql`: Clean database schema initialization.
+   - `migrations/`: Root folder for database migration scripts.
+   - `tests/boards-ui.spec.js`: Playwright E2E browser test verifying board switching and isolation.
 
 3. **Infrastructure** (`docker-compose.yml`):
-   - **postgres**: PostgreSQL 16 with persistent volume
-   - **api**: Node.js backend (port 3000, health check at `/api/health`)
-   - **nginx**: Reverse proxy serving frontend + proxying `/api` to backend (port 80)
+   - **postgres**: PostgreSQL 16 container.
+   - **api**: Node.js API container (port 3000, runs compiled code from `server/dist/server.js`).
+   - **nginx**: Reverse proxy mapping frontend compiled assets from `dist/` to Port 80, and proxying `/api` requests to backend.
+
 
 ### Authentication Flow
 
@@ -370,143 +360,131 @@ Both boards use `data-status` attributes for CSS styling:
 
 | File | Lines | Concerns |
 |------|-------|----------|
-| `public/js/app.js` | ~705 | Job Board core — Kanban, edit panel, form handling, focus mode, transform |
-| `public/js/business.js` | ~256 | Board-specific logic only (entity CRUD, cards, panel) |
-| `public/js/shared/file-manager.js` | ~281 | Shared file operations factory (used by both boards) |
-| `public/js/shared/board-helpers.js` | ~221 | Shared board behaviors factory (drag-drop, view toggle, preview, panel, ESC) |
-| `public/js/shared/archive-vault.js` | ~217 | Archive/restore modal logic |
-| `public/js/shared/center-peek.js` | ~135 | Read-only job detail modal with Journey Map |
-| `public/js/shared/journey-map.js` | ~120 | SVG status timeline rendering |
-| `public/js/shared/utils.js` | ~74 | Pure utility functions (shared across boards) |
-| `public/js/api.js` | ~141 | REST API client with `createCrudApi()` and `createFilesApi()` factories |
-| `server/controllers/files.factory.js` | ~162 | Generic file controller factory (shared by jobs & business) |
-| `server/controllers/files.controller.js` | ~10 | Thin wrapper using factory |
-| `server/controllers/business-files.controller.js` | ~10 | Thin wrapper using factory |
-
-### Known Complexity Areas
-
-**1. `app.js` (~705 lines)**
-- Job Board core — Kanban rendering, edit panel, form handling, focus mode, transform flow
-- Center Peek, Journey Map, and Archive Vault extracted to `shared/` modules
-- File management delegated to `shared/file-manager.js`
-- Drag-drop, view toggle, markdown preview, panel, ESC key delegated to `shared/board-helpers.js`
-
-**2. Remaining Board-Specific Logic**
-- Both `app.js` and `business.js` still implement their own: `renderBoard()`, `createCard()`, `openPanel()`, form handling
-- These differ meaningfully between boards (different fields, card HTML, statuses) — not candidates for extraction
+| `src/pages/jobs/main.tsx` | ~450 | Job Board core Kanban page, React states, and drag-and-drop logic |
+| `src/pages/business/main.tsx` | ~250 | Business Board page |
+| `src/components/DetailPanel.tsx` | ~580 | Large detail sidebar panel with fields, file uploads, and connection conversion logic |
+| `src/components/BusinessDetailPanel.tsx` | ~480 | Business entity detail sidebar panel |
+| `src/components/Sidebar.tsx` | ~160 | Workspace sidebar navigation |
+| `src/components/JourneyMap.tsx` | ~100 | SVG status timeline rendering component |
+| `src/components/CenterPeek.tsx` | ~110 | Read-only details view component |
+| `src/components/ArchiveVault.tsx` | ~110 | Archive / restore operations dialog |
+| `src/api.ts` | ~130 | REST API client wrapper with fully typed endpoints |
+| `server/controllers/files.factory.ts` | ~160 | Generic file controller factory in TS |
+| `server/server.ts` | ~100 | Express server entry point in TS |
 
 ### Technical Debt
 
-- [x] ~~**Consolidate file controllers**~~ — Done: `files.factory.js` factory pattern
-- [x] ~~**Extract shared file management**~~ — Done: `shared/file-manager.js` factory
-- [x] ~~**Extract shared utilities**~~ — Done: `shared/utils.js`
-- [x] ~~**DRY up API client**~~ — Done: `createCrudApi()` and `createFilesApi()` factories in `api.js`
-
-- [x] ~~**Split `app.js`**~~ — Done: extracted `shared/journey-map.js`, `shared/center-peek.js`, `shared/archive-vault.js`
-
-- [x] ~~**Abstract shared board logic**~~ — Done: `shared/board-helpers.js` factory (drag-drop, view toggle, markdown preview, panel, file queue, ESC key)
-
-- [ ] **TypeScript consideration**: No type safety - all validation is manual/runtime
-
-- [ ] **State management**: Global arrays (`jobs[]`, `entities[]`) with no structure
+- [x] ~~**TypeScript consideration**~~ — Done: Migrated entire backend and frontend to TypeScript, achieving strict type safety.
+- [x] ~~**State management**~~ — Done: Global mutable arrays replaced with React states (optimistic updates, React component-scoped state, and clear reactivity).
 
 ### Current Module Structure
 
 ```
-public/js/
-├── shared/
-│   ├── utils.js              # Pure utilities (escapeHtml, formatRelativeTime, renderStars, etc.)
-│   ├── file-manager.js       # createFileManager() factory for file operations
-│   ├── board-helpers.js      # createBoardHelpers() factory for shared board behaviors
-│   ├── journey-map.js        # renderJourneyMap() — SVG status timeline
-│   ├── center-peek.js        # initCenterPeek() — read-only job detail modal
-│   └── archive-vault.js      # initArchiveVault() — archive/restore modal
-├── api.js                    # REST API client (CRUD + file factories)
-├── app.js                    # Job Board core (Kanban, edit panel, form handling, focus mode)
-├── business.js               # Business Board (entity CRUD, cards, panel)
-├── dashboard.js              # Dashboard widgets
-├── sidebar.js                # Navigation highlighting
-├── logout.js                 # Logout modal
-└── auth.js                   # Login/signup
+src/
+├── components/
+│   ├── ArchiveVault.tsx       # Archive / restore modal dialog component
+│   ├── BusinessDetailPanel.tsx # Detail side panel drawer for business board
+│   ├── CenterPeek.tsx         # Read-only job details modal
+│   ├── DetailPanel.tsx        # Detail side panel drawer for jobs board (with transform button)
+│   ├── JourneyMap.tsx         # SVG status progression timeline widget
+│   └── Sidebar.tsx            # Left navigation sidebar with boards switcher
+├── pages/
+│   ├── business/
+│   │   └── main.tsx           # Business Kanban board page
+│   ├── docs/
+│   │   └── main.tsx           # Documentation & API reference explorer page
+│   ├── index/
+│   │   └── main.tsx           # Main Dashboard widgets page
+│   ├── jobs/
+│   │   └── main.tsx           # Job Kanban board page
+│   └── login/
+│       └── main.tsx           # Login and Signup forms page
+├── api.ts                     # Fully typed REST API client (Fetch wrapper)
+├── types.ts                   # Unified types for Jobs, Boards, Entities, and Files
+├── utils.ts                   # Shared UI/string helpers
+└── vite-env.d.ts              # Vite client types registration (allows CSS/asset imports)
 
-server/controllers/
-├── files.factory.js           # Generic file controller factory
-├── files.controller.js        # Job file ops (thin wrapper)
-├── business-files.controller.js # Business file ops (thin wrapper)
-├── jobs.controller.js         # Job CRUD
-├── business.controller.js     # Business entity CRUD
-├── auth.controller.js         # Authentication
-└── dashboard.controller.js    # Summary data
-
-migrations/
-├── migration_v2_1.sql         # v2.1 Advanced Tracking schema
-├── migration_v3_0_archive.sql # Archive status migration
-├── migration_v3_3_files.sql   # Job files schema migration
-├── migration_v3_4_business_files.sql # Business files schema migration
-├── migration_v3_5_locked.sql   # Locked jobs column migration
-└── migration_v3_6_boards.sql   # Boards schema & data migration
-
-tests/
-└── boards-ui.spec.js          # Playwright E2E browser test
+server/
+├── config/
+│   ├── auth.ts                # JWT config and settings
+│   └── db.ts                  # PostgreSQL Pool configuration
+├── controllers/
+│   ├── auth.controller.ts     # User signup and login controller
+│   ├── boards.controller.ts   # Board CRUD controller
+│   ├── jobs.controller.ts     # Job CRUD controller
+│   ├── business.controller.ts # Business connection CRUD controller
+│   ├── dashboard.controller.ts # Summary widgets controller
+│   ├── files.factory.ts       # Generic file upload/download/delete controller factory
+│   ├── files.controller.ts    # Thin job files factory wrapper
+│   └── business-files.controller.ts # Thin connection files factory wrapper
+├── middleware/
+│   ├── auth.ts                # JWT token validation middleware
+│   └── errorHandler.ts        # Express global error handler middleware
+├── routes/
+│   ├── auth.routes.ts         # User auth routing
+│   ├── boards.routes.ts       # Board CRUD routing
+│   ├── jobs.routes.ts         # Job CRUD + file uploads + transform routing
+│   ├── business.routes.ts     # Business connection CRUD + files routing
+│   └── dashboard.routes.ts    # Dashboard widgets routing
+├── tests/
+│   └── [name].test.ts         # Backend unit/integration tests (Jest + ts-jest)
+├── server.ts                  # Express server startup entry point
+├── tsconfig.json              # Server TypeScript configuration
+└── tsconfig.build.json        # TypeScript configuration for build (excludes tests)
 ```
 
 ### Data Flow & Dependencies
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                          FRONTEND                                │
+│                          FRONTEND (React SPA)                    │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│  ┌───────────┐     ┌───────────┐     ┌───────────────┐          │
-│  │ auth.js   │     │ api.js    │     │ sidebar.js    │          │
-│  │ (login)   │────▶│ (REST)    │     │ (navigation)  │          │
-│  └───────────┘     └─────┬─────┘     └───────────────┘          │
-│                          │                                       │
-│              ┌───────────┼───────────┐                           │
-│              ▼           ▼           ▼                           │
-│  ┌──────────────┐ ┌───────────┐ ┌──────────────┐                │
-│  │ dashboard.js │ │  app.js   │ │ business.js  │                │
-│  │ (widgets)    │ │(job board)│ │ (biz board)  │                │
-│  └──────────────┘ └─────┬─────┘ └──────┬───────┘                │
-│                         │              │                         │
-│                         ▼              ▼                         │
-│                  ┌─────────────────────────────┐                 │
-│                  │      shared/utils.js        │                 │
-│                  │   shared/file-manager.js    │                 │
-│                  │   shared/board-helpers.js   │                 │
-│                  │   shared/journey-map.js     │                 │
-│                  │   shared/center-peek.js     │                 │
-│                  │   shared/archive-vault.js   │                 │
-│                  └─────────────────────────────┘                 │
-└──────────────────────────────────────────────────────────────────┘
-                           │
-                           ▼ REST API
+│  ┌─────────────────────────┐         ┌────────────────────────┐  │
+│  │   src/pages/*/main.tsx  │ ◀─────▶ │       src/api.ts       │  │
+│  │     (Page Component)    │         │     (REST Client)      │  │
+│  └────────────┬────────────┘         └───────────┬────────────┘  │
+│               │                                  │               │
+│               ▼                                  │               │
+│  ┌─────────────────────────┐                     │               │
+│  │    src/components/*     │                     │               │
+│  │   (Reusable Widgets)    │                     │               │
+│  └────────────┬────────────┘                     │               │
+│               │                                  │               │
+│               ▼                                  │               │
+│  ┌─────────────────────────┐                     │               │
+│  │    src/utils.ts,        │                     │               │
+│  │    src/types.ts         │                     │               │
+│  └─────────────────────────┘                     │               │
+└──────────────────────────────────────────────────┼───────────────┘
+                                                   │
+                                                   ▼ REST API / JSON
 ┌──────────────────────────────────────────────────────────────────┐
-│                          BACKEND                                 │
+│                          BACKEND (TypeScript)                    │
 ├──────────────────────────────────────────────────────────────────┤
-│  server.js ─── routes/*.routes.js ─── controllers/*.controller  │
-│                                              │                   │
-│                                       files.factory.js           │
-│                                              │                   │
-│                                       middleware/auth.js         │
-│                                              │                   │
-│                                        config/db.js              │
-│                                              ▼                   │
-└──────────────────────────────── PostgreSQL (jobs, entities) ─────┘
+│  server.ts ─── routes/*.ts ─── controllers/*.ts                  │
+│                                      │                           │
+│                               files.factory.ts                   │
+│                                      │                           │
+│                               middleware/auth.ts                 │
+│                                      │                           │
+│                                config/db.ts                      │
+│                                      ▼                           │
+│                        PostgreSQL Database                       │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ### Performance Considerations
 
-- **Large DOM operations**: `renderAllJobs()` and `renderBoard()` re-render all cards on any change
-- **No virtual scrolling**: Could impact performance with 100+ cards per column
-- **File preview**: PDFs and images loaded fully in modal, consider lazy loading
-- **N+1 queries**: Loading job history on Center Peek open is efficient, but bulk loading could help
+- **React render cycle**: React optimizes DOM updates automatically, rendering only cards and columns that undergo actual state changes.
+- **Vite Bundle Sizes**: Built with ESModule code splitting to ensure clean chunks (each under 200KB).
+- **Optimistic UI Updates**: State updates are performed immediately locally for cards drag-and-drop to keep the UI snappy, then synchronized asynchronously via API calls.
 
 ### Entry Points for Analysis
 
 When analyzing this codebase, start with:
-1. `public/js/app.js:init()` - Job Board initialization flow
-2. `public/js/business.js:DOMContentLoaded` - Business Board init
-3. `server/server.js` - API route mounting
-4. `server/models/schema.sql` - Database schema and triggers
-5. `migrations/` - Database schema migrations folder
+1. `src/pages/jobs/main.tsx` - Job Board main logic and React layout.
+2. `src/pages/index/main.tsx` - Home dashboard and widgets.
+3. `server/server.ts` - Express router mounting and middleware setup.
+4. `server/models/schema.sql` - Database schema tables and triggers.
+

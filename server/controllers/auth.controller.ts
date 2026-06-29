@@ -1,0 +1,161 @@
+import { Request, Response, NextFunction } from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { pool } from '../config/db';
+import { jwtSecret, jwtExpiresIn, bcryptRounds } from '../config/auth';
+import { AuthenticatedRequest } from '../middleware/auth';
+
+/**
+ * User signup
+ * POST /api/auth/signup
+ */
+export const signup = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+
+        // Validation
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+        // Email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: 'Invalid email format' });
+        }
+
+        // Password strength validation (min 6 characters)
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        }
+
+        // Hash password
+        const passwordHash = await bcrypt.hash(password, bcryptRounds);
+
+        // Start database transaction
+        await pool.query('BEGIN');
+
+        try {
+            // Insert user into database
+            const result = await pool.query(
+                'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, created_at',
+                [email.toLowerCase(), passwordHash]
+            );
+
+            const user = result.rows[0];
+
+            // Create default board for new user
+            await pool.query(
+                "INSERT INTO boards (user_id, name) VALUES ($1, 'Mi Tablero')",
+                [user.id]
+            );
+
+            await pool.query('COMMIT');
+
+            // Generate JWT token
+            const token = jwt.sign(
+                { userId: user.id, email: user.email },
+                jwtSecret,
+                { expiresIn: jwtExpiresIn as any }
+            );
+
+            res.status(201).json({
+                message: 'User created successfully',
+                token,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    createdAt: user.created_at
+                }
+            });
+        } catch (txError) {
+            await pool.query('ROLLBACK');
+            throw txError;
+        }
+    } catch (error: any) {
+        // Duplicate email error
+        if (error.code === '23505') {
+            return res.status(409).json({ error: 'Email already registered' });
+        }
+        next(error);
+    }
+};
+
+/**
+ * User login
+ * POST /api/auth/login
+ */
+export const login = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+
+        // Validation
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+        // Find user by email
+        const result = await pool.query(
+            'SELECT id, email, password_hash FROM users WHERE email = $1',
+            [email.toLowerCase()]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const user = result.rows[0];
+
+        // Verify password
+        const isValidPassword = await bcrypt.compare(password, user.password_hash);
+
+        if (!isValidPassword) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        // Update last login timestamp
+        await pool.query(
+            'UPDATE users SET last_login = NOW() WHERE id = $1',
+            [user.id]
+        );
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { userId: user.id, email: user.email },
+            jwtSecret,
+            { expiresIn: jwtExpiresIn as any }
+        );
+
+        res.json({
+            message: 'Login successful',
+            token,
+            user: {
+                id: user.id,
+                email: user.email
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Get current user info (requires auth)
+ * GET /api/auth/me
+ */
+export const getCurrentUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const result = await pool.query(
+            'SELECT id, email, created_at, last_login FROM users WHERE id = $1',
+            [req.userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({ user: result.rows[0] });
+    } catch (error) {
+        next(error);
+    }
+};

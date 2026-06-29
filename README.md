@@ -43,13 +43,10 @@ A minimalist, **self-hosted Kanban board** to track job applications, networking
 
 ### 🔐 Authentication
 - Secure signup/login with password hashing (bcrypt)
-- JWT session tokens
-- Per-user data isolation
+- J## 🛠️ Tech Stack
 
-## 🛠️ Tech Stack
-
-- **Frontend**: Vanilla JS (ES6+), CSS3 Variables, Semantic HTML
-- **Backend**: Node.js, Express, JWT Authentication
+- **Frontend**: React 19, TypeScript 6, Vite 8, CSS3 variables, Semantic HTML, TanStack Query v5
+- **Backend**: Node.js, Express, TypeScript 6 (compiled to ESModules)
 - **Database**: PostgreSQL 16
 - **Infrastructure**: Docker Compose, Nginx (Reverse Proxy)
 
@@ -57,6 +54,7 @@ A minimalist, **self-hosted Kanban board** to track job applications, networking
 
 ### Prerequisites
 - Docker & Docker Compose installed
+- Node.js (v18+) and npm (for local compilation/tests)
 
 ### 1. Clone & Configure
 ```bash
@@ -65,15 +63,29 @@ cd personal-job-board
 cp .env.example .env  # Edit with your settings
 ```
 
-### 2. Start the Application
+### 2. Install & Build Frontend
+Before running Docker Compose, you must build the frontend and backend assets:
+```bash
+# Install root dependencies and build React app
+npm install
+npm run build
+
+# Install backend dependencies and build server
+cd server
+npm install
+npm run build
+cd ..
+```
+
+### 3. Start the Application
 ```bash
 docker-compose up -d
 ```
 
-### 3. Access the Job Board
+### 4. Access the Job Board
 Open your browser: **http://localhost/jobboard/**
 
-### 4. Create an Account
+### 5. Create an Account
 1. Click **"Sign up"** on the login page
 2. Create your account
 3. You'll be redirected to your personal Dashboard
@@ -82,39 +94,32 @@ Open your browser: **http://localhost/jobboard/**
 
 ```
 personal-job-board/
-├── public/                   # Frontend files
-│   ├── index.html           # Dashboard (home)
-│   ├── jobs.html            # Job Board
-│   ├── business.html        # Business Board
-│   ├── login.html           # Authentication
-│   ├── styles.css           # Main stylesheet
-│   ├── css/
-│   │   ├── layout.css       # Dashboard layout
-│   │   └── sidebar.css      # Navigation styles
-│   └── js/
-│       ├── shared/
-│       │   ├── utils.js     # Shared utilities (escapeHtml, formatDate, etc.)
-│       │   ├── file-manager.js # File upload/preview/delete factory
-│       │   ├── board-helpers.js # Shared board behaviors factory
-│       │   ├── journey-map.js  # SVG status timeline
-│       │   ├── center-peek.js  # Read-only job detail modal
-│       │   └── archive-vault.js # Archive/restore modal
-│       ├── api.js           # API client (CRUD + file factories)
-│       ├── app.js           # Job Board logic
-│       ├── business.js      # Business Board logic
-│       ├── dashboard.js     # Dashboard widgets
-│       ├── sidebar.js       # Navigation
-│       ├── logout.js        # Logout modal
-│       └── auth.js          # Login/signup
-├── server/                   # Backend API
-│   ├── server.js            # Express entry point
-│   ├── controllers/         # Request handlers
-│   ├── routes/              # API routes
-│   ├── middleware/          # Auth middleware
-│   ├── models/              # Database schema
-│   └── tests/               # Jest tests
-├── docker-compose.yml       # Container orchestration
-└── nginx/                   # Reverse proxy config
+├── dist/                     # Compiled frontend assets (served by Nginx)
+├── src/                      # Frontend source code (React + TypeScript)
+│   ├── components/           # Reusable React components (Sidebar, Panels, etc.)
+│   ├── pages/                # MPA Entry points (Dashboard, Jobs, Business, Docs, Login)
+│   │   ├── business/
+│   │   ├── docs/
+│   │   ├── index/
+│   │   ├── jobs/
+│   │   └── login/
+│   ├── api.ts                # Typed REST API client
+│   ├── types.ts              # Common interfaces and types
+│   └── utils.ts              # Shared utility functions
+├── server/                   # Backend API (TypeScript)
+│   ├── dist/                 # Compiled JavaScript output (run by Node container)
+│   ├── config/               # DB & auth config
+│   ├── controllers/          # Request handlers
+│   ├── middleware/           # Auth & error handling
+│   ├── routes/               # API routes
+│   ├── tests/                # Jest integration tests
+│   ├── server.ts             # Express entry point
+│   ├── tsconfig.json         # Server TS config
+│   └── tsconfig.build.json   # Build config (excludes tests)
+├── docker-compose.yml        # Container orchestration
+├── nginx/                    # Reverse proxy config
+├── tests/                    # Playwright E2E browser tests
+└── tsconfig.json             # Root TS config (frontend)
 ```
 
 ## 🔧 Management
@@ -131,7 +136,15 @@ docker-compose logs -f api
 ```
 
 ### Rebuilding After Changes
+To rebuild container layers (and apply backend TS/code changes):
 ```bash
+# Rebuild frontend
+npm run build
+
+# Rebuild backend locally (to update mounted /app volume)
+cd server && npm run build && cd ..
+
+# Restart containers
 docker-compose up -d --build
 ```
 
@@ -149,17 +162,22 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed migration steps.
 
 ## 🧪 Testing
 
+### Backend Unit/Integration Tests (Jest)
 ```bash
-# Run backend tests
 cd server
 npm test
 ```
 
-Tests include:
-- `auth.test.js` - Authentication flows
-- `jobs.test.js` - Job CRUD operations
-- `business.test.js` - Business entity CRUD
-- `dashboard.test.js` - Summary data
+### Frontend E2E UI Tests (Playwright)
+Ensure the application is running (e.g. via Docker Compose) at `http://localhost/jobboard/` before running E2E tests:
+```bash
+# Run headless UI tests
+npm run test:ui
+
+# Run headed or UI mode UI tests
+npm run test:ui:headed
+npm run test:ui:ui
+```
 
 See [TESTING.md](TESTING.md) for full testing strategy.
 

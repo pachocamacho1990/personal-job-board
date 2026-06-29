@@ -1,13 +1,13 @@
-# AI Development Guide - Personal Job Board v3.6.0
+# AI Development Guide - Personal Job Board v3.10.0 (TypeScript & React)
 
 **Purpose**: Token-efficient reference for AI-assisted development. For human docs, see README.md and DESIGN.md.
 
 ## Quick Context
 
-Multi-board career management platform with PostgreSQL backend. Three main views:
-1. **Dashboard** (`index.html`) - Home with interview/AI match widgets
-2. **Job Board** (`jobs.html`) - Kanban for job applications supporting multiple board instances (similar to ChatGPT sidebar history)
-3. **Business Board** (`business.html`) - Kanban for professional relationships
+Multi-board career management platform with PostgreSQL backend. Three main views served via a Vite multi-page React application:
+1. **Dashboard** (`index.html` -> `src/pages/index/main.tsx`) - Home with interview/AI match widgets
+2. **Job Board** (`jobs.html` -> `src/pages/jobs/main.tsx`) - Kanban for job applications supporting multiple board instances (similar to ChatGPT sidebar history)
+3. **Business Board** (`business.html` -> `src/pages/business/main.tsx`) - Kanban for professional relationships
 
 ## Data Schema
 
@@ -65,35 +65,32 @@ Multi-board career management platform with PostgreSQL backend. Three main views
 
 ## Core Files
 
-### Frontend (`/public`)
-| File | Purpose |
+### Frontend React SPA (`/src`)
+| File / Directory | Purpose |
 |------|---------|
-| `index.html` | Dashboard (home after login) |
-| `jobs.html` | Job Board Kanban |
-| `business.html` | Business Board Kanban |
-| `login.html` | Auth page |
-| `js/api.js` | REST client with JWT and cache-busting versioning |
-| `js/app.js` | Job Board logic (with board management) |
-| `js/business.js` | Business Board logic |
-| `js/dashboard.js` | Dashboard widgets |
-| `js/sidebar.js` | Nav highlighting |
-| `js/logout.js` | Logout modal |
-| `css/layout.css` | Dashboard grid |
-| `css/sidebar.css` | Navigation styles with boards submenu |
-| `styles.css` | Main design system |
-| `WIREFRAMING_GUIDE.md` | Protocols for AI image generation |
+| `src/pages/index/main.tsx` | Dashboard home view |
+| `src/pages/jobs/main.tsx` | Job Board Kanban board page |
+| `src/pages/business/main.tsx` | Business Board Kanban page |
+| `src/pages/login/main.tsx` | Auth register / login page |
+| `src/pages/docs/main.tsx` | Dynamic API Reference and guide |
+| `src/api.ts` | Strongly typed client with JWT management |
+| `src/types.ts` | Unified TypeScript interfaces |
+| `src/utils.ts` | Pure utility functions (escaping, ratings, dates) |
+| `src/components/Sidebar.tsx` | Left side navigation with active board selection |
+| `src/components/DetailPanel.tsx` | Jobs detail edit panel (sliding drawer) |
+| `src/components/BusinessDetailPanel.tsx` | Business connection detail panel (sliding drawer) |
 
 ### Backend, Testing & Migrations
 | Folder/File | Purpose |
 |------|---------|
-| `server.js` | Express entry, middleware |
-| `routes/boards.routes.js` | /api/boards/* endpoints |
-| `controllers/boards.controller.js` | Board management logic |
-| `routes/jobs.routes.js` | /api/jobs/* endpoints |
-| `models/schema.sql` | DB schema (v3.6.0 clean setup) |
+| `server/server.ts` | Express entry point in TypeScript (ESModules) |
+| `server/routes/` | Strongly typed Express routers |
+| `server/controllers/` | Request controllers (TS) |
+| `server/models/schema.sql` | DB schema (v3.6.0 clean setup) |
 | `migrations/` | Directory for chronological database schema updates |
 | `playwright.config.js` | Configuration for Playwright E2E browser tests |
 | `tests/boards-ui.spec.js` | E2E browser automation test for board isolation |
+
 
 ## API Endpoints
 
@@ -123,121 +120,75 @@ GET    /api/dashboard/summary    → { interviews, newMatches } (Filtered by boa
 
 All except auth require `Authorization: Bearer <token>` header.
 
-## State Variables
+## State Variables & React hooks
 
-### Dashboard (dashboard.js)
-```javascript
-// No persistent state - fetches fresh on load
-```
+### Jobs Page (`pages/jobs/main.tsx`)
+- `jobs` (state `Job[]`): Jobs belonging to the currently active board.
+- `boards` (state `Board[]`): Boards belonging to the current user.
+- `activeBoardId` (state `number | null`): Id of the active board.
+- `selectedJob` (state `Job | null`): Selected job for detail sidebar panel.
+- `viewMode` (state `"comfortable" | "compact"`): Layout density.
+- `focusMode` (state `boolean`): Filters the board to high-rated cards and hides rejected/forgotten columns.
+- `activePanel` (state `"details" | "center-peek" | "archive-vault" | null`): Currently visible modal/drawer view.
 
-### Job Board (app.js)
-```javascript
-jobs = []                  // Array of job objects for active board
-boards = []                // Array of board objects owned by user
-activeBoardId = null       // Current active board ID
-currentJobId = null        // Selected job ID
-isCompactView = false      // View mode toggle
-isPreviewMode = false      // Markdown preview toggle
-isFocusMode = false        // Filter high-priority items
-```
+### Business Page (`pages/business/main.tsx`)
+- `entities` (state `BusinessEntity[]`): Business connections.
+- `selectedEntity` (state `BusinessEntity | null`): Connection being edited/viewed in the sliding drawer.
+- `viewMode` (state `"comfortable" | "compact"`): Layout density.
+- `activePanel` (state `"details" | null`): Panel visibility indicator.
 
-### Business Board (business.js)
-```javascript
-entities = []              // Main array of business entities
-dragSource = null          // Currently dragged card
-isCompactView = false      // View mode toggle
-```
+## Core Component Architectures
 
-## Core Functions
+### Page Lifecycle
+1. **Initial Mount**: Check `localStorage.authToken` presence. If missing, redirect to `/jobboard/login.html`.
+2. **Fetch Data**: Fetch boards list (`GET /api/boards`) and current user info (`GET /api/auth/me`). Set default active board.
+3. **Fetch Board Jobs**: Whenever `activeBoardId` changes, fetch all jobs (`GET /api/jobs?boardId=id`).
 
-### Dashboard (dashboard.js)
-- `fetchDashboardData()` → Fetches /dashboard/summary, updates widgets
-- `renderInterviews(jobs)` → Populates upcoming interviews list
-- `renderNewMatches(jobs)` → Populates AI matches list
-
-### Job Board (app.js)
-- `fetchJobs()` → Loads all jobs from API
-- `renderAllJobs()` → Clears columns, renders all job cards
-- `createJob(data)` → POST /jobs, adds to array
-- `updateJob(id, data)` → PUT /jobs/:id, updates array
-- `deleteJob(id)` → DELETE /jobs/:id, removes from array
-- `openJobDetails(jobId)` → Opens side panel (null = new)
-- `toggleViewMode()` → Switches compact/comfortable
-
-### Business Board (business.js)
-- `fetchEntities()` → Loads all entities from API
-- `renderBoard()` → Clears columns, renders all entity cards
-- `createCard(entity)` → Creates DOM card element
-- `openPanel(entity)` → Opens side panel (null = new)
-- `handleFormSubmit(e)` → Creates or updates entity
-- `handleDelete()` → Deletes current entity
+### Optimistic Updates
+For drag-and-drop status changes, state arrays are updated immediately on drop:
+1. Re-map local state (`jobs` or `entities`) setting the new status.
+2. Trigger API PUT request in background.
+3. If API request fails, roll back local state to original value and alert user.
 
 ## Key Patterns
 
 ### Authentication
-- Token stored in `localStorage.authToken`
-- All pages check token on load, redirect to `/jobboard/login.html` if missing
-- API client auto-clears token on 401 response
+- Token stored in `localStorage.authToken`.
+- React pages block render/redirect if token is missing.
+- API requests automatically append `Authorization: Bearer <token>` header.
 
-### Drag & Drop
-Both boards use same pattern:
-1. `dragstart` → Store reference, add `.dragging` class
-2. `dragover` → Prevent default, add `.drag-over`
-3. `drop` → Read `data-id`, call update API, re-render
+### Drag & Drop (HTML5 Native Drag and Drop)
+1. Card defines `draggable="true"` and `onDragStart`.
+2. Column defines `onDragOver` (triggers `preventDefault`) and `onDrop`.
+3. Drop retrieves card ID, modifies status, triggers background API PUT sync.
 
 ### View Toggle
-- Icon: ⊟ (comfortable) ↔ ⊞ (compact)
-- Persisted to localStorage: `viewPreference` (jobs), `businessBoardCompactView` (business)
-- Adds `.compact` class to cards
+- Stored in localStorage: `viewPreference` (jobs), `businessBoardCompactView` (business).
+- Controls mapping CSS classes: `.comfortable` or `.compact` on cards.
 
 ### Color-Coded Columns
-CSS uses `[data-status="..."]` selectors:
-```css
-.column[data-status="interested"] .column-header { /* purple */ }
-.column[data-status="researching"] .column-header { /* indigo */ }
-```
-
-## Design Tokens (styles.css :root)
-
-### Status Colors - Job Board
-```css
---color-interested: #A855F7  /* Purple */
---color-applied: #3B82F6     /* Blue */
---color-interview: #F59E0B   /* Amber */
---color-offer: #22C55E       /* Green */
---color-rejected: #64748B    /* Slate */
-```
-
-### Status Colors - Business Board
-```css
---color-researching: #6366F1  /* Indigo */
---color-contacted: #0891B2    /* Cyan */
---color-meeting: #8B5CF6      /* Violet */
---color-negotiation: #EA580C  /* Orange */
---color-signed: #059669       /* Emerald */
-```
+Tailored HSL theme colors mapped via `data-status` attributes in CSS.
+- Job Board: `interested`, `applied`, `forgotten`, `interview`, `pending`, `offer`, `rejected`, `archived`
+- Business Board: `researching`, `contacted`, `meeting`, `negotiation`, `signed`, `rejected`
 
 ## Common Workflows
 
 ### Add Job/Entity
-1. Click "+ Add" button
-2. `openPanel(null)` / `openJobDetails(null)` → Sets currentId=null
-3. Fill form, submit
-4. `handleFormSubmit()` → Sees null ID → Calls create API
-5. Re-render board, close panel
+1. User clicks "+ Add Job" or "+ Add Relationship" button.
+2. React sets `selectedJob` / `selectedEntity` to `null` and sets `activePanel = "details"`.
+3. The detail panel renders blank fields.
+4. Form submit sends POST request to `/api/jobs` or `/api/business`, appends returned object to state, and closes panel.
 
 ### Edit Job/Entity
-1. Click card → `openPanel(entity)` / `openJobDetails(jobId)`
-2. Sets currentId, populates form
-3. Edit, submit
-4. `handleFormSubmit()` → Sees ID → Calls update API
-5. Re-render, close panel
+1. User clicks card.
+2. React sets `selectedJob` to the card object and `activePanel = "center-peek"` (or `"details"`).
+3. Modifying fields in Detail Panel and submitting sends PUT request, updates matching object in state array, and closes panel.
 
 ### Drag to Change Status
-1. Drag card → Store element
-2. Drop on column → Read new status from `data-status`
-3. Call update API with new status
-4. Re-render board
+1. Drag card -> triggers `onDragStart` setting transfer data (card ID).
+2. Drop on column -> triggers `onDrop` fetching target status from column's `data-status` attribute.
+3. React performs optimistic update on `jobs` state and initiates `PUT /api/jobs/:id` in background.
+
 
 ## Testing
 
@@ -270,12 +221,12 @@ Covers user registration, creating boards, data isolation, and deep link verific
 1. **Check this file first** - Most patterns documented here
 2. **Use file ranges** - `view_file` with StartLine/EndLine
 3. **Reference function names** - All functions are single-purpose
-4. **Pattern consistency** - All CRUD follows: API call → update array → re-render
+4. **Pattern consistency** - All CRUD follows React state update -> background API call
 5. **Check CLAUDE.md** - More detailed route/controller info
 6. **UI/Wireframing** - Always consult `WIREFRAMING_GUIDE.md` before generating UI mockups.
-7. **Documentation Sync** - When modifying features, routes, or schema, always update the public [public/docs.html](file:///Users/pacho-home-server/personal-job-board/public/docs.html) to keep it in sync.
+7. **Documentation Sync** - When modifying features, routes, or schema, always update [src/pages/docs/main.tsx](file:///Users/pacho-home-server/personal-job-board/src/pages/docs/main.tsx) (and `docs.html` root entry if layout changes) to keep it in sync.
 
-## Development Insights (v3.2.0)
+## Development Insights (v3.10.0)
 
 ### File Downloads & Browser Quirks
 1. **Safari**:
@@ -296,5 +247,6 @@ Covers user registration, creating boards, data isolation, and deep link verific
 
 ## Navigation & Deep Linking
 - **Dashboard to Board**: Links from the dashboard (e.g., "Upcoming Interviews") should use `?openJobId={id}`.
-- **Auto-Open**: The Job Board (`app.js`) automatically detects this parameter and opens the **Center Peek** modal.
+- **Auto-Open**: The Jobs Page (`src/pages/jobs/main.tsx`) automatically detects this parameter and opens the **Center Peek** modal.
 - **Parameter Handling**: Do not remove the query parameter (allows for bookmarking specific job views).
+
