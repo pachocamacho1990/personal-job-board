@@ -5,9 +5,9 @@ import { BusinessEntity } from '../../types';
 import { Sidebar } from '../../components/Sidebar';
 import { BusinessDetailPanel } from '../../components/BusinessDetailPanel';
 import { capitalize } from '../../utils';
-import '../../../public/styles.css';
-import '../../../public/css/layout.css';
-import '../../../public/css/sidebar.css';
+import '../../styles/styles.css';
+import '../../styles/layout.css';
+import '../../styles/sidebar.css';
 
 const columnsConfig = [
   { id: 'researching', title: 'Researching' },

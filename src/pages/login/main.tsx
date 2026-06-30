@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { api } from '../../api';
-import '../../../public/styles.css';
+import '../../styles/styles.css';
+
 
 const LoginPage: React.FC = () => {
   const [isSignupMode, setIsSignupMode] = useState<boolean>(false);
