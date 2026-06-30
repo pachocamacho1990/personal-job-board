@@ -44,6 +44,54 @@ class DatabaseManager:
             )
             return conv_id
 
+    async def get_user_conversations(self, user_id: int) -> List[Dict[str, Any]]:
+        async with self.pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT c.id, c.title, c.created_at AS "createdAt",
+                       (SELECT m.content FROM agent_messages m WHERE m.conversation_id = c.id ORDER BY m.timestamp DESC LIMIT 1) AS "lastMessage",
+                       (SELECT m.timestamp FROM agent_messages m WHERE m.conversation_id = c.id ORDER BY m.timestamp DESC LIMIT 1) AS "lastActive"
+                FROM agent_conversations c
+                WHERE c.user_id = $1
+                ORDER BY COALESCE(
+                    (SELECT m.timestamp FROM agent_messages m WHERE m.conversation_id = c.id ORDER BY m.timestamp DESC LIMIT 1), 
+                    c.created_at
+                ) DESC
+                """,
+                user_id
+            )
+            
+            conversations = []
+            for r in rows:
+                conversations.append({
+                    "id": r["id"],
+                    "title": r["title"] or "Nueva Conversación",
+                    "createdAt": r["createdAt"].isoformat() if r["createdAt"] else None,
+                    "lastMessage": r["lastMessage"] or "",
+                    "lastActive": r["lastActive"].isoformat() if r["lastActive"] else None
+                })
+            return conversations
+
+    async def create_new_conversation(self, user_id: int, title: str = "Nueva Conversación") -> int:
+        async with self.pool.acquire() as conn:
+            conv_id = await conn.fetchval(
+                "INSERT INTO agent_conversations (user_id, title) VALUES ($1, $2) RETURNING id",
+                user_id, title
+            )
+            return conv_id
+
+    async def delete_conversation(self, conversation_id: int):
+        async with self.pool.acquire() as conn:
+            # Cascades and deletes messages automatically
+            await conn.execute("DELETE FROM agent_conversations WHERE id = $1", conversation_id)
+
+    async def update_conversation_title(self, conversation_id: int, title: str):
+        async with self.pool.acquire() as conn:
+            await conn.execute(
+                "UPDATE agent_conversations SET title = $1 WHERE id = $2",
+                title, conversation_id
+            )
+
     async def get_conversation_history(self, conversation_id: int) -> List[Dict[str, Any]]:
         async with self.pool.acquire() as conn:
             rows = await conn.fetch(
