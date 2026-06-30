@@ -11,11 +11,43 @@ WORKSPACE_TOOLS_SCHEMAS = [
     {
         "type": "function",
         "function": {
-            "name": "list_jobs",
-            "description": "Obtiene la lista de tarjetas de empleo (job cards) del usuario. Permite filtrar por columna/status o por término de búsqueda.",
+            "name": "list_boards",
+            "description": "Obtiene la lista de todos los tableros (boards) creados por el usuario, mostrando sus IDs, nombres y número de tarjetas en cada uno.",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_board",
+            "description": "Crea un nuevo tablero (board) con un nombre específico en el espacio de trabajo del usuario.",
             "parameters": {
                 "type": "object",
                 "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "El nombre del nuevo tablero a crear"
+                    }
+                },
+                "required": ["name"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_jobs",
+            "description": "Obtiene la lista de tarjetas de empleo (job cards) de un tablero específico del usuario. Permite filtrar por columna/status o por término de búsqueda.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "board_id": {
+                        "type": "integer",
+                        "description": "El ID del tablero a consultar. Recomendado: listar los tableros con list_boards primero para saber sus IDs."
+                    },
                     "status": {
                         "type": "string",
                         "description": "Columna/estado a filtrar: interested, applied, forgotten, interview, pending, offer, rejected, archived",
@@ -26,6 +58,44 @@ WORKSPACE_TOOLS_SCHEMAS = [
                         "description": "Término de búsqueda para filtrar por compañía o posición"
                     }
                 }
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_job_card",
+            "description": "Crea una nueva tarjeta de empleo (job card) en un tablero específico del usuario.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "board_id": {
+                        "type": "integer",
+                        "description": "El ID numérico del tablero de destino donde se creará la tarjeta"
+                    },
+                    "company": {
+                        "type": "string",
+                        "description": "Nombre de la empresa"
+                    },
+                    "position": {
+                        "type": "string",
+                        "description": "Cargo/posición"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Columna/estado inicial de la tarjeta",
+                        "enum": ["interested", "applied", "forgotten", "interview", "pending", "offer", "rejected"]
+                    },
+                    "salary": {
+                        "type": "string",
+                        "description": "Información del salario (ej: '$80,000 USD')"
+                    },
+                    "location": {
+                        "type": "string",
+                        "description": "Ubicación (ej: 'Remote', 'New York, NY')"
+                    }
+                },
+                "required": ["board_id", "company", "position", "status"]
             }
         }
     },
@@ -89,11 +159,52 @@ WORKSPACE_TOOLS_SCHEMAS = [
 
 # ── 2. Tool Execution Functions (Called locally) ─────────
 
-async def list_jobs(user_token: str, status: Optional[str] = None, query: Optional[str] = None) -> Dict[str, Any]:
-    """Fetch jobs list from Express API on behalf of the user"""
+async def list_boards(user_token: str) -> Dict[str, Any]:
+    """Fetch boards list from Express API on behalf of the user"""
+    url = f"{settings.express_api_url}/boards"
+    headers = {"Authorization": f"Bearer {user_token}"}
+
+    async with httpx.AsyncClient() as client:
+        try:
+            logger.info(f"Executing list_boards on API: {url}")
+            resp = await client.get(url, headers=headers, timeout=10.0)
+            if resp.status_code == 200:
+                boards = resp.json()
+                return {"success": True, "boards": boards, "count": len(boards)}
+            return {"success": False, "error": f"API returned status {resp.status_code}", "detail": resp.text}
+        except Exception as e:
+            logger.error(f"Error executing list_boards API request: {e}")
+            return {"success": False, "error": str(e)}
+
+async def create_board(user_token: str, name: str) -> Dict[str, Any]:
+    """Create a new board in Express API on behalf of the user"""
+    url = f"{settings.express_api_url}/boards"
+    headers = {"Authorization": f"Bearer {user_token}"}
+    payload = {"name": name}
+
+    async with httpx.AsyncClient() as client:
+        try:
+            logger.info(f"Executing create_board with name '{name}'")
+            resp = await client.post(url, headers=headers, json=payload, timeout=10.0)
+            if resp.status_code == 201:
+                return {"success": True, "message": f"Tablero '{name}' creado exitosamente.", "board": resp.json()}
+            return {"success": False, "error": f"API returned status {resp.status_code}", "detail": resp.text}
+        except Exception as e:
+            logger.error(f"Error executing create_board API request: {e}")
+            return {"success": False, "error": str(e)}
+
+async def list_jobs(
+    user_token: str, 
+    board_id: Optional[int] = None, 
+    status: Optional[str] = None, 
+    query: Optional[str] = None
+) -> Dict[str, Any]:
+    """Fetch jobs list from Express API on behalf of the user, optionally filtering by board_id"""
     url = f"{settings.express_api_url}/jobs"
     headers = {"Authorization": f"Bearer {user_token}"}
     params = {}
+    if board_id is not None:
+        params["boardId"] = board_id
     if status:
         params["status"] = status
     if query:
@@ -105,7 +216,6 @@ async def list_jobs(user_token: str, status: Optional[str] = None, query: Option
             resp = await client.get(url, headers=headers, params=params, timeout=10.0)
             if resp.status_code == 200:
                 jobs = resp.json()
-                # Format to give a cleaner, truncated layout to the LLM to save token context window space
                 simplified_jobs = []
                 for j in jobs:
                     simplified_jobs.append({
@@ -119,6 +229,41 @@ async def list_jobs(user_token: str, status: Optional[str] = None, query: Option
             return {"success": False, "error": f"API returned status {resp.status_code}", "detail": resp.text}
         except Exception as e:
             logger.error(f"Error executing list_jobs API request: {e}")
+            return {"success": False, "error": str(e)}
+
+async def create_job_card(
+    user_token: str,
+    board_id: int,
+    company: str,
+    position: str,
+    status: str,
+    salary: Optional[str] = None,
+    location: Optional[str] = None
+) -> Dict[str, Any]:
+    """Create a new job card on a specific board via Express POST endpoint"""
+    url = f"{settings.express_api_url}/jobs"
+    headers = {"Authorization": f"Bearer {user_token}"}
+    payload = {
+        "boardId": board_id,
+        "company": company,
+        "position": position,
+        "status": status,
+        "origin": "agent"
+    }
+    if salary:
+        payload["salary"] = salary
+    if location:
+        payload["location"] = location
+
+    async with httpx.AsyncClient() as client:
+        try:
+            logger.info(f"Executing create_job_card on board {board_id} for '{company}'")
+            resp = await client.post(url, headers=headers, json=payload, timeout=10.0)
+            if resp.status_code == 201:
+                return {"success": True, "message": f"Tarjeta de empleo para '{company}' creada exitosamente.", "job": resp.json()}
+            return {"success": False, "error": f"API returned status {resp.status_code}", "detail": resp.text}
+        except Exception as e:
+            logger.error(f"Error executing create_job_card API request: {e}")
             return {"success": False, "error": str(e)}
 
 async def update_job_status(user_token: str, job_id: int, status: str) -> Dict[str, Any]:
@@ -166,10 +311,29 @@ async def execute_tool(name: str, arguments: Dict[str, Any], user_token: str) ->
     Executes a workspace tool requested by the LLM on behalf of the user.
     """
     try:
-        if name == "list_jobs":
+        if name == "list_boards":
+            return await list_boards(user_token)
+            
+        elif name == "create_board":
+            board_name = arguments.get("name")
+            return await create_board(user_token, board_name)
+            
+        elif name == "list_jobs":
+            board_id = arguments.get("board_id")
+            if board_id is not None:
+                board_id = int(board_id)
             status = arguments.get("status")
             query = arguments.get("query")
-            return await list_jobs(user_token, status, query)
+            return await list_jobs(user_token, board_id, status, query)
+            
+        elif name == "create_job_card":
+            board_id = int(arguments.get("board_id"))
+            company = arguments.get("company")
+            position = arguments.get("position")
+            status = arguments.get("status")
+            salary = arguments.get("salary")
+            location = arguments.get("location")
+            return await create_job_card(user_token, board_id, company, position, status, salary, location)
             
         elif name == "update_job_status":
             job_id = int(arguments.get("job_id"))
