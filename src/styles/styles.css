@@ -46,6 +46,13 @@
     --accent: var(--color-primary);
     --accent-hover: var(--color-primary-hover);
     --danger: var(--color-danger);
+    --canvas: var(--color-canvas);
+    --border: var(--color-border);
+    --radius: var(--radius-md);
+    --shadow: var(--shadow-md);
+    --surface: var(--color-surface);
+    --surface-hover: var(--color-tertiary);
+    --primary-soft: rgba(79, 70, 229, 0.08);
 
     /* Status Colors (Refined for Aurora) */
     --color-interested: #A855F7;

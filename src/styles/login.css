@@ -1,0 +1,132 @@
+        /* Authentication page specific styles - Aurora Theme */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background-color: var(--color-surface);
+        }
+
+        .auth-card {
+            background: var(--color-canvas);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--color-border);
+            width: 100%;
+            max-width: 400px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--color-text-main);
+            margin: 0 0 8px 0;
+            letter-spacing: -0.02em;
+        }
+
+        .auth-header p {
+            font-size: 15px;
+            color: var(--color-text-muted);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--color-text-main);
+        }
+
+        .form-group input {
+            padding: 10px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--color-text-main);
+            background: var(--color-canvas);
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            /* Aurora Indigo Ring */
+        }
+
+        .error-message {
+            display: none;
+            padding: 12px;
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: var(--radius-sm);
+            color: var(--color-danger);
+            font-size: 14px;
+        }
+
+        .btn-submit {
+            padding: 12px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            background: var(--color-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .toggle-mode {
+            text-align: center;
+            font-size: 14px;
+            color: var(--color-text-muted);
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .toggle-mode a {
+            color: var(--color-primary);
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toggle-mode a:hover {
+            color: var(--color-primary-hover);
+            text-decoration: underline;
+        }

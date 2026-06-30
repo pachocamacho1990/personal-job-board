@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { api } from '../../api';
 import '../../styles/styles.css';
+import '../../styles/login.css';
+
 
 
 const LoginPage: React.FC = () => {

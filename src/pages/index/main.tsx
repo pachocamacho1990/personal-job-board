@@ -5,6 +5,7 @@ import { Sidebar } from '../../components/Sidebar';
 import '../../styles/styles.css';
 import '../../styles/layout.css';
 import '../../styles/sidebar.css';
+import '../../styles/dashboard.css';
 
 interface DashboardSummary {
   interviews: any[];
