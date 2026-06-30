@@ -364,7 +364,14 @@ const JobsPage: React.FC = () => {
       <div className="main-content">
         <main className="board-section">
           <div className="page-header">
-            <h1 className="page-title">{pageHeaderTitle}</h1>
+            <div>
+              <h1 className="page-title" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                {pageHeaderTitle}
+              </h1>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                Track your active job search pipelines and candidate funnel.
+              </p>
+            </div>
             <div className="header-actions">
               <button
                 id="focusToggle"
@@ -455,7 +462,7 @@ const JobsPage: React.FC = () => {
                           key={job.id}
                           className={`job-card ${isCompactView ? 'compact' : ''} ${
                             job.is_unseen ? 'shining' : ''
-                          } ${job.is_locked ? 'locked' : ''}`}
+                          } ${job.is_locked ? 'locked' : ''} ${isAgent ? 'agent-origin' : ''}`}
                           draggable={!job.is_locked}
                           data-job-id={job.id}
                           data-type={job.type}

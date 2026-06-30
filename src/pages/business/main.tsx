@@ -160,7 +160,14 @@ const BusinessPage: React.FC = () => {
       <div className="main-content">
         <main className="board-section">
           <div className="page-header">
-            <h1 className="page-title">Business Connections</h1>
+            <div>
+              <h1 className="page-title" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                Business Connections
+              </h1>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                Manage investors, partners, and key professional relations.
+              </p>
+            </div>
             <div className="header-actions">
               <button
                 id="viewToggle"

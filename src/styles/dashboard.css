@@ -1,65 +1,127 @@
-        .list-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+/* Redesigned Dashboard Styles - Zenith Brand */
+.dashboard-grid {
+    margin-top: 1.5rem;
+}
 
-        .list-item:last-child {
-            border-bottom: none;
-        }
+.dashboard-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--canvas);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+}
 
-        .list-item:hover {
-            background-color: var(--surface);
-        }
+.dashboard-card:hover {
+    box-shadow: 0 12px 28px -5px rgba(99, 102, 241, 0.12), 
+                0 8px 12px -6px rgba(99, 102, 241, 0.06);
+    transform: translateY(-2px);
+    border-color: rgba(99, 102, 241, 0.3);
+}
 
-        .item-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            margin-right: 1rem;
-            background-color: var(--surface);
-        }
+.card-header {
+    border-bottom: 1px solid var(--border);
+}
 
-        .interview-icon {
-            background-color: var(--color-interview-light);
-            color: var(--color-interview);
-        }
+.card-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
 
-        .match-icon {
-            background-color: rgba(168, 85, 247, 0.1);
-            color: var(--accent);
-        }
+.list-item {
+    display: flex;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-        .item-content {
-            flex: 1;
-        }
+.list-item:last-child {
+    margin-bottom: 0;
+}
 
-        .item-title {
-            font-weight: 600;
-            color: var(--text-main);
-            margin-bottom: 0.25rem;
-        }
+.list-item:hover {
+    background-color: var(--color-tertiary);
+    border-color: var(--color-border);
+    transform: translateX(4px);
+}
 
-        .item-subtitle {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
+.item-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    margin-right: 0.85rem;
+    background-color: var(--color-surface);
+    flex-shrink: 0;
+}
 
-        .item-action {
-            font-size: 0.875rem;
-            color: var(--primary);
-            font-weight: 500;
-        }
+.interview-icon {
+    background-color: var(--color-interview-light);
+    color: var(--color-interview);
+}
 
-        .loading-spinner {
-            padding: 2rem;
-            text-align: center;
-            color: var(--text-muted);
-        }
+.match-icon {
+    background-color: rgba(168, 85, 247, 0.1);
+    color: var(--accent);
+}
+
+.item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-title {
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.15rem;
+    font-size: 0.925rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-subtitle {
+    font-size: 0.825rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-action {
+    font-size: 0.825rem;
+    color: var(--primary);
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: var(--primary-soft);
+    transition: all 0.2s;
+}
+
+.list-item:hover .item-action {
+    background: var(--primary);
+    color: white;
+}
+
+.loading-spinner {
+    padding: 2.5rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-style: italic;
+}

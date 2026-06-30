@@ -69,9 +69,14 @@ const DashboardPage: React.FC = () => {
       <Sidebar activePage="dashboard" />
       <div className="main-content">
         <div className="page-header">
-          <h1 className="page-title" id="welcomeTitle">
-            Welcome back, {formattedUsername}
-          </h1>
+          <div>
+            <h1 className="page-title" id="welcomeTitle" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              Welcome back, {formattedUsername}
+            </h1>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+              Here is what's happening with your Zenith Career Command Center.
+            </p>
+          </div>
         </div>
 
         <div className="dashboard-grid">
