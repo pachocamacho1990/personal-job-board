@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { Board } from '../types';
+import { navigateTo } from '../router';
 interface SidebarProps {
   activePage: 'dashboard' | 'jobs' | 'business' | 'docs';
   boards?: (Board & { jobCount?: number })[];
@@ -48,16 +49,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <>
       <aside className="app-sidebar">
         <div className="sidebar-header">
-          <a href="index.html" className="sidebar-brand">
+          <a
+            href="/jobboard/index.html"
+            className="sidebar-brand"
+            onClick={(e) => {
+              e.preventDefault();
+              navigateTo('/jobboard/index.html');
+            }}
+          >
             <span className="brand-icon">🚀</span>
             <span className="brand-text">Zenith</span>
           </a>
         </div>
         <nav className="sidebar-nav">
-          <a href="index.html" className={`nav-item ${activePage === 'dashboard' ? 'active' : ''}`}>
+          <a
+            href="/jobboard/index.html"
+            className={`nav-item ${activePage === 'dashboard' ? 'active' : ''}`}
+            onClick={(e) => {
+              e.preventDefault();
+              navigateTo('/jobboard/index.html');
+            }}
+          >
             <span>🏠</span> Dashboard
           </a>
-          <a href="jobs.html" className={`nav-item ${activePage === 'jobs' ? 'active' : ''}`}>
+          <a
+            href="/jobboard/jobs.html"
+            className={`nav-item ${activePage === 'jobs' ? 'active' : ''}`}
+            onClick={(e) => {
+              e.preventDefault();
+              navigateTo('/jobboard/jobs.html');
+            }}
+          >
             <span>💼</span> Job Board
           </a>
 
@@ -111,10 +133,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </>
           )}
 
-          <a href="business.html" className={`nav-item ${activePage === 'business' ? 'active' : ''}`}>
+          <a
+            href="/jobboard/business.html"
+            className={`nav-item ${activePage === 'business' ? 'active' : ''}`}
+            onClick={(e) => {
+              e.preventDefault();
+              navigateTo('/jobboard/business.html');
+            }}
+          >
             <span>🤝</span> Business Board
           </a>
-          <a href="docs.html" className={`nav-item ${activePage === 'docs' ? 'active' : ''}`}>
+          <a
+            href="/jobboard/docs.html"
+            className={`nav-item ${activePage === 'docs' ? 'active' : ''}`}
+            onClick={(e) => {
+              e.preventDefault();
+              navigateTo('/jobboard/docs.html');
+            }}
+          >
             <span>📖</span> Documentación
           </a>
         </nav>

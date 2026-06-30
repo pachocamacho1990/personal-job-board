@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
 import { api } from '../../api';
 import { BusinessEntity } from '../../types';
 import { Sidebar } from '../../components/Sidebar';
 import { BusinessDetailPanel } from '../../components/BusinessDetailPanel';
 import { capitalize } from '../../utils';
+import { navigateTo } from '../../router';
 import '../../styles/styles.css';
 import '../../styles/layout.css';
 import '../../styles/sidebar.css';
@@ -18,7 +18,7 @@ const columnsConfig = [
   { id: 'rejected', title: 'Rejected / Passed' },
 ];
 
-const BusinessPage: React.FC = () => {
+export const BusinessPage: React.FC = () => {
   const [entities, setEntities] = useState<BusinessEntity[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -37,7 +37,7 @@ const BusinessPage: React.FC = () => {
     // Check auth
     const token = localStorage.getItem('authToken');
     if (!token) {
-      window.location.href = '/jobboard/login.html';
+      navigateTo('/jobboard/login.html');
       return;
     }
 
@@ -263,9 +263,3 @@ const BusinessPage: React.FC = () => {
     </div>
   );
 };
-
-const container = document.getElementById('root');
-if (container) {
-  const root = createRoot(container);
-  root.render(<BusinessPage />);
-}

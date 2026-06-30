@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { createRoot } from 'react-dom/client';
+import { navigateTo } from '../../router';
 import '../../styles/styles.css';
 import '../../styles/docs.css';
 
 
-const DocsPage: React.FC = () => {
+export const DocsPage: React.FC = () => {
   const [activeMode, setActiveMode] = useState<'user' | 'agent'>('user');
   const [activeSection, setActiveSection] = useState<string>('quickstart');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -131,7 +131,14 @@ const DocsPage: React.FC = () => {
               🤖 Guía de Agentes (API)
             </button>
           </div>
-          <a href="index.html" className="back-link">
+          <a
+            href="/jobboard/index.html"
+            className="back-link"
+            onClick={(e) => {
+              e.preventDefault();
+              navigateTo('/jobboard/index.html');
+            }}
+          >
             Volver a la App ➔
           </a>
         </div>
@@ -893,9 +900,3 @@ const DocsPage: React.FC = () => {
     </div>
   );
 };
-
-const container = document.getElementById('root');
-if (container) {
-  const root = createRoot(container);
-  root.render(<DocsPage />);
-}

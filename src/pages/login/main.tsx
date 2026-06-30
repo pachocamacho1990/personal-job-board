@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
 import { api } from '../../api';
+import { navigateTo } from '../../router';
 import '../../styles/styles.css';
 import '../../styles/login.css';
 
 
 
-const LoginPage: React.FC = () => {
+export const LoginPage: React.FC = () => {
   const [isSignupMode, setIsSignupMode] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -16,7 +16,7 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     // Check if already logged in
     if (localStorage.getItem('authToken')) {
-      window.location.href = '/jobboard/index.html';
+      navigateTo('/jobboard/index.html');
     }
   }, []);
 
@@ -70,7 +70,7 @@ const LoginPage: React.FC = () => {
       } else {
         await api.auth.login(trimmedEmail, password);
       }
-      window.location.href = '/jobboard/index.html';
+      navigateTo('/jobboard/index.html');
     } catch (err: any) {
       setError(err.message || 'Authentication failed. Please try again.');
       setIsLoading(false);
@@ -146,7 +146,14 @@ const LoginPage: React.FC = () => {
           </a>
         </p>
         <p className="toggle-mode" style={{ marginTop: '15px' }}>
-          <a href="docs.html" style={{ opacity: 0.8, fontSize: '0.875rem' }}>
+          <a
+            href="/jobboard/docs.html"
+            style={{ opacity: 0.8, fontSize: '0.875rem' }}
+            onClick={(e) => {
+              e.preventDefault();
+              navigateTo('/jobboard/docs.html');
+            }}
+          >
             📖 Documentación y APIs de la App
           </a>
         </p>
@@ -154,9 +161,3 @@ const LoginPage: React.FC = () => {
     </div>
   );
 };
-
-const container = document.getElementById('root');
-if (container) {
-  const root = createRoot(container);
-  root.render(<LoginPage />);
-}

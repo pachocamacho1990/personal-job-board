@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
 import { api, apiRequest } from '../../api';
 import { Sidebar } from '../../components/Sidebar';
+import { navigateTo } from '../../router';
 import '../../styles/styles.css';
 import '../../styles/layout.css';
 import '../../styles/sidebar.css';
@@ -12,7 +12,7 @@ interface DashboardSummary {
   newMatches: any[];
 }
 
-const DashboardPage: React.FC = () => {
+export const DashboardPage: React.FC = () => {
   const [summary, setSummary] = useState<DashboardSummary>({ interviews: [], newMatches: [] });
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
@@ -22,7 +22,7 @@ const DashboardPage: React.FC = () => {
     // Check authentication
     const token = localStorage.getItem('authToken');
     if (!token) {
-      window.location.href = '/jobboard/login.html';
+      navigateTo('/jobboard/login.html');
       return;
     }
 
@@ -100,7 +100,7 @@ const DashboardPage: React.FC = () => {
                     key={job.id}
                     className="list-item"
                     onClick={() => {
-                      window.location.href = `jobs.html?openJobId=${job.id}`;
+                      navigateTo(`/jobboard/jobs.html?openJobId=${job.id}`);
                     }}
                   >
                     <div className="item-icon interview-icon">📅</div>
@@ -135,7 +135,7 @@ const DashboardPage: React.FC = () => {
                     key={job.id}
                     className="list-item"
                     onClick={() => {
-                      window.location.href = `jobs.html?openJobId=${job.id}`;
+                      navigateTo(`/jobboard/jobs.html?openJobId=${job.id}`);
                     }}
                   >
                     <div className="item-icon match-icon">🤖</div>
@@ -154,9 +154,3 @@ const DashboardPage: React.FC = () => {
     </div>
   );
 };
-
-const container = document.getElementById('root');
-if (container) {
-  const root = createRoot(container);
-  root.render(<DashboardPage />);
-}
