@@ -65,6 +65,16 @@ export const JobsPage: React.FC = () => {
     initializeBoards();
   }, []);
 
+  useEffect(() => {
+    const handleWorkspaceUpdate = () => {
+      initializeBoards();
+    };
+    window.addEventListener('workspace-updated', handleWorkspaceUpdate);
+    return () => {
+      window.removeEventListener('workspace-updated', handleWorkspaceUpdate);
+    };
+  }, []);
+
   // Sync focus-mode class with body
   useEffect(() => {
     if (isFocusMode) {
