@@ -79,6 +79,10 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="auth-container">
+      <div className="bg-glow-container">
+        <div className="bg-glow-blob blob-1"></div>
+        <div className="bg-glow-blob blob-2"></div>
+      </div>
       <div className="auth-card">
         <div className="auth-header">
           <h1 id="formTitle">{isSignupMode ? 'Create Account' : 'Welcome Back'}</h1>

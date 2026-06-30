@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { Board } from '../types';
-
 interface SidebarProps {
   activePage: 'dashboard' | 'jobs' | 'business' | 'docs';
   boards?: (Board & { jobCount?: number })[];
@@ -50,7 +49,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <aside className="app-sidebar">
         <div className="sidebar-header">
           <a href="index.html" className="sidebar-brand">
-            <span>🚀</span> Job Tracker
+            <span className="brand-icon">🚀</span>
+            <span className="brand-text">Zenith</span>
           </a>
         </div>
         <nav className="sidebar-nav">
