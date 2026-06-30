@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import '../../../public/styles.css';
+import '../../styles/styles.css';
 
 const DocsPage: React.FC = () => {
   const [activeMode, setActiveMode] = useState<'user' | 'agent'>('user');

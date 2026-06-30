@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { api, apiRequest } from '../../api';
 import { Sidebar } from '../../components/Sidebar';
-import '../../../public/styles.css';
-import '../../../public/css/layout.css';
-import '../../../public/css/sidebar.css';
+import '../../styles/styles.css';
+import '../../styles/layout.css';
+import '../../styles/sidebar.css';
 
 interface DashboardSummary {
   interviews: any[];

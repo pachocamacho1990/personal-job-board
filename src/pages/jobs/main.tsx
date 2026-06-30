@@ -7,9 +7,9 @@ import { DetailPanel } from '../../components/DetailPanel';
 import { CenterPeek } from '../../components/CenterPeek';
 import { ArchiveVault } from '../../components/ArchiveVault';
 import { formatRelativeTime } from '../../utils';
-import '../../../public/styles.css';
-import '../../../public/css/layout.css';
-import '../../../public/css/sidebar.css';
+import '../../styles/styles.css';
+import '../../styles/layout.css';
+import '../../styles/sidebar.css';
 
 const columnsConfig = [
   { id: 'interested', title: 'Interested' },
