@@ -5,6 +5,14 @@ import { AgentInput } from './AgentInput';
 import { AgentStatusBar } from './AgentStatusBar';
 import '../../styles/agent-console.css';
 
+interface ConversationHistory {
+  id: number;
+  title: string;
+  createdAt: string;
+  lastMessage: string;
+  lastActive: string;
+}
+
 export const AgentConsole: React.FC = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(() => {
     return localStorage.getItem('agentPanelOpen') === 'true';
@@ -15,6 +23,12 @@ export const AgentConsole: React.FC = () => {
   const [onboardingStatus, setOnboardingStatus] = useState<AgentOnboardingStatus>('uninitialized');
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'error' | 'closed'>('connecting');
   
+  // New States for Multi-Chat & Stop Button
+  const [viewMode, setViewMode] = useState<'chat' | 'list'>('chat');
+  const [conversations, setConversations] = useState<ConversationHistory[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const wsRef = useRef<WebSocket | null>(null);
 
   // Establish WebSocket connection
@@ -37,6 +51,8 @@ export const AgentConsole: React.FC = () => {
       ws.onopen = () => {
         logger.info("Agent WebSocket connected successfully");
         setConnectionStatus('connected');
+        // Fetch conversations list immediately on open
+        ws.send(JSON.stringify({ event: 'list_conversations' }));
       };
 
       ws.onmessage = (event) => {
@@ -46,6 +62,9 @@ export const AgentConsole: React.FC = () => {
           if (data.event === 'history') {
             setMessages(data.messages);
             setOnboardingStatus(data.onboardingStatus);
+            if (data.conversationId) {
+              setActiveConversationId(data.conversationId);
+            }
             // If onboarding is uninitialized and panel closed, show unread count
             if (data.onboardingStatus === 'uninitialized' && !isPanelOpenRef.current) {
               setUnreadCount(1);
@@ -66,7 +85,24 @@ export const AgentConsole: React.FC = () => {
             if (lastMsg && lastMsg.role === 'agent' && !isPanelOpenRef.current) {
               setUnreadCount(prev => prev + 1);
             }
+            
+            // Request refreshed conversations list to update titles/snippets
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+              wsRef.current.send(JSON.stringify({ event: 'list_conversations' }));
+            }
           } 
+          
+          else if (data.event === 'conversations_list') {
+            setConversations(data.conversations);
+          }
+
+          else if (data.event === 'generation_started') {
+            setIsGenerating(true);
+          }
+
+          else if (data.event === 'generation_stopped') {
+            setIsGenerating(false);
+          }
           
           else if (data.event === 'run_update') {
             setActiveRun(data.run);
@@ -83,6 +119,7 @@ export const AgentConsole: React.FC = () => {
       ws.onclose = (event) => {
         logger.warn("Agent WebSocket disconnected", event);
         setConnectionStatus('closed');
+        setIsGenerating(false);
         // Retry connection in 3 seconds
         setTimeout(connectWebSocket, 3000);
       };
@@ -90,11 +127,13 @@ export const AgentConsole: React.FC = () => {
       ws.onerror = (err) => {
         logger.error("Agent WebSocket error:", err);
         setConnectionStatus('error');
+        setIsGenerating(false);
       };
 
     } catch (e) {
       logger.error("Failed to initialize WebSocket:", e);
       setConnectionStatus('error');
+      setIsGenerating(false);
     }
   }, []);
 
@@ -132,7 +171,6 @@ export const AgentConsole: React.FC = () => {
   const togglePanel = useCallback(() => {
     setIsPanelOpen(prev => {
       if (!prev) {
-        // Opening — clear unread
         setUnreadCount(0);
       }
       return !prev;
@@ -169,6 +207,50 @@ export const AgentConsole: React.FC = () => {
       content: text
     }));
   }, []);
+
+  // New WebSocket Event Emitters
+  const handleNewChat = useCallback(() => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ event: 'new_conversation' }));
+    setViewMode('chat');
+  }, []);
+
+  const handleSelectChat = useCallback((id: number) => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ event: 'select_conversation', conversation_id: id }));
+    setViewMode('chat');
+  }, []);
+
+  const handleDeleteChat = useCallback((e: React.MouseEvent, id: number) => {
+    e.stopPropagation(); // prevent opening the chat
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ event: 'delete_conversation', conversation_id: id }));
+  }, []);
+
+  const handleStop = useCallback(() => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ event: 'stop_generation' }));
+    setIsGenerating(false);
+  }, []);
+
+  const formatConvDate = (isoString: string | null) => {
+    if (!isoString) return '';
+    try {
+      const date = new Date(isoString);
+      return date.toLocaleDateString(undefined, { 
+        month: 'short', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    } catch {
+      return '';
+    }
+  };
 
   // Console helper objects to bypass missing globals
   const logger = {
@@ -209,6 +291,29 @@ export const AgentConsole: React.FC = () => {
               {isOnline ? 'Online' : 'Conectando...'}
             </div>
           </div>
+          
+          {/* Header Action Buttons (Only visible when connected) */}
+          {isOnline && (
+            <div className="agent-header-actions">
+              <button
+                className={`agent-header-btn ${viewMode === 'list' ? 'active' : ''}`}
+                onClick={() => setViewMode(prev => prev === 'chat' ? 'list' : 'chat')}
+                title="Historial de conversaciones"
+                aria-label="Ver historial"
+              >
+                💬
+              </button>
+              <button
+                className="agent-header-btn"
+                onClick={handleNewChat}
+                title="Nueva conversación"
+                aria-label="Nuevo chat"
+              >
+                ➕
+              </button>
+            </div>
+          )}
+
           <button
             className="agent-close-btn"
             onClick={togglePanel}
@@ -218,14 +323,69 @@ export const AgentConsole: React.FC = () => {
           </button>
         </div>
 
-        {/* Chat */}
-        <AgentChat
-          messages={messages}
-          onAction={handleAction}
-        />
+        {/* View Selection: Chat vs History List */}
+        {viewMode === 'list' ? (
+          <div className="agent-conv-list">
+            <div style={{ padding: '0 4px 8px 4px', fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+              Chats Recientes
+            </div>
+            {conversations.length === 0 ? (
+              <div className="empty-state" style={{ fontSize: '0.85rem' }}>No hay chats anteriores.</div>
+            ) : (
+              conversations.map(conv => (
+                <div
+                  key={conv.id}
+                  className={`agent-conv-item ${conv.id === activeConversationId ? 'active' : ''}`}
+                  onClick={() => handleSelectChat(conv.id)}
+                >
+                  <div className="agent-conv-info">
+                    <div className="agent-conv-title">{conv.title}</div>
+                    <div className="agent-conv-snippet">
+                      {conv.lastMessage ? conv.lastMessage : 'Sin mensajes'}
+                    </div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
+                      {formatConvDate(conv.lastActive || conv.createdAt)}
+                    </div>
+                  </div>
+                  
+                  {/* Delete conversation button */}
+                  <button
+                    className="agent-conv-delete"
+                    onClick={(e) => handleDeleteChat(e, conv.id)}
+                    title="Eliminar conversación"
+                    aria-label="Eliminar chat"
+                  >
+                    🗑
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Chat Messages */}
+            <AgentChat
+              messages={messages}
+              onAction={handleAction}
+            />
 
-        {/* Input */}
-        <AgentInput onSend={handleSend} disabled={!isOnline} />
+            {/* Floating Stop Button (visible while generating/thinking) */}
+            {isGenerating && (
+              <div className="agent-stop-container">
+                <button 
+                  className="agent-stop-btn" 
+                  onClick={handleStop}
+                  aria-label="Detener generación de IA"
+                >
+                  <span style={{ fontSize: '0.65rem' }}>⏹</span> Detener respuesta
+                </button>
+              </div>
+            )}
+
+            {/* Input Form */}
+            <AgentInput onSend={handleSend} disabled={!isOnline} />
+          </>
+        )}
       </div>
 
       {/* Global Status Bar */}
