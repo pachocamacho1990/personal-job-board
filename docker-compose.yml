@@ -57,6 +57,29 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - api
+      - agent
+
+  # Python Agent Service
+  agent:
+    build:
+      context: ./agent-service
+      dockerfile: Dockerfile
+    container_name: jobboard-agent
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://jobboard_user:${DB_PASSWORD}@postgres:5432/jobboard
+      JWT_SECRET: ${JWT_SECRET}
+      LLM_BASE_URL: ${LLM_BASE_URL}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_MODEL: ${LLM_MODEL}
+      EXPRESS_API_URL: http://api:3000/api
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
 
 volumes:
   postgres_data:

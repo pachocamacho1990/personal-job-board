@@ -11,6 +11,9 @@ function saveToken(token: string): void {
 export function clearToken(): void {
   localStorage.removeItem('authToken');
   localStorage.removeItem('user');
+  localStorage.removeItem('agentChatMessages');
+  localStorage.removeItem('agentOnboardingStatus');
+  localStorage.removeItem('agentPanelOpen');
 }
 
 export async function apiRequest<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {

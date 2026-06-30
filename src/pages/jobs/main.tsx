@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
 import { api, apiRequest } from '../../api';
 import { Board, Job } from '../../types';
 import { Sidebar } from '../../components/Sidebar';
@@ -7,6 +6,7 @@ import { DetailPanel } from '../../components/DetailPanel';
 import { CenterPeek } from '../../components/CenterPeek';
 import { ArchiveVault } from '../../components/ArchiveVault';
 import { formatRelativeTime } from '../../utils';
+import { navigateTo } from '../../router';
 import '../../styles/styles.css';
 import '../../styles/layout.css';
 import '../../styles/sidebar.css';
@@ -21,7 +21,7 @@ const columnsConfig = [
   { id: 'rejected', title: 'Rejected' },
 ];
 
-const JobsPage: React.FC = () => {
+export const JobsPage: React.FC = () => {
   const [boards, setBoards] = useState<(Board & { jobCount?: number })[]>([]);
   const [activeBoardId, setActiveBoardId] = useState<number | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -46,7 +46,7 @@ const JobsPage: React.FC = () => {
     // Check authentication
     const token = localStorage.getItem('authToken');
     if (!token) {
-      window.location.href = '/jobboard/login.html';
+      navigateTo('/jobboard/login.html');
       return;
     }
 
@@ -574,9 +574,3 @@ const JobsPage: React.FC = () => {
     </div>
   );
 };
-
-const container = document.getElementById('root');
-if (container) {
-  const root = createRoot(container);
-  root.render(<JobsPage />);
-}
