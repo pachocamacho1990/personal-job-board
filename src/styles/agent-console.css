@@ -50,16 +50,20 @@
 /* Content compression when panel is open */
 .main-content,
 .docs-content {
-  transition: margin-right var(--agent-transition), max-width var(--agent-transition);
+  transition: margin-right var(--agent-transition), max-width var(--agent-transition), width var(--agent-transition);
 }
 
-.main-content.agent-open,
+.main-content.agent-open {
+  margin-right: var(--agent-panel-width);
+  max-width: calc(100vw - var(--sidebar-width, 250px) - var(--agent-panel-width)) !important;
+}
+
 .docs-content.agent-open {
   margin-right: var(--agent-panel-width);
 }
 
 main.docs-content.agent-open {
-  max-width: calc(100vw - 280px - var(--agent-panel-width) - 2rem);
+  max-width: calc(100vw - 280px - var(--agent-panel-width) - 2rem) !important;
 }
 
 /* ── Toggle Button ───────────────────────── */
