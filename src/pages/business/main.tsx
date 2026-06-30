@@ -51,6 +51,16 @@ export const BusinessPage: React.FC = () => {
     fetchEntities();
   }, []);
 
+  useEffect(() => {
+    const handleWorkspaceUpdate = () => {
+      fetchEntities();
+    };
+    window.addEventListener('workspace-updated', handleWorkspaceUpdate);
+    return () => {
+      window.removeEventListener('workspace-updated', handleWorkspaceUpdate);
+    };
+  }, []);
+
   const fetchEntities = async () => {
     setLoading(true);
     try {

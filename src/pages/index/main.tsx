@@ -41,6 +41,16 @@ export const DashboardPage: React.FC = () => {
     loadDashboard();
   }, []);
 
+  useEffect(() => {
+    const handleWorkspaceUpdate = () => {
+      loadDashboard();
+    };
+    window.addEventListener('workspace-updated', handleWorkspaceUpdate);
+    return () => {
+      window.removeEventListener('workspace-updated', handleWorkspaceUpdate);
+    };
+  }, []);
+
   const loadDashboard = async () => {
     setLoading(true);
     setError('');

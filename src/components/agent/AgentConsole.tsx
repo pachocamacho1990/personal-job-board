@@ -55,6 +55,12 @@ export const AgentConsole: React.FC = () => {
           else if (data.event === 'messages_update') {
             setMessages(data.messages);
             
+            // Dispatch custom event to notify other pages (dashboard, jobs, business) to reload their data in real-time
+            const hasToolResult = data.messages.some((m: any) => m.role === 'tool' && m.type === 'tool_result');
+            if (hasToolResult) {
+              window.dispatchEvent(new CustomEvent('workspace-updated'));
+            }
+            
             // Check if the last message is an agent message and the panel is closed to show unread badge
             const lastMsg = data.messages[data.messages.length - 1];
             if (lastMsg && lastMsg.role === 'agent' && !isPanelOpenRef.current) {
