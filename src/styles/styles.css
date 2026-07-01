@@ -1420,6 +1420,31 @@ body.focus-mode .job-card.dimmed {
     overflow-y: auto;
 }
 
+.archive-search-container {
+    padding: var(--spacing-md) var(--spacing-xl);
+    background: var(--color-canvas);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.archive-search-input {
+    flex: 1;
+    padding: 8px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--color-surface);
+    color: var(--color-text-main);
+    font-size: var(--font-size-sm);
+    transition: all 0.25s ease;
+}
+
+.archive-search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
 .archive-pagination {
     display: flex;
     align-items: center;
