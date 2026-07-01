@@ -190,4 +190,44 @@ class DatabaseManager:
                 json.dumps(data), user_id
             )
 
+    async def get_user_memories(self, user_id: int) -> List[Dict[str, Any]]:
+        async with self.pool.acquire() as conn:
+            rows = await conn.fetch(
+                "SELECT id, category, content, created_at FROM agent_memories WHERE user_id = $1 ORDER BY created_at ASC",
+                user_id
+            )
+            return [{"id": r["id"], "category": r["category"], "content": r["content"], "createdAt": r["created_at"].isoformat() if r["created_at"] else None} for r in rows]
+
+    async def save_user_memory(self, user_id: int, category: str, content: str) -> int:
+        async with self.pool.acquire() as conn:
+            mem_id = await conn.fetchval(
+                "INSERT INTO agent_memories (user_id, category, content) VALUES ($1, $2, $3) RETURNING id",
+                user_id, category, content
+            )
+            return mem_id
+
+    async def delete_user_memory(self, user_id: int, memory_id: int):
+        async with self.pool.acquire() as conn:
+            await conn.execute("DELETE FROM agent_memories WHERE id = $1 AND user_id = $2", memory_id, user_id)
+
+    async def get_user_skills(self, user_id: int) -> List[Dict[str, Any]]:
+        async with self.pool.acquire() as conn:
+            rows = await conn.fetch(
+                "SELECT id, name, description, recipe FROM agent_skills WHERE user_id = $1 ORDER BY name ASC",
+                user_id
+            )
+            return [{"id": r["id"], "name": r["name"], "description": r["description"], "recipe": json.loads(r["recipe"]) if r["recipe"] else {}} for r in rows]
+
+    async def save_user_skill(self, user_id: int, name: str, description: str, recipe: Dict[str, Any]) -> int:
+        async with self.pool.acquire() as conn:
+            skill_id = await conn.fetchval(
+                "INSERT INTO agent_skills (user_id, name, description, recipe) VALUES ($1, $2, $3, $4) RETURNING id",
+                user_id, name, description, json.dumps(recipe)
+            )
+            return skill_id
+
+    async def delete_user_skill(self, user_id: int, skill_id: int):
+        async with self.pool.acquire() as conn:
+            await conn.execute("DELETE FROM agent_skills WHERE id = $1 AND user_id = $2", skill_id, user_id)
+
 db_manager = DatabaseManager()

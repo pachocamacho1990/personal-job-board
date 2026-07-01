@@ -3,7 +3,7 @@ import jwt
 import logging
 import asyncio
 from contextlib import asynccontextmanager
-from typing import Dict, Any
+from typing import Dict, Any, List
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import settings
@@ -71,6 +71,91 @@ async def auto_title_conversation(conversation_id: int, user_message: str):
     except Exception as e:
         logger.error(f"Failed to auto-title conversation {conversation_id}: {e}")
 
+async def get_adaptive_system_prompt(user_id: int) -> str:
+    """Assembles the system prompt in real-time by prepending user preferences and skills"""
+    memories = await db_manager.get_user_memories(user_id)
+    skills = await db_manager.get_user_skills(user_id)
+    
+    base_instructions = (
+        "Eres Zenith Agent, un asistente de IA inteligente de búsqueda de empleo.\n"
+        "Puedes interactuar con el espacio de trabajo del usuario (job boards, tarjetas de empleo) "
+        "y administrar tus preferencias usando las herramientas suministradas.\n"
+        "Sé directo, profesional y mantén tus respuestas concisas en español."
+    )
+    
+    memories_section = ""
+    if memories:
+        memories_section = "\n\n## PREFERENCIAS Y HECHOS DEL USUARIO (Memoria Permanente)\n"
+        for m in memories:
+            category_label = "Preferencia" if m["category"] == "preference" else "Hecho"
+            memories_section += f"- [{category_label} ID: {m['id']}]: {m['content']}\n"
+            
+    skills_section = ""
+    if skills:
+        skills_section = "\n\n## SKILLS/HABILIDADES APRENDIDAS (Recetas Ejecutables)\n"
+        for s in skills:
+            skills_section += f"- Skill '{s['name']}': {s['description']} (Receta: {json.dumps(s['recipe'])})\n"
+            
+    return base_instructions + memories_section + skills_section
+
+async def run_background_preference_extraction(conversation_id: int, user_id: int):
+    """
+    Evaluates the conversation turns to passively extract user preferences or facts 
+    and save them into the database, simulating Nous Research Hermes learning loops.
+    """
+    try:
+        # Load the latest few messages
+        history = await db_manager.get_conversation_history(conversation_id)
+        if len(history) < 2:
+            return
+
+        # Fetch existing memories to avoid redundant duplicates
+        existing_memories = await db_manager.get_user_memories(user_id)
+        existing_contents = [m["content"].lower().strip() for m in existing_memories]
+
+        # Extract only the last 4 turns to focus on new context
+        recent_turns = history[-4:]
+        turns_text = ""
+        for t in recent_turns:
+            turns_text += f"{t['role'].upper()}: {t['content']}\n"
+
+        prompt = (
+            "Eres un extractor de preferencias para Zenith Agent. Analiza el siguiente fragmento de diálogo "
+            "e identifica si el usuario expresó de forma explícita alguna preferencia o regla general sobre "
+            "cómo Zenith Agent debería gestionar sus ofertas, salarios, ubicaciones o tableros (ej. 'Prefiere empleos remotos', "
+            "'Ignorar ofertas de Acme Corp').\n\n"
+            "Diálogo reciente:\n"
+            f"{turns_text}\n"
+            "Responde estrictamente con un array JSON de objetos con formato:\n"
+            '[{"category": "preference" o "fact", "content": "directiva de 3-10 palabras en español"}]\n'
+            "Si no se expresan nuevas preferencias permanentes, responde únicamente con un array vacío [].\n"
+            "No incluyas explicaciones ni formato markdown de bloque (sin ```json)."
+        )
+
+        content, _ = await llm_manager.get_response([{"role": "user", "content": prompt}], tools=None)
+        if not content:
+            return
+
+        cleaned_content = content.strip()
+        if cleaned_content.startswith("```"):
+            lines = cleaned_content.split("\n")
+            cleaned_content = "\n".join([line for line in lines if not line.startswith("```")])
+        
+        parsed_memories = json.loads(cleaned_content)
+        if isinstance(parsed_memories, list) and len(parsed_memories) > 0:
+            for item in parsed_memories:
+                category = item.get("category", "preference")
+                content_text = item.get("content", "").strip()
+                
+                if not content_text or content_text.lower().strip() in existing_contents:
+                    continue
+                    
+                logger.info(f"Background extractor auto-saved new preference: '{content_text}' for user {user_id}")
+                await db_manager.save_user_memory(user_id, category, content_text)
+                
+    except Exception as e:
+        logger.error(f"Error in background preference extraction: {e}")
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
     """
@@ -131,7 +216,6 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
             event_type = message_data.get("event")
             
             if event_type == "message" or event_type == "action":
-                # Handle active run cancellation checks before running a new one
                 if conversation_id in active_tasks:
                     logger.warn(f"Task already active for conversation {conversation_id}. Rejecting new run.")
                     continue
@@ -181,12 +265,10 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
                 task.add_done_callback(make_cleanup(conversation_id))
 
             elif event_type == "stop_generation":
-                # Cancel the active runner for this conversation
                 task = active_tasks.get(conversation_id)
                 if task and not task.done():
                     logger.info(f"Cancelling active generation run for conversation {conversation_id}")
                     task.cancel()
-                    # WebSocket event back to client to clear isGenerating state immediately
                     await websocket.send_json({"event": "generation_stopped"})
                 else:
                     logger.warn("Stop generation requested but no active task was found")
@@ -199,15 +281,11 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
                 })
 
             elif event_type == "select_conversation":
-                # Load selected conversation
                 selected_id = int(message_data.get("conversation_id"))
                 conversation_id = selected_id
                 logger.info(f"User switched to conversation {conversation_id}")
                 
-                # Retrieve history
                 history = await db_manager.get_conversation_history(conversation_id)
-                
-                # Stream back select success
                 await websocket.send_json({
                     "event": "history",
                     "messages": history,
@@ -216,12 +294,10 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
                 })
 
             elif event_type == "new_conversation":
-                # Create a new conversation record
                 new_id = await db_manager.create_new_conversation(user_id)
                 conversation_id = new_id
                 logger.info(f"User created new conversation {conversation_id}")
                 
-                # Seed welcome prompt
                 initial_msg = get_initial_welcome_message(onboarding_status)
                 if initial_msg:
                     await db_manager.save_message(
@@ -235,7 +311,6 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
                 history = await db_manager.get_conversation_history(conversation_id)
                 convs = await db_manager.get_user_conversations(user_id)
                 
-                # Stream new chat and updated conversation list
                 await websocket.send_json({
                     "event": "history",
                     "messages": history,
@@ -251,14 +326,12 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
                 del_id = int(message_data.get("conversation_id"))
                 logger.info(f"User deleted conversation {del_id}")
                 
-                # Cancel task if deleting active
                 task = active_tasks.get(del_id)
                 if task and not task.done():
                     task.cancel()
 
                 await db_manager.delete_conversation(del_id)
                 
-                # If deleted active, switch to latest or create new one
                 if del_id == conversation_id:
                     conversation_id = await db_manager.get_or_create_conversation(user_id)
                     history = await db_manager.get_conversation_history(conversation_id)
@@ -301,7 +374,6 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
     loop_count = 0
 
     try:
-        # Notify frontend that inference is active
         await websocket.send_json({"event": "generation_started"})
 
         while loop_count < loop_limit:
@@ -309,8 +381,12 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
             
             history = await db_manager.get_conversation_history(conversation_id)
             
-            # Send history to LLM
-            content, tool_calls = await llm_manager.get_response(history, tools=WORKSPACE_TOOLS_SCHEMAS)
+            # Assemble dynamic system prompt and prepend it to the LLM message payload on EVERY turn (adaptive prompt)
+            system_prompt = await get_adaptive_system_prompt(user_id)
+            messages_payload = [{"role": "system", "content": system_prompt}] + history
+            
+            # Send payload to LLM
+            content, tool_calls = await llm_manager.get_response(messages_payload, tools=WORKSPACE_TOOLS_SCHEMAS)
             
             if tool_calls:
                 for tool_call in tool_calls:
@@ -319,7 +395,6 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
                     
                     logger.info(f"Agent requested tool execution: '{tool_name}'")
                     
-                    # Update message logs in DB
                     await db_manager.save_message(
                         conversation_id=conversation_id,
                         role="tool",
@@ -329,16 +404,14 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
                         tool_input=tool_args
                     )
                     
-                    # Clear generic thinking placeholder
                     async with db_manager.pool.acquire() as conn:
                         await conn.execute("DELETE FROM agent_messages WHERE id = $1", current_thinking_id)
                     
                     await stream_current_history(websocket, conversation_id)
                     
-                    # Execute tool
-                    tool_result = await execute_tool(tool_name, tool_args, user_token)
+                    # Execute tool (passing user_id for memory-modifying tools)
+                    tool_result = await execute_tool(tool_name, tool_args, user_token, user_id)
                     
-                    # Save tool output
                     await db_manager.save_message(
                         conversation_id=conversation_id,
                         role="tool",
@@ -348,7 +421,6 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
                         tool_output=tool_result
                     )
                     
-                    # Seed next loop thinking placeholder
                     current_thinking_id = await db_manager.save_message(
                         conversation_id=conversation_id,
                         role="agent",
@@ -358,11 +430,9 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
                     
                     await stream_current_history(websocket, conversation_id)
                     
-                # Loop again to feed tool result back
                 continue
                 
             else:
-                # Save final text answer
                 if content:
                     await db_manager.save_message(
                         conversation_id=conversation_id,
@@ -371,7 +441,6 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
                         content=content
                     )
                 
-                # Delete thinking placeholder
                 async with db_manager.pool.acquire() as conn:
                     await conn.execute("DELETE FROM agent_messages WHERE id = $1", current_thinking_id)
                     
@@ -380,12 +449,10 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
 
     except asyncio.CancelledError:
         logger.info(f"Run loop canceled for conversation {conversation_id}")
-        # Clean up temporary thinking blocks
         try:
             async with db_manager.pool.acquire() as conn:
                 await conn.execute("DELETE FROM agent_messages WHERE id = $1", current_thinking_id)
             
-            # Save cancellation placeholder message
             await db_manager.save_message(
                 conversation_id=conversation_id,
                 role="agent",
@@ -398,11 +465,13 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
         raise
 
     finally:
-        # Notify frontend that inference ended
         try:
             await websocket.send_json({"event": "generation_stopped"})
         except:
             pass
+            
+        # Trigger background consolidation loop to learn preferences asynchronously after response finishes
+        asyncio.create_task(run_background_preference_extraction(conversation_id, user_id))
 
 def get_initial_welcome_message(status_str: str) -> Dict[str, Any]:
     """Provides seed onboarding blocks based on user state"""
