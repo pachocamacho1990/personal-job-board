@@ -321,6 +321,36 @@ describe('Jobs Routes', () => {
             expect(res.statusCode).toBe(200);
             expect(res.body).toHaveProperty('status', 'interested');
         });
+
+        it('should automatically set is_unseen to false when status is updated', async () => {
+            const updateData = { status: 'applied' };
+
+            // Reset mock history
+            (pool.query as unknown as jest.Mock).mockClear();
+
+            // First query: ownership check
+            (pool.query as unknown as jest.Mock).mockResolvedValueOnce({ rows: [{ id: 1 }] });
+            // Second query: update
+            (pool.query as unknown as jest.Mock).mockResolvedValueOnce({
+                rows: [{
+                    id: 1,
+                    status: 'applied',
+                    is_unseen: false
+                }]
+            });
+
+            const res = await request(app)
+                .put('/api/jobs/1')
+                .send(updateData);
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toHaveProperty('is_unseen', false);
+
+            const mockCalls = (pool.query as unknown as jest.Mock).mock.calls;
+            const updateQueryCall = mockCalls[1];
+            const queryParams = updateQueryCall[1];
+            expect(queryParams[4]).toBe(false);
+        });
     });
 
     describe('POST /api/jobs/:id/transform', () => {

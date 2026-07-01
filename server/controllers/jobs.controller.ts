@@ -155,6 +155,12 @@ export const updateJob = async (req: AuthenticatedRequest, res: Response, next: 
             }
         }
 
+        // Auto-mark as seen if status is updated (meaning reviewed), unless explicitly specified
+        let resolvedIsUnseen = is_unseen;
+        if (resolvedIsUnseen === undefined && status !== undefined) {
+            resolvedIsUnseen = false;
+        }
+
         // Update job (updated_at timestamp handled by trigger)
         const result = await pool.query(
             `UPDATE jobs 
@@ -175,7 +181,7 @@ export const updateJob = async (req: AuthenticatedRequest, res: Response, next: 
              RETURNING id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary,
                        contact_name AS "contactName", organization, comments,
                        created_at AS "created_at", updated_at AS "updated_at"`,
-            [type, rating, status, origin, is_unseen, company, position, location, salary,
+            [type, rating, status, origin, resolvedIsUnseen, company, position, location, salary,
                 contact_name, organization, comments, boardId || null, id, req.userId]
         );
 
