@@ -12,21 +12,43 @@ const ITEMS_PER_PAGE = 10;
 
 export const ArchiveVault: React.FC<ArchiveVaultProps> = ({ isOpen, onClose, jobs, onRestore }) => {
   const archivedJobs = jobs.filter((j) => j.status === 'archived');
+  
+  // Search state
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  
+  // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  // Calculate total pages
-  const totalPages = Math.ceil(archivedJobs.length / ITEMS_PER_PAGE);
+  // Filter jobs based on query
+  const filteredJobs = archivedJobs.filter((job) => {
+    const isConnection = job.type === 'connection';
+    const title = (isConnection ? job.contact_name || job.position : job.position) || '';
+    const subtitle = (isConnection ? job.organization || job.company : job.company) || '';
+    
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return true;
+    return title.toLowerCase().includes(query) || subtitle.toLowerCase().includes(query);
+  });
+
+  // Calculate total pages for the filtered list
+  const totalPages = Math.ceil(filteredJobs.length / ITEMS_PER_PAGE);
+
+  // Reset pagination to first page when searchQuery changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   // Clamp current page if list size shrinks (e.g. from restoring cards)
   useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(totalPages);
     }
-  }, [archivedJobs.length, totalPages, currentPage]);
+  }, [filteredJobs.length, totalPages, currentPage]);
 
-  // Reset pagination to first page when opening the archive modal
+  // Reset search and pagination when opening the archive modal
   useEffect(() => {
     if (isOpen) {
+      setSearchQuery('');
       setCurrentPage(1);
     }
   }, [isOpen]);
@@ -39,7 +61,7 @@ export const ArchiveVault: React.FC<ArchiveVaultProps> = ({ isOpen, onClose, job
 
   if (!isOpen) return null;
 
-  const displayedJobs = archivedJobs.slice(
+  const displayedJobs = filteredJobs.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
@@ -63,12 +85,41 @@ export const ArchiveVault: React.FC<ArchiveVaultProps> = ({ isOpen, onClose, job
             Vault of processed cards. Restore them to bring them back to the board.
           </p>
         </div>
+
+        {/* Dynamic Search Bar (Only visible if there are archived cards) */}
+        {archivedJobs.length > 0 && (
+          <div className="archive-search-container">
+            <input
+              type="text"
+              className="archive-search-input"
+              placeholder="🔍 Search by company, position, contact..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button 
+                className="btn btn-secondary btn-sm"
+                onClick={() => setSearchQuery('')}
+                style={{ borderRadius: 'var(--radius-md)', padding: '0 12px' }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        )}
+
         <div id="archiveContent" className="peek-content" style={{ padding: 0, flexDirection: 'column' }}>
           {archivedJobs.length === 0 ? (
             <div className="archive-empty" style={{ padding: '3rem', textAlign: 'center' }}>
               <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📦</div>
               <h3>The Vault is Empty</h3>
               <p>Jobs you archive will appear here.</p>
+            </div>
+          ) : filteredJobs.length === 0 ? (
+            <div className="archive-empty" style={{ padding: '3rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔍</div>
+              <h3>No Matches Found</h3>
+              <p>Try searching for a different keyword.</p>
             </div>
           ) : (
             <>
@@ -141,7 +192,7 @@ export const ArchiveVault: React.FC<ArchiveVaultProps> = ({ isOpen, onClose, job
                     ◀ Previous
                   </button>
                   <span className="pagination-info">
-                    Page <strong>{currentPage}</strong> of {totalPages} ({archivedJobs.length} items)
+                    Page <strong>{currentPage}</strong> of {totalPages} ({filteredJobs.length} matches)
                   </span>
                   <button
                     className="btn btn-secondary btn-sm"
