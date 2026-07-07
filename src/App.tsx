@@ -5,15 +5,17 @@ import { DashboardPage } from './pages/index/main';
 import { JobsPage } from './pages/jobs/main';
 import { BusinessPage } from './pages/business/main';
 import { DocsPage } from './pages/docs/main';
+import { ProfilePage } from './pages/profile/main';
 import { AgentConsole } from './components/agent/AgentConsole';
 
 // Helper to determine the active page based on current URL path
-const getPageFromPath = (path: string): 'dashboard' | 'jobs' | 'business' | 'docs' | 'login' => {
+const getPageFromPath = (path: string): 'dashboard' | 'jobs' | 'business' | 'docs' | 'login' | 'profile' => {
   const p = path.toLowerCase();
   if (p.includes('/login')) return 'login';
   if (p.includes('/jobs')) return 'jobs';
   if (p.includes('/business')) return 'business';
   if (p.includes('/docs')) return 'docs';
+  if (p.includes('/profile')) return 'profile';
   return 'dashboard'; // fallback default
 };
 
@@ -38,6 +40,7 @@ export const App: React.FC = () => {
       {page === 'jobs' && <JobsPage />}
       {page === 'business' && <BusinessPage />}
       {page === 'docs' && <DocsPage />}
+      {page === 'profile' && <ProfilePage />}
 
       {/* Global persistent Agent Console */}
       {page !== 'login' && <AgentConsole />}

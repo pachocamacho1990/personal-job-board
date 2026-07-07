@@ -67,3 +67,39 @@ export interface FileAttachment {
   size: number;
   created_at: string;
 }
+
+export interface ProfileExperience {
+  role: string;
+  company: string;
+  start_date: string;
+  end_date: string;
+  description: string;
+}
+
+export interface ProfileEducation {
+  degree: string;
+  school: string;
+  year: string;
+}
+
+export interface ProfileLanguage {
+  language: string;
+  level: string;
+}
+
+export interface ProfileData {
+  full_name?: string;
+  headline?: string;
+  linkedin_url?: string;
+  location?: string;
+  summary?: string;
+  experience?: ProfileExperience[];
+  education?: ProfileEducation[];
+  skills?: string[];
+  languages?: ProfileLanguage[];
+}
+
+export interface Profile {
+  profile_data: ProfileData;
+  onboarding_status: 'uninitialized' | 'interview_pending' | 'interviewing' | 'ready' | 'searching';
+}

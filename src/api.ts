@@ -144,4 +144,10 @@ export const api = {
   boards: createCrudApi<any>('/boards'),
 
   files: createFilesApi('/jobs'),
+
+  profile: {
+    get: async (): Promise<any> => apiRequest('/profile'),
+    save: async (profileData: any): Promise<any> =>
+      apiRequest('/profile', { method: 'POST', body: JSON.stringify({ profile_data: profileData }) }),
+  },
 };

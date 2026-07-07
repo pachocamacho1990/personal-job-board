@@ -23,6 +23,7 @@ export default defineConfig({
         jobs: resolve(__dirname, 'jobs.html'),
         business: resolve(__dirname, 'business.html'),
         docs: resolve(__dirname, 'docs.html'),
+        profile: resolve(__dirname, 'profile.html'),
       },
     },
   },

@@ -1,0 +1,4 @@
+name: "Búsqueda Loopeada de Empleos"
+goal: "Navegar a http://host.docker.internal/jobboard/index.html, hacer login si es necesario, iterar sobre la lista de ofertas de empleo de la primera página, extraer el título y la compañía de cada una, y guardarlo en CSV."
+max_steps: 30
+output_path: "runs/job_offers.csv"

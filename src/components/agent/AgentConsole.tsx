@@ -3,6 +3,7 @@ import type { AgentMessage as AgentMessageType, ActiveRun, AgentOnboardingStatus
 import { AgentChat } from './AgentChat';
 import { AgentInput } from './AgentInput';
 import { AgentStatusBar } from './AgentStatusBar';
+import { navigateTo } from '../../router';
 import '../../styles/agent-console.css';
 
 interface ConversationHistory {
@@ -108,6 +109,10 @@ export const AgentConsole: React.FC = () => {
             setActiveRun(data.run);
           }
           
+          else if (data.event === 'navigate') {
+            navigateTo(data.url);
+          }
+          
           else if (data.event === 'onboarding_status_update') {
             setOnboardingStatus(data.status);
           }
@@ -152,6 +157,18 @@ export const AgentConsole: React.FC = () => {
   useEffect(() => {
     isPanelOpenRef.current = isPanelOpen;
   }, [isPanelOpen]);
+
+  // Listen to profile-saved event and send WebSocket message to agent service
+  useEffect(() => {
+    const handleProfileSaved = () => {
+      const ws = wsRef.current;
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ event: 'profile_saved' }));
+      }
+    };
+    window.addEventListener('profile-saved', handleProfileSaved);
+    return () => window.removeEventListener('profile-saved', handleProfileSaved);
+  }, []);
 
   // Persist panel state
   useEffect(() => {

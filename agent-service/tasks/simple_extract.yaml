@@ -1,0 +1,4 @@
+name: "Navegar y Extraer Título"
+goal: "Navegar a http://host.docker.internal/jobboard/login.html, extraer el título de bienvenida del formulario (Welcome back) y guardarlo en JSON."
+max_steps: 10
+output_path: "runs/simple_title.json"
