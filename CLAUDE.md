@@ -14,6 +14,7 @@ A self-hosted career management platform supporting multiple **board instances**
 2. **Business Board** (`/business.html`): Track professional relationships (Investors, VCs, Accelerators, Connections).
 3. **Dashboard** (`/index.html`): Home view with upcoming interviews and AI match widgets filtered by active board.
 4. **Archive Vault** (Modal): View and restore archived jobs.
+5. **Professional Profile** (`/profile.html`): Manage experience, skills, and languages for Zenith AI Agent onboarding.
 
 ### Core Entities
 
@@ -180,6 +181,12 @@ SELECT * FROM job_history WHERE job_id = 1;
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/dashboard/summary` | Get interviews + AI matches |
+
+### Profile
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/profile` | Fetch user's professional profile data |
+| POST | `/api/profile` | Save professional profile data |
 
 ### Health
 | Method | Endpoint | Description |

@@ -3,7 +3,7 @@ import { api } from '../api';
 import { Board } from '../types';
 import { navigateTo } from '../router';
 interface SidebarProps {
-  activePage: 'dashboard' | 'jobs' | 'business' | 'docs';
+  activePage: 'dashboard' | 'jobs' | 'business' | 'docs' | 'profile';
   boards?: (Board & { jobCount?: number })[];
   activeBoardId?: number | null;
   onBoardSelect?: (id: number) => void;
@@ -142,6 +142,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
           >
             <span>🤝</span> Business Board
+          </a>
+          <a
+            href="/jobboard/profile.html"
+            className={`nav-item ${activePage === 'profile' ? 'active' : ''}`}
+            onClick={(e) => {
+              e.preventDefault();
+              navigateTo('/jobboard/profile.html');
+            }}
+          >
+            <span>👤</span> Mi Perfil
           </a>
           <a
             href="/jobboard/docs.html"

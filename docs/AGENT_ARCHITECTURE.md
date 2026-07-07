@@ -361,17 +361,15 @@ CREATE TABLE agent_profiles (
     -- Estado del onboarding
     onboarding_status VARCHAR(30) DEFAULT 'uninitialized'
         CHECK (onboarding_status IN (
-            'uninitialized',           -- Sin perfil
-            'linkedin_pending',        -- Esperando aceptación del user
-            'linkedin_investigating',  -- Investigando LinkedIn
-            'interview_pending',       -- LinkedIn listo, esperando entrevista
-            'interviewing',            -- Entrevista en progreso
-            'ready',                   -- Perfil completo, listo para buscar
+            'uninitialized',           -- Sin perfil cargado (formulario vacío)
+            'interview_pending',       -- Formulario completado, listo para iniciar la entrevista
+            'interviewing',            -- Entrevista profesional en progreso
+            'ready',                   -- Perfil completo y refinado
             'searching'                -- Búsqueda activa
         )),
     
-    -- Perfil crudo extraído de LinkedIn (JSON completo)
-    linkedin_raw JSONB,
+    -- Perfil profesional cargado del formulario (Nombre, resumen, experiencia, educación, skills, etc.)
+    profile_data JSONB,
     
     -- Perfil enriquecido post-entrevista (JSON estructurado)
     enriched_profile JSONB,
@@ -396,9 +394,6 @@ CREATE TABLE agent_profiles (
     
     -- Parámetros de búsqueda concretos para Loop 3
     search_parameters JSONB,
-    
-    -- LinkedIn credentials (encrypted)
-    linkedin_session_data JSONB,
     
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()

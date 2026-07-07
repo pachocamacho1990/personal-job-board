@@ -182,7 +182,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
         conversation_id = await db_manager.get_or_create_conversation(user_id)
         logger.info(f"Active conversation: {conversation_id} for user {user_id}")
 
-        # Seed initial message if empty
+        # Seed initial message if empty or transition to interview_pending if not prompted yet
         history = await db_manager.get_conversation_history(conversation_id)
         if not history:
             initial_msg = get_initial_welcome_message(onboarding_status)
@@ -195,6 +195,23 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
                     actions=initial_msg.get("actions")
                 )
                 history = await db_manager.get_conversation_history(conversation_id)
+        elif onboarding_status == "interview_pending":
+            # Check if history already has the start_interview action
+            has_interview_prompt = any(
+                isinstance(m, dict) and m.get("actions") and any(a.get("action") == "start_interview" for a in m["actions"])
+                for m in history
+            )
+            if not has_interview_prompt:
+                initial_msg = get_initial_welcome_message(onboarding_status)
+                if initial_msg:
+                    await db_manager.save_message(
+                        conversation_id=conversation_id,
+                        role="agent",
+                        type_name=initial_msg["type"],
+                        content=initial_msg["content"],
+                        actions=initial_msg.get("actions")
+                    )
+                    history = await db_manager.get_conversation_history(conversation_id)
 
         # Send initial history and conversations list
         conversations = await db_manager.get_user_conversations(user_id)
@@ -215,22 +232,126 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
             message_data = json.loads(data)
             event_type = message_data.get("event")
             
+            if event_type == "profile_saved":
+                onboarding_status = await db_manager.get_onboarding_status(user_id)
+                await websocket.send_json({
+                    "event": "onboarding_status_update",
+                    "status": onboarding_status
+                })
+                if onboarding_status == "interview_pending":
+                    history = await db_manager.get_conversation_history(conversation_id)
+                    has_interview_prompt = any(
+                        isinstance(m, dict) and m.get("actions") and any(a.get("action") == "start_interview" for a in m["actions"])
+                        for m in history
+                    )
+                    if not has_interview_prompt:
+                        initial_msg = get_initial_welcome_message(onboarding_status)
+                        if initial_msg:
+                            await db_manager.save_message(
+                                conversation_id=conversation_id,
+                                role="agent",
+                                type_name=initial_msg["type"],
+                                content=initial_msg["content"],
+                                actions=initial_msg.get("actions")
+                            )
+                            await stream_current_history(websocket, conversation_id)
+                continue
+
             if event_type == "message" or event_type == "action":
                 if conversation_id in active_tasks:
                     logger.warn(f"Task already active for conversation {conversation_id}. Rejecting new run.")
                     continue
 
                 user_text = ""
+                action_name = None
                 if event_type == "message":
                     user_text = message_data.get("content", "").strip()
                 else:
                     action_name = message_data.get("action")
                     user_text = message_data.get("label", action_name)
 
-                if not user_text:
+                if not user_text and not action_name:
                     continue
 
-                # Save user message to Postgres
+                # Fetch current onboarding status
+                onboarding_status = await db_manager.get_onboarding_status(user_id)
+
+                # Intercept onboarding actions
+                if action_name == "open_profile":
+                    await db_manager.save_message(
+                        conversation_id=conversation_id,
+                        role="user",
+                        type_name="chat",
+                        content=user_text
+                    )
+                    await db_manager.save_message(
+                        conversation_id=conversation_id,
+                        role="agent",
+                        type_name="chat",
+                        content="¡Perfecto! Te redirijo al formulario de perfil profesional. Completa tu información y cuando guardes, continuaremos con tu entrevista."
+                    )
+                    await stream_current_history(websocket, conversation_id)
+                    # Tell the frontend to navigate to the profile page
+                    await websocket.send_json({
+                        "event": "navigate",
+                        "url": "/jobboard/profile.html"
+                    })
+                    continue
+
+                elif action_name == "dismiss":
+                    await db_manager.save_message(
+                        conversation_id=conversation_id,
+                        role="user",
+                        type_name="chat",
+                        content=user_text
+                    )
+                    await db_manager.save_message(
+                        conversation_id=conversation_id,
+                        role="agent",
+                        type_name="chat",
+                        content="Entendido. Cuando estés listo, puedes completar tu perfil profesional desde el menú lateral o hablándome aquí."
+                    )
+                    await stream_current_history(websocket, conversation_id)
+                    continue
+
+                elif action_name == "start_interview":
+                    await db_manager.save_message(
+                        conversation_id=conversation_id,
+                        role="user",
+                        type_name="chat",
+                        content=user_text
+                    )
+                    await db_manager.update_onboarding_status(user_id, "interviewing")
+                    await websocket.send_json({
+                        "event": "onboarding_status_update",
+                        "status": "interviewing"
+                    })
+                    await db_manager.save_message(
+                        conversation_id=conversation_id,
+                        role="agent",
+                        type_name="chat",
+                        content="¡Comencemos! 🎤 Primera pregunta: ¿Qué tipo de rol estás buscando prioritariamente (ej. Senior ML Engineer, Tech Lead, Engineering Manager)?"
+                    )
+                    await stream_current_history(websocket, conversation_id)
+                    continue
+
+                elif action_name == "dismiss_interview":
+                    await db_manager.save_message(
+                        conversation_id=conversation_id,
+                        role="user",
+                        type_name="chat",
+                        content=user_text
+                    )
+                    await db_manager.save_message(
+                        conversation_id=conversation_id,
+                        role="agent",
+                        type_name="chat",
+                        content="Entendido. Estaré disponible aquí cuando estés listo para comenzar tu perfilado profesional."
+                    )
+                    await stream_current_history(websocket, conversation_id)
+                    continue
+
+                # Standard chat processing
                 await db_manager.save_message(
                     conversation_id=conversation_id,
                     role="user",
@@ -285,6 +406,8 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
                 conversation_id = selected_id
                 logger.info(f"User switched to conversation {conversation_id}")
                 
+                # Reload onboarding status
+                onboarding_status = await db_manager.get_onboarding_status(user_id)
                 history = await db_manager.get_conversation_history(conversation_id)
                 await websocket.send_json({
                     "event": "history",
@@ -478,13 +601,30 @@ def get_initial_welcome_message(status_str: str) -> Dict[str, Any]:
     if status_str == "uninitialized":
         return {
             "type": "action",
-            "content": "¡Hola! 👋 Soy **Zenith Agent**, tu asistente inteligente de búsqueda laboral.\n\nNoté que aún no tengo contexto de tu perfil profesional. ¿Quieres que investigue tu LinkedIn para entender tu experiencia y habilidades?",
+            "content": "¡Hola! 👋 Soy **Zenith Agent**, tu asistente inteligente de búsqueda laboral.\n\nNoté que aún no tengo contexto de tu perfil profesional. Para comenzar, necesito que completes tu perfil con tu experiencia, habilidades y educación.",
             "actions": [
-                { "label": "✅ Sí, investiga mi LinkedIn", "action": "start_linkedin", "variant": "primary" },
+                { "label": "📋 Completar mi perfil profesional", "action": "open_profile", "variant": "primary" },
                 { "label": "⏭ Después", "action": "dismiss", "variant": "secondary" }
             ]
+        }
+    elif status_str == "interview_pending":
+        return {
+            "type": "action",
+            "content": "Ya tengo tu perfil profesional cargado. ¿Estás listo para comenzar tu entrevista profesional? Consiste en unas pocas preguntas sobre tus expectativas, metas y preferencias.",
+            "actions": [
+                { "label": "🎤 Sí, empecemos", "action": "start_interview", "variant": "primary" },
+                { "label": "⏭ Ahora no", "action": "dismiss_interview", "variant": "secondary" }
+            ]
+        }
+    elif status_str == "interviewing":
+        return {
+            "type": "chat",
+            "content": "¡Comencemos! ¿Qué tipo de rol estás buscando prioritariamente?"
         }
     return {
         "type": "chat",
         "content": "¡Hola! ¿En qué puedo ayudarte hoy con tu espacio de trabajo? Puedes pedirme que liste tus tableros, cree nuevos tableros o mueva/archive tus tarjetas."
     }
+
+# NOTE: simulate_linkedin_investigation and import_profile endpoint removed in Stage 3 cleanup.
+# Profile data is now collected via the /api/profile REST endpoint (Express) and the profile.html form.

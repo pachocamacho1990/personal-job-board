@@ -161,6 +161,23 @@ class DatabaseManager:
                 content, message_id
             )
 
+    async def update_message_progress(
+        self,
+        message_id: int,
+        progress_pct: int,
+        progress_steps: List[Dict[str, Any]]
+    ):
+        async with self.pool.acquire() as conn:
+            steps_json = json.dumps(progress_steps)
+            await conn.execute(
+                """
+                UPDATE agent_messages 
+                SET progress_pct = $1, progress_steps = $2 
+                WHERE id = $3
+                """,
+                progress_pct, steps_json, message_id
+            )
+
     async def get_onboarding_status(self, user_id: int) -> str:
         async with self.pool.acquire() as conn:
             status = await conn.fetchval(
@@ -189,6 +206,16 @@ class DatabaseManager:
                 "UPDATE agent_profiles SET profile_data = $1, updated_at = NOW() WHERE user_id = $2",
                 json.dumps(data), user_id
             )
+
+    async def get_profile_data(self, user_id: int) -> Dict[str, Any]:
+        async with self.pool.acquire() as conn:
+            data = await conn.fetchval(
+                "SELECT profile_data FROM agent_profiles WHERE user_id = $1",
+                user_id
+            )
+            if data is None:
+                return {}
+            return json.loads(data) if isinstance(data, str) else data
 
     async def get_user_memories(self, user_id: int) -> List[Dict[str, Any]]:
         async with self.pool.acquire() as conn:

@@ -32,11 +32,10 @@ El ciclo de vida del agente se divide en tres fases funcionales obligatorias:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-#### Loop 1: Investigador de LinkedIn (Extracción Asíncrona)
-*   **Gatillo (Trigger)**: El agente detecta que el usuario no tiene perfil cargado y muestra un mensaje de acción en la consola: `"¿Quieres que investigue tu LinkedIn?"`.
-*   **Comportamiento**: 100% en segundo plano. El usuario debe poder seguir navegando en el Kanban, Dashboard y Business Board.
-*   **Visualización**: El panel lateral del agente y una barra de estado inferior muestran el progreso asíncrono en tiempo real (ej: *Step 1: Navigating*, *Step 2: Extracting Experience*, *Step 3: Indexing Skills*) con porcentaje de completitud.
-*   **Output**: Un objeto JSON crudo guardado en la base de datos (`linkedin_raw`).
+#### Loop 1: Formulario de Perfil Profesional (Web Form Onboarding)
+*   **Gatillo (Trigger)**: El agente detecta que el usuario no tiene perfil cargado y muestra un mensaje con el botón: `"📋 Completar mi perfil profesional"`.
+*   **Comportamiento**: El usuario es redirigido a `/jobboard/profile.html` para rellenar su información (Nombre, titular, resumen, experiencia, educación, habilidades e idiomas). Se recomienda el uso de **Claude for Chrome** para agilizar el proceso de llenado a partir de su perfil de LinkedIn.
+*   **Output**: Un objeto JSON estructurado guardado en la base de datos (`profile_data`) y transición de estado a `interview_pending`.
 
 #### Loop 2: Entrevistador Dinámico (Perfilado Conversacional)
 *   **Trigger**: Cambio de estado a `interview_pending`. El agente inicia el diálogo saludando y preguntando si está listo para comenzar.
@@ -137,15 +136,12 @@ CREATE TABLE agent_profiles (
     onboarding_status VARCHAR(50) DEFAULT 'uninitialized'
         CHECK (onboarding_status IN (
             'uninitialized',
-            'linkedin_pending',
-            'linkedin_investigating',
             'interview_pending',
             'interviewing',
             'ready',
             'searching'
         )),
-    linkedin_raw JSONB DEFAULT '{}'::jsonb,      -- Data cruda extraída de LinkedIn
-    profile_data JSONB DEFAULT '{}'::jsonb,      -- Preferencias validadas
+    profile_data JSONB DEFAULT '{}'::jsonb,      -- Información del perfil profesional (nombre, experiencia, skills, etc.)
     career_strategy JSONB DEFAULT '{}'::jsonb,   -- Estrategia recomendada por la IA
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -213,7 +209,7 @@ La comunicación interactiva y en tiempo real a través de WebSockets utiliza el
     ```
 *   **Ejecutar Acción / Botón**:
     ```json
-    { "event": "action", "action": "start_linkedin", "label": "✅ Sí, investiga mi LinkedIn" }
+    { "event": "action", "action": "open_profile", "label": "📋 Completar mi perfil profesional" }
     ```
 *   **Detener Inferencia (Cancelación)**:
     ```json

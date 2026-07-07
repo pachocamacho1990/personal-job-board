@@ -73,6 +73,7 @@ Multi-board career management platform with PostgreSQL backend. Three main views
 | `src/pages/business/main.tsx` | Business Board Kanban page |
 | `src/pages/login/main.tsx` | Auth register / login page |
 | `src/pages/docs/main.tsx` | Dynamic API Reference and guide |
+| `src/pages/profile/main.tsx` | Professional Profile form |
 | `src/api.ts` | Strongly typed client with JWT management |
 | `src/types.ts` | Unified TypeScript interfaces |
 | `src/utils.ts` | Pure utility functions (escaping, ratings, dates) |
@@ -116,6 +117,9 @@ PUT    /api/business/:id         → { entity }
 DELETE /api/business/:id         → { message }
 
 GET    /api/dashboard/summary    → { interviews, newMatches } (Filtered by boardId)
+
+GET    /api/profile              → { profile_data, onboarding_status }
+POST   /api/profile              → { message, onboarding_status, profile_data }
 ```
 
 All except auth require `Authorization: Bearer <token>` header.
