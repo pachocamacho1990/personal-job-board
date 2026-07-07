@@ -72,17 +72,70 @@ async def auto_title_conversation(conversation_id: int, user_message: str):
         logger.error(f"Failed to auto-title conversation {conversation_id}: {e}")
 
 async def get_adaptive_system_prompt(user_id: int) -> str:
-    """Assembles the system prompt in real-time by prepending user preferences and skills"""
+    """Assembles the system prompt in real-time by prepending user preferences, profile data and skills"""
     memories = await db_manager.get_user_memories(user_id)
     skills = await db_manager.get_user_skills(user_id)
+    profile_data = await db_manager.get_profile_data(user_id)
+    onboarding_status = await db_manager.get_onboarding_status(user_id)
     
     base_instructions = (
-        "Eres Zenith Agent, un asistente de IA inteligente de búsqueda de empleo.\n"
+        "Eres Zenith Agent, un consultor de carrera y headhunter senior de élite.\n"
         "Puedes interactuar con el espacio de trabajo del usuario (job boards, tarjetas de empleo) "
         "y administrar tus preferencias usando las herramientas suministradas.\n"
-        "Sé directo, profesional y mantén tus respuestas concisas en español."
+        "Sé directo, profesional y mantén tus respuestas concisas en español.\n"
     )
     
+    if onboarding_status == "interviewing":
+        base_instructions += (
+            "\n[MODO ENTREVISTA ACTIVO]\n"
+            "Tu objetivo actual es perfilar profesional y motivacionalmente al usuario a través de una entrevista en el chat.\n"
+            "1. Utiliza técnicas de Entrevista Motivacional (OARS) para guiar la conversación con empatía y sin respuestas cerradas.\n"
+            "2. Valida competencias de su experiencia usando la estructura STAR (Situación, Tarea, Acción, Resultado).\n"
+            "3. Identifica sus motivaciones internas y el Ancla de Carrera de Edgar Schein dominante.\n"
+            "4. Cuando determines que tienes suficiente información sobre sus roles objetivo, rangos salariales, "
+            "modalidades de trabajo, preferencias geográficas y deal-breakers/exclusiones, debes llamar de inmediato a la herramienta "
+            "save_career_strategy para guardar la estrategia de búsqueda e inyectar el prompt de búsqueda detallado para Claude for Chrome.\n"
+            "Importante: No cierres la entrevista con un simple mensaje de texto; DEBES ejecutar la herramienta save_career_strategy "
+            "para que el sistema registre la finalización y cambie el estado a 'ready'. Tu respuesta final debe confirmar al usuario "
+            "que has procesado y guardado la estrategia.\n"
+        )
+    
+    profile_section = ""
+    if profile_data:
+        profile_section = "\n\n## DATOS DEL PERFIL PROFESIONAL DEL USUARIO (Formulario Inicial)\n"
+        profile_section += f"- Nombre completo: {profile_data.get('full_name', 'No especificado')}\n"
+        profile_section += f"- Titular profesional: {profile_data.get('headline', 'No especificado')}\n"
+        profile_section += f"- Ubicación: {profile_data.get('location', 'No especificado')}\n"
+        profile_section += f"- Resumen profesional: {profile_data.get('summary', 'No especificado')}\n"
+        
+        skills_list = profile_data.get("skills", [])
+        if skills_list:
+            profile_section += f"- Habilidades técnicas: {', '.join(skills_list)}\n"
+            
+        langs = profile_data.get("languages", [])
+        if langs:
+            lang_strs = [f"{l.get('language')} ({l.get('level')})" for l in langs]
+            profile_section += f"- Idiomas: {', '.join(lang_strs)}\n"
+            
+        exp = profile_data.get("experience", [])
+        if exp:
+            profile_section += "- Experiencia laboral:\n"
+            for e in exp:
+                profile_section += f"  * Cargo: {e.get('role')} en {e.get('company')} ({e.get('start_date')} - {e.get('end_date')})\n"
+                if e.get("description"):
+                    profile_section += f"    Descripción: {e.get('description')}\n"
+                    
+        edu = profile_data.get("education", [])
+        if edu:
+            profile_section += "- Educación:\n"
+            for d in edu:
+                profile_section += f"  * Título: {d.get('degree')} en {d.get('school')} (Año: {d.get('year')})\n"
+                
+        profile_section += (
+            "\nIMPORTANTE: Utiliza esta información previa de su trayectoria para formular preguntas avanzadas y "
+            "específicas. No le vuelvas a preguntar detalles que ya están declarados en esta sección."
+        )
+
     memories_section = ""
     if memories:
         memories_section = "\n\n## PREFERENCIAS Y HECHOS DEL USUARIO (Memoria Permanente)\n"
@@ -96,7 +149,7 @@ async def get_adaptive_system_prompt(user_id: int) -> str:
         for s in skills:
             skills_section += f"- Skill '{s['name']}': {s['description']} (Receta: {json.dumps(s['recipe'])})\n"
             
-    return base_instructions + memories_section + skills_section
+    return base_instructions + profile_section + memories_section + skills_section
 
 async def run_background_preference_extraction(conversation_id: int, user_id: int):
     """
@@ -480,6 +533,56 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
         except:
             pass
 
+class MockFunction:
+    def __init__(self, name: str, arguments: str):
+        self.name = name
+        self.arguments = arguments
+
+class MockToolCall:
+    def __init__(self, name: str, arguments_str: str):
+        self.id = "mock_call_123"
+        self.type = "function"
+        self.function = MockFunction(name, arguments_str)
+
+def get_mock_interview_response(history: List[Dict[str, Any]]) -> tuple[str | None, list[Any] | None]:
+    user_messages = [m for m in history if m["role"] == "user"]
+    user_msg_count = len(user_messages)
+    logger.info(f"MOCK INTERVIEW RUNNING: user_msg_count={user_msg_count}")
+    for m in history:
+        logger.info(f"  MSG: role={m.get('role')} type={m.get('type')} content={m.get('content')[:30] if m.get('content') else ''}")
+    if user_msg_count <= 3:
+        content = "Entendido. Segunda pregunta: ¿Cuál es tu rango salarial objetivo y qué modalidad prefieres (remoto, híbrido)?"
+        return content, None
+    elif user_msg_count == 4:
+        content = "Perfecto. Última pregunta: ¿Tienes alguna empresa o industria excluida de tu búsqueda?"
+        return content, None
+    else:
+        strategy = {
+            "dominant_anchor": "Lifestyle",
+            "target_roles": ["Senior Software Engineer", "Tech Lead"],
+            "salary_preferences": {
+                "target": 100000,
+                "minimum": 90000,
+                "currency": "EUR"
+            },
+            "work_mode": {
+                "remote": True,
+                "hybrid": False,
+                "on_site": False
+            },
+            "geography": {
+                "priorities": ["España", "Remoto Europa"],
+                "exclusions": []
+            },
+            "exclusions": {
+                "industries": ["Crypto"],
+                "companies": ["Acme Corp"]
+            },
+            "strategy_summary": "Ingeniero de Software Senior enfocado en estabilidad laboral y balance de vida. Prefiere roles 100% remotos en Europa y evita el sector Cripto.",
+            "search_prompt": "Eres un agente de búsqueda de empleo automatizado que opera dentro de mi navegador usando Claude for Chrome.\n\nDebes buscar vacantes de Senior Software Engineer o Tech Lead en España o Remoto Europa, evitando Acme Corp y el sector Crypto. Si el salario estimado supera los 90000 EUR, guarda la vacante en Zenith llamando a POST /api/jobs con boardId: {board_id}."
+        }
+        return None, [MockToolCall("save_career_strategy", json.dumps(strategy))]
+
 async def stream_current_history(websocket: WebSocket, conversation_id: int):
     """Refreshes and sends the active message logs list to the client"""
     history = await db_manager.get_conversation_history(conversation_id)
@@ -503,13 +606,18 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
             loop_count += 1
             
             history = await db_manager.get_conversation_history(conversation_id)
+            onboarding_status = await db_manager.get_onboarding_status(user_id)
             
             # Assemble dynamic system prompt and prepend it to the LLM message payload on EVERY turn (adaptive prompt)
             system_prompt = await get_adaptive_system_prompt(user_id)
             messages_payload = [{"role": "system", "content": system_prompt}] + history
             
             # Send payload to LLM
-            content, tool_calls = await llm_manager.get_response(messages_payload, tools=WORKSPACE_TOOLS_SCHEMAS)
+            if settings.test_mode and onboarding_status == "interviewing":
+                logger.info("TEST_MODE active. Intercepting interview flow with mock responses.")
+                content, tool_calls = get_mock_interview_response(history)
+            else:
+                content, tool_calls = await llm_manager.get_response(messages_payload, tools=WORKSPACE_TOOLS_SCHEMAS)
             
             if tool_calls:
                 for tool_call in tool_calls:
@@ -533,7 +641,25 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
                     await stream_current_history(websocket, conversation_id)
                     
                     # Execute tool (passing user_id for memory-modifying tools)
+                    logger.info(f"DEBUG: Calling execute_tool '{tool_name}'...")
                     tool_result = await execute_tool(tool_name, tool_args, user_token, user_id)
+                    logger.info(f"DEBUG: execute_tool '{tool_name}' finished: {tool_result}")
+                    
+                    if tool_name == "save_career_strategy" and tool_result.get("success"):
+                        await websocket.send_json({
+                            "event": "onboarding_status_update",
+                            "status": "ready"
+                        })
+                        await db_manager.save_message(
+                            conversation_id=conversation_id,
+                            role="agent",
+                            type_name="chat",
+                            content="¡Excelente! He analizado tu perfil y he estructurado tu estrategia de carrera. He activado la búsqueda y generado el prompt de búsqueda detallado para tu extensión Claude for Chrome. Puedes copiarlo en el panel superior."
+                        )
+                        async with db_manager.pool.acquire() as conn:
+                            await conn.execute("DELETE FROM agent_messages WHERE id = $1", current_thinking_id)
+                        await stream_current_history(websocket, conversation_id)
+                        return
                     
                     await db_manager.save_message(
                         conversation_id=conversation_id,

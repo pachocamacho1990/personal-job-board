@@ -219,6 +219,53 @@ WORKSPACE_TOOLS_SCHEMAS = [
                 "required": ["name", "description", "recipe"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "save_career_strategy",
+            "description": "Guarda la estrategia de búsqueda laboral y el prompt personalizado para Claude for Chrome al finalizar la entrevista.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "dominant_anchor": { "type": "string", "description": "El Ancla de Carrera identificada según Schein (ej. Lifestyle, Autonomía)." },
+                    "target_roles": { "type": "array", "items": { "type": "string" }, "description": "Lista de títulos de roles objetivo." },
+                    "salary_preferences": {
+                        "type": "object",
+                        "properties": {
+                            "target": { "type": "integer" },
+                            "minimum": { "type": "integer" },
+                            "currency": { "type": "string" }
+                        }
+                    },
+                    "work_mode": {
+                        "type": "object",
+                        "properties": {
+                            "remote": { "type": "boolean" },
+                            "hybrid": { "type": "boolean" },
+                            "on_site": { "type": "boolean" }
+                        }
+                    },
+                    "geography": {
+                        "type": "object",
+                        "properties": {
+                            "priorities": { "type": "array", "items": { "type": "string" } },
+                            "exclusions": { "type": "array", "items": { "type": "string" } }
+                        }
+                    },
+                    "exclusions": {
+                        "type": "object",
+                        "properties": {
+                            "industries": { "type": "array", "items": { "type": "string" } },
+                            "companies": { "type": "array", "items": { "type": "string" } }
+                        }
+                    },
+                    "strategy_summary": { "type": "string", "description": "Resumen narrativo de la estrategia de carrera recomendada." },
+                    "search_prompt": { "type": "string", "description": "El prompt de instrucciones ultra-detallado para Claude for Chrome." }
+                },
+                "required": ["dominant_anchor", "target_roles", "strategy_summary", "search_prompt"]
+            }
+        }
     }
 ]
 
@@ -431,6 +478,20 @@ async def execute_tool(name: str, arguments: Dict[str, Any], user_token: str, us
             recipe = arguments.get("recipe", {})
             skill_id = await db_manager.save_user_skill(user_id, skill_name, description, recipe)
             return {"success": True, "message": f"Skill '{skill_name}' guardada y aprendida con ID {skill_id}."}
+            
+        elif name == "save_career_strategy":
+            strategy = {
+                "dominant_anchor": arguments.get("dominant_anchor"),
+                "target_roles": arguments.get("target_roles"),
+                "salary_preferences": arguments.get("salary_preferences"),
+                "work_mode": arguments.get("work_mode"),
+                "geography": arguments.get("geography"),
+                "exclusions": arguments.get("exclusions"),
+                "strategy_summary": arguments.get("strategy_summary")
+            }
+            search_prompt = arguments.get("search_prompt")
+            await db_manager.update_career_strategy(user_id, strategy, search_prompt)
+            return {"success": True, "message": "Estrategia de carrera y prompt de búsqueda guardados correctamente."}
             
         else:
             return {"success": False, "error": f"Herramienta '{name}' no disponible."}

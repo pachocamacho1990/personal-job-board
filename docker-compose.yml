@@ -73,6 +73,7 @@ services:
       LLM_API_KEY: ${LLM_API_KEY}
       LLM_MODEL: ${LLM_MODEL}
       EXPRESS_API_URL: http://api:3000/api
+      TEST_MODE: ${TEST_MODE:-true}
     ports:
       - "8000:8000"
     depends_on:
@@ -80,6 +81,8 @@ services:
         condition: service_healthy
       api:
         condition: service_started
+    volumes:
+      - ./agent-service:/app
 
 volumes:
   postgres_data:

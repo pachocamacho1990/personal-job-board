@@ -13,7 +13,7 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response) => {
 
         // Try to get existing profile
         let result = await pool.query(
-            'SELECT profile_data, onboarding_status FROM agent_profiles WHERE user_id = $1',
+            'SELECT profile_data, onboarding_status, career_strategy, search_prompt FROM agent_profiles WHERE user_id = $1',
             [userId]
         );
 
@@ -25,14 +25,18 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response) => {
             );
             return res.json({
                 profile_data: {},
-                onboarding_status: 'uninitialized'
+                onboarding_status: 'uninitialized',
+                career_strategy: {},
+                search_prompt: null
             });
         }
 
         const row = result.rows[0];
         res.json({
             profile_data: row.profile_data || {},
-            onboarding_status: row.onboarding_status
+            onboarding_status: row.onboarding_status,
+            career_strategy: row.career_strategy || {},
+            search_prompt: row.search_prompt || null
         });
     } catch (error: any) {
         console.error('Error fetching profile:', error);
