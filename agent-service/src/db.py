@@ -217,6 +217,29 @@ class DatabaseManager:
                 return {}
             return json.loads(data) if isinstance(data, str) else data
 
+    async def update_career_strategy(self, user_id: int, strategy: Dict[str, Any], search_prompt: str):
+        async with self.pool.acquire() as conn:
+            await conn.execute(
+                "UPDATE agent_profiles SET career_strategy = $1, search_prompt = $2, onboarding_status = 'ready', updated_at = NOW() WHERE user_id = $3",
+                json.dumps(strategy), search_prompt, user_id
+            )
+
+    async def get_career_strategy(self, user_id: int) -> Dict[str, Any]:
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT career_strategy, search_prompt FROM agent_profiles WHERE user_id = $1",
+                user_id
+            )
+            if row is None:
+                return {"career_strategy": {}, "search_prompt": None}
+            strategy = row["career_strategy"]
+            if isinstance(strategy, str):
+                strategy = json.loads(strategy)
+            return {
+                "career_strategy": strategy or {},
+                "search_prompt": row["search_prompt"]
+            }
+
     async def get_user_memories(self, user_id: int) -> List[Dict[str, Any]]:
         async with self.pool.acquire() as conn:
             rows = await conn.fetch(

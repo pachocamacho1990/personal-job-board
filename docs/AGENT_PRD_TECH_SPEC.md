@@ -64,18 +64,14 @@ El estado del perfil del usuario se rige por la siguiente máquina de estados co
 ```mermaid
 stateDiagram-v2
     direction LR
-    UNINITIALIZED --> LINKEDIN_PENDING: Registro de usuario sin perfil
-    LINKEDIN_PENDING --> LINKEDIN_INVESTIGATING: Usuario autoriza búsqueda en LinkedIn
-    LINKEDIN_INVESTIGATING --> INTERVIEW_PENDING: Extracción finalizada con éxito
-    INTERVIEW_PENDING --> INTERVIEWING: Usuario inicia entrevista en consola
-    INTERVIEWING --> READY: Entrevista finalizada y perfil compilado
-    READY --> SEARCHING: Se inicia la búsqueda activa de empleo
-    SEARCHING --> READY: Búsqueda completada e inserción en Kanban
+    UNINITIALIZED --> INTERVIEW_PENDING: Usuario guarda formulario en profile.html
+    INTERVIEW_PENDING --> INTERVIEWING: Usuario inicia la entrevista conversacional
+    INTERVIEWING --> READY: Entrevista finalizada y estrategia guardada en DB
     
-    note right of LINKEDIN_INVESTIGATING: Proceso asíncrono. No bloquea navegación.
-    note right of INTERVIEWING: Bucle conversacional turno a turno.
-    note right of SEARCHING: Ejecución programada o manual en segundo plano.
+    note right of INTERVIEWING: Diálogo interactivo turno a turno (STAR/OARS/Schein)
+    note right of READY: Widget de Búsqueda Activa habilitado (Claude for Chrome)
 ```
+
 
 ### 3.2. Arquitectura de Microservicios
 
@@ -143,6 +139,7 @@ CREATE TABLE agent_profiles (
         )),
     profile_data JSONB DEFAULT '{}'::jsonb,      -- Información del perfil profesional (nombre, experiencia, skills, etc.)
     career_strategy JSONB DEFAULT '{}'::jsonb,   -- Estrategia recomendada por la IA
+    search_prompt TEXT,                          -- Prompt de búsqueda personalizado para Claude for Chrome
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
@@ -260,21 +257,19 @@ La comunicación interactiva y en tiempo real a través de WebSockets utiliza el
 *   Paginador y buscador dinámico integrados en el Archivo de tarjetas modal.
 *   Auto-visto de recomendaciones de IA (`is_unseen = false`) al cambiar su columna o estado.
 
-### [ ] STAGE 3 — Agente Investigador de LinkedIn (Loop 1)
-*   Integración del motor de Playwright o mocks de scraping en Python.
-*   Algoritmo para extraer el perfil y mapearlo a `linkedin_raw` en base de datos.
-*   Transición de estados y progress steps asíncronos en el frontend del panel lateral.
-*   Guardado del perfil preliminar y actualización de estado a `interview_pending`.
+### [x] STAGE 3 — Formulario de Perfil Profesional (Loop 1)
+*   Formulario interactivo modular y dinámico en React (`/jobboard/profile.html`).
+*   Guardado del perfil preliminar (`profile_data` en Postgres) y transición de estado a `interview_pending`.
+*   Envío del evento WebSocket `profile_saved` para alertar al agente en tiempo real.
 
-### [ ] STAGE 4 — Entrevistador Conversacional Inteligente (Loop 2)
-*   Prompt del sistema para el LLM en modo Entrevistador.
+### [x] STAGE 4 — Entrevistador Conversacional Inteligente (Loop 2)
+*   Prompt del sistema para el LLM en modo Entrevistador ( Schein Schein anchors, Korn Ferry, STAR, OARS).
 *   Interacción estructurada pregunta-respuesta en tiempo real en la consola de chat.
-*   Mecanismo del LLM para determinar la finalización de la entrevista mediante la marca `ENTREVISTA_COMPLETA` y salida estructurada JSON.
-*   Guardado de `enriched_profile` en base de datos y transición a estado `ready`.
+*   Herramienta `save_career_strategy` para guardar el perfil enriquecido, la estrategia estructurada y el prompt de búsqueda en la base de datos, con transición automática a estado `ready`.
+*   Modo de prueba `TEST_MODE=true` determinista para simulaciones rápidas en E2E y pruebas unitarias de Python.
 
-### [ ] STAGE 5 — Orquestador de Búsqueda y Automatización (Loop 3)
-*   Motor de scraping para portales de empleo (LinkedIn Jobs, Indeed).
-*   Algoritmo de scoring semántico (Match Rate) entre el perfil enriquecido y los job postings.
-*   Creación automatizada de tarjetas en la columna `interested` a través de llamadas asíncronas seguras a la API Express.
-*   Notificaciones push en tiempo real en la UI del panel lateral.
-*   Planificador de tareas (cron programado) para búsquedas recurrentes en background.
+### [x] STAGE 5 — Búsqueda Descentralizada con Claude for Chrome (Loop 3)
+*   Widget visual superior de Búsqueda Activa con chips de perfilado e inyección dinámica del Job Board en el prompt.
+*   Copia fácil al portapapeles del prompt personalizado detallado para la extensión local Claude for Chrome.
+*   Llamada directa autorizada mediante JWT al endpoint Express `POST /api/jobs` desde Claude for Chrome para poblar el Kanban de Zenith en la columna "Interested".
+*   Pruebas completas de integración en Playwright simulando el onboarding, entrevista, copiado e importación de vacantes.

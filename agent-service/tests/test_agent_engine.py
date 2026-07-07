@@ -29,3 +29,46 @@ def test_safety_guards_allowed_actions():
     assert guards.is_allowed_action("click") is True
     assert guards.is_allowed_action("payment") is False
     assert guards.is_allowed_action("delete_account") is False
+
+def test_get_mock_interview_response():
+    from src.main import get_mock_interview_response
+    
+    # 1. First turn: 3 user messages (profile_saved event + start_interview action + chat input)
+    history = [
+        {"role": "user", "content": "Completar mi perfil"},
+        {"role": "user", "content": "Sí, empecemos"},
+        {"role": "user", "content": "Busco Senior Software Engineer"}
+    ]
+    content, tool_calls = get_mock_interview_response(history)
+    assert content is not None
+    assert "Segunda pregunta" in content
+    assert tool_calls is None
+    
+    # 2. Second turn: 4 user messages
+    history = [
+        {"role": "user", "content": "Completar mi perfil"},
+        {"role": "user", "content": "Sí, empecemos"},
+        {"role": "user", "content": "Busco Senior Software Engineer"},
+        {"role": "agent", "content": "Segunda pregunta..."},
+        {"role": "user", "content": "Mi rango es 100k y remoto"}
+    ]
+    content, tool_calls = get_mock_interview_response(history)
+    assert content is not None
+    assert "Última pregunta" in content
+    assert tool_calls is None
+    
+    # 3. Third turn: 5 user messages
+    history = [
+        {"role": "user", "content": "Completar mi perfil"},
+        {"role": "user", "content": "Sí, empecemos"},
+        {"role": "user", "content": "Busco Senior Software Engineer"},
+        {"role": "agent", "content": "Segunda pregunta..."},
+        {"role": "user", "content": "Mi rango es 100k y remoto"},
+        {"role": "agent", "content": "Última pregunta..."},
+        {"role": "user", "content": "Excluir Acme Corp"}
+    ]
+    content, tool_calls = get_mock_interview_response(history)
+    assert content is None
+    assert tool_calls is not None
+    assert len(tool_calls) == 1
+    assert tool_calls[0].function.name == "save_career_strategy"

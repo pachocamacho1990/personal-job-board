@@ -1,6 +1,9 @@
 const { test, expect } = require('@playwright/test');
 
 test('Agent Onboarding and Profile Form E2E', async ({ page }) => {
+  // Grant clipboard permissions
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+
   // Capture browser console logs
   page.on('console', msg => console.log('BROWSER CONSOLE:', msg.text()));
 
@@ -70,4 +73,87 @@ test('Agent Onboarding and Profile Form E2E', async ({ page }) => {
   // Verify transition to interviewing state
   const firstQuestion = panel.locator('.agent-msg.role-agent').last();
   await expect(firstQuestion).toContainText('¿Qué tipo de rol estás buscando');
+
+  // 11. Play the interactive interview (TEST_MODE = true makes it deterministic)
+  // Input: Question 1 Answer -> "Busco Senior Software Engineer"
+  const chatInput = panel.locator('.agent-input-field');
+  const sendBtn = panel.locator('.agent-send-btn');
+  
+  await chatInput.fill('Busco Senior Software Engineer');
+  await sendBtn.click();
+
+  // Wait for Question 2
+  const secondQuestion = panel.locator('.agent-msg.role-agent.type-chat').last();
+  await expect(secondQuestion).toContainText('¿Cuál es tu rango salarial objetivo', { timeout: 10000 });
+
+  // Input: Question 2 Answer -> "Mi rango es 100k y remoto"
+  await chatInput.fill('Mi rango es 100k y remoto');
+  await sendBtn.click();
+
+  // Wait for Question 3
+  const thirdQuestion = panel.locator('.agent-msg.role-agent.type-chat').last();
+  await expect(thirdQuestion).toContainText('¿Tienes alguna empresa o industria', { timeout: 10000 });
+
+  // Input: Question 3 Answer -> "Excluir Acme Corp"
+  await chatInput.fill('Excluir Acme Corp');
+  await sendBtn.click();
+
+  // 12. Verify Strategy Panel is generated and visible
+  const strategyPanel = page.locator('#agent-active-search-panel');
+  await expect(strategyPanel).toBeVisible({ timeout: 15000 });
+
+  // Verify elements inside the strategy panel
+  const summaryBox = strategyPanel.locator('.agent-strategy-summary');
+  await expect(summaryBox).toContainText('Ingeniero de Software Senior');
+
+  const anchorBadge = strategyPanel.locator('.agent-meta-badge', { hasText: 'Lifestyle' });
+  await expect(anchorBadge).toBeVisible();
+
+  const promptText = await page.locator('#agent-search-prompt-text').inputValue();
+  expect(promptText).toContain('Claude for Chrome');
+
+  // Verify copy button
+  const copyBtn = page.locator('#agent-copy-prompt-btn');
+  await expect(copyBtn).toBeVisible();
+  await copyBtn.click();
+  await expect(copyBtn).toContainText('¡Prompt Copiado!');
+
+  // 13. Get active board ID and simulate Claude for Chrome saving a job
+  const selectElement = page.locator('#strategy-board-select');
+  await expect(selectElement).toBeVisible();
+  const boardIdStr = await selectElement.inputValue();
+  const boardId = Number(boardIdStr);
+  expect(boardId).toBeGreaterThan(0);
+
+  // Call the POST /api/jobs endpoint as if we are the extension
+  await page.evaluate(async (bid) => {
+    const token = localStorage.getItem('authToken');
+    await fetch('/jobboard/api/jobs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        boardId: bid,
+        status: 'interested',
+        origin: 'agent',
+        company: 'Acme Corp Mocked',
+        position: 'Senior Engineer Mocked',
+        location: 'Remote',
+        salary: '$100k',
+        comments: 'Prueba de importación'
+      })
+    });
+  }, boardId);
+
+  // 14. Navigate to Job Board UI and verify card is visible
+  await page.click('text=Job Board');
+  await page.waitForURL('**/jobs.html');
+  await page.waitForSelector('#appLoading', { state: 'hidden' });
+
+  // Verify card exists on the board
+  const jobCard = page.locator('.job-card', { hasText: 'Acme Corp Mocked' });
+  await expect(jobCard).toBeVisible({ timeout: 10000 });
+  await expect(jobCard.locator('h3')).toContainText('Senior Engineer Mocked');
 });

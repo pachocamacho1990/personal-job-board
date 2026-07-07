@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.11.0] - 2026-07-07
+
+### 🚀 Onboarding laboral conversacional y búsqueda activa descentralizada (Fases 3, 4 y 5)
+
+Reemplazado el sistema heredado de scraping automático de LinkedIn en el backend por un onboarding interactivo en React, un entrevistador dinámico basado en anclas de carrera y un panel superior para búsqueda activa delegada en la extensión local Claude for Chrome.
+
+#### Added
+- **Formulario de Perfil (`/profile.html`)**: Formulario React moderno para recopilar datos de perfil (`profile_data`) e integrarse mediante WebSockets con el agente Zenith.
+- **Estrategia y Prompt de Búsqueda**: Nuevas columnas `career_strategy` y `search_prompt` en `agent_profiles` Postgres, con migración `v3_11`.
+- **Entrevista Interactiva de Schein/STAR/OARS**: Diálogo interactivo determinista en el agente y herramienta `save_career_strategy` para guardar la estrategia al completar.
+- **Modo de Prueba (`TEST_MODE=true`)**: Modo de simulación rápida y determinista en Python para pruebas unitarias y de integración E2E.
+- **Widget de Búsqueda Activa**: Componente en `AgentConsole.tsx` para visualizar la estrategia y copiar el prompt dinámico de búsqueda activa inyectando el ID del tablero destino seleccionado.
+- **Pruebas de Integración**: Pruebas Playwright ampliadas y exitosas cubriendo la simulación completa de onboarding, copia de prompt y guardado de tarjetas desde Claude for Chrome.
+
+#### Removed
+- Dependencias obsoletas del sistema (`playwright`, `browser-use`) e instalación de Chromium en la imagen de Docker del agente para una construcción más eficiente.
+
+---
+
 ## [3.10.0] - 2026-02-09
 
 ### 🚀 Feature: Job to Business Connection Transformation

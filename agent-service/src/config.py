@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     
     # Internal URL for Express API
     express_api_url: str = os.getenv("EXPRESS_API_URL", "http://api:3000/api")
+    
+    # Test Mode for deterministic mock responses in tests
+    test_mode: bool = os.getenv("TEST_MODE", "false").lower() == "true"
 
     class Config:
         env_file = ".env"
