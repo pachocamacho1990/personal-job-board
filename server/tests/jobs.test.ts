@@ -435,4 +435,59 @@ describe('Jobs Routes', () => {
             expect(mockClient.release).toHaveBeenCalled();
         });
     });
+
+    describe('GET /api/jobs/:id/documents', () => {
+        it('should get job documents successfully', async () => {
+            // Verify job ownership check query
+            (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ id: 1 }] });
+            // Select job documents query
+            const mockDocs = [{ id: 1, documentType: 'cover_letter', content: 'Mock content' }];
+            (pool.query as jest.Mock).mockResolvedValueOnce({ rows: mockDocs });
+
+            const res = await request(app).get('/api/jobs/1/documents');
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toEqual(mockDocs);
+        });
+    });
+
+    describe('POST /api/jobs/:id/copilot', () => {
+        it('should generate copilot document successfully', async () => {
+            // Verify job ownership check query
+            (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [{ id: 1 }] });
+
+            // Mock fetch response
+            const mockFetch = jest.fn().mockResolvedValue({
+                ok: true,
+                json: async () => ({ content: 'Generated cover letter text' })
+            });
+            const originalFetch = global.fetch;
+            global.fetch = mockFetch as any;
+
+            // Mock insert document query
+            (pool.query as jest.Mock).mockResolvedValueOnce({
+                rows: [{ id: 1, documentType: 'cover_letter', content: 'Generated cover letter text' }]
+            });
+
+            const res = await request(app)
+                .post('/api/jobs/1/copilot')
+                .send({ documentType: 'cover_letter' });
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body.content).toBe('Generated cover letter text');
+            expect(mockFetch).toHaveBeenCalledWith('http://agent:8000/copilot', expect.anything());
+
+            // Restore fetch
+            global.fetch = originalFetch;
+        });
+
+        it('should return 400 for invalid documentType', async () => {
+            const res = await request(app)
+                .post('/api/jobs/1/copilot')
+                .send({ documentType: 'invalid' });
+
+            expect(res.statusCode).toBe(400);
+        });
+    });
 });
+

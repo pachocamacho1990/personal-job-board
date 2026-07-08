@@ -60,6 +60,15 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // AI Copilot State
+  const [isCopilotOpen, setIsCopilotOpen] = useState<boolean>(false);
+  const [docType, setDocType] = useState<'cover_letter' | 'resume_bullets'>('cover_letter');
+  const [isGeneratingDoc, setIsGeneratingDoc] = useState<boolean>(false);
+  const [generatedDocContent, setGeneratedDocContent] = useState<string>('');
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [copyDocSuccess, setCopyDocSuccess] = useState<boolean>(false);
+
+
   // Load Job details if jobId is provided
   useEffect(() => {
     if (isOpen) {
@@ -84,6 +93,8 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
         setCreatedAt('');
         setUpdatedAt('');
         setFiles([]);
+        setGeneratedDocContent('');
+        setDocuments([]);
       }
     }
   }, [jobId, isOpen, initialStatus]);
@@ -107,10 +118,12 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
       setUpdatedAt(job.updated_at || '');
 
       loadAttachedFiles(id);
+      loadJobDocuments(id);
     } catch (error) {
       console.error('Failed to load job details', error);
     }
   };
+
 
   const loadAttachedFiles = async (id: number) => {
     setLoadingFiles(true);
@@ -123,6 +136,74 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
       setLoadingFiles(false);
     }
   };
+
+  const loadJobDocuments = async (id: number) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`/jobboard/api/jobs/${id}/documents`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const list = await response.json();
+        setDocuments(list || []);
+        // Match current docType
+        const found = list.find((d: any) => d.documentType === docType);
+        setGeneratedDocContent(found ? found.content : '');
+      }
+    } catch (error) {
+      console.error('Failed to load job documents', error);
+    }
+  };
+
+  const handleDocTypeChange = (type: 'cover_letter' | 'resume_bullets') => {
+    setDocType(type);
+    const found = documents.find((d: any) => d.documentType === type);
+    setGeneratedDocContent(found ? found.content : '');
+  };
+
+  const handleGenerateCopilotDocument = async () => {
+    if (!jobId) return;
+    setIsGeneratingDoc(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`/jobboard/api/jobs/${jobId}/copilot`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ documentType: docType })
+      });
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to generate');
+      }
+      const newDoc = await response.json();
+      setGeneratedDocContent(newDoc.content);
+      setDocuments((prev) => {
+        const filtered = prev.filter((d) => d.documentType !== docType);
+        return [...filtered, newDoc];
+      });
+    } catch (error: any) {
+      console.error('Copilot generation failed', error);
+      alert('Error al generar: ' + error.message);
+    } finally {
+      setIsGeneratingDoc(false);
+    }
+  };
+
+  const handleCopyDocToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedDocContent);
+      setCopyDocSuccess(true);
+      setTimeout(() => setCopyDocSuccess(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy document content:', err);
+    }
+  };
+
 
   // Esc key closes panel
   useEffect(() => {
@@ -547,7 +628,139 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
               )}
             </div>
 
+            {jobId && !isLocked && type === 'job' && (
+              <div 
+                className={`form-group ai-copilot-accordion ${isCopilotOpen ? 'open' : ''}`}
+                style={{
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  padding: '1rem',
+                  backgroundColor: 'rgba(99, 102, 241, 0.03)',
+                  marginTop: '1.5rem',
+                  marginBottom: '1rem'
+                }}
+              >
+                <div 
+                  className="accordion-header" 
+                  style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    userSelect: 'none'
+                  }}
+                  onClick={() => setIsCopilotOpen(!isCopilotOpen)}
+                  id="copilotAccordionHeader"
+                >
+                  <span style={{ fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    🤖 Copiloto de Postulación IA
+                  </span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    {isCopilotOpen ? '▲ Contraer' : '▼ Expandir'}
+                  </span>
+                </div>
+
+                {isCopilotOpen && (
+                  <div className="accordion-body" style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.25rem', display: 'block' }}>
+                        Tipo de Documento
+                      </label>
+                      <div className="type-selector" style={{ gap: '0.5rem' }}>
+                        <label className="type-option" style={{ flex: 1, padding: '8px 10px', fontSize: '0.85rem' }}>
+                          <input
+                            type="radio"
+                            name="copilotDocType"
+                            value="cover_letter"
+                            checked={docType === 'cover_letter'}
+                            onChange={() => handleDocTypeChange('cover_letter')}
+                          />
+                          <span>✍️ Carta de Presentación</span>
+                        </label>
+                        <label className="type-option" style={{ flex: 1, padding: '8px 10px', fontSize: '0.85rem' }}>
+                          <input
+                            type="radio"
+                            name="copilotDocType"
+                            value="resume_bullets"
+                            checked={docType === 'resume_bullets'}
+                            onChange={() => handleDocTypeChange('resume_bullets')}
+                          />
+                          <span>🎯 CV Optimizado (ATS)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        className="btn-primary"
+                        style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+                        onClick={handleGenerateCopilotDocument}
+                        disabled={isGeneratingDoc}
+                        id="generateCopilotBtn"
+                      >
+                        {isGeneratingDoc ? '🔄 Generando...' : '⚙️ Generar con IA'}
+                      </button>
+
+                      {generatedDocContent && (
+                        <button
+                          type="button"
+                          className={`btn-secondary ${copyDocSuccess ? 'copied' : ''}`}
+                          style={{ 
+                            padding: '8px 16px', 
+                            fontSize: '0.85rem',
+                            backgroundColor: copyDocSuccess ? '#D1FAE5' : '',
+                            color: copyDocSuccess ? '#065F46' : '',
+                            borderColor: copyDocSuccess ? '#A7F3D0' : ''
+                          }}
+                          onClick={handleCopyDocToClipboard}
+                          id="copyCopilotDocBtn"
+                        >
+                          {copyDocSuccess ? '✅ ¡Copiado!' : '📋 Copiar Contenido'}
+                        </button>
+                      )}
+                    </div>
+
+                    {generatedDocContent ? (
+                      <div 
+                        id="copilotDocResult"
+                        style={{
+                          background: 'var(--canvas)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '6px',
+                          padding: '1rem',
+                          fontSize: '0.875rem',
+                          color: 'var(--text-main)',
+                          maxHeight: '200px',
+                          overflowY: 'auto',
+                          fontFamily: 'monospace',
+                          whiteSpace: 'pre-wrap',
+                          lineHeight: '1.4'
+                        }}
+                      >
+                        {generatedDocContent}
+                      </div>
+                    ) : (
+                      <div 
+                        style={{ 
+                          textAlign: 'center', 
+                          padding: '1.5rem', 
+                          border: '1px dashed var(--border)', 
+                          borderRadius: '6px',
+                          fontSize: '0.8rem',
+                          color: 'var(--text-tertiary)'
+                        }}
+                      >
+                        Presiona "Generar con IA" para redactar tu documento adaptado.
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="form-actions">
+
               {jobId && !isLocked && type === 'job' && (
                 <button
                   type="button"
@@ -694,6 +907,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                 Cancel
               </button>
               <button
+                id="confirmDelete"
                 className="btn-danger"
                 onClick={async () => {
                   if (jobId) {

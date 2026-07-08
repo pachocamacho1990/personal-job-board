@@ -10,6 +10,8 @@ from src.config import settings
 from src.db import db_manager
 from src.llm import llm_manager
 from src.tools.workspace_tools import WORKSPACE_TOOLS_SCHEMAS, execute_tool
+from pydantic import BaseModel
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
@@ -55,6 +57,92 @@ def decode_token(token: str) -> Dict[str, Any]:
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "zenith-agent-backend"}
+
+class CopilotRequest(BaseModel):
+    user_id: int
+    job_id: int
+    document_type: str
+
+@app.post("/copilot")
+async def generate_copilot_document(req: CopilotRequest):
+    try:
+        user_id = req.user_id
+        job_id = req.job_id
+        doc_type = req.document_type
+
+        if doc_type not in ["cover_letter", "resume_bullets"]:
+            raise HTTPException(status_code=400, detail="Invalid document type")
+
+        # 1. Fetch job details
+        job = await db_manager.get_job_by_id(user_id, job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+
+        # 2. Fetch profile data, strategy, and active memories
+        profile_data = await db_manager.get_profile_data(user_id)
+        strategy_data = await db_manager.get_career_strategy(user_id)
+        memories = await db_manager.get_user_memories(user_id)
+
+        # 3. Assemble context for LLM
+        dominant_anchor = strategy_data.get("career_strategy", {}).get("dominant_anchor", "No definido")
+        strategy_summary = strategy_data.get("career_strategy", {}).get("strategy_summary", "")
+
+        memories_bullets = "\n".join([f"- {m['content']}" for m in memories if m.get("category") == "preference"])
+
+        system_prompt = (
+            "Eres Zenith Agent, un consultor de carrera y headhunter senior de élite.\n"
+            "Tu objetivo es redactar o adaptar material de postulación profesional para el usuario.\n"
+            "Responde de manera directa, profesional y mantén tu respuesta redactada en español con formato Markdown limpio."
+        )
+
+        user_context = (
+            f"DATOS PROFESIONALES DEL USUARIO:\n"
+            f"- Nombre completo: {profile_data.get('full_name', 'Usuario')}\n"
+            f"- Titular profesional: {profile_data.get('headline', '')}\n"
+            f"- Ancla de carrera dominante (Schein): {dominant_anchor}\n"
+            f"- Estrategia de carrera: {strategy_summary}\n"
+            f"- Preferencias y directrices aprendidas:\n{memories_bullets}\n\n"
+            f"DATOS DE LA VACANTE OBJETIVO:\n"
+            f"- Empresa: {job.get('company')}\n"
+            f"- Cargo / Puesto: {job.get('position')}\n"
+            f"- Ubicación: {job.get('location', 'No especificado')}\n"
+            f"- Salario: {job.get('salary', 'No especificado')}\n"
+            f"- Detalles / Descripción de la vacante:\n{job.get('comments', '')}\n\n"
+        )
+
+        if doc_type == "cover_letter":
+            prompt = (
+                f"{user_context}"
+                "INSTRUCCIÓN:\n"
+                "Redacta una carta de presentación (Cover Letter) adaptada a esta vacante. "
+                "Debe ser persuasiva, concisa (máximo 3 párrafos), redactada en español, que destaque las habilidades "
+                "relevantes del usuario y se alinee con su ancla de carrera dominante. No uses marcadores de posición [como corchetes], "
+                "completa o infiere los datos lógicamente."
+            )
+        else: # resume_bullets
+            prompt = (
+                f"{user_context}"
+                "INSTRUCCIÓN:\n"
+                "Genera entre 3 y 4 viñetas (bullet points) optimizadas para el CV del usuario y adaptadas a esta vacante. "
+                "Cada viñeta debe comenzar con un verbo de acción fuerte en español (ej. Lideré, Implementé, Optimicé), "
+                "destacar el impacto cuantitativo o cualitativo y conectar las habilidades del usuario con los requisitos del puesto."
+            )
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt}
+        ]
+
+        logger.info(f"Generating copilot document {doc_type} for job {job_id} and user {user_id}")
+        generated_text, _ = await llm_manager.get_response(messages, tools=None)
+
+        return {"content": generated_text or ""}
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logger.error(f"Error in /copilot endpoint: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate document")
+
 
 async def auto_title_conversation(conversation_id: int, user_message: str):
     """Generates a brief title based on the user's first query"""
