@@ -22,8 +22,13 @@ echo "Found user ID: $USER_ID"
 echo "Deleting agent conversations..."
 docker exec -t $DB_CONTAINER psql -U $DB_USER -d $DB_NAME -c "DELETE FROM agent_conversations WHERE user_id = $USER_ID;"
 
-# Reset agent profile onboarding status and clear profile data
-echo "Resetting agent profile onboarding status..."
-docker exec -t $DB_CONTAINER psql -U $DB_USER -d $DB_NAME -c "UPDATE agent_profiles SET onboarding_status = 'uninitialized', profile_data = '{}'::jsonb WHERE user_id = $USER_ID;"
+# Reset agent profile onboarding status, clear profile data, career strategy, and search prompt
+echo "Resetting agent profile onboarding status, strategy, and prompt..."
+docker exec -t $DB_CONTAINER psql -U $DB_USER -d $DB_NAME -c "UPDATE agent_profiles SET onboarding_status = 'uninitialized', profile_data = '{}'::jsonb, career_strategy = '{}'::jsonb, search_prompt = NULL WHERE user_id = $USER_ID;"
 
-echo "Successfully reset agent status for $USER_EMAIL!"
+# Delete all learned memories
+echo "Deleting agent memories..."
+docker exec -t $DB_CONTAINER psql -U $DB_USER -d $DB_NAME -c "DELETE FROM agent_memories WHERE user_id = $USER_ID;"
+
+echo "Successfully reset agent status and strategy for $USER_EMAIL!"
+
