@@ -632,7 +632,9 @@ class MockToolCall:
         self.type = "function"
         self.function = MockFunction(name, arguments_str)
 
-def get_mock_interview_response(history: List[Dict[str, Any]]) -> tuple[str | None, list[Any] | None]:
+def get_mock_interview_response(history: List[Dict[str, Any]], profile_data: Dict[str, Any] = None) -> tuple[str | None, list[Any] | None]:
+    if profile_data is None:
+        profile_data = {}
     user_messages = [m for m in history if m["role"] == "user"]
     user_msg_count = len(user_messages)
     logger.info(f"MOCK INTERVIEW RUNNING: user_msg_count={user_msg_count}")
@@ -645,13 +647,103 @@ def get_mock_interview_response(history: List[Dict[str, Any]]) -> tuple[str | No
         content = "Perfecto. Última pregunta: ¿Tienes alguna empresa o industria excluida de tu búsqueda?"
         return content, None
     else:
+        import re
+        # Determine dominant anchor based on headline, summary, and skills
+        headline_lower = profile_data.get("headline", "").lower()
+        summary_lower = profile_data.get("summary", "").lower()
+        skills_list = profile_data.get("skills", [])
+        skills_str = " ".join(skills_list).lower()
+        
+        dominant_anchor = "Técnica/Funcional"
+        if any(w in headline_lower or w in summary_lower for w in ["manager", "director", "lead", "jefe", "gerente", "principal"]):
+            dominant_anchor = "Dirección General"
+        elif any(w in headline_lower or w in summary_lower for w in ["entrepreneur", "founder", "fundador", "startup", "creador"]):
+            dominant_anchor = "Creatividad Emprendedora"
+        elif any(w in headline_lower or w in summary_lower for w in ["freelance", "independent", "consultor independiente", "autónomo"]):
+            dominant_anchor = "Autonomía/Independencia"
+        elif any(w in headline_lower or w in summary_lower for w in ["lifestyle", "balance", "vida", "remoto", "flexibilidad"]):
+            dominant_anchor = "Estilo de vida"
+        elif any(w in headline_lower or w in summary_lower for w in ["security", "stability", "seguridad", "estabilidad"]):
+            dominant_anchor = "Seguridad/Estabilidad"
+        elif any(w in headline_lower or w in summary_lower for w in ["service", "dedication", "causa", "servicio", "impacto"]):
+            dominant_anchor = "Servicio/Dedicación a una causa"
+        elif any(w in headline_lower or w in summary_lower for w in ["challenge", "desafío", "dificultad", "competencia"]):
+            dominant_anchor = "Desafío Puro"
+
+        # Determine target roles
+        headline = profile_data.get("headline")
+        if headline:
+            target_roles = [headline]
+        else:
+            # Check experience roles
+            exp_roles = [e.get("role") for e in profile_data.get("experience", []) if e.get("role")]
+            if exp_roles:
+                target_roles = list(set(exp_roles))[:2]
+            else:
+                target_roles = ["Senior Software Engineer", "Tech Lead"]
+
+        # Determine location / geography priorities
+        location = profile_data.get("location")
+        priorities = [location] if location else ["España", "Remoto Europa"]
+
+        # Parse user's responses for salary and exclusions if possible
+        salary_target = 100000
+        salary_min = 90000
+        salary_currency = "EUR"
+        
+        for msg in user_messages:
+            content_lower = msg.get("content", "").lower()
+            numbers = re.findall(r'\b\d+k?\b', content_lower)
+            if numbers:
+                parsed_nums = []
+                for n in numbers:
+                    val = n.replace('k', '')
+                    try:
+                        parsed_nums.append(int(val) * (1000 if 'k' in n or int(val) < 1000 else 1))
+                    except:
+                        pass
+                if len(parsed_nums) >= 2:
+                    salary_min = min(parsed_nums)
+                    salary_target = max(parsed_nums)
+                elif len(parsed_nums) == 1:
+                    salary_min = int(parsed_nums[0] * 0.9)
+                    salary_target = parsed_nums[0]
+            
+            if '$' in content_lower or 'usd' in content_lower:
+                salary_currency = "USD"
+            elif 'cop' in content_lower or 'pesos' in content_lower:
+                salary_currency = "COP"
+
+        # Exclusions parsing
+        excl_companies = ["Acme Corp"]
+        excl_industries = ["Crypto"]
+        if len(user_messages) >= 4:
+            excl_text = user_messages[3].get("content", "")
+            if not any(w in excl_text.lower() for w in ["no", "ninguna", "nada", "tengo"]):
+                words = [w.strip(".,;:?!") for w in excl_text.split() if len(w) > 4]
+                if words:
+                    excl_companies = [words[0]]
+                    if len(words) > 1:
+                        excl_industries = [words[1]]
+
+        skills_text = f" con habilidades en {', '.join(skills_list[:3])}" if skills_list else ""
+        strategy_summary = f"{target_roles[0]} enfocado en {dominant_anchor}{skills_text}. Prefiere roles alineados con sus metas en {', '.join(priorities)}."
+        
+        roles_text = " o ".join(target_roles)
+        search_prompt = (
+            f"Eres un agente de búsqueda de empleo automatizado que opera dentro de mi navegador usando Claude for Chrome.\n\n"
+            f"Debes buscar vacantes de {roles_text} en {', '.join(priorities)}, alineadas con {dominant_anchor}. "
+            f"Evita {', '.join(excl_companies)} y el sector {', '.join(excl_industries)}. "
+            f"Si el salario estimado supera los {salary_min} {salary_currency}, guarda la vacante en Zenith llamando a POST /api/jobs con boardId: {{board_id}}."
+        )
+
         strategy = {
-            "dominant_anchor": "Lifestyle",
-            "target_roles": ["Senior Software Engineer", "Tech Lead"],
+            "dominant_anchor": dominant_anchor,
+            "target_roles": target_roles,
             "salary_preferences": {
-                "target": 100000,
-                "minimum": 90000,
-                "currency": "EUR"
+                "target": salary_target,
+                "minimum": salary_min,
+                "currency": salary_currency
             },
             "work_mode": {
                 "remote": True,
@@ -659,15 +751,15 @@ def get_mock_interview_response(history: List[Dict[str, Any]]) -> tuple[str | No
                 "on_site": False
             },
             "geography": {
-                "priorities": ["España", "Remoto Europa"],
+                "priorities": priorities,
                 "exclusions": []
             },
             "exclusions": {
-                "industries": ["Crypto"],
-                "companies": ["Acme Corp"]
+                "industries": excl_industries,
+                "companies": excl_companies
             },
-            "strategy_summary": "Ingeniero de Software Senior enfocado en estabilidad laboral y balance de vida. Prefiere roles 100% remotos en Europa y evita el sector Cripto.",
-            "search_prompt": "Eres un agente de búsqueda de empleo automatizado que opera dentro de mi navegador usando Claude for Chrome.\n\nDebes buscar vacantes de Senior Software Engineer o Tech Lead en España o Remoto Europa, evitando Acme Corp y el sector Crypto. Si el salario estimado supera los 90000 EUR, guarda la vacante en Zenith llamando a POST /api/jobs con boardId: {board_id}."
+            "strategy_summary": strategy_summary,
+            "search_prompt": search_prompt
         }
         return None, [MockToolCall("save_career_strategy", json.dumps(strategy))]
 
@@ -703,7 +795,8 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
             # Send payload to LLM
             if settings.test_mode and onboarding_status == "interviewing":
                 logger.info("TEST_MODE active. Intercepting interview flow with mock responses.")
-                content, tool_calls = get_mock_interview_response(history)
+                profile_data = await db_manager.get_profile_data(user_id)
+                content, tool_calls = get_mock_interview_response(history, profile_data)
             else:
                 content, tool_calls = await llm_manager.get_response(messages_payload, tools=WORKSPACE_TOOLS_SCHEMAS)
             
