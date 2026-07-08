@@ -355,3 +355,88 @@ export const getJobById = async (req: AuthenticatedRequest, res: Response, next:
         next(error);
     }
 };
+
+/**
+ * Get job documents
+ * GET /api/jobs/:id/documents
+ */
+export const getJobDocuments = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        // Verify job ownership
+        const checkResult = await pool.query(
+            'SELECT id FROM jobs WHERE id = $1 AND user_id = $2',
+            [id, req.userId]
+        );
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Job not found' });
+        }
+
+        const result = await pool.query(
+            'SELECT id, document_type AS "documentType", content, created_at AS "createdAt" FROM job_documents WHERE job_id = $1',
+            [id]
+        );
+        res.json(result.rows);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Generate job document via AI Copilot
+ * POST /api/jobs/:id/copilot
+ */
+export const generateCopilotDocument = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const { documentType } = req.body;
+
+        if (!documentType || (documentType !== 'cover_letter' && documentType !== 'resume_bullets')) {
+            return res.status(400).json({ error: 'documentType is required and must be cover_letter or resume_bullets' });
+        }
+
+        // Verify job ownership
+        const checkResult = await pool.query(
+            'SELECT id FROM jobs WHERE id = $1 AND user_id = $2',
+            [id, req.userId]
+        );
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Job not found' });
+        }
+
+        // Call Python Agent http://agent:8000/copilot
+        const agentResponse = await fetch('http://agent:8000/copilot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: req.userId,
+                job_id: parseInt(id as string, 10),
+
+                document_type: documentType
+            })
+        });
+
+        if (!agentResponse.ok) {
+            const errBody = await agentResponse.text();
+            throw new Error(`Agent service responded with ${agentResponse.status}: ${errBody}`);
+        }
+
+        const data = await agentResponse.json();
+        const content = data.content || '';
+
+        // Save generated document to job_documents (upsert)
+        const docResult = await pool.query(
+            `INSERT INTO job_documents (job_id, document_type, content, updated_at)
+             VALUES ($1, $2, $3, NOW())
+             ON CONFLICT (job_id, document_type) 
+             DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()
+             RETURNING id, document_type AS "documentType", content, created_at AS "createdAt"`,
+            [id, documentType, content]
+        );
+
+        res.json(docResult.rows[0]);
+    } catch (error) {
+        next(error);
+    }
+};
+

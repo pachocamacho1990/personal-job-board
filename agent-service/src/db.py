@@ -280,4 +280,15 @@ class DatabaseManager:
         async with self.pool.acquire() as conn:
             await conn.execute("DELETE FROM agent_skills WHERE id = $1 AND user_id = $2", skill_id, user_id)
 
+    async def get_job_by_id(self, user_id: int, job_id: int) -> Optional[Dict[str, Any]]:
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT id, company, position, comments, location, salary FROM jobs WHERE id = $1 AND user_id = $2",
+                job_id, user_id
+            )
+            if row:
+                return dict(row)
+            return None
+
+
 db_manager = DatabaseManager()

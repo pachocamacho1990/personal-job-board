@@ -100,3 +100,51 @@ export const saveProfile = async (req: AuthenticatedRequest, res: Response) => {
         res.status(500).json({ error: 'Failed to save profile' });
     }
 };
+
+/**
+ * GET /api/profile/memories
+ * Returns all learned memories/directives for the logged-in user.
+ */
+export const getUserMemories = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId = req.userId;
+        const result = await pool.query(
+            'SELECT id, category, content, created_at FROM agent_memories WHERE user_id = $1 ORDER BY created_at ASC',
+            [userId]
+        );
+        res.json(result.rows);
+    } catch (error: any) {
+        console.error('Error fetching user memories:', error);
+        res.status(500).json({ error: 'Failed to fetch user memories' });
+    }
+};
+
+/**
+ * DELETE /api/profile/memories/:id
+ * Deletes a specific memory/directive belonging to the logged-in user.
+ */
+export const deleteUserMemory = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId = req.userId;
+        const memoryId = parseInt(req.params.id as string, 10);
+
+        if (isNaN(memoryId)) {
+            return res.status(400).json({ error: 'Invalid memory ID' });
+        }
+
+        const result = await pool.query(
+            'DELETE FROM agent_memories WHERE id = $1 AND user_id = $2 RETURNING id',
+            [memoryId, userId]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Memory not found or unauthorized' });
+        }
+
+        res.json({ message: 'Memory deleted successfully', id: memoryId });
+    } catch (error: any) {
+        console.error('Error deleting user memory:', error);
+        res.status(500).json({ error: 'Failed to delete user memory' });
+    }
+};
+
