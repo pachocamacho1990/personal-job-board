@@ -131,6 +131,9 @@ export const AgentConsole: React.FC = () => {
           else if (data.event === 'onboarding_status_update') {
             logger.info("ONBOARDING STATUS UPDATE WS EVENT:", data.status);
             setOnboardingStatus(data.status);
+            if (data.status === 'ready') {
+              window.dispatchEvent(new CustomEvent('workspace-updated'));
+            }
           }
         } catch (err) {
           logger.error("Failed to parse WebSocket message:", err);
@@ -310,89 +313,7 @@ export const AgentConsole: React.FC = () => {
     }
   };
 
-  const renderStrategyPanel = () => {
-    if (!searchPrompt) return null;
-    
-    const activePrompt = searchPrompt.replace('{board_id}', String(selectedBoardId || ''));
 
-    const handleCopy = () => {
-      navigator.clipboard.writeText(activePrompt)
-        .then(() => {
-          setCopySuccess(true);
-          setTimeout(() => setCopySuccess(false), 2000);
-        })
-        .catch(err => console.error('Failed to copy prompt:', err));
-    };
-
-    return (
-      <div className="agent-ready-panel" id="agent-active-search-panel">
-        <div 
-          className="agent-ready-header"
-          onClick={() => setShowStrategyPanel(prev => !prev)}
-        >
-          <span>🔍 Búsqueda Activa (Claude for Chrome)</span>
-          <span>{showStrategyPanel ? '▲' : '▼'}</span>
-        </div>
-
-        {showStrategyPanel && (
-          <div className="agent-ready-body">
-            {careerStrategy && (
-              <>
-                <div className="agent-strategy-summary">
-                  {careerStrategy.strategy_summary}
-                </div>
-                <div className="agent-strategy-meta">
-                  {careerStrategy.dominant_anchor && (
-                    <span className="agent-meta-badge">
-                      ⚓ {careerStrategy.dominant_anchor}
-                    </span>
-                  )}
-                  {careerStrategy.target_roles?.map((r: string, idx: number) => (
-                    <span key={idx} className="agent-meta-badge">
-                      💼 {r}
-                    </span>
-                  ))}
-                </div>
-              </>
-            )}
-
-            <div className="agent-board-select-container">
-              <label className="agent-board-select-label" htmlFor="strategy-board-select">
-                Tablero de destino:
-              </label>
-              <select
-                id="strategy-board-select"
-                className="agent-board-select"
-                value={selectedBoardId}
-                onChange={(e) => setSelectedBoardId(Number(e.target.value))}
-              >
-                {boards.map(b => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <textarea
-              className="agent-prompt-box"
-              id="agent-search-prompt-text"
-              readOnly
-              value={activePrompt}
-            />
-
-            <button
-              className={`agent-copy-btn ${copySuccess ? 'success' : ''}`}
-              id="agent-copy-prompt-btn"
-              onClick={handleCopy}
-            >
-              {copySuccess ? '✓ ¡Prompt Copiado!' : '📋 Copiar Prompt de Búsqueda'}
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   const isOnline = connectionStatus === 'connected';
 
@@ -497,8 +418,7 @@ export const AgentConsole: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Strategy Panel (only if ready) */}
-            {onboardingStatus === 'ready' && renderStrategyPanel()}
+
 
             {/* Chat Messages */}
             <AgentChat

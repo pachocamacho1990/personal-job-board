@@ -835,7 +835,7 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
                             conversation_id=conversation_id,
                             role="agent",
                             type_name="chat",
-                            content="¡Excelente! He analizado tu perfil y he estructurado tu estrategia de carrera. He activado la búsqueda y generado el prompt de búsqueda detallado para tu extensión Claude for Chrome. Puedes copiarlo en el panel superior."
+                            content="¡Excelente! He analizado tu perfil y he estructurado tu estrategia de carrera. He activado la búsqueda y generado el prompt de búsqueda detallado para tu extensión Claude for Chrome. Haz clic en la pestaña **Búsqueda Activa (Claude)** en tu dashboard principal para copiar o editar tu prompt."
                         )
                         async with db_manager.pool.acquire() as conn:
                             await conn.execute("DELETE FROM agent_messages WHERE id = $1", current_thinking_id)

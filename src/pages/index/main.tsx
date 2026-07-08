@@ -41,7 +41,7 @@ interface Memory {
 }
 
 export const DashboardPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'activity' | 'strategy'>('activity');
+  const [activeTab, setActiveTab] = useState<'activity' | 'strategy' | 'search'>('activity');
   const [summary, setSummary] = useState<DashboardSummary>({ interviews: [], newMatches: [] });
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
@@ -51,6 +51,14 @@ export const DashboardPage: React.FC = () => {
   const [strategy, setStrategy] = useState<CareerStrategy>({});
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loadingStrategy, setLoadingStrategy] = useState<boolean>(false);
+
+  // Active Search config states
+  const [boards, setBoards] = useState<any[]>([]);
+  const [selectedBoardId, setSelectedBoardId] = useState<number | ''>('');
+  const [searchPrompt, setSearchPrompt] = useState<string>('');
+  const [editedPrompt, setEditedPrompt] = useState<string>('');
+  const [saveSuccess, setSaveSuccess] = useState<string>('');
+  const [copySuccess, setCopySuccess] = useState<boolean>(false);
 
   useEffect(() => {
     // Check authentication
@@ -73,23 +81,22 @@ export const DashboardPage: React.FC = () => {
     }
 
     loadDashboard();
+    loadStrategyData();
   }, []);
 
   useEffect(() => {
     const handleWorkspaceUpdate = () => {
       loadDashboard();
-      if (activeTab === 'strategy') {
-        loadStrategyData();
-      }
+      loadStrategyData();
     };
     window.addEventListener('workspace-updated', handleWorkspaceUpdate);
     return () => {
       window.removeEventListener('workspace-updated', handleWorkspaceUpdate);
     };
-  }, [activeTab]);
+  }, []);
 
   useEffect(() => {
-    if (activeTab === 'strategy') {
+    if (activeTab === 'strategy' || activeTab === 'search') {
       loadStrategyData();
     }
   }, [activeTab]);
@@ -119,14 +126,52 @@ export const DashboardPage: React.FC = () => {
     try {
       const profileData = await apiRequest<any>('/profile');
       setStrategy(profileData.career_strategy || {});
+      setSearchPrompt(profileData.search_prompt || '');
+      // Only set editedPrompt if it was empty, to prevent overwriting user edits in progress
+      setEditedPrompt(prev => prev || profileData.search_prompt || '');
 
       const memoriesData = await apiRequest<Memory[]>('/profile/memories');
       setMemories(memoriesData || []);
+
+      const boardsData = await apiRequest<any[]>('/boards');
+      setBoards(boardsData || []);
+      if (boardsData && boardsData.length > 0 && !selectedBoardId) {
+        setSelectedBoardId(boardsData[0].id);
+      }
     } catch (err) {
       console.error('Failed to load strategy or memories data', err);
     } finally {
       setLoadingStrategy(false);
     }
+  };
+
+  const handleSavePrompt = async () => {
+    try {
+      setSaveSuccess('');
+      await api.profile.updateSearchPrompt(editedPrompt);
+      setSearchPrompt(editedPrompt);
+      setSaveSuccess('¡Prompt de búsqueda guardado correctamente!');
+      setTimeout(() => setSaveSuccess(''), 3000);
+      
+      // Notify other components (like Agent Console) to refresh
+      window.dispatchEvent(new CustomEvent('workspace-updated'));
+    } catch (err: any) {
+      console.error('Failed to save search prompt', err);
+      alert('Error al guardar el prompt de búsqueda: ' + (err.message || err));
+    }
+  };
+
+  const handleCopyPrompt = () => {
+    const finalPrompt = editedPrompt.replace('{board_id}', String(selectedBoardId || ''));
+    navigator.clipboard.writeText(finalPrompt)
+      .then(() => {
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy prompt:', err);
+        alert('No se pudo copiar el prompt.');
+      });
   };
 
   const handleDeleteMemory = async (id: number) => {
@@ -190,9 +235,18 @@ export const DashboardPage: React.FC = () => {
           >
             🎯 Mi Estrategia Profesional
           </button>
+          {(strategy.dominant_anchor || searchPrompt) && (
+            <button 
+              className={`dashboard-tab-btn ${activeTab === 'search' ? 'active' : ''}`}
+              onClick={() => setActiveTab('search')}
+              id="searchPromptTabBtn"
+            >
+              ⚙️ Búsqueda Activa (Claude)
+            </button>
+          )}
         </div>
 
-        {activeTab === 'activity' ? (
+        {activeTab === 'activity' && (
           <div className="dashboard-grid">
             {/* Upcoming Interviews */}
             <div className="dashboard-card">
@@ -264,7 +318,9 @@ export const DashboardPage: React.FC = () => {
               </div>
             </div>
           </div>
-        ) : (
+        )}
+
+        {activeTab === 'strategy' && (
           <div className="strategy-container">
             {loadingStrategy ? (
               <div className="loading-spinner">Cargando estrategia de carrera...</div>
@@ -384,6 +440,122 @@ export const DashboardPage: React.FC = () => {
                       )}
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'search' && (
+          <div className="strategy-container">
+            {loadingStrategy ? (
+              <div className="loading-spinner">Cargando configuración de búsqueda...</div>
+            ) : (
+              <div className="dashboard-card" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+                <h3 className="strategy-section-title">⚙️ Prompt de Búsqueda Activa (Claude for Chrome)</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                  Este prompt es generado automáticamente por tu Zenith Agent según tu perfil y anclas de carrera. 
+                  Puedes editarlo aquí, guardar los cambios y copiarlo para pegarlo en Claude for Chrome.
+                </p>
+
+                <div className="strategy-field" style={{ marginBottom: '1.5rem' }}>
+                  <label className="strategy-field-label" htmlFor="dashboard-board-select" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+                    Tablero de destino para las vacantes encontradas:
+                  </label>
+                  <select
+                    id="dashboard-board-select"
+                    className="agent-board-select"
+                    style={{ 
+                      width: '100%', 
+                      padding: '0.75rem', 
+                      borderRadius: 'var(--border-radius-sm)', 
+                      backgroundColor: 'var(--bg-card-hover)', 
+                      color: 'var(--text-primary)', 
+                      border: '1px solid var(--border-color)',
+                      fontSize: '0.9rem'
+                    }}
+                    value={selectedBoardId}
+                    onChange={(e) => setSelectedBoardId(Number(e.target.value))}
+                  >
+                    {boards.map(b => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="strategy-field" style={{ marginBottom: '1.5rem' }}>
+                  <label className="strategy-field-label" htmlFor="dashboard-prompt-editor" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+                    Prompt de Búsqueda Personalizado:
+                  </label>
+                  <textarea
+                    id="dashboard-prompt-editor"
+                    className="agent-prompt-box"
+                    style={{ 
+                      width: '100%', 
+                      height: '220px', 
+                      padding: '1rem', 
+                      fontFamily: 'monospace', 
+                      fontSize: '0.85rem', 
+                      lineHeight: '1.4', 
+                      borderRadius: 'var(--border-radius-sm)', 
+                      backgroundColor: 'var(--bg-card-hover)', 
+                      color: 'var(--text-primary)', 
+                      border: '1px solid var(--border-color)',
+                      resize: 'vertical'
+                    }}
+                    value={editedPrompt}
+                    onChange={(e) => setEditedPrompt(e.target.value)}
+                  />
+                </div>
+
+                {saveSuccess && (
+                  <div className="success-message" style={{ color: 'var(--color-success)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                    ✅ {saveSuccess}
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    className="dashboard-tab-btn active"
+                    style={{ 
+                      flex: 1, 
+                      padding: '0.75rem 1.5rem', 
+                      backgroundColor: 'var(--color-primary)', 
+                      color: '#ffffff', 
+                      borderRadius: 'var(--border-radius-sm)', 
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      border: 'none',
+                      textAlign: 'center'
+                    }}
+                    id="dashboard-copy-prompt-btn"
+                    onClick={handleCopyPrompt}
+                  >
+                    {copySuccess ? '✓ ¡Prompt Copiado!' : '📋 Copiar Prompt para Claude'}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="dashboard-tab-btn"
+                    style={{ 
+                      flex: 1, 
+                      padding: '0.75rem 1.5rem', 
+                      borderRadius: 'var(--border-radius-sm)', 
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      border: '1px solid var(--border-color)',
+                      backgroundColor: 'transparent',
+                      color: 'var(--text-primary)',
+                      textAlign: 'center'
+                    }}
+                    id="dashboard-save-prompt-btn"
+                    onClick={handleSavePrompt}
+                  >
+                    💾 Guardar Cambios
+                  </button>
                 </div>
               </div>
             )}
