@@ -24,7 +24,7 @@ export const getAllJobs = async (req: AuthenticatedRequest, res: Response, next:
         }
 
         const result = await pool.query(
-            `SELECT id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary,
+            `SELECT id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary, url,
                     contact_name AS "contactName", organization, comments, 
                     created_at AS "created_at", updated_at AS "updated_at"
              FROM jobs 
@@ -54,6 +54,7 @@ export const createJob = async (req: AuthenticatedRequest, res: Response, next: 
             position,
             location,
             salary,
+            url,
             contact_name,
             organization,
             comments,
@@ -94,14 +95,14 @@ export const createJob = async (req: AuthenticatedRequest, res: Response, next: 
 
         const result = await pool.query(
             `INSERT INTO jobs 
-             (user_id, board_id, type, rating, status, origin, is_unseen, company, position, location, salary, 
+             (user_id, board_id, type, rating, status, origin, is_unseen, company, position, location, salary, url,
               contact_name, organization, comments, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
-                     COALESCE($15::timestamptz, NOW()), COALESCE($16::timestamptz, NOW()))
-             RETURNING id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary,
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
+                     COALESCE($16::timestamptz, NOW()), COALESCE($17::timestamptz, NOW()))
+             RETURNING id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary, url,
                        contact_name AS "contactName", organization, comments,
                        created_at AS "created_at", updated_at AS "updated_at"`,
-            [req.userId, targetBoardId, type, rating, status, origin, is_unseen, company, position, location, salary,
+            [req.userId, targetBoardId, type, rating, status, origin, is_unseen, company, position, location, salary, url,
                 contact_name, organization, comments, created_at || null, updated_at || null]
         );
 
@@ -128,6 +129,7 @@ export const updateJob = async (req: AuthenticatedRequest, res: Response, next: 
             position,
             location,
             salary,
+            url,
             contact_name,
             organization,
             comments,
@@ -173,15 +175,16 @@ export const updateJob = async (req: AuthenticatedRequest, res: Response, next: 
                  position = COALESCE($7, position),
                  location = COALESCE($8, location),
                  salary = COALESCE($9, salary),
-                 contact_name = COALESCE($10, contact_name),
-                 organization = COALESCE($11, organization),
-                 comments = COALESCE($12, comments),
-                 board_id = COALESCE($13, board_id)
-             WHERE id = $14 AND user_id = $15
-             RETURNING id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary,
+                 url = COALESCE($10, url),
+                 contact_name = COALESCE($11, contact_name),
+                 organization = COALESCE($12, organization),
+                 comments = COALESCE($13, comments),
+                 board_id = COALESCE($14, board_id)
+             WHERE id = $15 AND user_id = $16
+             RETURNING id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary, url,
                        contact_name AS "contactName", organization, comments,
                        created_at AS "created_at", updated_at AS "updated_at"`,
-            [type, rating, status, origin, resolvedIsUnseen, company, position, location, salary,
+            [type, rating, status, origin, resolvedIsUnseen, company, position, location, salary, url,
                 contact_name, organization, comments, boardId || null, id, req.userId]
         );
 
@@ -338,7 +341,7 @@ export const getJobById = async (req: AuthenticatedRequest, res: Response, next:
         const { id } = req.params;
 
         const result = await pool.query(
-            `SELECT id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary,
+            `SELECT id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary, url,
                     contact_name AS "contactName", organization, comments,
                     created_at AS "created_at", updated_at AS "updated_at"
              FROM jobs 

@@ -94,6 +94,10 @@ WORKSPACE_TOOLS_SCHEMAS = [
                     "location": {
                         "type": "string",
                         "description": "Ubicación (ej: 'Remote', 'New York, NY')"
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "URL del anuncio o publicación de la vacante (ej: 'https://linkedin.com/jobs/...')"
                     }
                 },
                 "required": ["board_id", "company", "position", "status"]
@@ -335,7 +339,8 @@ async def list_jobs(
                         "company": j.get("company"),
                         "position": j.get("position"),
                         "status": j.get("status"),
-                        "salary": j.get("salary")
+                        "salary": j.get("salary"),
+                        "url": j.get("url")
                     })
                 return {"success": True, "jobs": simplified_jobs, "count": len(simplified_jobs)}
             return {"success": False, "error": f"API returned status {resp.status_code}", "detail": resp.text}
@@ -350,7 +355,8 @@ async def create_job_card(
     position: str,
     status: str,
     salary: Optional[str] = None,
-    location: Optional[str] = None
+    location: Optional[str] = None,
+    job_url: Optional[str] = None
 ) -> Dict[str, Any]:
     """Create a new job card on a specific board via Express POST endpoint"""
     url = f"{settings.express_api_url}/jobs"
@@ -366,6 +372,8 @@ async def create_job_card(
         payload["salary"] = salary
     if location:
         payload["location"] = location
+    if job_url:
+        payload["url"] = job_url
 
     async with httpx.AsyncClient() as client:
         try:
@@ -445,7 +453,8 @@ async def execute_tool(name: str, arguments: Dict[str, Any], user_token: str, us
             status = arguments.get("status")
             salary = arguments.get("salary")
             location = arguments.get("location")
-            return await create_job_card(user_token, board_id, company, position, status, salary, location)
+            job_url = arguments.get("url")
+            return await create_job_card(user_token, board_id, company, position, status, salary, location, job_url)
             
         elif name == "update_job_status":
             job_id = int(arguments.get("job_id"))

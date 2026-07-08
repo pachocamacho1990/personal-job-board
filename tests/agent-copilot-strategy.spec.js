@@ -144,6 +144,7 @@ test('Agent Copilot & Strategy Dashboard E2E', async ({ page }) => {
   await page.fill('#position', 'Staff Agentic Engineer');
   await page.fill('#location', 'Mountain View, CA');
   await page.fill('#salary', '$250,000');
+  await page.fill('#jobUrl', 'https://google.com/careers/agentic-engineer');
   
   // Fill description comments
   const commentsArea = page.locator('#comments');
@@ -154,6 +155,7 @@ test('Agent Copilot & Strategy Dashboard E2E', async ({ page }) => {
   // Open the newly created Google job card
   const newCard = page.locator('.job-card', { hasText: 'Google' });
   await expect(newCard).toBeVisible({ timeout: 8000 });
+  await expect(newCard.locator('text=Ver publicación')).toBeVisible();
   await newCard.click();
 
   // Click "Edit Details" button inside CenterPeek to open DetailPanel sidebar

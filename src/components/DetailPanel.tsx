@@ -34,6 +34,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
   const [position, setPosition] = useState<string>('');
   const [location, setLocation] = useState<string>('');
   const [salary, setSalary] = useState<string>('');
+  const [url, setUrl] = useState<string>('');
   const [rating, setRating] = useState<number>(3);
   const [status, setStatus] = useState<string>('interested');
   const [comments, setComments] = useState<string>('');
@@ -84,6 +85,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
         setPosition('');
         setLocation('');
         setSalary('');
+        setUrl('');
         setRating(3);
         setStatus(initialStatus || 'interested');
         setComments('');
@@ -108,6 +110,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
       setPosition(job.position || '');
       setLocation(job.location || '');
       setSalary(job.salary || '');
+      setUrl(job.url || '');
       setRating(job.rating || 3);
       setStatus(job.status || 'interested');
       setComments(job.comments || '');
@@ -227,6 +230,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
       position,
       location,
       salary,
+      url: url || null,
       rating,
       status,
       comments,
@@ -456,6 +460,33 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                 onChange={(e) => setSalary(e.target.value)}
                 disabled={isLocked}
               />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="jobUrl">Job Posting URL</label>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <input
+                  type="url"
+                  id="jobUrl"
+                  placeholder="https://..."
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  disabled={isLocked}
+                  style={{ flex: 1 }}
+                />
+                {url && (
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-secondary btn-sm"
+                    style={{ whiteSpace: 'nowrap', textDecoration: 'none', padding: '6px 10px' }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    🔗 Open
+                  </a>
+                )}
+              </div>
             </div>
 
             <div className="form-group">

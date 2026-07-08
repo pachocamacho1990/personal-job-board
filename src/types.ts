@@ -27,6 +27,7 @@ export interface Job {
   position: string;
   location: string;
   salary: string;
+  url: string | null;
   contact_name: string | null;
   organization: string | null;
   comments: string | null;
