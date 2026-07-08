@@ -529,6 +529,19 @@ export const JobsPage: React.FC = () => {
                               <p className="company">{subtitle}</p>
                               {job.location && <p>{job.location}</p>}
                               {job.salary && <p>{job.salary}</p>}
+                              {job.url && (
+                                <p>
+                                  <a
+                                    href={job.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ color: 'var(--primary)', fontSize: '0.8rem', textDecoration: 'none' }}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    🔗 Ver publicación
+                                  </a>
+                                </p>
+                              )}
                               {relativeTime && <p className="timestamp">Updated {relativeTime}</p>}
                             </>
                           )}

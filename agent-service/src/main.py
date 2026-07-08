@@ -734,7 +734,8 @@ def get_mock_interview_response(history: List[Dict[str, Any]], profile_data: Dic
             f"Eres un agente de búsqueda de empleo automatizado que opera dentro de mi navegador usando Claude for Chrome.\n\n"
             f"Debes buscar vacantes de {roles_text} en {', '.join(priorities)}, alineadas con {dominant_anchor}. "
             f"Evita {', '.join(excl_companies)} y el sector {', '.join(excl_industries)}. "
-            f"Si el salario estimado supera los {salary_min} {salary_currency}, guarda la vacante en Zenith llamando a POST /api/jobs con boardId: {{board_id}}."
+            f"Si el salario estimado supera los {salary_min} {salary_currency}, guarda la vacante en Zenith llamando a POST /api/jobs con boardId: {{board_id}}. "
+            f"IMPORTANTE: Siempre incluye el campo 'url' con el enlace directo al anuncio de la vacante para que el candidato pueda postularse."
         )
 
         strategy = {

@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS jobs (
     position VARCHAR(255),
     location VARCHAR(255),
     salary VARCHAR(100),
+    url TEXT,
     
     -- Connection-specific fields
     contact_name VARCHAR(255),
