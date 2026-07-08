@@ -98,32 +98,41 @@ test('Agent Onboarding and Profile Form E2E', async ({ page }) => {
   await chatInput.fill('Excluir Acme Corp');
   await sendBtn.click();
 
-  // 12. Verify Strategy Panel is generated and visible
-  const strategyPanel = page.locator('#agent-active-search-panel');
-  await expect(strategyPanel).toBeVisible({ timeout: 15000 });
+  // 12. Verify Strategy Panel/Dashboard Tab is generated and visible
+  await panel.locator('.agent-close-btn').click(); // Close agent panel to avoid overlay
 
-  // Verify elements inside the strategy panel
-  const summaryBox = strategyPanel.locator('.agent-strategy-summary');
-  await expect(summaryBox).toContainText('Ingeniero de Software Senior');
+  const searchTabBtn = page.locator('#searchPromptTabBtn');
+  await expect(searchTabBtn).toBeVisible({ timeout: 15000 });
+  await searchTabBtn.click();
 
-  const anchorBadge = strategyPanel.locator('.agent-meta-badge', { hasText: 'Lifestyle' });
-  await expect(anchorBadge).toBeVisible();
-
-  const promptText = await page.locator('#agent-search-prompt-text').inputValue();
-  expect(promptText).toContain('Claude for Chrome');
-
-  // Verify copy button
-  const copyBtn = page.locator('#agent-copy-prompt-btn');
-  await expect(copyBtn).toBeVisible();
-  await copyBtn.click();
-  await expect(copyBtn).toContainText('¡Prompt Copiado!');
-
-  // 13. Get active board ID and simulate Claude for Chrome saving a job
-  const selectElement = page.locator('#strategy-board-select');
+  // Verify elements inside the search prompt tab
+  const selectElement = page.locator('#dashboard-board-select');
   await expect(selectElement).toBeVisible();
   const boardIdStr = await selectElement.inputValue();
   const boardId = Number(boardIdStr);
   expect(boardId).toBeGreaterThan(0);
+
+  const promptEditor = page.locator('#dashboard-prompt-editor');
+  await expect(promptEditor).toBeVisible();
+  const promptText = await promptEditor.inputValue();
+  expect(promptText).toContain('Claude for Chrome');
+
+  // Verify copy button
+  const copyBtn = page.locator('#dashboard-copy-prompt-btn');
+  await expect(copyBtn).toBeVisible();
+  await copyBtn.click();
+  await expect(copyBtn).toContainText('¡Prompt Copiado!');
+
+  // Navigate to Strategy Tab to verify strategy summaries
+  const strategyTabBtn = page.locator('#strategyTabBtn');
+  await expect(strategyTabBtn).toBeVisible();
+  await strategyTabBtn.click();
+
+  const summaryBox = page.locator('#strategySummaryVal');
+  await expect(summaryBox).toContainText('Senior Software Architect');
+
+  const anchorBadge = page.locator('text=Competencia Técnico-Funcional');
+  await expect(anchorBadge).toBeVisible();
 
   // Call the POST /api/jobs endpoint as if we are the extension
   await page.evaluate(async (bid) => {
