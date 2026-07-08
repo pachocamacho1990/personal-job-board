@@ -1,24 +1,24 @@
-# Zenith AI Agent — Arquitectura Agentic v2
+# Zenith AI Agent — Arquitectura Agentic v3
 
 ## 🎯 Visión Revisada
 
-El Zenith Agent no es un chatbot con formularios. Es un **sistema agentic de 3 loops** que construye inteligencia progresivamente:
+El Zenith Agent es un **sistema agentic de 3 loops** interactivo y descentralizado que construye inteligencia progresivamente:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    ZENITH AGENT LIFECYCLE                        │
 │                                                                  │
-│   Loop 1: LinkedIn Investigator    (Background, autónomo)        │
-│           ↓ output: raw_profile                                  │
-│   Loop 2: Interview Conductor      (Conversacional, con user)    │
-│           ↓ output: enriched_profile + career_strategy           │
-│   Loop 3: Job Search Orchestrator  (Background + notificaciones) │
+│   Loop 1: Formulario de Perfil     (Web Onboarding, React Form)  │
+│           ↓ output: profile_data                                 │
+│   Loop 2: Entrevistador Dinámico   (Conversacional, con user)    │
+│           ↓ output: career_strategy + search_prompt              │
+│   Loop 3: Búsqueda Activa          (Descentralizado, Claude)     │
 │           ↓ output: matched jobs → Kanban board                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 > [!IMPORTANT]
-> **Cambio fundamental vs. v1**: El System Prompt/perfil profesional NO se llena con un formulario. Se **construye dinámicamente** a través de un proceso de onboarding agentic en 2 fases (investigación LinkedIn + entrevista profesional). Esto produce un perfil mucho más rico y preciso que cualquier formulario.
+> **Enfoque de Búsqueda y Onboarding**: El System Prompt y el perfil profesional se inicializan mediante un formulario React moderno, se enriquecen conversacionalmente a través de un diálogo basado en Schein y Korn Ferry (STAR/OARS), y la búsqueda de empleo se delega de forma descentralizada a la extensión local Claude for Chrome mediante el copiado de prompts dinámicos.
 
 ---
 
@@ -30,30 +30,23 @@ stateDiagram-v2
     Login --> Dashboard
     
     Dashboard --> AgentDetectsNoProfile: Agent detecta sin perfil
-    AgentDetectsNoProfile --> ProactiveMessage: "¿Quieres que investigue tu perfil de LinkedIn?"
+    AgentDetectsNoProfile --> ProactiveMessage: "📋 Completar mi perfil profesional"
     
-    ProactiveMessage --> UserDeclines: "No por ahora"
-    ProactiveMessage --> UserAccepts: "Sí, investiga"
-    UserDeclines --> Dashboard: Puede seguir usando la app
+    ProactiveMessage --> ProfileForm: Abre profile.html
+    ProfileForm --> SubmitProfile: Usuario llena y envía perfil profesional
+    SubmitProfile --> InterviewPrompt: Redirección al Dashboard y saludo del agente
     
-    UserAccepts --> LinkedInInvestigation: Loop 1 inicia en background
-    LinkedInInvestigation --> UserNavigates: User navega normalmente
-    UserNavigates --> ProgressIndicator: Ve progreso async del agente
-    ProgressIndicator --> InvestigationComplete: Notificación al user
-    
-    InvestigationComplete --> NextLogin: Próximo login o próxima conversación
-    NextLogin --> InterviewPrompt: Agent dice "¿Listo para la entrevista?"
-    
-    InterviewPrompt --> InterviewLoop: Loop 2 inicia
-    InterviewLoop --> DynamicQuestions: Preguntas adaptativas
-    DynamicQuestions --> UserResponds: User responde en chat
-    UserResponds --> AgentAnalyzes: Agent analiza y decide siguiente pregunta
+    InterviewPrompt --> InterviewLoop: Loop 2 inicia ("Sí, empecemos")
+    InterviewLoop --> DynamicQuestions: Preguntas adaptativas (STAR/OARS)
+    DynamicQuestions --> UserResponds: User responde en consola
+    UserResponds --> AgentAnalyzes: Agent analiza y decide si requiere más info
     AgentAnalyzes --> DynamicQuestions: Más preguntas necesarias
-    AgentAnalyzes --> InterviewComplete: Perfil suficiente
+    AgentAnalyzes --> SaveStrategyTool: Ejecución de save_career_strategy
     
-    InterviewComplete --> ProfileReady: Perfil profesional completo
-    ProfileReady --> SearchOrchestrator: Loop 3 disponible
-    SearchOrchestrator --> JobMatches: Resultados en el Kanban
+    SaveStrategyTool --> ProfileReady: Estado cambia a 'ready'
+    ProfileReady --> ActiveSearchWidget: Widget de Búsqueda Activa visible
+    ActiveSearchWidget --> CopyPrompt: Usuario copia prompt para Claude for Chrome
+    CopyPrompt --> ClaudeImport: Claude for Chrome guarda vacantes al Kanban
 ```
 
 ### Estados del Agente (State Machine)
@@ -61,18 +54,14 @@ stateDiagram-v2
 ```mermaid
 stateDiagram-v2
     direction LR
-    UNINITIALIZED --> LINKEDIN_PENDING: User hace login sin perfil
-    LINKEDIN_PENDING --> LINKEDIN_INVESTIGATING: User acepta investigación
-    LINKEDIN_INVESTIGATING --> INTERVIEW_PENDING: Investigación completa
-    INTERVIEW_PENDING --> INTERVIEWING: User inicia entrevista
-    INTERVIEWING --> READY: Entrevista completa
-    READY --> SEARCHING: User inicia búsqueda
-    SEARCHING --> READY: Búsqueda completa
+    UNINITIALIZED --> INTERVIEW_PENDING: Usuario guarda formulario en profile.html
+    INTERVIEW_PENDING --> INTERVIEWING: Usuario inicia entrevista en consola
+    INTERVIEWING --> READY: Entrevista completa y estrategia guardada en DB
     
-    note right of LINKEDIN_INVESTIGATING: Background process. User puede navegar.
     note right of INTERVIEWING: Conversacional. User responde en dashboard.
-    note right of SEARCHING: Background + notificaciones async.
+    note right of READY: Widget activo. Búsqueda descentralizada vía Claude for Chrome.
 ```
+
 
 ---
 
@@ -98,41 +87,33 @@ graph TB
     subgraph "Agent Core - Python FastAPI"
         SM["State Machine Manager"]
         
-        subgraph "Loop 1: LinkedIn Investigator"
-            L1["Orchestrator"]
-            BT["Browser Tool (Playwright)"]
-            PE1["Profile Extractor"]
-            SK["Skills Analyzer"]
+        subgraph "Loop 1: Formulario de Perfil"
+            L1["React UI Form"]
+            PE1["Profile Schema Saver"]
         end
         
-        subgraph "Loop 2: Interview Conductor"
+        subgraph "Loop 2: Entrevistador Dinámico"
             L2["Interview Orchestrator"]
             QG["Question Generator (LLM)"]
             RA["Response Analyzer (LLM)"]
-            CS["Career Suggester (LLM)"]
+            CS["save_career_strategy Tool"]
         end
         
-        subgraph "Loop 3: Job Search Orchestrator"
-            L3["Search Orchestrator"]
-            SA["Search Aggregator"]
-            JA["Job Analyzer"]
-            RM["Resume Matcher"]
-            WT["Workspace Tool"]
+        subgraph "Loop 3: Búsqueda Activa"
+            L3["Strategy Dashboard Widget"]
+            SA["Claude for Chrome Prompt Generator"]
+            WT["Express POST /api/jobs Gateway"]
         end
         
         subgraph "Memory Layer"
             WM["Working Memory (in-process)"]
             EM["Episodic Memory (DB)"]
-            VM["Vector Memory (pgvector)"]
             PM["Profile Memory (DB)"]
         end
     end
 
-    subgraph "External"
-        LI["LinkedIn"]
-        IND["Indeed"]
-        WF["Wellfound"]
-        RO["RemoteOK"]
+    subgraph "External Client Side"
+        CFC["Claude for Chrome / Browser"]
     end
 
     DB --> AC
@@ -146,124 +127,28 @@ graph TB
     SM --> L1
     SM --> L2
     SM --> L3
-    L1 --> BT
-    BT --> LI
     L1 --> PE1
-    L1 --> SK
     L2 --> QG
     L2 --> RA
     L2 --> CS
     L3 --> SA
-    L3 --> JA
-    L3 --> RM
-    L3 --> WT
-    SA --> IND
-    SA --> WF
-    SA --> RO
+    CFC -->|Imports Jobs with auth JWT| WT
     WT --> API
     SM --> WM
     SM --> EM
-    SM --> VM
     SM --> PM
 ```
+
 
 ---
 
 ## 📐 Diseño Detallado por Loop
 
-### Loop 1: LinkedIn Investigator (Background Agent)
+### Loop 1: Formulario de Perfil Profesional (Web Onboarding)
 
-**Trigger**: User acepta el mensaje proactivo en el Dashboard.
-**Ejecución**: 100% background. User navega normalmente.
-**Output**: `raw_profile` estructurado en la DB.
-
-#### Qué hace el agente paso a paso:
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  LOOP 1: LINKEDIN INVESTIGATOR                                  │
-│                                                                  │
-│  Pre-requisito: User provee sus credenciales de LinkedIn         │
-│  (o ya tiene sesión activa en el browser del servidor)           │
-│                                                                  │
-│  Step 1: NAVIGATE                                                │
-│    → Playwright abre LinkedIn con las credenciales del user      │
-│    → WebSocket: "🔍 Accediendo a tu perfil de LinkedIn..."       │
-│                                                                  │
-│  Step 2: EXTRACT PROFILE HEADER                                  │
-│    → Nombre, título actual, ubicación, foto                      │
-│    → WebSocket: "📋 Encontré: Senior ML Engineer at Company X"   │
-│                                                                  │
-│  Step 3: EXTRACT EXPERIENCE                                      │
-│    → Scroll por toda la sección de experiencia                   │
-│    → Extraer cada posición: empresa, rol, período, descripción   │
-│    → WebSocket: "💼 Extrayendo experiencia... 5 posiciones"      │
-│                                                                  │
-│  Step 4: EXTRACT SKILLS & ENDORSEMENTS                           │
-│    → Navegar a la sección de skills                              │
-│    → Listar skills con endorsement count                         │
-│    → WebSocket: "🎯 32 skills encontradas. Top: Python (47)"     │
-│                                                                  │
-│  Step 5: EXTRACT EDUCATION                                       │
-│    → Universidades, títulos, fechas                              │
-│    → WebSocket: "🎓 Educación extraída: 2 instituciones"         │
-│                                                                  │
-│  Step 6: EXTRACT RECOMMENDATIONS                                 │
-│    → Texto de recomendaciones recibidas                          │
-│    → WebSocket: "⭐ 8 recomendaciones encontradas"               │
-│                                                                  │
-│  Step 7: EXTRACT CERTIFICATIONS & COURSES                        │
-│    → WebSocket: "📜 3 certificaciones encontradas"               │
-│                                                                  │
-│  Step 8: ANALYZE & STRUCTURE                                     │
-│    → LLM procesa toda la data cruda en perfil estructurado       │
-│    → Genera embeddings del perfil completo                       │
-│    → WebSocket: "✅ Perfil completo. 8 años de experiencia,      │
-│                     32 skills, especialización en ML/AI"          │
-│                                                                  │
-│  Step 9: SAVE & NOTIFY                                           │
-│    → Guarda raw_profile en agent_profiles                        │
-│    → Actualiza estado: LINKEDIN_INVESTIGATING → INTERVIEW_PENDING│
-│    → Notificación: "Tu perfil de LinkedIn fue investigado con    │
-│      éxito. Cuando estés listo, iniciaremos la entrevista."      │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-#### Lo que ve el usuario en el Dashboard mientras tanto:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  🧠 Zenith Agent                                     ● Live │
-│ ─────────────────────────────────────────────────────────── │
-│                                                              │
-│  Agent: ¡Hola! Noté que aún no tengo contexto de tu         │
-│  perfil profesional. ¿Quieres que investigue tu LinkedIn     │
-│  para entender tu experiencia y skills?                      │
-│                                                              │
-│  You: Sí, dale                                               │
-│                                                              │
-│  Agent: Perfecto. Iniciando investigación de perfil...       │
-│                                                              │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │  📊 Investigación de Perfil LinkedIn                 │    │
-│  │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━░░░░ 78%       │    │
-│  │                                                      │    │
-│  │  ✅ Perfil header extraído                           │    │
-│  │  ✅ Experiencia laboral (5 posiciones)               │    │
-│  │  ✅ Skills y endorsements (32 skills)                │    │
-│  │  ✅ Educación (2 instituciones)                      │    │
-│  │  🔄 Extrayendo recomendaciones...                    │    │
-│  │  ○  Certificaciones                                  │    │
-│  │  ○  Análisis final                                   │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                              │
-│  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─  │
-│  [  Escribe un mensaje...                            📎 ➤ ] │
-└─────────────────────────────────────────────────────────────┘
-```
-
-> [!NOTE]
-> **UX clave**: El usuario puede navegar a Jobs Board, Business Board, etc. mientras el agente investiga. El progress indicator es un badge persistente en el Sidebar/Header que muestra el estado actual. Similar a como ves el chain-of-thought de un agente en Cursor/Claude.
+**Trigger**: El agente detecta que no hay perfil y muestra el botón `📋 Completar mi perfil profesional`.
+**Ejecución**: El usuario completa sus datos profesionales en `/jobboard/profile.html`.
+**Output**: `profile_data` guardado en la base de datos y transición a estado `interview_pending`.
 
 ---
 
@@ -271,7 +156,7 @@ graph TB
 
 **Trigger**: Agente detecta `estado = INTERVIEW_PENDING` y user inicia conversación.
 **Ejecución**: Interactiva en el chat del Dashboard. El agente pregunta, el user responde.
-**Output**: `enriched_profile` + `career_strategy` en la DB.
+**Output**: `career_strategy` + `search_prompt` en la DB.
 
 #### Diseño de la Entrevista
 
@@ -279,36 +164,19 @@ graph TB
 ┌─────────────────────────────────────────────────────────────────┐
 │  LOOP 2: INTERVIEW CONDUCTOR                                    │
 │                                                                  │
-│  El agente ya tiene el raw_profile de LinkedIn.                  │
-│  Ahora necesita entender lo que LinkedIn NO dice:                │
+│  El agente ya tiene el profile_data del formulario.              │
+│  Ahora necesita entender lo que el perfil inicial no dice:       │
 │                                                                  │
 │  BLOQUE 1: Validación del Perfil (2-3 preguntas)                │
-│    → "Vi que trabajaste 3 años en Company X como ML Engineer.    │
+│    → "Vi que trabajaste en Company X como ML Engineer.           │
 │       ¿Cuál fue tu mayor logro técnico ahí?"                    │
-│    → "Tus top skills en LinkedIn son Python y PyTorch.           │
-│       ¿Hay algún skill que no esté ahí pero domines?\"           │
 │                                                                  │
 │  BLOQUE 2: Preferencias Profesionales (3-4 preguntas)           │
-│    → \"¿Qué tipo de rol buscas? ¿IC, Tech Lead, Manager?\"       │
-│    → \"¿Preferencia de modalidad? Remoto, híbrido, presencial\"   │
-│    → \"¿Rango salarial esperado?\"                                │
-│    → \"¿Disposición a reubicarte? ¿A dónde?\"                    │
+│    → "¿Qué tipo de rol buscas? ¿IC, Tech Lead, Manager?"       │
+│    → "¿Preferencia de modalidad? Remoto, híbrido, presencial"   │
+│    → "¿Rango salarial esperado?"                                │
 │                                                                  │
 │  BLOQUE 3: Fit Cultural y Psicológico (2-3 preguntas)           │
-│    → \"¿Qué valoras más en un equipo de trabajo?\"                │
-│    → \"¿Prefieres empresas en etapa temprana o corporativos?\"    │
-│    → \"¿Qué te hizo dejar tu último trabajo?\"                   │
-│                                                                  │
-│  BLOQUE 4: Career Path Exploration (2-3 preguntas, adaptivas)  │
-│    → El agente ANALIZA el perfil y SUGIERE caminos              │
-│    → \"Con tu experiencia en ML y tu interés en producto,         │
-│       has considerado roles de ML Product Manager? Están         │
-│       pagando $180-220k y tu perfil es un fit natural.\"         │
-│    → \"Veo que tienes experiencia en infraestructura.             │
-│       Los roles de MLOps/Platform están en alta demanda.\"       │
-│                                                                  │
-│  BLOQUE 5: Deal Breakers y Prioridades (1-2 preguntas)         │
-│    → \"¿Hay algo que sea un NO absoluto para ti?\"                │
 │    → \"Si tuvieras que elegir entre mayor salario o mejor         │
 │       equipo técnico, ¿cuál priorizas?\"                         │
 │                                                                  │
@@ -341,198 +209,10 @@ graph TB
 
 ---
 
-## 💾 Schema de Base de Datos (Nuevas Tablas)
+## 💾 Schema de Base de Datos
 
-```sql
--- ============================================
--- ZENITH AGENT DATABASE EXTENSIONS
--- ============================================
+Las tablas y esquemas reales del microservicio del agente Zenith AI se encuentran detallados en el archivo [AGENT_PRD_TECH_SPEC.md](file:///Users/pacho-home-server/personal-job-board/docs/AGENT_PRD_TECH_SPEC.md#L127-L196) (Sección 4. Esquema de Base de Datos y Datos Persistentes).
 
--- Extensión para vector similarity search
-CREATE EXTENSION IF NOT EXISTS vector;
-
--- ────────────────────────────────────────────
--- Agent Profile (construido por onboarding)
--- ────────────────────────────────────────────
-CREATE TABLE agent_profiles (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-    
-    -- Estado del onboarding
-    onboarding_status VARCHAR(30) DEFAULT 'uninitialized'
-        CHECK (onboarding_status IN (
-            'uninitialized',           -- Sin perfil cargado (formulario vacío)
-            'interview_pending',       -- Formulario completado, listo para iniciar la entrevista
-            'interviewing',            -- Entrevista profesional en progreso
-            'ready',                   -- Perfil completo y refinado
-            'searching'                -- Búsqueda activa
-        )),
-    
-    -- Perfil profesional cargado del formulario (Nombre, resumen, experiencia, educación, skills, etc.)
-    profile_data JSONB,
-    
-    -- Perfil enriquecido post-entrevista (JSON estructurado)
-    enriched_profile JSONB,
-    -- Ejemplo de enriched_profile:
-    -- {
-    --   "name": "Francisco Camacho",
-    --   "title": "Senior ML Engineer",
-    --   "years_experience": 8,
-    --   "skills": { "primary": [...], "secondary": [...], "emerging": [...] },
-    --   "experience": [{ "company": "...", "role": "...", "highlights": [...] }],
-    --   "education": [...],
-    --   "certifications": [...],
-    --   "career_goals": { "target_roles": [...], "industries": [...] },
-    --   "preferences": { "remote": true, "salary_range": { "min": 120000 } },
-    --   "cultural_fit": { "values": [...], "company_stage": "startup" },
-    --   "deal_breakers": [...],
-    --   "agent_suggestions": { "alternative_paths": [...] }
-    -- }
-    
-    -- Estrategia de búsqueda generada por el agente
-    career_strategy JSONB,
-    
-    -- Parámetros de búsqueda concretos para Loop 3
-    search_parameters JSONB,
-    
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
-);
-
--- ────────────────────────────────────────────
--- Agent Conversations (sesiones de chat)
--- ────────────────────────────────────────────
-CREATE TABLE agent_conversations (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    conversation_type VARCHAR(30)
-        CHECK (conversation_type IN (
-            'onboarding_linkedin',  -- Loop 1: Investigación LinkedIn
-            'onboarding_interview', -- Loop 2: Entrevista profesional
-            'search_session',       -- Loop 3: Sesión de búsqueda
-            'general'               -- Conversación libre con el agente
-        )),
-    status VARCHAR(20) DEFAULT 'active'
-        CHECK (status IN ('active', 'completed', 'paused', 'cancelled')),
-    metadata JSONB,  -- Datos específicos del tipo de conversación
-    started_at TIMESTAMP DEFAULT NOW(),
-    completed_at TIMESTAMP
-);
-
--- ────────────────────────────────────────────
--- Agent Messages (mensajes individuales)
--- ────────────────────────────────────────────
-CREATE TABLE agent_messages (
-    id SERIAL PRIMARY KEY,
-    conversation_id INTEGER REFERENCES agent_conversations(id) ON DELETE CASCADE,
-    role VARCHAR(10) CHECK (role IN ('agent', 'user', 'system', 'tool')),
-    content TEXT NOT NULL,
-    
-    -- Para mensajes de tipo 'tool': qué herramienta se usó
-    tool_name VARCHAR(50),
-    tool_input JSONB,
-    tool_output JSONB,
-    
-    -- Para mensajes de progreso (chain of thought visible)
-    message_type VARCHAR(20) DEFAULT 'chat'
-        CHECK (message_type IN (
-            'chat',           -- Mensaje normal de conversación
-            'thinking',       -- Chain of thought del agente (visible al user)
-            'tool_call',      -- El agente está ejecutando una herramienta
-            'tool_result',    -- Resultado de la herramienta
-            'progress',       -- Update de progreso (barra de progreso)
-            'notification',   -- Notificación proactiva del agente
-            'suggestion'      -- Sugerencia de carrera del agente
-        )),
-    
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
-CREATE INDEX idx_messages_conversation ON agent_messages(conversation_id);
-CREATE INDEX idx_messages_created ON agent_messages(created_at);
-
--- ────────────────────────────────────────────
--- Agent Runs (ejecuciones de background)
--- ────────────────────────────────────────────
-CREATE TABLE agent_runs (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    conversation_id INTEGER REFERENCES agent_conversations(id),
-    
-    run_type VARCHAR(30)
-        CHECK (run_type IN (
-            'linkedin_investigation',
-            'interview_session',
-            'job_search',
-            'job_analysis',
-            'market_research'
-        )),
-    
-    status VARCHAR(20) DEFAULT 'pending'
-        CHECK (status IN ('pending', 'running', 'completed', 'failed', 'cancelled')),
-    
-    -- Progreso trackeable
-    progress_pct INTEGER DEFAULT 0 CHECK (progress_pct >= 0 AND progress_pct <= 100),
-    progress_steps JSONB,  -- Array de steps con status
-    -- Ejemplo: [
-    --   {"step": "extract_header", "status": "completed", "detail": "Senior ML Engineer"},
-    --   {"step": "extract_experience", "status": "running", "detail": "3/5 positions..."},
-    --   {"step": "extract_skills", "status": "pending"}
-    -- ]
-    
-    input_params JSONB,
-    output_data JSONB,
-    error_message TEXT,
-    
-    tokens_used INTEGER DEFAULT 0,
-    cost_usd DECIMAL(10,4) DEFAULT 0,
-    
-    started_at TIMESTAMP DEFAULT NOW(),
-    completed_at TIMESTAMP
-);
-
--- ────────────────────────────────────────────
--- Agent Embeddings (vector search)
--- ────────────────────────────────────────────
-CREATE TABLE agent_embeddings (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    source_type VARCHAR(50),  -- 'profile', 'job_posting', 'company', 'skill'
-    source_id VARCHAR(255),
-    content TEXT,
-    embedding vector(1536),
-    metadata JSONB,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
-CREATE INDEX ON agent_embeddings
-    USING ivfflat (embedding vector_cosine_ops)
-    WITH (lists = 100);
-
--- ────────────────────────────────────────────
--- Agent Notifications
--- ────────────────────────────────────────────
-CREATE TABLE agent_notifications (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    run_id INTEGER REFERENCES agent_runs(id),
-    
-    type VARCHAR(30) CHECK (type IN (
-        'profile_ready',       -- Investigación LinkedIn completa
-        'interview_ready',     -- Listo para entrevista
-        'new_matches',         -- Nuevos job matches encontrados
-        'market_insight',      -- Insight de mercado laboral
-        'action_required',     -- Necesita input del user
-        'search_complete'      -- Búsqueda completada
-    )),
-    
-    title VARCHAR(255),
-    body TEXT,
-    action_url VARCHAR(255),   -- Deep link a la acción
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
 
 ---
 
