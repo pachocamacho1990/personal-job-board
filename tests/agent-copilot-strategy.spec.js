@@ -75,21 +75,40 @@ test('Agent Copilot & Strategy Dashboard E2E', async ({ page }) => {
   await chatInput.fill('Excluir Acme Corp');
   await sendBtn.click();
 
-  // Strategy Panel appears
-  await expect(page.locator('#agent-active-search-panel')).toBeVisible({ timeout: 15000 });
+  // Onboarding ready message appears
+  await expect(panel.locator('.agent-msg.role-agent.type-chat').last()).toContainText('He analizado tu perfil y he estructurado tu estrategia', { timeout: 15000 });
 
-  // Close panel
+  // Close agent panel
   await panel.locator('.agent-close-btn').click();
 
-  // 5. Navigate to Strategy Tab in Dashboard
+  // 5. Navigate to Search Prompt Tab in Dashboard
+  const searchTabBtn = page.locator('#searchPromptTabBtn');
+  await expect(searchTabBtn).toBeVisible({ timeout: 5000 });
+  await searchTabBtn.click();
+
+  // Verify elements in Search Prompt tab
+  await expect(page.locator('#dashboard-board-select')).toBeVisible();
+  const promptEditor = page.locator('#dashboard-prompt-editor');
+  await expect(promptEditor).toBeVisible();
+  await expect(promptEditor).toContainText('Eres un agente de búsqueda de empleo');
+
+  // Edit and save search prompt
+  await promptEditor.fill('Eres un agente de búsqueda de empleo automatizado. Guardar en boardId: {board_id}');
+  await page.click('#dashboard-save-prompt-btn');
+  await expect(page.locator('.success-message')).toBeVisible({ timeout: 5000 });
+
+  // Test Copy Prompt
+  await page.click('#dashboard-copy-prompt-btn');
+  await expect(page.locator('#dashboard-copy-prompt-btn')).toContainText('¡Prompt Copiado!');
+
+  // Navigate to Strategy Tab in Dashboard
   const strategyTabBtn = page.locator('#strategyTabBtn');
   await expect(strategyTabBtn).toBeVisible();
   await strategyTabBtn.click();
 
   // Verify elements in strategy view
   await expect(page.locator('#strategyCardGrid')).toBeVisible({ timeout: 5000 });
-  await expect(page.locator('#strategySummaryVal')).toContainText('Ingeniero de Software Senior');
-  await expect(page.locator('#strategyRolesVal')).toContainText('Senior Software Engineer');
+  await expect(page.locator('#strategySummaryVal')).toContainText('enfocado en');
   await expect(page.locator('text=Estilo de Vida (Lifestyle)')).toBeVisible();
 
   // 6. Test Memory deletion

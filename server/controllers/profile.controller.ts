@@ -148,3 +148,29 @@ export const deleteUserMemory = async (req: AuthenticatedRequest, res: Response)
     }
 };
 
+/**
+ * PUT /api/profile/search-prompt
+ * Updates the user's custom search prompt for Claude for Chrome.
+ */
+export const updateSearchPrompt = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const userId = req.userId;
+        const { search_prompt } = req.body;
+
+        if (typeof search_prompt !== 'string') {
+            return res.status(400).json({ error: 'search_prompt must be a string' });
+        }
+
+        await pool.query(
+            'UPDATE agent_profiles SET search_prompt = $1, updated_at = NOW() WHERE user_id = $2',
+            [search_prompt, userId]
+        );
+
+        res.json({ message: 'Search prompt updated successfully', search_prompt });
+    } catch (error: any) {
+        console.error('Error updating search prompt:', error);
+        res.status(500).json({ error: 'Failed to update search prompt' });
+    }
+};
+
+

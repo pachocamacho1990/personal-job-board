@@ -142,5 +142,36 @@ describe('Profile Routes', () => {
             expect(res.body.error).toBe('Memory not found or unauthorized');
         });
     });
+
+    describe('PUT /api/profile/search-prompt', () => {
+        it('should update search prompt successfully', async () => {
+            (pool.query as jest.Mock).mockResolvedValueOnce({ rowCount: 1, rows: [] });
+
+            const res = await request(app)
+                .put('/api/profile/search-prompt')
+                .set('Authorization', 'Bearer mock_token')
+                .send({ search_prompt: 'My new prompt' });
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toEqual({
+                message: 'Search prompt updated successfully',
+                search_prompt: 'My new prompt'
+            });
+            expect(pool.query).toHaveBeenCalledWith(
+                expect.stringContaining('UPDATE agent_profiles SET search_prompt = $1'),
+                ['My new prompt', 1]
+            );
+        });
+
+        it('should return 400 if search_prompt is not a string', async () => {
+            const res = await request(app)
+                .put('/api/profile/search-prompt')
+                .set('Authorization', 'Bearer mock_token')
+                .send({ search_prompt: 12345 });
+
+            expect(res.statusCode).toBe(400);
+            expect(res.body.error).toBe('search_prompt must be a string');
+        });
+    });
 });
 
