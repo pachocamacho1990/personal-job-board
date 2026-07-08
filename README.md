@@ -1,6 +1,6 @@
 # Job Board - Personal Application Tracker
 
-![Version](https://img.shields.io/badge/version-3.10.0-blue.svg)
+![Version](https://img.shields.io/badge/version-3.11.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ![Job Board Preview](preview.png)
@@ -41,12 +41,22 @@ A minimalist, **self-hosted Kanban board** to track job applications, networking
 - **Compact/Comfortable View**: Same view toggle as Job Board
 - **Deep Linking**: Click jobs from Dashboard to open directly in Job Board with details visible
 
+### 🤖 Zenith AI Agent
+- **Conversational Career Assistant**: Adaptive interviewing loop based on Edgar Schein career anchors, Korn Ferry leadership archetypes, STAR methodology, and OARS active listening.
+- **Form-Based Onboarding**: Fill in profile information via React UI which dynamically triggers the agent.
+- **Active Search Widget**: Collapsible strategy dashboard that presents career strategy summary, dominant career anchors, target roles, and exclusions.
+- **Dynamic Claude for Chrome Integration**: Generates customized active search prompts linked to your selected Job Board to copy/paste directly.
+- **Continuous Preference Learning**: Detects and updates preference directives in real-time based on natural conversation.
+
 ### 🔐 Authentication
 - Secure signup/login with password hashing (bcrypt)
-- J## 🛠️ Tech Stack
+- JWT session authentication
+
+## 🛠️ Tech Stack
 
 - **Frontend**: React 19, TypeScript 6, Vite 8, CSS3 variables, Semantic HTML, TanStack Query v5
-- **Backend**: Node.js, Express, TypeScript 6 (compiled to ESModules)
+- **Backend (Express)**: Node.js, Express, TypeScript 6 (compiled to ESModules)
+- **AI Agent Service**: Python 3.11, FastAPI, WebSockets (uvicorn), OpenAI/LangChain (reasoning & learning loops)
 - **Database**: PostgreSQL 16
 - **Infrastructure**: Docker Compose, Nginx (Reverse Proxy)
 
@@ -116,6 +126,12 @@ personal-job-board/
 │   ├── server.ts             # Express entry point
 │   ├── tsconfig.json         # Server TS config
 │   └── tsconfig.build.json   # Build config (excludes tests)
+├── agent-service/            # AI Agent Microservice (Python + FastAPI)
+│   ├── src/                  # Reasoning loop and DB handlers
+│   │   ├── tools/            # Workspace and preference learning tools
+│   │   ├── db.py             # Postgres asynchronous connection helper
+│   │   └── main.py           # FastAPI entrypoint, websocket loop, mocks
+│   └── tests/                # Pytest unit tests
 ├── docker-compose.yml        # Container orchestration
 ├── nginx/                    # Reverse proxy config
 ├── tests/                    # Playwright E2E browser tests
@@ -219,10 +235,19 @@ See [TESTING.md](TESTING.md) for full testing strategy.
 |--------|----------|-------------|
 | GET | `/api/dashboard/summary` | Get widget data |
 
+### AI Agent / Profiles
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/profile` | Read profile, strategy and search prompt |
+| POST | `/api/profile` | Create/update profile details |
+| GET | `/api/boards` | List user job boards |
+| WS | `/agent-ws` | WebSocket route for AI Agent console |
+
 ### Health
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/health` | API health check |
+
 
 ## 📚 Documentation
 

@@ -41,6 +41,7 @@ docker-compose up -d
 This starts:
 - PostgreSQL database (port 5432)
 - Node.js API (port 3000)
+- AI Agent Service (port 8000)
 - Nginx web server (port 80)
 
 
@@ -182,15 +183,33 @@ cd server
 npm run dev
 ```
 
+### AI Agent Development (FastAPI + uvicorn)
+To run the Python agent service in development mode with auto-reload:
+```bash
+cd agent-service
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
 ### Running Tests
+
 ```bash
 # Backend unit/integration tests (Jest)
 cd server
 npm test
 
+# Python Agent unit/integration tests (Pytest)
+# Inside agent container:
+docker compose exec agent env PYTHONPATH=. pytest
+# Or locally:
+cd agent-service && pytest
+
 # Frontend E2E tests (Playwright)
 npm run test:ui
 ```
+
 
 ## Project Structure
 
