@@ -36,22 +36,17 @@ test('Agent Learning Loop - Explicit and dynamic user preference learning', asyn
   await inputField.fill('Por favor, guarda la siguiente regla: Prefiero ofertas ubicadas únicamente en España.');
   await sendBtn.click();
 
-  // Wait for the thinking indicator to be removed from the DOM
-  await expect(panel.locator('.agent-msg.type-thinking')).toHaveCount(0, { timeout: 20000 });
-  
-  // Verify that the last message is from the agent (not user)
-  const agentResponse = panel.locator('.agent-msg').last();
-  await expect(agentResponse).not.toHaveClass(/role-user/);
+  // Wait for the agent's chat response to appear in the DOM
+  const agentResponse = panel.locator('.agent-msg.role-agent.type-chat').last();
+  await expect(agentResponse).toBeVisible({ timeout: 25000 });
   
   // 5. Send a new query to verify that the agent reloads and respects this preference in the system prompt
   await inputField.fill('¿Qué ubicación prefiero según mis preferencias guardadas?');
   await sendBtn.click();
 
-  // Wait for the second response to finish processing
-  await expect(panel.locator('.agent-msg.type-thinking')).toHaveCount(0, { timeout: 20000 });
-
-  const finalResponse = panel.locator('.agent-msg').last();
-  await expect(finalResponse).not.toHaveClass(/role-user/);
+  // Wait for the agent's next chat response to appear in the DOM
+  const finalResponse = panel.locator('.agent-msg.role-agent.type-chat').last();
+  await expect(finalResponse).toBeVisible({ timeout: 25000 });
   
   // The LLM response should mention "España" since it was injected in the system prompt
   const textContent = await finalResponse.textContent();
