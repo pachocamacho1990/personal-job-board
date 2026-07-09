@@ -217,3 +217,20 @@ The **Zenith Agent** runs as a separate service communicating with the React SPA
 ### 5. Automated Job Search Prompt Generation
 - **Goal**: Injects a structured prompt for Claude for Chrome inside the dashboard.
 - **Content**: Specifies selection filters (salary, mode, exclusions) and provides a JSON schema (including `url`) with step-by-step instructions for REST API calls and DOM field-filling.
+
+### 6. Last Message Editing & Forking (Bifurcación)
+- **UI Interaction**: The last user message in the active chat displays an edit button (`✏️`). Clicking it switches the message to an inline textarea.
+  - **Textarea Styles**: To ensure optimal UX and responsiveness, the textarea is styled with `minHeight: 100px`, `maxHeight: none`, `resize: vertical` (allowing manual height expansion), and `overflowY: auto` (allowing internal vertical scrolling).
+  - **Actions**: Includes "Guardar y enviar" and "Cancelar" buttons.
+- **Backend Flow**: When an `edit_message` WebSocket event is received, the server cancels any active LLM generation for that conversation, updates the content of the edited message in the database, deletes all subsequent messages (`id > messageId`) to purge old context, streams the updated history, and triggers `run_agent_loop` to regenerate the response.
+
+### 7. Real-Time Thinking States
+- **Dynamic Progress Feed**: The static `"Pensando..."` state is replaced by dynamic, context-specific strings updated in real-time as the agent loop iterates:
+  - Initial Analysis: `"Analizando tu consulta..."`
+  - Workspace Tool Execution: `"Procesando resultados de la acción en tu tablero de empleos..."`
+  - Memory Management: `"Consolidando preferencias en tu memoria a largo plazo..."`
+  - Navigation Redirection: `"Confirmando redirección de pantalla..."`
+
+### 8. Utility Scripts
+- **`scripts/reset_agent.sh`**: Completely purges all user profile data, enriched strategies, learned memories, and chat conversations. Sets onboarding status back to `uninitialized`.
+- **`scripts/reset_interview.sh`**: Resets only the onboarding interview status back to `interview_pending` and deletes conversations and memories, but **preserves `profile_data` completely intact**. This enables quick, repetitive testing of the dynamic interviewing loop using already populated context.
