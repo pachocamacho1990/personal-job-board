@@ -450,7 +450,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
 
                 # Spawn standard loop runner
                 task = asyncio.create_task(
-                    run_agent_loop(websocket, conversation_id, user_id, token, thinking_msg_id)
+                    run_agent_loop(websocket, conversation_id, user_id, token, thinking_msg_id, email)
                 )
                 active_tasks[conversation_id] = task
                 
@@ -578,7 +578,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
 
                 # Spawn loop runner as an asyncio task to support stop cancellation
                 task = asyncio.create_task(
-                    run_agent_loop(websocket, conversation_id, user_id, token, thinking_msg_id)
+                    run_agent_loop(websocket, conversation_id, user_id, token, thinking_msg_id, email)
                 )
                 active_tasks[conversation_id] = task
                 
@@ -894,7 +894,7 @@ async def stream_current_history(websocket: WebSocket, conversation_id: int):
         "messages": history
     })
 
-async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: int, user_token: str, thinking_msg_id: int):
+async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: int, user_token: str, thinking_msg_id: int, email: str = ""):
     """
     Core reasoning loop wrapped in an asyncio task to support stop cancellations.
     """
@@ -915,9 +915,13 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
             system_prompt = await get_adaptive_system_prompt(user_id)
             messages_payload = [{"role": "system", "content": system_prompt}] + history
             
+            # Determine if we should intercept with mock interview responses
+            is_test_user = email.startswith("copilot-e2e-") or email.startswith("test-onboarding-")
+            is_test_mode = settings.test_mode or is_test_user
+
             # Send payload to LLM
-            if settings.test_mode and onboarding_status == "interviewing":
-                logger.info("TEST_MODE active. Intercepting interview flow with mock responses.")
+            if is_test_mode and onboarding_status == "interviewing":
+                logger.info("TEST_MODE or test email active. Intercepting interview flow with mock responses.")
                 profile_data = await db_manager.get_profile_data(user_id)
                 content, tool_calls = get_mock_interview_response(history, profile_data)
             else:

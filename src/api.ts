@@ -149,7 +149,7 @@ export const api = {
     get: async (): Promise<any> => apiRequest('/profile'),
     save: async (profileData: any): Promise<any> =>
       apiRequest('/profile', { method: 'POST', body: JSON.stringify({ profile_data: profileData }) }),
-    updateSearchPrompt: async (searchPrompt: string): Promise<any> =>
-      apiRequest('/profile/search-prompt', { method: 'PUT', body: JSON.stringify({ search_prompt: searchPrompt }) }),
+    updateSearchPrompt: async (searchPrompt: string, selectedBoardId?: number): Promise<any> =>
+      apiRequest('/profile/search-prompt', { method: 'PUT', body: JSON.stringify({ search_prompt: searchPrompt, selected_board_id: selectedBoardId }) }),
   },
 };

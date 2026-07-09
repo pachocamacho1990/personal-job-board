@@ -287,7 +287,10 @@ export const DashboardPage: React.FC = () => {
 
       const boardsData = await apiRequest<any[]>('/boards');
       setBoards(boardsData || []);
-      if (boardsData && boardsData.length > 0 && !selectedBoardId) {
+      const savedBoardId = profileData.career_strategy?.selected_board_id;
+      if (savedBoardId) {
+        setSelectedBoardId(Number(savedBoardId));
+      } else if (boardsData && boardsData.length > 0) {
         setSelectedBoardId(boardsData[0].id);
       }
     } catch (err) {
@@ -300,7 +303,7 @@ export const DashboardPage: React.FC = () => {
   const handleSavePrompt = async () => {
     try {
       setSaveSuccess('');
-      await api.profile.updateSearchPrompt(editedPrompt);
+      await api.profile.updateSearchPrompt(editedPrompt, selectedBoardId ? Number(selectedBoardId) : undefined);
       setSearchPrompt(editedPrompt);
       setSaveSuccess('¡Prompt de búsqueda guardado correctamente!');
       setTimeout(() => setSaveSuccess(''), 3000);

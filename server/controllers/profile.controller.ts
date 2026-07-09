@@ -155,18 +155,29 @@ export const deleteUserMemory = async (req: AuthenticatedRequest, res: Response)
 export const updateSearchPrompt = async (req: AuthenticatedRequest, res: Response) => {
     try {
         const userId = req.userId;
-        const { search_prompt } = req.body;
+        const { search_prompt, selected_board_id } = req.body;
 
         if (typeof search_prompt !== 'string') {
             return res.status(400).json({ error: 'search_prompt must be a string' });
         }
 
-        await pool.query(
-            'UPDATE agent_profiles SET search_prompt = $1, updated_at = NOW() WHERE user_id = $2',
-            [search_prompt, userId]
-        );
+        if (selected_board_id !== undefined && selected_board_id !== null) {
+            await pool.query(
+                `UPDATE agent_profiles 
+                 SET search_prompt = $1, 
+                     career_strategy = jsonb_set(COALESCE(career_strategy, '{}'::jsonb), '{selected_board_id}', to_jsonb($2::int)), 
+                     updated_at = NOW() 
+                 WHERE user_id = $3`,
+                [search_prompt, Number(selected_board_id), userId]
+            );
+        } else {
+            await pool.query(
+                'UPDATE agent_profiles SET search_prompt = $1, updated_at = NOW() WHERE user_id = $2',
+                [search_prompt, userId]
+            );
+        }
 
-        res.json({ message: 'Search prompt updated successfully', search_prompt });
+        res.json({ message: 'Search prompt updated successfully', search_prompt, selected_board_id });
     } catch (error: any) {
         console.error('Error updating search prompt:', error);
         res.status(500).json({ error: 'Failed to update search prompt' });
