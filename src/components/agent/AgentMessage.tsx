@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { AgentMessage as AgentMessageType } from '../../types/agent';
 
 interface Props {
@@ -39,6 +39,18 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
   const [isEditing, setIsEditing] = useState(false);
   const [editVal, setEditVal] = useState(message.content);
   const isCollapsible = message.type === 'thinking' || message.type === 'tool_call';
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    if (isEditing) {
+      const el = textareaRef.current;
+      if (el) {
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 250) + 'px';
+      }
+    }
+  }, [editVal, isEditing]);
 
   const classNames = [
     'agent-msg',
@@ -71,10 +83,11 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
           {isEditing ? (
             <div className="agent-msg-bubble" style={{ width: '100%', background: 'var(--color-bg-card)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px' }}>
               <textarea
+                ref={textareaRef}
                 className="agent-input-field"
                 value={editVal}
                 onChange={(e) => setEditVal(e.target.value)}
-                style={{ width: '100%', minHeight: '60px', padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', background: 'var(--bg-input)' }}
+                style={{ width: '100%', minHeight: '38px', padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', background: 'var(--bg-input)', resize: 'none', overflowY: 'hidden' }}
               />
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                 <button
@@ -113,7 +126,7 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
                     cursor: 'pointer'
                   }}
                 >
-                  Guardar y Bifurcar
+                  Guardar y enviar
                 </button>
               </div>
             </div>
