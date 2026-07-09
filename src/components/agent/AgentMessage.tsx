@@ -4,6 +4,8 @@ import type { AgentMessage as AgentMessageType } from '../../types/agent';
 interface Props {
   message: AgentMessageType;
   onAction?: (action: string) => void;
+  canEdit?: boolean;
+  onEditMessage?: (messageId: number, content: string) => void;
 }
 
 /** Renders bold markdown (**text**) as <strong> */
@@ -32,8 +34,10 @@ function formatTime(ts: string): string {
   }
 }
 
-export const AgentMessage: React.FC<Props> = ({ message, onAction }) => {
+export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = false, onEditMessage }) => {
   const [collapsed, setCollapsed] = useState(message.isCollapsed ?? false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editVal, setEditVal] = useState(message.content);
   const isCollapsible = message.type === 'thinking' || message.type === 'tool_call';
 
   const classNames = [
@@ -63,21 +67,98 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction }) => {
         </button>
       )}
       {!collapsed && (
-        <div className="agent-msg-bubble">
-          <div className="agent-msg-content">
-            {renderContent(message.content)}
-          </div>
-          {message.actions && message.actions.length > 0 && (
-            <div className="agent-msg-actions">
-              {message.actions.map((btn) => (
+        <div style={{ position: 'relative', width: '100%', display: 'flex', flexDirection: 'column' }}>
+          {isEditing ? (
+            <div className="agent-msg-bubble" style={{ width: '100%', background: 'var(--color-bg-card)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px' }}>
+              <textarea
+                className="agent-input-field"
+                value={editVal}
+                onChange={(e) => setEditVal(e.target.value)}
+                style={{ width: '100%', minHeight: '60px', padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', background: 'var(--bg-input)' }}
+              />
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                 <button
-                  key={btn.action}
-                  className={`agent-action-btn variant-${btn.variant}`}
-                  onClick={() => onAction?.(btn.action)}
+                  type="button"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditVal(message.content);
+                  }}
+                  style={{
+                    padding: '4px 10px',
+                    fontSize: '0.75rem',
+                    border: '1px solid var(--border-color)',
+                    background: 'transparent',
+                    color: 'var(--text-secondary)',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
                 >
-                  {btn.label}
+                  Cancelar
                 </button>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (editVal.trim()) {
+                      onEditMessage?.(Number(message.id), editVal.trim());
+                      setIsEditing(false);
+                    }
+                  }}
+                  style={{
+                    padding: '4px 10px',
+                    fontSize: '0.75rem',
+                    background: 'var(--primary)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Guardar y Bifurcar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', alignSelf: message.role === 'user' ? 'flex-end' : 'flex-start', width: '100%', justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start' }}>
+              {canEdit && message.role === 'user' && message.type === 'chat' && (
+                <button
+                  className="agent-msg-edit-btn"
+                  onClick={() => setIsEditing(true)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    padding: '4px',
+                    opacity: 0.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '4px',
+                    transition: 'opacity 0.2s'
+                  }}
+                  title="Editar mensaje"
+                >
+                  ✏️
+                </button>
+              )}
+              <div className="agent-msg-bubble">
+                <div className="agent-msg-content">
+                  {renderContent(message.content)}
+                </div>
+                {message.actions && message.actions.length > 0 && (
+                  <div className="agent-msg-actions">
+                    {message.actions.map((btn) => (
+                      <button
+                        key={btn.action}
+                        className={`agent-action-btn variant-${btn.variant}`}
+                        onClick={() => onAction?.(btn.action)}
+                      >
+                        {btn.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
