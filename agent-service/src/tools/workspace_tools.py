@@ -265,9 +265,44 @@ WORKSPACE_TOOLS_SCHEMAS = [
                         }
                     },
                     "strategy_summary": { "type": "string", "description": "Resumen narrativo de la estrategia de carrera recomendada." },
-                    "search_prompt": { "type": "string", "description": "El prompt de instrucciones ultra-detallado para Claude for Chrome." }
+                    "search_prompt": { "type": "string", "description": "El prompt de instrucciones ultra-detallado para Claude for Chrome." },
+                    "anchor_scores": {
+                        "type": "object",
+                        "properties": {
+                            "Lifestyle": { "type": "integer", "description": "Estilo de Vida (0-100)" },
+                            "Autonomía": { "type": "integer", "description": "Autonomía/Independencia (0-100)" },
+                            "Technical/Functional": { "type": "integer", "description": "Competencia Técnico-Funcional (0-100)" },
+                            "Pure Challenge": { "type": "integer", "description": "Desafío Puro (0-100)" },
+                            "Entrepreneurial": { "type": "integer", "description": "Creatividad Emprendedora (0-100)" },
+                            "Security/Stability": { "type": "integer", "description": "Seguridad/Estabilidad (0-100)" },
+                            "Service/Dedication": { "type": "integer", "description": "Servicio/Dedicación a una causa (0-100)" },
+                            "General Managerial": { "type": "integer", "description": "Dirección General (0-100)" }
+                        },
+                        "description": "Puntajes para cada una de las 8 anclas de carrera de Edgar Schein (0 a 100)."
+                    },
+                    "kf_competencies": { "type": "array", "items": { "type": "string" }, "description": "Competencias clave identificadas según Korn Ferry." },
+                    "kf_traits": { "type": "array", "items": { "type": "string" }, "description": "Rasgos de personalidad profesional destacados." },
+                    "kf_drivers": { "type": "array", "items": { "type": "string" }, "description": "Drivers y motivaciones principales de Korn Ferry." }
                 },
                 "required": ["dominant_anchor", "target_roles", "strategy_summary", "search_prompt"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "navigate_to",
+            "description": "Navega automáticamente al usuario a una sección o página específica de la plataforma (ej: Mi Perfil, Tablero Kanban, Dashboard, etc.). Llama a esta herramienta cuando el usuario pida ir a una sección, cambiar de página o editar su perfil/experiencias.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "destination": {
+                        "type": "string",
+                        "description": "La sección a donde redirigir al usuario.",
+                        "enum": ["dashboard", "jobs", "business", "profile", "docs"]
+                    }
+                },
+                "required": ["destination"]
             }
         }
     }
@@ -422,6 +457,17 @@ async def delete_job(user_token: str, job_id: int) -> Dict[str, Any]:
         except Exception as e:
             logger.error(f"Error executing delete_job API request: {e}")
             return {"success": False, "error": str(e)}
+async def navigate_to(destination: str) -> Dict[str, Any]:
+    """Helper to return navigation destination URLs for client-side routing"""
+    mapping = {
+        "dashboard": "/jobboard/index.html",
+        "jobs": "/jobboard/jobs.html",
+        "business": "/jobboard/business.html",
+        "profile": "/jobboard/profile.html",
+        "docs": "/jobboard/docs.html"
+    }
+    url = mapping.get(destination, "/jobboard/index.html")
+    return {"success": True, "destination": destination, "url": url}
 
 
 # ── 3. Tool Dispatcher ───────────────────────────────────
@@ -488,6 +534,10 @@ async def execute_tool(name: str, arguments: Dict[str, Any], user_token: str, us
             skill_id = await db_manager.save_user_skill(user_id, skill_name, description, recipe)
             return {"success": True, "message": f"Skill '{skill_name}' guardada y aprendida con ID {skill_id}."}
             
+        elif name == "navigate_to":
+            dest = arguments.get("destination")
+            return await navigate_to(dest)
+
         elif name == "save_career_strategy":
             strategy = {
                 "dominant_anchor": arguments.get("dominant_anchor"),
@@ -496,7 +546,11 @@ async def execute_tool(name: str, arguments: Dict[str, Any], user_token: str, us
                 "work_mode": arguments.get("work_mode"),
                 "geography": arguments.get("geography"),
                 "exclusions": arguments.get("exclusions"),
-                "strategy_summary": arguments.get("strategy_summary")
+                "strategy_summary": arguments.get("strategy_summary"),
+                "anchor_scores": arguments.get("anchor_scores"),
+                "kf_competencies": arguments.get("kf_competencies"),
+                "kf_traits": arguments.get("kf_traits"),
+                "kf_drivers": arguments.get("kf_drivers")
             }
             search_prompt = arguments.get("search_prompt")
             await db_manager.update_career_strategy(user_id, strategy, search_prompt)

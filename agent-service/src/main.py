@@ -170,19 +170,33 @@ async def get_adaptive_system_prompt(user_id: int) -> str:
         "Eres Zenith Agent, un consultor de carrera y headhunter senior de élite.\n"
         "Puedes interactuar con el espacio de trabajo del usuario (job boards, tarjetas de empleo) "
         "y administrar tus preferencias usando las herramientas suministradas.\n"
-        "Sé directo, profesional y mantén tus respuestas concisas en español.\n"
+        "Sé directo, profesional y mantén tus respuestas concisas en español.\n\n"
+        "## ESTRUCTURA DE NAVEGACIÓN Y PÁGINAS DE LA APLICACIÓN\n"
+        "Puedes redirigir automáticamente al usuario llamando a la herramienta 'navigate_to' con una de las siguientes opciones según lo que pida:\n"
+        "- 'dashboard' (/jobboard/index.html): Muestra el resumen de actividad, el radar de anclas de carrera y la configuración del prompt de búsqueda (Claude).\n"
+        "- 'jobs' (/jobboard/jobs.html): El tablero Kanban de vacantes y oportunidades. Aquí los usuarios organizan y editan tarjetas de empleo, y pueden usar el Copiloto IA de postulación (cartas de presentación/CVs ATS).\n"
+        "- 'business' (/jobboard/business.html): El tablero Kanban para contactos de negocios, inversionistas, VCs o aceleradoras.\n"
+        "- 'profile' (/jobboard/profile.html): Pantalla donde el usuario edita o completa sus datos personales, titular, resumen, educación y EXPERIENCIA LABORAL.\n"
+        "- 'docs' (/jobboard/docs.html): Documentación y manuales del sistema.\n"
+        "Si el usuario dice algo como 'llévame a ver mi perfil', 'cómo modifico mi experiencia laboral' o 'dónde edito mis datos', debes indicarle la sección y llamar a 'navigate_to' inmediatamente.\n"
     )
     
     if onboarding_status == "interviewing":
         base_instructions += (
             "\n[MODO ENTREVISTA ACTIVO]\n"
-            "Tu objetivo actual es perfilar profesional y motivacionalmente al usuario a través de una entrevista en el chat.\n"
+            "Tu objetivo actual es perfilar profesional y motivacionalmente al usuario a través de una entrevista inteligente.\n"
+            "REGLA CRÍTICA DE CONTEXTO: Antes de hacer cualquier pregunta, lee detenidamente la sección '## DATOS DEL PERFIL PROFESIONAL DEL USUARIO' más abajo.\n"
+            "- Si el usuario ya tiene cargados datos de su experiencia (ej: cargos anteriores, habilidades, educación, etc.), NO le hagas preguntas básicas o redundantes como '¿En qué has trabajado?' o '¿Qué estudiaste?'.\n"
+            "- Utiliza los datos existentes para profundizar de manera inteligente. Ejemplo: 'Veo en tu perfil que fuiste Tech Lead en X. ¿Qué tipo de desafíos de escala te gustaría liderar ahora?' o 'Veo que tienes experiencia en React y Python. ¿Prefieres un rol full-stack balanceado o especializarte más en una de estas áreas?'.\n"
+            "- Haz preguntas progresivas enfocándote en lo que falta (Drivers, Expectativa Salarial, Modalidad, Exclusiones de empresas y Ancla de Schein dominante).\n"
             "1. Utiliza técnicas de Entrevista Motivacional (OARS) para guiar la conversación con empatía y sin respuestas cerradas.\n"
             "2. Valida competencias de su experiencia usando la estructura STAR (Situación, Tarea, Acción, Resultado).\n"
             "3. Identifica sus motivaciones internas y el Ancla de Carrera de Edgar Schein dominante.\n"
             "4. Cuando determines que tienes suficiente información sobre sus roles objetivo, rangos salariales, "
             "modalidades de trabajo, preferencias geográficas y deal-breakers/exclusiones, debes llamar de inmediato a la herramienta "
-            "save_career_strategy para guardar la estrategia de búsqueda e inyectar el prompt de búsqueda detallado para Claude for Chrome.\n"
+            "save_career_strategy para guardar la estrategia de búsqueda e inyectar el prompt de búsqueda detallado para Claude for Chrome. "
+            "Además, asegúrate de calcular e inyectar puntajes (0-100) para las 8 anclas de carrera de Schein ('anchor_scores') y "
+            "mapear las competencias, rasgos y drivers de Korn Ferry ('kf_competencies', 'kf_traits', 'kf_drivers') en el payload de la herramienta.\n"
             "Importante: No cierres la entrevista con un simple mensaje de texto; DEBES ejecutar la herramienta save_career_strategy "
             "para que el sistema registre la finalización y cambie el estado a 'ready'. Tu respuesta final debe confirmar al usuario "
             "que has procesado y guardado la estrategia.\n"
@@ -731,12 +745,69 @@ def get_mock_interview_response(history: List[Dict[str, Any]], profile_data: Dic
         
         roles_text = " o ".join(target_roles)
         search_prompt = (
-            f"Eres un agente de búsqueda de empleo automatizado que opera dentro de mi navegador usando Claude for Chrome.\n\n"
-            f"Debes buscar vacantes de {roles_text} en {', '.join(priorities)}, alineadas con {dominant_anchor}. "
-            f"Evita {', '.join(excl_companies)} y el sector {', '.join(excl_industries)}. "
-            f"Si el salario estimado supera los {salary_min} {salary_currency}, guarda la vacante en Zenith llamando a POST /api/jobs con boardId: {{board_id}}. "
-            f"IMPORTANTE: Siempre incluye el campo 'url' con el enlace directo al anuncio de la vacante para que el candidato pueda postularse."
+            f"Eres un copiloto de búsqueda de empleo que opera en mi navegador a través de Claude for Chrome.\n"
+            f"Tu misión es buscar vacantes de {roles_text} en {', '.join(priorities)} alineadas con mi perfil y motivaciones.\n\n"
+            f"## Criterios de Selección:\n"
+            f"- **Roles Objetivo**: {roles_text}\n"
+            f"- **Ubicación & Modalidad**: {', '.join(priorities)}\n"
+            f"- **Filtros de Exclusión (Deal-breakers)**: Evitar {', '.join(excl_companies)} y el sector {', '.join(excl_industries)}.\n"
+            f"- **Salario Mínimo**: {salary_min} {salary_currency}.\n\n"
+            f"## Instrucciones para Guardar Vacantes en mi Tablero:\n"
+            f"Cuando encuentres una vacante que cumpla estos criterios, regístrala de forma automatizada usando una de las siguientes vías:\n\n"
+            f"### Vía 1: Llamar a la API REST (Recomendado)\n"
+            f"Haz un POST request a: `http://localhost/jobboard/api/jobs` e incluye la cabecera `Authorization: Bearer <token>`.\n"
+            f"Cuerpo del JSON a enviar:\n"
+            f"```json\n"
+            f"{{\n"
+            f"  \"boardId\": {{board_id}},\n"
+            f"  \"type\": \"job\",\n"
+            f"  \"status\": \"interested\",\n"
+            f"  \"origin\": \"agent\",\n"
+            f"  \"company\": \"Nombre de la empresa\",\n"
+            f"  \"position\": \"Título de la vacante\",\n"
+            f"  \"location\": \"Ubicación (ej: 'Remote')\",\n"
+            f"  \"salary\": \"Salario (ej: '$100k')\",\n"
+            f"  \"url\": \"URL directo de la oferta de trabajo o publicación (ej. de LinkedIn, Indeed, etc.)\",\n"
+            f"  \"comments\": \"Resumen ejecutivo de la vacante y por qué se ajusta al perfil del candidato.\"\n"
+            f"}}\n"
+            f"```\n\n"
+            f"### Vía 2: Automatización DOM de la Interfaz\n"
+            f"1. Navega a `http://localhost/jobboard/jobs.html`.\n"
+            f"2. Abre el tablero correspondiente y haz clic en el botón de agregar tarjeta con ID `#addJobBtn`.\n"
+            f"3. Rellena los campos del formulario:\n"
+            f"   - Empresa: `#company`\n"
+            f"   - Cargo/Posición: `#position`\n"
+            f"   - Ubicación: `#location`\n"
+            f"   - Salario: `#salary`\n"
+            f"   - Enlace/URL de la vacante: `#jobUrl`\n"
+            f"   - Comentarios: `#comments`\n"
+            f"4. Presiona el botón de guardar del formulario.\n\n"
+            f"IMPORTANTE: Siempre incluye el campo 'url' con la URL directa de la vacante para que el candidato pueda consultarla e iniciar su postulación."
         )
+
+        anchor_mapping = {
+            "Estilo de vida": "Lifestyle",
+            "Autonomía/Independencia": "Autonomía",
+            "Técnica/Funcional": "Technical/Functional",
+            "Desafío Puro": "Pure Challenge",
+            "Creatividad Emprendedora": "Entrepreneurial",
+            "Seguridad/Estabilidad": "Security/Stability",
+            "Servicio/Dedicación a una causa": "Service/Dedication",
+            "Dirección General": "General Managerial"
+        }
+        
+        anchor_key = anchor_mapping.get(dominant_anchor, "Technical/Functional")
+        
+        anchor_scores = {
+            "Lifestyle": 95 if anchor_key == "Lifestyle" else 75,
+            "Autonomía": 95 if anchor_key == "Autonomía" else 70,
+            "Technical/Functional": 95 if anchor_key == "Technical/Functional" else 65,
+            "Pure Challenge": 95 if anchor_key == "Pure Challenge" else 60,
+            "Entrepreneurial": 95 if anchor_key == "Entrepreneurial" else 45,
+            "Security/Stability": 95 if anchor_key == "Security/Stability" else 40,
+            "Service/Dedication": 95 if anchor_key == "Service/Dedication" else 35,
+            "General Managerial": 95 if anchor_key == "General Managerial" else 20
+        }
 
         strategy = {
             "dominant_anchor": dominant_anchor,
@@ -760,7 +831,11 @@ def get_mock_interview_response(history: List[Dict[str, Any]], profile_data: Dic
                 "companies": excl_companies
             },
             "strategy_summary": strategy_summary,
-            "search_prompt": search_prompt
+            "search_prompt": search_prompt,
+            "anchor_scores": anchor_scores,
+            "kf_competencies": ["Diseño de Arquitectura", "Sistemas Distribuidos", "AI Agent Development"],
+            "kf_traits": ["Resiliencia ante la ambigüedad", "Curiosidad de aprendizaje"],
+            "kf_drivers": ["Autonomía laboral", "Liderazgo técnico"]
         }
         return None, [MockToolCall("save_career_strategy", json.dumps(strategy))]
 
@@ -827,6 +902,32 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
                     tool_result = await execute_tool(tool_name, tool_args, user_token, user_id)
                     logger.info(f"DEBUG: execute_tool '{tool_name}' finished: {tool_result}")
                     
+                    if tool_name == "navigate_to" and tool_result.get("success"):
+                        await websocket.send_json({
+                            "event": "navigate",
+                            "url": tool_result.get("url")
+                        })
+                        # Also save a tool message in database
+                        await db_manager.save_message(
+                            conversation_id=conversation_id,
+                            role="tool",
+                            type_name="tool_result",
+                            content=json.dumps(tool_result),
+                            tool_name=tool_name,
+                            tool_output=tool_result
+                        )
+                        # Remove thinking status and send navigation confirmation chat
+                        async with db_manager.pool.acquire() as conn:
+                            await conn.execute("DELETE FROM agent_messages WHERE id = $1", current_thinking_id)
+                        await db_manager.save_message(
+                            conversation_id=conversation_id,
+                            role="agent",
+                            type_name="chat",
+                            content=f"Te he redirigido a la sección de **{tool_args.get('destination')}**."
+                        )
+                        await stream_current_history(websocket, conversation_id)
+                        return
+
                     if tool_name == "save_career_strategy" and tool_result.get("success"):
                         await websocket.send_json({
                             "event": "onboarding_status_update",

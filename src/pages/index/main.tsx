@@ -31,6 +31,10 @@ interface CareerStrategy {
     industries?: string[];
   };
   strategy_summary?: string;
+  anchor_scores?: Record<string, number>;
+  kf_competencies?: string[];
+  kf_traits?: string[];
+  kf_drivers?: string[];
 }
 
 interface Memory {
@@ -39,6 +43,152 @@ interface Memory {
   content: string;
   createdAt: string;
 }
+
+const RadarChart: React.FC<{ anchors: { name: string; key: string; val: number }[] }> = ({ anchors }) => {
+  const center = 200;
+  const radius = 130;
+  const axesCount = anchors.length;
+
+  const getCoordinates = (index: number, value: number) => {
+    const angle = (index * 2 * Math.PI) / axesCount - Math.PI / 2;
+    const x = center + radius * (value / 100) * Math.cos(angle);
+    const y = center + radius * (value / 100) * Math.sin(angle);
+    return { x, y };
+  };
+
+  const gridLevels = [25, 50, 75, 100];
+  const gridPolygons = gridLevels.map((level) => {
+    return Array.from({ length: axesCount }, (_, i) => {
+      const { x, y } = getCoordinates(i, level);
+      return `${x},${y}`;
+    }).join(' ');
+  });
+
+  const dataPoints = anchors.map((anchor, i) => {
+    const { x, y } = getCoordinates(i, anchor.val);
+    return `${x},${y}`;
+  }).join(' ');
+
+  // Map Spanish names or short keys for layout
+  const shortNames: Record<string, string> = {
+    'Lifestyle': 'Estilo de Vida',
+    'Autonomía': 'Autonomía',
+    'Technical/Functional': 'Técnico/Funcional',
+    'Pure Challenge': 'Desafío Puro',
+    'Entrepreneurial': 'Emprendimiento',
+    'Security/Stability': 'Estabilidad',
+    'Service/Dedication': 'Servicio/Causa',
+    'General Managerial': 'Dirección'
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 auto', width: '100%' }}>
+      <svg width="400" height="400" viewBox="0 0 400 400" style={{ maxWidth: '100%', height: 'auto', display: 'block' }}>
+        {/* definitions */}
+        <defs>
+          <linearGradient id="radarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#6366f1" />
+            <stop offset="100%" stopColor="#a855f7" />
+          </linearGradient>
+        </defs>
+
+        {/* Concentric grids */}
+        {gridPolygons.map((pts, idx) => (
+          <polygon
+            key={idx}
+            points={pts}
+            fill="none"
+            stroke="var(--border-color, #e2e8f0)"
+            strokeWidth="1"
+            strokeDasharray={idx === 3 ? "0" : "3 3"}
+          />
+        ))}
+
+        {/* Radial divider lines */}
+        {Array.from({ length: axesCount }).map((_, i) => {
+          const outer = getCoordinates(i, 100);
+          return (
+            <line
+              key={i}
+              x1={center}
+              y1={center}
+              x2={outer.x}
+              y2={outer.y}
+              stroke="var(--border-color, #e2e8f0)"
+              strokeWidth="1"
+            />
+          );
+        })}
+
+        {/* Level indicators */}
+        {gridLevels.map((lvl) => {
+          const pt = getCoordinates(0, lvl);
+          return (
+            <text
+              key={lvl}
+              x={pt.x + 4}
+              y={pt.y + 10}
+              fill="var(--text-secondary)"
+              fontSize="9"
+              fontWeight="bold"
+            >
+              {lvl}%
+            </text>
+          );
+        })}
+
+        {/* Filled polygon for user values */}
+        <polygon
+          points={dataPoints}
+          fill="rgba(99, 102, 241, 0.2)"
+          stroke="url(#radarGrad)"
+          strokeWidth="2.5"
+          style={{ transition: 'all 0.5s ease-in-out' }}
+        />
+
+        {/* Dots on vertices */}
+        {anchors.map((anchor, i) => {
+          const { x, y } = getCoordinates(i, anchor.val);
+          return (
+            <g key={i} style={{ transition: 'all 0.5s ease-in-out' }}>
+              <circle
+                cx={x}
+                cy={y}
+                r="5"
+                fill="var(--primary, #6366f1)"
+                stroke="#ffffff"
+                strokeWidth="1.5"
+              />
+            </g>
+          );
+        })}
+
+        {/* Axis Labels */}
+        {anchors.map((anchor, i) => {
+          const outer = getCoordinates(i, 115);
+          const name = shortNames[anchor.key] || anchor.key;
+          let textAnchor: "middle" | "start" | "end" = "middle";
+          if (outer.x > center + 25) textAnchor = "start";
+          else if (outer.x < center - 25) textAnchor = "end";
+
+          return (
+            <text
+              key={i}
+              x={outer.x}
+              y={outer.y + 4}
+              fill="var(--text-primary)"
+              fontSize="10"
+              fontWeight="600"
+              textAnchor={textAnchor}
+            >
+              {name}
+            </text>
+          );
+        })}
+      </svg>
+    </div>
+  );
+};
 
 export const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'activity' | 'strategy' | 'search'>('activity');
@@ -49,6 +199,7 @@ export const DashboardPage: React.FC = () => {
 
   // Strategy & Memories states
   const [strategy, setStrategy] = useState<CareerStrategy>({});
+  const [profileDetails, setProfileDetails] = useState<any>({});
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loadingStrategy, setLoadingStrategy] = useState<boolean>(false);
 
@@ -126,6 +277,7 @@ export const DashboardPage: React.FC = () => {
     try {
       const profileData = await apiRequest<any>('/profile');
       setStrategy(profileData.career_strategy || {});
+      setProfileDetails(profileData.profile_data || {});
       setSearchPrompt(profileData.search_prompt || '');
       // Only set editedPrompt if it was empty, to prevent overwriting user edits in progress
       setEditedPrompt(prev => prev || profileData.search_prompt || '');
@@ -194,15 +346,16 @@ export const DashboardPage: React.FC = () => {
 
   // Schein Anchors scoring helper
   const dominant = strategy.dominant_anchor || '';
+  const scores = strategy.anchor_scores || {};
   const anchors = [
-    { name: 'Estilo de Vida (Lifestyle)', key: 'Lifestyle', val: dominant === 'Lifestyle' ? 95 : 75, desc: 'Busca balance entre la vida personal y laboral.' },
-    { name: 'Autonomía / Independencia', key: 'Autonomía', val: dominant === 'Autonomía' ? 95 : 70, desc: 'Desea definir su propio ritmo y dirección.' },
-    { name: 'Competencia Técnico-Funcional', key: 'Technical/Functional', val: dominant === 'Technical/Functional' ? 95 : 65, desc: 'Enfocado en dominar habilidades específicas y profundas.' },
-    { name: 'Desafío Puro', key: 'Pure Challenge', val: dominant === 'Pure Challenge' ? 95 : 60, desc: 'Busca resolver problemas complejos e intelectuales.' },
-    { name: 'Creatividad Emprendedora', key: 'Entrepreneurial', val: dominant === 'Entrepreneurial' ? 95 : 45, desc: 'Motivado por crear nuevos productos o startups.' },
-    { name: 'Seguridad / Estabilidad', key: 'Security/Stability', val: dominant === 'Security/Stability' ? 95 : 40, desc: 'Valora la estabilidad y permanencia laboral.' },
-    { name: 'Servicio / Dedicación', key: 'Service/Dedication', val: dominant === 'Service/Dedication' ? 95 : 35, desc: 'Desea realizar trabajo con un fin ético o social.' },
-    { name: 'Dirección General', key: 'General Managerial', val: dominant === 'General Managerial' ? 95 : 20, desc: 'Busca liderar equipos y coordinar funciones.' }
+    { name: 'Estilo de Vida (Lifestyle)', key: 'Lifestyle', val: scores.Lifestyle || (dominant === 'Lifestyle' ? 95 : 75), desc: 'Busca balance entre la vida personal y laboral.' },
+    { name: 'Autonomía / Independencia', key: 'Autonomía', val: scores.Autonomía || (dominant === 'Autonomía' ? 95 : 70), desc: 'Desea definir su propio ritmo y dirección.' },
+    { name: 'Competencia Técnico-Funcional', key: 'Technical/Functional', val: scores['Technical/Functional'] || (dominant === 'Technical/Functional' ? 95 : 65), desc: 'Enfocado en dominar habilidades específicas y profundas.' },
+    { name: 'Desafío Puro', key: 'Pure Challenge', val: scores['Pure Challenge'] || (dominant === 'Pure Challenge' ? 95 : 60), desc: 'Busca resolver problemas complejos e intelectuales.' },
+    { name: 'Creatividad Emprendedora', key: 'Entrepreneurial', val: scores.Entrepreneurial || (dominant === 'Entrepreneurial' ? 95 : 45), desc: 'Motivado por crear nuevos productos o startups.' },
+    { name: 'Seguridad / Estabilidad', key: 'Security/Stability', val: scores['Security/Stability'] || (dominant === 'Security/Stability' ? 95 : 40), desc: 'Valora la estabilidad y permanencia laboral.' },
+    { name: 'Servicio / Dedicación', key: 'Service/Dedication', val: scores['Service/Dedication'] || (dominant === 'Service/Dedication' ? 95 : 35), desc: 'Desea realizar trabajo con un fin ético o social.' },
+    { name: 'Dirección General', key: 'General Managerial', val: scores['General Managerial'] || (dominant === 'General Managerial' ? 95 : 20), desc: 'Busca liderar equipos y coordinar funciones.' }
   ].sort((a, b) => b.val - a.val);
 
   return (
@@ -329,30 +482,28 @@ export const DashboardPage: React.FC = () => {
                 Aún no has completado la entrevista profesional con tu Zenith Agent. Completa tu perfil en la consola lateral para ver tu estrategia.
               </div>
             ) : (
-              <div className="strategy-card-grid" id="strategyCardGrid">
+              <>
+                <div className="strategy-card-grid" id="strategyCardGrid">
                 {/* Radar Bar Schein anchors Card */}
-                <div className="dashboard-card" style={{ padding: '1.5rem' }}>
-                  <h3 className="strategy-section-title">🧭 Anclas de Carrera (Schein)</h3>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
+                <div className="dashboard-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <h3 className="strategy-section-title" style={{ width: '100%' }}>🧭 Anclas de Carrera (Schein)</h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem', width: '100%' }}>
                     Tus motivaciones profesionales predominantes inferidas en la entrevista.
                   </p>
-                  <div className="anchors-list">
-                    {anchors.map((anchor) => (
-                      <div key={anchor.key} className="anchor-bar-item">
-                        <div className="anchor-label-row">
-                          <span>{anchor.name}</span>
-                          <span>{anchor.key === dominant ? '★ Dominante' : `${anchor.val}%`}</span>
+                  
+                  <RadarChart anchors={anchors} />
+
+                  <div style={{ marginTop: '1.5rem', width: '100%' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem' }}>Anclas Destacadas:</h4>
+                    {anchors.slice(0, 3).map((anchor, idx) => (
+                      <div key={anchor.key} style={{ marginBottom: '0.75rem', paddingBottom: '0.5rem', borderBottom: idx < 2 ? '1px solid var(--border-color)' : 'none' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600 }}>
+                          <span>{idx + 1}. {anchor.name}</span>
+                          <span style={{ color: 'var(--primary)' }}>{anchor.val}%</span>
                         </div>
-                        <div className="anchor-bar-outer">
-                          <div 
-                            className="anchor-bar-inner" 
-                            style={{ 
-                              width: `${anchor.val}%`,
-                              background: anchor.key === dominant ? 'linear-gradient(90deg, #6366f1, #a855f7)' : 'var(--text-secondary)'
-                            }} 
-                          />
-                        </div>
-                        <div className="anchor-bar-description">{anchor.desc}</div>
+                        <p style={{ fontSize: '0.775rem', color: 'var(--text-secondary)', marginTop: '0.15rem', margin: 0 }}>
+                          {anchor.desc}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -442,7 +593,86 @@ export const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            )}
+
+              {/* Korn Ferry KF4D Dimensions Card */}
+              <div className="dashboard-card" style={{ padding: '1.5rem', marginTop: '1.5rem', width: '100%' }}>
+                <h3 className="strategy-section-title" style={{ marginBottom: '0.25rem' }}>🛡️ Korn Ferry KF4D (Las 4 Dimensiones del Éxito)</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                  Evaluación cualitativa de tus competencias, experiencias, rasgos y drivers.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+                  
+                  {/* Competencies */}
+                  <div style={{ backgroundColor: 'var(--bg-card-hover, #f8fafc)', padding: '1rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
+                      🎯 Competencias
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                      {strategy.kf_competencies && strategy.kf_competencies.length > 0 ? (
+                        strategy.kf_competencies.map((c: string, i: number) => (
+                          <div key={i} className="strategy-tag" style={{ margin: 0, width: 'fit-content', fontSize: '0.75rem' }}>{c}</div>
+                        ))
+                      ) : (
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Mapeando competencias...</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Experiences */}
+                  <div style={{ backgroundColor: 'var(--bg-card-hover, #f8fafc)', padding: '1rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
+                      📈 Experiencias Clave
+                    </h4>
+                    <div style={{ fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {profileDetails?.experience && profileDetails.experience.length > 0 ? (
+                        profileDetails.experience.slice(0, 3).map((e: any, i: number) => (
+                          <div key={i} style={{ borderLeft: '2px solid var(--primary)', paddingLeft: '0.5rem', color: 'var(--text-primary)' }}>
+                            <strong style={{ display: 'block', fontSize: '0.8rem' }}>{e.role}</strong>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{e.company}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Completa tu perfil para mapear trayectorias.</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Traits */}
+                  <div style={{ backgroundColor: 'var(--bg-card-hover, #f8fafc)', padding: '1rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
+                      👤 Rasgos
+                    </h4>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                      {strategy.kf_traits && strategy.kf_traits.length > 0 ? (
+                        strategy.kf_traits.map((t: string, i: number) => (
+                          <span key={i} className="strategy-tag" style={{ margin: 0, backgroundColor: 'rgba(99, 102, 241, 0.08)', color: 'var(--color-primary-light, #818cf8)', fontSize: '0.75rem' }}>{t}</span>
+                        ))
+                      ) : (
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Mapeando rasgos...</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Drivers */}
+                  <div style={{ backgroundColor: 'var(--bg-card-hover, #f8fafc)', padding: '1rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
+                      ⚡ Drivers & Motivadores
+                    </h4>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                      {strategy.kf_drivers && strategy.kf_drivers.length > 0 ? (
+                        strategy.kf_drivers.map((d: string, i: number) => (
+                          <span key={i} className="strategy-tag" style={{ margin: 0, backgroundColor: 'rgba(168, 85, 247, 0.08)', color: '#c084fc', fontSize: '0.75rem' }}>{d}</span>
+                        ))
+                      ) : (
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Mapeando motivaciones...</div>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </>
+          )}
           </div>
         )}
 

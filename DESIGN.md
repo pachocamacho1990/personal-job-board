@@ -194,3 +194,26 @@ Aurora Design System - Modern, clean aesthetic with color-coded status columns.
 4.  **Result**:
     -   Job card becomes a **Ghost** (readonly, non-draggable) in its original column.
     -   New Business Connection appears in "Researching" column on Business Board.
+
+## Agent & Copilot Architecture
+
+### 1. WebSocket Agent Console
+The **Zenith Agent** runs as a separate service communicating with the React SPA over a persistent WebSocket connection:
+- **Endpoint**: `/ws?token=<JWT>`
+- **Loop**: Listens for user messages/actions and responds with streaming states (`type: 'thinking'` followed by tool executions or chat updates).
+
+### 2. Contextual Onboarding & Interview
+- **Dynamic Context**: The agent system prompt is compiled dynamically on every turn. If `profile_data` (experiences, skills, bio) exists, the agent analyzes it to avoid repeating questions.
+- **Smart Interviewing**: Focuses questions on missing details, motivators, salary, location, and constraints.
+
+### 3. Strategy Frameworks & Visualizations
+- **Schein Career Anchors**: The user's motivators (Lifestyle, Autonomy, etc.) are compiled and visualized via an **SVG Radar Chart** in the Strategy dashboard.
+- **Korn Ferry KF4D**: Mapped pillars showing Competencies, Experiences, Traits, and Drivers in a dedicated dashboard view.
+
+### 4. Client-Side Navigation Agent Tool
+- **Tool**: `navigate_to`
+- **Execution Flow**: When triggered by the user (e.g. *"take me to my experiences"*), the agent invokes `navigate_to` which sends a navigate event to the SPA frontend. The router intercepts this and changes pages without reload.
+
+### 5. Automated Job Search Prompt Generation
+- **Goal**: Injects a structured prompt for Claude for Chrome inside the dashboard.
+- **Content**: Specifies selection filters (salary, mode, exclusions) and provides a JSON schema (including `url`) with step-by-step instructions for REST API calls and DOM field-filling.

@@ -90,7 +90,7 @@ test('Agent Copilot & Strategy Dashboard E2E', async ({ page }) => {
   await expect(page.locator('#dashboard-board-select')).toBeVisible();
   const promptEditor = page.locator('#dashboard-prompt-editor');
   await expect(promptEditor).toBeVisible();
-  await expect(promptEditor).toContainText('Eres un agente de búsqueda de empleo');
+  await expect(promptEditor).toContainText('Eres un copiloto de búsqueda de empleo');
 
   // Edit and save search prompt
   await promptEditor.fill('Eres un agente de búsqueda de empleo automatizado. Guardar en boardId: {board_id}');
