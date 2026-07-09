@@ -300,10 +300,11 @@ export const DashboardPage: React.FC = () => {
     }
   };
 
-  const handleSavePrompt = async () => {
+  const handleSavePrompt = async (boardIdOverride?: number) => {
     try {
       setSaveSuccess('');
-      await api.profile.updateSearchPrompt(editedPrompt, selectedBoardId ? Number(selectedBoardId) : undefined);
+      const boardToSave = boardIdOverride ?? (typeof selectedBoardId === 'number' ? selectedBoardId : undefined);
+      await api.profile.updateSearchPrompt(editedPrompt, boardToSave);
       setSearchPrompt(editedPrompt);
       setSaveSuccess('¡Prompt de búsqueda guardado correctamente!');
       setTimeout(() => setSaveSuccess(''), 3000);
@@ -313,6 +314,15 @@ export const DashboardPage: React.FC = () => {
     } catch (err: any) {
       console.error('Failed to save search prompt', err);
       alert('Error al guardar el prompt de búsqueda: ' + (err.message || err));
+    }
+  };
+
+  const handleBoardChange = async (newBoardId: number) => {
+    setSelectedBoardId(newBoardId);
+    try {
+      await api.profile.updateSearchPrompt(editedPrompt || searchPrompt, newBoardId);
+    } catch (err) {
+      console.error('Failed to auto-save board selection', err);
     }
   };
 
@@ -708,7 +718,7 @@ export const DashboardPage: React.FC = () => {
                       fontSize: '0.9rem'
                     }}
                     value={selectedBoardId}
-                    onChange={(e) => setSelectedBoardId(Number(e.target.value))}
+                    onChange={(e) => handleBoardChange(Number(e.target.value))}
                   >
                     {boards.map(b => (
                       <option key={b.id} value={b.id}>
@@ -785,7 +795,7 @@ export const DashboardPage: React.FC = () => {
                       textAlign: 'center'
                     }}
                     id="dashboard-save-prompt-btn"
-                    onClick={handleSavePrompt}
+                    onClick={() => handleSavePrompt()}
                   >
                     💾 Guardar Cambios
                   </button>
