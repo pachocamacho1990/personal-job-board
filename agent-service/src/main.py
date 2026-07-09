@@ -185,6 +185,7 @@ async def get_adaptive_system_prompt(user_id: int) -> str:
         base_instructions += (
             "\n[MODO ENTREVISTA ACTIVO]\n"
             "Tu objetivo actual es perfilar profesional y motivacionalmente al usuario a través de una entrevista inteligente.\n"
+            "- REGLA CRÍTICA DE FLUJO: En cada turno de la entrevista, realiza únicamente UNA (1) pregunta a la vez. Está terminantemente prohibido formular múltiples preguntas, listas numeradas de preguntas o cuestionarios agrupados en un solo mensaje. Espera a que el usuario responda cada pregunta antes de formular la siguiente de manera progresiva y fluida.\n"
             "REGLA CRÍTICA DE CONTEXTO: Antes de hacer cualquier pregunta, lee detenidamente la sección '## DATOS DEL PERFIL PROFESIONAL DEL USUARIO' más abajo.\n"
             "- Si el usuario ya tiene cargados datos de su experiencia (ej: cargos anteriores, habilidades, educación, etc.), NO le hagas preguntas básicas o redundantes como '¿En qué has trabajado?' o '¿Qué estudiaste?'.\n"
             "- Utiliza los datos existentes para profundizar de manera inteligente. Ejemplo: 'Veo en tu perfil que fuiste Tech Lead en X. ¿Qué tipo de desafíos de escala te gustaría liderar ahora?' o 'Veo que tienes experiencia en React y Python. ¿Prefieres un rol full-stack balanceado o especializarte más en una de estas áreas?'.\n"
@@ -192,7 +193,7 @@ async def get_adaptive_system_prompt(user_id: int) -> str:
             "1. Utiliza técnicas de Entrevista Motivacional (OARS) para guiar la conversación con empatía y sin respuestas cerradas.\n"
             "2. Valida competencias de su experiencia usando la estructura STAR (Situación, Tarea, Acción, Resultado).\n"
             "3. Identifica sus motivaciones internas y el Ancla de Carrera de Edgar Schein dominante.\n"
-            "4. Cuando determines que tienes suficiente información sobre sus roles objetivo, rangos salariales, "
+            "4. Cuando determine que tienes suficiente información sobre sus roles objetivo, rangos salariales, "
             "modalidades de trabajo, preferencias geográficas y deal-breakers/exclusiones, debes llamar de inmediato a la herramienta "
             "save_career_strategy para guardar la estrategia de búsqueda e inyectar el prompt de búsqueda detallado para Claude for Chrome. "
             "Además, asegúrate de calcular e inyectar puntajes (0-100) para las 8 anclas de carrera de Schein ('anchor_scores') y "
