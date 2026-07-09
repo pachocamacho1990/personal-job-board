@@ -75,7 +75,7 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
                 className="agent-input-field"
                 value={editVal}
                 onChange={(e) => setEditVal(e.target.value)}
-                style={{ width: '100%', minHeight: '100px', padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', background: 'var(--bg-input)', resize: 'vertical', overflowY: 'auto' }}
+                style={{ width: '100%', minHeight: '100px', maxHeight: 'none', padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', background: 'var(--bg-input)', resize: 'vertical', overflowY: 'auto' }}
               />
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                 <button
