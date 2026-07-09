@@ -269,6 +269,21 @@ export const AgentConsole: React.FC = () => {
     }));
   }, []);
 
+  const handleEditMessage = useCallback((messageId: number, content: string) => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      logger.error("Cannot edit message: WebSocket is not open");
+      return;
+    }
+
+    setIsGenerating(true);
+    ws.send(JSON.stringify({
+      event: 'edit_message',
+      messageId: messageId,
+      content: content
+    }));
+  }, []);
+
   // New WebSocket Event Emitters
   const handleNewChat = useCallback(() => {
     const ws = wsRef.current;
@@ -424,6 +439,7 @@ export const AgentConsole: React.FC = () => {
             <AgentChat
               messages={messages}
               onAction={handleAction}
+              onEditMessage={handleEditMessage}
             />
 
             {/* Floating Stop Button (visible while generating/thinking) */}

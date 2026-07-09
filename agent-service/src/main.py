@@ -412,6 +412,52 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
                             await stream_current_history(websocket, conversation_id)
                 continue
 
+            if event_type == "edit_message":
+                msg_id = int(message_data.get("messageId"))
+                new_content = message_data.get("content", "").strip()
+                if not new_content:
+                    continue
+
+                if conversation_id in active_tasks:
+                    logger.info(f"Cancelling active generation run for conversation {conversation_id} due to edit")
+                    task = active_tasks.get(conversation_id)
+                    if task and not task.done():
+                        task.cancel()
+                    active_tasks.pop(conversation_id, None)
+
+                # Update message content in database
+                await db_manager.update_message_content(msg_id, new_content)
+
+                # Delete subsequent messages
+                async with db_manager.pool.acquire() as conn:
+                    await conn.execute(
+                        "DELETE FROM agent_messages WHERE conversation_id = $1 AND id > $2",
+                        conversation_id, msg_id
+                    )
+
+                await stream_current_history(websocket, conversation_id)
+
+                # Create placeholder thinking block
+                thinking_msg_id = await db_manager.save_message(
+                    conversation_id=conversation_id,
+                    role="agent",
+                    type_name="thinking",
+                    content="Analizando tu consulta..."
+                )
+                
+                await stream_current_history(websocket, conversation_id)
+
+                # Spawn standard loop runner
+                task = asyncio.create_task(
+                    run_agent_loop(websocket, conversation_id, user_id, token, thinking_msg_id)
+                )
+                active_tasks[conversation_id] = task
+                
+                def make_cleanup(cid):
+                    return lambda t: active_tasks.pop(cid, None)
+                task.add_done_callback(make_cleanup(conversation_id))
+                continue
+
             if event_type == "message" or event_type == "action":
                 if conversation_id in active_tasks:
                     logger.warn(f"Task already active for conversation {conversation_id}. Rejecting new run.")
@@ -524,7 +570,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
                     conversation_id=conversation_id,
                     role="agent",
                     type_name="thinking",
-                    content="Procesando..."
+                    content="Analizando tu consulta..."
                 )
                 
                 await stream_current_history(websocket, conversation_id)
@@ -953,11 +999,20 @@ async def run_agent_loop(websocket: WebSocket, conversation_id: int, user_id: in
                         tool_output=tool_result
                     )
                     
+                    # Determine dynamic progress step content
+                    thinking_content = "Procesando resultados y formulando respuesta..."
+                    if tool_name in ["list_jobs", "create_job_card", "update_job_status", "archive_job", "delete_job"]:
+                        thinking_content = f"Procesando resultados de la acción en tu tablero de empleos..."
+                    elif tool_name in ["save_preference", "delete_preference"]:
+                        thinking_content = "Consolidando preferencias en tu memoria a largo plazo..."
+                    elif tool_name == "navigate_to":
+                        thinking_content = "Confirmando redirección de pantalla..."
+                    
                     current_thinking_id = await db_manager.save_message(
                         conversation_id=conversation_id,
                         role="agent",
                         type_name="thinking",
-                        content="Pensando..."
+                        content=thinking_content
                     )
                     
                     await stream_current_history(websocket, conversation_id)

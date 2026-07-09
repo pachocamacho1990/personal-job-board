@@ -6,11 +6,17 @@ import { AgentProgress } from './AgentProgress';
 interface Props {
   messages: AgentMessageType[];
   onAction: (action: string) => void;
+  onEditMessage?: (messageId: number, content: string) => void;
 }
 
-export const AgentChat: React.FC<Props> = ({ messages, onAction }) => {
+export const AgentChat: React.FC<Props> = ({ messages, onAction, onEditMessage }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const chatRef = useRef<HTMLDivElement>(null);
+
+  // Find the last user message of type chat
+  const lastUserMessageId = [...messages]
+    .reverse()
+    .find((m) => m.role === 'user' && m.type === 'chat')?.id;
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -40,6 +46,8 @@ export const AgentChat: React.FC<Props> = ({ messages, onAction }) => {
             key={msg.id}
             message={msg}
             onAction={onAction}
+            canEdit={msg.id === lastUserMessageId}
+            onEditMessage={onEditMessage}
           />
         );
       })}
