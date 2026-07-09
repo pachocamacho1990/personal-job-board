@@ -273,3 +273,10 @@ La comunicación interactiva y en tiempo real a través de WebSockets utiliza el
 *   Copia fácil al portapapeles del prompt personalizado detallado para la extensión local Claude for Chrome.
 *   Llamada directa autorizada mediante JWT al endpoint Express `POST /api/jobs` desde Claude for Chrome para poblar el Kanban de Zenith en la columna "Interested".
 *   Pruebas completas de integración en Playwright simulando el onboarding, entrevista, copiado e importación de vacantes.
+
+### [x] STAGE 6 — Refinamientos Avanzados (Bifurcación y Pensamiento Dinámico)
+*   **Edición e Historial**: Edición del último mensaje del usuario desde el chat bubbles con un formulario de edición responsivo (redimensionable y con scrollbar).
+*   **Regeneración en Cascada (Fork)**: Borrado de registros posteriores al mensaje editado en base de datos para prevenir contaminación del contexto del LLM.
+*   **Prompt Único**: Regla estricta de flujo de una sola pregunta a la vez en la entrevista motivacional.
+*   **Thinking Dinámico**: Feedback en tiempo real que describe la herramienta o acción del agente (ej. *"Analizando tu consulta..."*, *"Procesando resultados..."*, *"Consolidando preferencias..."*).
+*   **Script de Reinicio de Entrevista**: Creación de `reset_interview.sh` para restaurar la entrevista conversacional sin limpiar los datos del formulario de perfil profesional.

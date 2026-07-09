@@ -278,4 +278,21 @@ Las tablas y esquemas reales del microservicio del agente Zenith AI se encuentra
 | **Workspace Memory** | Jobs, boards, connections del user | Ya existe en la DB | PostgreSQL (tablas existentes) |
 
 > [!IMPORTANT]
-> **System Prompt dinámico**: El system prompt del agente se construye en runtime combinando: `enriched_profile` + `career_strategy` + estado actual del workspace (cuántos jobs activos, en qué stage, últimas búsquedas). Esto es lo que hace que el agente sea contextualmente inteligente y no un chatbot genérico.
+> **System Prompt dinámico**: El system prompt del agente se construye en runtime combinando: `enriched_profile` + `career_strategy` + estado actual del workspace (cuántos jobs activos, en qué stage, últimas búsquedas). Esto es lo que hace que el agente sea contextualmente inteligente y no un chatbot genérico. Además, incluye la **Regla de Pregunta Única** para garantizar que la entrevista de onboarding fluya de forma progresiva e interactiva sin abrumar al usuario con múltiples preguntas simultáneas.
+
+---
+
+## 🛠️ Interacciones Avanzadas y Utilidades de Desarrollo
+
+### 1. Edición de Último Mensaje y Bifurcación (Fork)
+Para simplificar la interacción y permitir la corrección de entradas erróneas o redirección del diálogo:
+- **Flujo**: El usuario puede editar su último mensaje en el chat haciendo clic en el icono `✏️`.
+- **Acción**: Al presionar **Guardar y enviar**, el WebSocket envía un evento `edit_message` que purga las respuestas posteriores en base de datos (`DELETE FROM agent_messages WHERE id > messageId`), cancela ejecuciones activas del LLM en curso, y regenera la respuesta del agente a partir del nuevo prompt.
+
+### 2. Estados de Pensamiento (Thinking) en Tiempo Real
+- El agente actualiza dinámicamente el contenido de su mensaje de procesamiento intermedio (`type: 'thinking'`) para mostrar visualmente en el panel lateral qué acción o herramienta está ejecutando (ej. *"Analizando tu consulta..."*, *"Procesando resultados de la acción..."*, *"Consolidando preferencias..."*, *"Confirmando redirección..."*).
+
+### 3. Scripts de Mantenimiento y Reinicio
+Ubicados en el directorio `scripts/`:
+- **`reset_agent.sh`**: Resetea por completo el perfil profesional del usuario y el agente al estado `uninitialized`.
+- **`reset_interview.sh`**: Reinicia la entrevista del Loop 2 y cambia el estado a `interview_pending`. **Preserva `profile_data` intacto**, permitiendo volver a probar la entrevista inteligente tomando la experiencia laboral previa como contexto.
