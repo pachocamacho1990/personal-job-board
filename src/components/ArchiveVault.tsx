@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Job } from '../types';
+import { ArchiveIcon, SearchIcon } from './icons';
 
 interface ArchiveVaultProps {
   isOpen: boolean;
@@ -92,7 +93,7 @@ export const ArchiveVault: React.FC<ArchiveVaultProps> = ({ isOpen, onClose, job
             <input
               type="text"
               className="archive-search-input"
-              placeholder="🔍 Search by company, position, contact..."
+              placeholder="Search by company, position, contact..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -111,13 +112,13 @@ export const ArchiveVault: React.FC<ArchiveVaultProps> = ({ isOpen, onClose, job
         <div id="archiveContent" className="peek-content" style={{ padding: 0, flexDirection: 'column' }}>
           {archivedJobs.length === 0 ? (
             <div className="archive-empty" style={{ padding: '3rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📦</div>
+              <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}><ArchiveIcon size={48} style={{ color: 'var(--color-primary)' }} /></div>
               <h3>The Vault is Empty</h3>
               <p>Jobs you archive will appear here.</p>
             </div>
           ) : filteredJobs.length === 0 ? (
             <div className="archive-empty" style={{ padding: '3rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔍</div>
+              <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}><SearchIcon size={32} style={{ color: 'var(--color-text-muted)' }} /></div>
               <h3>No Matches Found</h3>
               <p>Try searching for a different keyword.</p>
             </div>

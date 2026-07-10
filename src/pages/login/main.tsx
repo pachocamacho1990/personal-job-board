@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../api';
 import { navigateTo } from '../../router';
+import { DocsIcon } from '../../components/icons';
 import '../../styles/styles.css';
 import '../../styles/login.css';
 
@@ -148,13 +149,13 @@ export const LoginPage: React.FC = () => {
         <p className="toggle-mode" style={{ marginTop: '15px' }}>
           <a
             href="/jobboard/docs.html"
-            style={{ opacity: 0.8, fontSize: '0.875rem' }}
+            style={{ opacity: 0.8, fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
             onClick={(e) => {
               e.preventDefault();
               navigateTo('/jobboard/docs.html');
             }}
           >
-            📖 Documentación y APIs de la App
+            <DocsIcon size={14} /> Documentación y APIs de la App
           </a>
         </p>
       </div>

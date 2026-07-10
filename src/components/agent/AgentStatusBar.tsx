@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ActiveRun } from '../../types/agent';
+import { LightningIcon } from '../icons';
 
 interface Props {
   activeRun: ActiveRun | null;
@@ -12,7 +13,7 @@ export const AgentStatusBar: React.FC<Props> = ({ activeRun, isPanelOpen, onView
 
   return (
     <div className={`agent-status-bar ${isPanelOpen ? 'agent-open' : ''}`}>
-      <span className="agent-status-bar-icon">⚡</span>
+      <span className="agent-status-bar-icon"><LightningIcon size={14} /></span>
       <span className="agent-status-bar-text">
         Agent: {activeRun.description} — {activeRun.progressPct}%
       </span>

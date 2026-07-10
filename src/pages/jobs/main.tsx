@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { api, apiRequest } from '../../api';
 import { Board, Job } from '../../types';
 import { Sidebar } from '../../components/Sidebar';
+import {
+  TargetIcon,
+  ArchiveIcon,
+  BusinessIcon,
+  JobBoardIcon,
+  RobotIcon,
+  ProfileIcon,
+  LinkIcon
+} from '../../components/icons';
 import { DetailPanel } from '../../components/DetailPanel';
 import { CenterPeek } from '../../components/CenterPeek';
 import { ArchiveVault } from '../../components/ArchiveVault';
@@ -386,10 +395,10 @@ export const JobsPage: React.FC = () => {
               <button
                 id="focusToggle"
                 className={`btn-icon ${isFocusMode ? 'active' : ''}`}
-                title="Toggle Focus Mode 🎯"
+                title="Toggle Focus Mode"
                 onClick={toggleFocusMode}
               >
-                <span>🎯</span>
+                <TargetIcon size={18} />
               </button>
               <button
                 id="viewToggle"
@@ -402,11 +411,11 @@ export const JobsPage: React.FC = () => {
               <button
                 id="archiveBtn"
                 className="btn-icon"
-                title="View Archive 📦"
-                style={{ fontSize: '1.2rem' }}
+                title="View Archive"
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                 onClick={() => setIsArchiveVaultOpen(true)}
               >
-                📦
+                <ArchiveIcon size={18} />
               </button>
               <button
                 id="addJobBtn"
@@ -455,11 +464,9 @@ export const JobsPage: React.FC = () => {
                         ? job.organization || job.company || ''
                         : job.company || '';
 
-                      const typeEmoji = isConnection ? '🤝' : '💼';
                       const typeName = isConnection ? 'Connection' : 'Job';
                       const isAgent = job.origin === 'agent';
                       const originClass = isAgent ? 'origin-agent' : 'origin-human';
-                      const originEmoji = isAgent ? '🤖' : '👤';
 
                       const relativeTime = formatRelativeTime(job.updated_at);
                       const metadataItems = [];
@@ -490,14 +497,18 @@ export const JobsPage: React.FC = () => {
                                 <h3>{title}</h3>
                                 <div style={{ display: 'flex', gap: '4px', marginLeft: 'auto' }}>
                                   <span className={`type-badge ${job.type}`}>
-                                    <span className="type-emoji">{typeEmoji}</span>
+                                    <span className="type-emoji" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                      {isConnection ? <BusinessIcon size={12} /> : <JobBoardIcon size={12} />}
+                                    </span>
                                     {typeName}
                                   </span>
                                   <span
                                     className={`type-badge ${originClass}`}
                                     title={`Created by ${isAgent ? 'AI Agent' : 'Human'}`}
                                   >
-                                    <span className="type-emoji">{originEmoji}</span>
+                                    <span className="type-emoji" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                      {isAgent ? <RobotIcon size={12} /> : <ProfileIcon size={12} />}
+                                    </span>
                                   </span>
                                 </div>
                               </div>
@@ -514,14 +525,18 @@ export const JobsPage: React.FC = () => {
                                 {getRatingStars(job.rating)}
                                 <div style={{ display: 'flex', gap: '4px' }}>
                                   <span className={`type-badge ${job.type}`}>
-                                    <span className="type-emoji">{typeEmoji}</span>
+                                    <span className="type-emoji" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                      {isConnection ? <BusinessIcon size={12} /> : <JobBoardIcon size={12} />}
+                                    </span>
                                     {typeName}
                                   </span>
                                   <span
                                     className={`type-badge ${originClass}`}
                                     title={`Created by ${isAgent ? 'AI Agent' : 'Human'}`}
                                   >
-                                    <span className="type-emoji">{originEmoji}</span>
+                                    <span className="type-emoji" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                      {isAgent ? <RobotIcon size={12} /> : <ProfileIcon size={12} />}
+                                    </span>
                                   </span>
                                 </div>
                               </div>
@@ -535,10 +550,10 @@ export const JobsPage: React.FC = () => {
                                     href={job.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    style={{ color: 'var(--primary)', fontSize: '0.8rem', textDecoration: 'none' }}
+                                    style={{ color: 'var(--primary)', fontSize: '0.8rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                                     onClick={(e) => e.stopPropagation()}
                                   >
-                                    🔗 Ver publicación
+                                    <LinkIcon size={12} /> Ver publicación
                                   </a>
                                 </p>
                               )}

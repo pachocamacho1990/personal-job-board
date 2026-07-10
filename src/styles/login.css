@@ -1,209 +1,141 @@
-/* Redesigned Authentication Page Styles - Zenith Cosmic Theme */
+/* Redesigned Authentication Page Styles - IBM Carbon Design System */
 .auth-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background-color: #F8FAFC;
+    background-color: var(--color-surface); /* IBM Carbon Gray 10 */
     position: relative;
     overflow: hidden;
+    font-family: var(--font-family);
 }
 
-/* Cosmic Background Glow Blobs */
-.bg-glow-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-@keyframes auroraGlow1 {
-    0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(10%, -15%) scale(1.2); }
-    100% { transform: translate(0, 0) scale(1); }
-}
-
-@keyframes auroraGlow2 {
-    0% { transform: translate(0, 0) scale(1.1); }
-    50% { transform: translate(-15%, 10%) scale(0.9); }
-    100% { transform: translate(0, 0) scale(1.1); }
-}
-
-.bg-glow-blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(120px);
-    opacity: 0.45;
-}
-
-.bg-glow-blob.blob-1 {
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, #6366F1 0%, #A855F7 100%);
-    top: -10%;
-    left: -10%;
-    animation: auroraGlow1 15s infinite ease-in-out;
-}
-
-.bg-glow-blob.blob-2 {
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, #EC4899 0%, #4F46E5 100%);
-    bottom: -10%;
-    right: -10%;
-    animation: auroraGlow2 18s infinite ease-in-out;
-}
-
-/* Glassmorphic Auth Card */
+/* Carbon-style Flat Auth Card */
 .auth-card {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border-radius: 20px;
+    background: var(--color-canvas); /* White */
+    border: 1px solid var(--color-border);
+    border-radius: 0;
     padding: 40px;
-    box-shadow: 0 10px 40px -10px rgba(79, 70, 229, 0.12), 
-                0 0 1px 1px rgba(255, 255, 255, 0.6) inset;
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: none;
     width: 100%;
-    max-width: 420px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 400px;
     position: relative;
     z-index: 10;
 }
 
-.auth-card:hover {
-    box-shadow: 0 20px 50px -10px rgba(79, 70, 229, 0.18), 
-                0 0 1px 1px rgba(255, 255, 255, 0.8) inset;
-    transform: translateY(-2px);
-}
-
 .auth-header {
-    text-align: center;
-    margin-bottom: 28px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.auth-brand-logo {
-    width: 72px;
-    height: 72px;
-    object-fit: contain;
-    margin-bottom: 16px;
-    filter: drop-shadow(0 4px 8px rgba(99, 102, 241, 0.2));
+    text-align: left;
+    margin-bottom: 32px;
 }
 
 .auth-header h1 {
-    font-family: 'Outfit', sans-serif;
-    font-size: 26px;
-    font-weight: 700;
-    color: #0F172A;
-    margin: 0 0 6px 0;
-    letter-spacing: -0.03em;
+    font-family: var(--font-family);
+    font-size: 28px;
+    font-weight: 300; /* Carbon style light font weight for titles */
+    color: var(--color-text-main);
+    margin: 0 0 8px 0;
+    letter-spacing: 0;
 }
 
 .auth-header p {
     font-size: 14px;
-    color: #64748B;
+    color: var(--color-text-muted);
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .auth-form {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 24px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .form-group label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #334155;
-    letter-spacing: 0.02em;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    letter-spacing: 0;
 }
 
 .form-group input {
-    padding: 11px 14px;
-    border: 1px solid #E2E8F0;
-    border-radius: 10px;
+    padding: 12px 16px;
+    border: 1px solid #8d8d8d; /* Carbon Gray 50 border */
+    border-radius: 0;
     font-size: 14px;
     font-family: inherit;
-    color: #0F172A;
-    background: rgba(255, 255, 255, 0.5);
-    transition: all 0.2s ease;
+    color: var(--color-text-main);
+    background: #f4f4f4; /* Carbon Gray 10 input bg */
+    transition: all 0.15s ease;
+    width: 100%;
 }
 
 .form-group input:focus {
-    outline: none;
-    border-color: #6366F1;
-    background: #FFFFFF;
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
+    background: #ffffff;
 }
 
 .error-message {
-    padding: 10px 12px;
-    background: #FEF2F2;
-    border: 1px solid #FEE2E2;
-    border-radius: 8px;
-    color: #EF4444;
-    font-size: 13px;
-    margin-bottom: 16px;
-    font-weight: 500;
+    padding: 12px 16px;
+    background: #fff0f0;
+    border: 1px solid var(--color-danger);
+    border-radius: 0;
+    color: var(--color-danger);
+    font-size: 14px;
+    margin-bottom: 20px;
+    font-weight: 400;
 }
 
 .btn-submit {
-    padding: 12px;
-    background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+    padding: 14px 16px;
+    background: var(--color-primary);
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 0;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    transition: background-color 0.15s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
 
 .btn-submit:hover:not(:disabled) {
-    background: linear-gradient(135deg, #4F46E5 0%, #4338CA 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+    background: var(--color-primary-hover);
 }
 
 .btn-submit:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
 }
 
 .toggle-mode {
-    text-align: center;
-    font-size: 13px;
-    color: #64748B;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(226, 232, 240, 0.6);
+    text-align: left;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
 }
 
 .toggle-mode a {
-    color: #6366F1;
+    color: var(--color-primary);
     cursor: pointer;
     text-decoration: none;
-    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
 }
 
 .toggle-mode a:hover {
-    color: #4F46E5;
     text-decoration: underline;
+    color: var(--color-primary-hover);
 }

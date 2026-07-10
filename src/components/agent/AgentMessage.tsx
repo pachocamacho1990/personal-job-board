@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { AgentMessage as AgentMessageType } from '../../types/agent';
+import { EditIcon, SettingsIcon, BrainIcon } from '../icons';
 
 interface Props {
   message: AgentMessageType;
@@ -49,11 +50,15 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
   ].filter(Boolean).join(' ');
 
   // Tool call label
-  const toolLabel = message.type === 'tool_call'
-    ? `🔧 ${message.toolName || 'tool'}`
-    : message.type === 'thinking'
-    ? '💭 Thinking'
-    : null;
+  const toolLabel = message.type === 'tool_call' ? (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+      <SettingsIcon size={13} /> {message.toolName || 'tool'}
+    </span>
+  ) : message.type === 'thinking' ? (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+      <BrainIcon size={13} /> Thinking
+    </span>
+  ) : null;
 
   return (
     <div className={classNames}>
@@ -139,7 +144,7 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
                   }}
                   title="Editar mensaje"
                 >
-                  ✏️
+                  <EditIcon size={14} />
                 </button>
               )}
               <div className="agent-msg-bubble">

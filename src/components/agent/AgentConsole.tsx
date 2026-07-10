@@ -3,6 +3,7 @@ import type { AgentMessage as AgentMessageType, ActiveRun, AgentOnboardingStatus
 import { AgentChat } from './AgentChat';
 import { AgentInput } from './AgentInput';
 import { AgentStatusBar } from './AgentStatusBar';
+import { BrainIcon, ChatIcon, PlusIcon, TrashIcon, StopIcon } from '../icons';
 import { navigateTo } from '../../router';
 import { apiRequest } from '../../api';
 import '../../styles/agent-console.css';
@@ -344,7 +345,7 @@ export const AgentConsole: React.FC = () => {
           {unreadCount > 0 && (
             <span className="agent-toggle-badge">{unreadCount}</span>
           )}
-          <span className="toggle-icon">🧠</span>
+          <span className="toggle-icon"><BrainIcon size={18} /></span>
           <span className="toggle-label">Agent</span>
         </button>
       )}
@@ -353,7 +354,7 @@ export const AgentConsole: React.FC = () => {
       <div className={`agent-panel ${isPanelOpen ? 'open' : ''}`}>
         {/* Header */}
         <div className="agent-header">
-          <div className="agent-header-icon">🧠</div>
+          <div className="agent-header-icon"><BrainIcon size={20} /></div>
           <div className="agent-header-info">
             <div className="agent-header-title">Zenith Agent</div>
             <div className={`agent-header-status ${isOnline ? 'online' : 'offline'}`} style={{ color: isOnline ? 'var(--color-success)' : 'var(--color-text-muted)' }}>
@@ -371,7 +372,7 @@ export const AgentConsole: React.FC = () => {
                 title="Historial de conversaciones"
                 aria-label="Ver historial"
               >
-                💬
+                <ChatIcon size={16} />
               </button>
               <button
                 className="agent-header-btn"
@@ -379,7 +380,7 @@ export const AgentConsole: React.FC = () => {
                 title="Nueva conversación"
                 aria-label="Nuevo chat"
               >
-                ➕
+                <PlusIcon size={16} />
               </button>
             </div>
           )}
@@ -425,7 +426,7 @@ export const AgentConsole: React.FC = () => {
                     title="Eliminar conversación"
                     aria-label="Eliminar chat"
                   >
-                    🗑
+                    <TrashIcon size={14} />
                   </button>
                 </div>
               ))
@@ -449,8 +450,9 @@ export const AgentConsole: React.FC = () => {
                   className="agent-stop-btn" 
                   onClick={handleStop}
                   aria-label="Detener generación de IA"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 >
-                  <span style={{ fontSize: '0.65rem' }}>⏹</span> Detener respuesta
+                  <StopIcon size={12} /> Detener respuesta
                 </button>
               </div>
             )}

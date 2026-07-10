@@ -3,6 +3,7 @@ import { api } from '../api';
 import { BusinessEntity, FileAttachment } from '../types';
 import { getFileIcon, formatFileSize } from '../utils';
 import { marked } from 'marked';
+import { HandshakeIcon, MoneyIcon, InstitutionIcon, RocketLaunchIcon } from './icons';
 
 interface BusinessDetailPanelProps {
   entityId: number | null;
@@ -194,7 +195,7 @@ export const BusinessDetailPanel: React.FC<BusinessDetailPanelProps> = ({
                     checked={type === 'connection'}
                     onChange={() => setType('connection')}
                   />
-                  <span>🤝 Connection</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><HandshakeIcon size={14} /> Connection</span>
                 </label>
                 <label className="type-option">
                   <input
@@ -204,7 +205,7 @@ export const BusinessDetailPanel: React.FC<BusinessDetailPanelProps> = ({
                     checked={type === 'investor'}
                     onChange={() => setType('investor')}
                   />
-                  <span>💸 Investor</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MoneyIcon size={14} /> Investor</span>
                 </label>
                 <label className="type-option">
                   <input
@@ -214,7 +215,7 @@ export const BusinessDetailPanel: React.FC<BusinessDetailPanelProps> = ({
                     checked={type === 'vc'}
                     onChange={() => setType('vc')}
                   />
-                  <span>🏛️ VC Fund</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><InstitutionIcon size={14} /> VC Fund</span>
                 </label>
                 <label className="type-option">
                   <input
@@ -224,7 +225,7 @@ export const BusinessDetailPanel: React.FC<BusinessDetailPanelProps> = ({
                     checked={type === 'accelerator'}
                     onChange={() => setType('accelerator')}
                   />
-                  <span>🚀 Accelerator</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><RocketLaunchIcon size={14} /> Accelerator</span>
                 </label>
               </div>
             </div>
