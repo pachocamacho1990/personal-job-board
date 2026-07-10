@@ -2,6 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { Board } from '../types';
 import { navigateTo } from '../router';
+import {
+  RocketIcon,
+  DashboardIcon,
+  JobBoardIcon,
+  BusinessIcon,
+  ProfileIcon,
+  DocsIcon,
+  PlusIcon,
+  EditIcon,
+  TrashIcon
+} from './icons';
+
 interface SidebarProps {
   activePage: 'dashboard' | 'jobs' | 'business' | 'docs' | 'profile';
   boards?: (Board & { jobCount?: number })[];
@@ -57,7 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               navigateTo('/jobboard/index.html');
             }}
           >
-            <span className="brand-icon">🚀</span>
+            <RocketIcon size={20} />
             <span className="brand-text">Zenith</span>
           </a>
         </div>
@@ -70,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               navigateTo('/jobboard/index.html');
             }}
           >
-            <span>🏠</span> Dashboard
+            <DashboardIcon size={18} /> Dashboard
           </a>
           <a
             href="/jobboard/jobs.html"
@@ -80,7 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               navigateTo('/jobboard/jobs.html');
             }}
           >
-            <span>💼</span> Job Board
+            <JobBoardIcon size={18} /> Job Board
           </a>
 
           {activePage === 'jobs' && (
@@ -99,7 +111,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onClick={() => onBoardSelect && onBoardSelect(board.id)}
                     >
                       <span className="board-name" title={board.name}>
-                        📋 {board.name} ({board.jobCount || 0})
+                        {board.name} ({board.jobCount || 0})
                       </span>
                       <div className="board-actions">
                         <button
@@ -110,7 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             onBoardEdit && onBoardEdit(board.id, board.name);
                           }}
                         >
-                          ✏️
+                          <EditIcon size={12} />
                         </button>
                         <button
                           className="board-action-btn delete"
@@ -120,7 +132,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             onBoardDelete && onBoardDelete(board.id);
                           }}
                         >
-                          🗑️
+                          <TrashIcon size={12} />
                         </button>
                       </div>
                     </div>
@@ -128,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 )}
               </div>
               <button id="newBoardBtn" className="new-board-btn" onClick={onBoardCreate}>
-                <span>+</span> Nuevo Tablero
+                <PlusIcon size={14} /> Nuevo Tablero
               </button>
             </>
           )}
@@ -141,7 +153,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               navigateTo('/jobboard/business.html');
             }}
           >
-            <span>🤝</span> Business Board
+            <BusinessIcon size={18} /> Business Board
           </a>
           <a
             href="/jobboard/profile.html"
@@ -151,7 +163,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               navigateTo('/jobboard/profile.html');
             }}
           >
-            <span>👤</span> Mi Perfil
+            <ProfileIcon size={18} /> Mi Perfil
           </a>
           <a
             href="/jobboard/docs.html"
@@ -161,7 +173,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               navigateTo('/jobboard/docs.html');
             }}
           >
-            <span>📖</span> Documentación
+            <DocsIcon size={18} /> Documentación
           </a>
         </nav>
         <div className="sidebar-footer">

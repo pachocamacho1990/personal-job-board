@@ -3,6 +3,7 @@ import { api } from '../../api';
 import { navigateTo } from '../../router';
 import { Sidebar } from '../../components/Sidebar';
 import { ProfileExperience, ProfileEducation, ProfileLanguage, ProfileData } from '../../types';
+import { BrainIcon, ClipboardIcon, SaveIcon } from '../../components/icons';
 import '../../styles/styles.css';
 import '../../styles/profile.css';
 
@@ -182,7 +183,7 @@ export const ProfilePage: React.FC = () => {
         <div className="profile-page-container">
           
           <div className="banner-claude-hint">
-            <span className="banner-claude-hint-icon">🔮</span>
+             <span className="banner-claude-hint-icon" style={{ display: 'inline-flex', alignItems: 'center' }}><BrainIcon size={16} /></span>
             <div>
               <strong>Consejo de Automatización:</strong> Puedes usar la extensión <strong>Claude for Chrome</strong> para ir a tu perfil de LinkedIn, copiar tu información y pedirle que rellene automáticamente este formulario.
             </div>
@@ -190,7 +191,7 @@ export const ProfilePage: React.FC = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="profile-header">
-              <h1>📋 Perfil Profesional</h1>
+              <h1 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><ClipboardIcon size={22} /> Perfil Profesional</h1>
               <div className="profile-header-actions">
                 <button 
                   type="button" 
@@ -206,7 +207,7 @@ export const ProfilePage: React.FC = () => {
                   disabled={isSaving}
                   id="profile-save-btn"
                 >
-                  {isSaving ? 'Guardando...' : '💾 Guardar y Continuar'}
+                  {isSaving ? 'Guardando...' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SaveIcon size={14} /> Guardar y Continuar</span>}
                 </button>
               </div>
             </div>

@@ -5,24 +5,25 @@
 /* ── Agent-specific Design Tokens ────────── */
 :root {
   --agent-panel-width: 400px;
-  --agent-bg: rgba(250, 250, 252, 0.97);
-  --agent-border: rgba(99, 102, 241, 0.12);
-  --agent-accent: #6366F1;
-  --agent-accent-soft: rgba(99, 102, 241, 0.08);
-  --agent-accent-medium: rgba(99, 102, 241, 0.15);
-  --agent-bubble-agent: #FFFFFF;
-  --agent-bubble-user: var(--agent-accent);
-  --agent-text-user: #FFFFFF;
-  --agent-thinking-bg: rgba(245, 158, 11, 0.06);
-  --agent-thinking-border: rgba(245, 158, 11, 0.2);
-  --agent-tool-bg: rgba(16, 185, 129, 0.06);
-  --agent-tool-border: rgba(16, 185, 129, 0.2);
-  --agent-suggestion-bg: rgba(168, 85, 247, 0.06);
-  --agent-suggestion-border: rgba(168, 85, 247, 0.2);
-  --agent-progress-track: #E2E8F0;
-  --agent-progress-fill: linear-gradient(90deg, #6366F1, #A855F7);
-  --agent-status-bar-bg: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
-  --agent-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --agent-bg: #ffffff; /* Carbon White */
+  --agent-border: #e0e0e0; /* Carbon Gray 20 */
+  --agent-accent: #0f62fe; /* IBM Blue 60 */
+  --agent-accent-soft: rgba(15, 98, 254, 0.08);
+  --agent-accent-medium: rgba(15, 98, 254, 0.16);
+  --agent-bubble-agent: #f4f4f4; /* Carbon Gray 10 */
+  --agent-bubble-user: #0f62fe; /* IBM Blue 60 for user messages */
+  --agent-text-user: #ffffff; /* White text on blue user bubbles */
+  --agent-text-agent: #161616; /* Gray 100 text for agent messages */
+  --agent-thinking-bg: #fff8e1; /* Warm light yellow */
+  --agent-thinking-border: #ffe082;
+  --agent-tool-bg: #161616; /* Keep terminal output dark for high-tech contrast */
+  --agent-tool-border: #393939;
+  --agent-suggestion-bg: #f2f0ff; /* Light purple */
+  --agent-suggestion-border: #d4c4fc;
+  --agent-progress-track: #e0e0e0;
+  --agent-progress-fill: var(--agent-accent);
+  --agent-status-bar-bg: #f4f4f4;
+  --agent-transition: 0.15s ease;
 }
 
 /* ── Panel Container ─────────────────────── */
@@ -36,11 +37,10 @@
   transition: transform var(--agent-transition);
   z-index: 200;
   background: var(--agent-bg);
-  backdrop-filter: blur(20px);
   border-left: 1px solid var(--agent-border);
   display: flex;
   flex-direction: column;
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.06);
+  box-shadow: none;
 }
 
 .agent-panel.open {
@@ -75,24 +75,24 @@ main.docs-content.agent-open {
   z-index: 201;
   width: 40px;
   height: 72px;
-  background: var(--color-canvas);
+  background: var(--agent-bg);
   border: 1px solid var(--agent-border);
   border-right: none;
-  border-radius: 10px 0 0 10px;
+  border-radius: 0px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  box-shadow: -2px 2px 12px rgba(99, 102, 241, 0.1);
-  transition: all 0.2s ease;
+  box-shadow: none;
+  transition: all 0.15s ease;
 }
 
 .agent-toggle-btn:hover {
-  width: 46px;
+  width: 44px;
   background: var(--agent-accent-soft);
-  box-shadow: -4px 2px 20px rgba(99, 102, 241, 0.18);
+  box-shadow: none;
 }
 
 .agent-toggle-btn .toggle-icon {
@@ -153,7 +153,7 @@ main.docs-content.agent-open {
   width: 32px;
   height: 32px;
   background: var(--agent-accent-soft);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -165,7 +165,7 @@ main.docs-content.agent-open {
 }
 
 .agent-header-title {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-family);
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-text-main);
@@ -265,7 +265,7 @@ main.docs-content.agent-open {
 
 .agent-msg-bubble {
   padding: 10px 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   font-size: 0.875rem;
   line-height: 1.55;
   word-break: break-word;
@@ -275,7 +275,6 @@ main.docs-content.agent-open {
 .agent-msg.role-user .agent-msg-bubble {
   background: var(--agent-bubble-user);
   color: var(--agent-text-user);
-  border-bottom-right-radius: 4px;
 }
 
 /* Agent bubble */
@@ -283,8 +282,6 @@ main.docs-content.agent-open {
   background: var(--agent-bubble-agent);
   color: var(--color-text-main);
   border: 1px solid var(--color-border);
-  border-bottom-left-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 /* Bold / markdown-like rendering in messages */
@@ -346,7 +343,7 @@ main.docs-content.agent-open {
 .agent-progress {
   background: var(--color-canvas);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 14px;
   max-width: 92%;
   animation: agent-msg-in 0.25s ease-out;
@@ -365,7 +362,7 @@ main.docs-content.agent-open {
 .agent-progress-bar-track {
   height: 6px;
   background: var(--agent-progress-track);
-  border-radius: 6px;
+  border-radius: 0;
   overflow: hidden;
   margin-bottom: 12px;
 }
@@ -373,7 +370,7 @@ main.docs-content.agent-open {
 .agent-progress-bar-fill {
   height: 100%;
   background: var(--agent-progress-fill);
-  border-radius: 6px;
+  border-radius: 0;
   transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
@@ -456,7 +453,7 @@ main.docs-content.agent-open {
 
 .agent-action-btn {
   padding: 7px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -518,14 +515,14 @@ main.docs-content.agent-open {
   gap: 8px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 6px 6px 6px 14px;
   transition: border-color 0.2s;
 }
 
 .agent-input-wrapper:focus-within {
   border-color: var(--agent-accent);
-  box-shadow: 0 0 0 3px var(--agent-accent-soft);
+  box-shadow: none;
 }
 
 .agent-input-field {
@@ -552,7 +549,7 @@ main.docs-content.agent-open {
 .agent-send-btn {
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   border: none;
   background: var(--agent-accent);
   color: white;
@@ -566,7 +563,6 @@ main.docs-content.agent-open {
 
 .agent-send-btn:hover:not(:disabled) {
   background: var(--color-primary-hover);
-  transform: scale(1.05);
 }
 
 .agent-send-btn:disabled {
@@ -640,7 +636,7 @@ main.docs-content.agent-open {
   color: var(--agent-accent);
   background: none;
   border: 1px solid var(--agent-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 3px 10px;
   cursor: pointer;
   transition: all 0.15s;
@@ -697,7 +693,7 @@ main.docs-content.agent-open {
   cursor: pointer;
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -733,7 +729,7 @@ main.docs-content.agent-open {
   padding: 12px 16px;
   background: var(--agent-bg);
   border: 1px solid var(--agent-border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
   gap: 12px;
@@ -742,8 +738,6 @@ main.docs-content.agent-open {
 
 .agent-conv-item:hover {
   border-color: var(--agent-accent);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.06);
-  transform: translateY(-1px);
 }
 
 .agent-conv-item.active {
@@ -781,7 +775,7 @@ main.docs-content.agent-open {
   font-size: 0.95rem;
   cursor: pointer;
   padding: 6px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -810,31 +804,29 @@ main.docs-content.agent-open {
   background: #EF4444;
   color: #FFFFFF;
   border: none;
-  border-radius: 20px;
+  border-radius: var(--radius-sm);
   padding: 6px 14px;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+  box-shadow: none;
   transition: all 0.2s ease;
   animation: pulse-stop 2s infinite;
 }
 
 .agent-stop-btn:hover {
   background: #DC2626;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
 }
 
 @keyframes pulse-stop {
   0% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    opacity: 1;
   }
-  70% {
-    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  50% {
+    opacity: 0.6;
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    opacity: 1;
   }
 }
 
@@ -842,7 +834,7 @@ main.docs-content.agent-open {
 .agent-ready-panel {
   background: var(--agent-accent-soft);
   border: 1px solid var(--agent-border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   margin: 12px 16px;
   padding: 12px;
   display: flex;
@@ -874,8 +866,8 @@ main.docs-content.agent-open {
   line-height: 1.4;
   background: var(--color-canvas);
   padding: 8px;
-  border-radius: 6px;
-  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
 }
 
 .agent-strategy-meta {
@@ -888,7 +880,7 @@ main.docs-content.agent-open {
   font-size: 0.72rem;
   font-weight: 600;
   padding: 3px 8px;
-  border-radius: 12px;
+  border-radius: 0;
   background: rgba(139, 92, 246, 0.08);
   border: 1px solid rgba(139, 92, 246, 0.2);
   color: #8b5cf6;
@@ -908,7 +900,7 @@ main.docs-content.agent-open {
 
 .agent-board-select {
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   font-size: 0.78rem;
   background: var(--color-canvas);
@@ -923,7 +915,7 @@ main.docs-content.agent-open {
   font-family: monospace;
   background: var(--color-canvas-subtle);
   border: 1px solid var(--color-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 8px;
   color: var(--color-text-primary);
   resize: none;
@@ -941,7 +933,7 @@ main.docs-content.agent-open {
   color: #FFFFFF;
   background: var(--agent-accent);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.2s ease;
 }

@@ -1,68 +1,32 @@
-        :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --accent: #A855F7;
-            --surface: #FFFFFF;
-            --surface-hover: #F1F5F9;
-            --surface-active: rgba(79, 70, 229, 0.08);
-            --border: #E2E8F0;
-            --border-hover: #CBD5E1;
-            --text-main: #0F172A;
-            --text-muted: #64748B;
-            --text-light: #94A3B8;
-            --code-bg: #0F172A;
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-            --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-            --font-title: 'Outfit', sans-serif;
-        }
+/* Scoped Docs Page Styles */
+.docs-app-container {
+    --code-bg: #1e293b;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+/* Sidebar Documentation Navigation */
+aside.docs-sidebar {
+    background: var(--color-canvas);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1.5rem;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    z-index: 100;
+}
 
-        body {
-            font-family: var(--font-family);
-            background: #F8FAFC;
-            color: var(--text-main);
-            min-height: 100vh;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
-        }
-
-        /* Layout Grid */
-        .app-container {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            min-height: 100vh;
-        }
-
-        /* Sidebar Documentation Navigation */
-        aside.docs-sidebar {
-            background: #FFFFFF;
-            border-right: 1px solid var(--border);
-            padding: 2rem 1.5rem;
-            height: 100vh;
-            position: sticky;
-            top: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            z-index: 100;
-        }
-
-        .sidebar-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
+.docs-sidebar .sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
 
         .logo-icon {
             font-size: 1.5rem;
@@ -280,7 +244,7 @@
             background: #F1F5F9;
             border: 1px solid var(--border);
             padding: 0.2rem 0.4rem;
-            border-radius: 4px;
+            border-radius: 0;
             font-size: 0.875rem;
             color: #D946EF;
         }
@@ -454,8 +418,6 @@
 
         .feature-card:hover {
             border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         }
 
         .feature-icon {

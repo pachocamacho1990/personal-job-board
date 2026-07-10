@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../api';
 import { BusinessEntity } from '../../types';
 import { Sidebar } from '../../components/Sidebar';
+import { MoneyIcon, InstitutionIcon, RocketIcon, HandshakeIcon } from '../../components/icons';
 import { BusinessDetailPanel } from '../../components/BusinessDetailPanel';
 import { capitalize } from '../../utils';
 import { navigateTo } from '../../router';
@@ -156,11 +157,11 @@ export const BusinessPage: React.FC = () => {
     }
   };
 
-  const getTypeEmoji = (type: string) => {
-    if (type === 'investor') return '💸';
-    if (type === 'vc') return '🏛️';
-    if (type === 'accelerator') return '🚀';
-    return '🤝';
+  const getTypeIcon = (type: string, size = 12) => {
+    if (type === 'investor') return <MoneyIcon size={size} />;
+    if (type === 'vc') return <InstitutionIcon size={size} />;
+    if (type === 'accelerator') return <RocketIcon size={size} />;
+    return <HandshakeIcon size={size} />;
   };
 
   return (
@@ -218,7 +219,7 @@ export const BusinessPage: React.FC = () => {
                     onDrop={(e) => handleDrop(e, col.id)}
                   >
                     {columnEntities.map((entity) => {
-                      const typeEmoji = getTypeEmoji(entity.type);
+                      const typeIcon = getTypeIcon(entity.type);
                       return (
                         <div
                           key={entity.id}
@@ -234,14 +235,14 @@ export const BusinessPage: React.FC = () => {
                         >
                           {isCompactView ? (
                             <div className="compact-row">
-                              <span className="type-emoji">{typeEmoji}</span>
+                              <span className="type-icon type-emoji">{typeIcon}</span>
                               <h3>{entity.name}</h3>
                             </div>
                           ) : (
                             <>
                               <div className="card-header">
                                 <span className="type-badge">
-                                  {typeEmoji} {capitalize(entity.type)}
+                                  {typeIcon} {capitalize(entity.type)}
                                 </span>
                               </div>
                               <h3>{entity.name}</h3>

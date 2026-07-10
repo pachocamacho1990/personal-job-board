@@ -1,6 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { api, apiRequest } from '../../api';
 import { Sidebar } from '../../components/Sidebar';
+import {
+  MetricsIcon,
+  StrategyIcon,
+  SettingsIcon,
+  CalendarIcon,
+  RobotIcon,
+  BrainIcon,
+  TrashIcon,
+  SaveIcon,
+  ShieldIcon,
+  TargetIcon,
+  ChartIcon,
+  LightningIcon,
+  CopyIcon,
+  ProhibitedIcon,
+  JobBoardIcon,
+  ProfileIcon
+} from '../../components/icons';
 import { navigateTo } from '../../router';
 import '../../styles/styles.css';
 import '../../styles/layout.css';
@@ -392,14 +410,14 @@ export const DashboardPage: React.FC = () => {
             className={`dashboard-tab-btn ${activeTab === 'activity' ? 'active' : ''}`}
             onClick={() => setActiveTab('activity')}
           >
-            📊 Resumen de Actividad
+            <MetricsIcon size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Resumen de Actividad
           </button>
           <button 
             className={`dashboard-tab-btn ${activeTab === 'strategy' ? 'active' : ''}`}
             onClick={() => setActiveTab('strategy')}
             id="strategyTabBtn"
           >
-            🎯 Mi Estrategia Profesional
+            <StrategyIcon size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Mi Estrategia Profesional
           </button>
           {(strategy.dominant_anchor || searchPrompt) && (
             <button 
@@ -407,7 +425,7 @@ export const DashboardPage: React.FC = () => {
               onClick={() => setActiveTab('search')}
               id="searchPromptTabBtn"
             >
-              ⚙️ Búsqueda Activa (Claude)
+              <SettingsIcon size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Búsqueda Activa (Claude)
             </button>
           )}
         </div>
@@ -418,7 +436,7 @@ export const DashboardPage: React.FC = () => {
             <div className="dashboard-card">
               <div className="card-header">
                 <div className="card-title">
-                  <span>📅</span> Upcoming Interviews
+                  <CalendarIcon size={18} style={{ marginRight: '8px', verticalAlign: 'middle', color: 'var(--color-primary)' }} /> Upcoming Interviews
                 </div>
               </div>
               <div id="interviewsList">
@@ -437,7 +455,7 @@ export const DashboardPage: React.FC = () => {
                         navigateTo(`/jobboard/jobs.html?openJobId=${job.id}`);
                       }}
                     >
-                      <div className="item-icon interview-icon">📅</div>
+                      <div className="item-icon interview-icon"><CalendarIcon size={16} /></div>
                       <div className="item-content">
                         <div className="item-title">{job.company}</div>
                         <div className="item-subtitle">{job.position}</div>
@@ -453,7 +471,7 @@ export const DashboardPage: React.FC = () => {
             <div className="dashboard-card">
               <div className="card-header">
                 <div className="card-title">
-                  <span>🤖</span> New AI Matches
+                  <RobotIcon size={18} style={{ marginRight: '8px', verticalAlign: 'middle', color: 'var(--color-accent)' }} /> New AI Matches
                 </div>
               </div>
               <div id="newMatchesList">
@@ -472,7 +490,7 @@ export const DashboardPage: React.FC = () => {
                         navigateTo(`/jobboard/jobs.html?openJobId=${job.id}`);
                       }}
                     >
-                      <div className="item-icon match-icon">🤖</div>
+                      <div className="item-icon match-icon"><RobotIcon size={16} /></div>
                       <div className="item-content">
                         <div className="item-title">{job.company}</div>
                         <div className="item-subtitle">{job.position}</div>
@@ -499,7 +517,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="strategy-card-grid" id="strategyCardGrid">
                 {/* Radar Bar Schein anchors Card */}
                 <div className="dashboard-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <h3 className="strategy-section-title" style={{ width: '100%' }}>🧭 Anclas de Carrera (Schein)</h3>
+                  <h3 className="strategy-section-title" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}><StrategyIcon size={18} style={{ color: 'var(--color-primary)' }} /> Anclas de Carrera (Schein)</h3>
                   <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem', width: '100%' }}>
                     Tus motivaciones profesionales predominantes inferidas en la entrevista.
                   </p>
@@ -525,7 +543,7 @@ export const DashboardPage: React.FC = () => {
                 {/* Strategy fields Card */}
                 <div>
                   <div className="strategy-info-card">
-                    <h3 className="strategy-section-title" style={{ marginBottom: 0 }}>📋 Estrategia de Búsqueda</h3>
+                    <h3 className="strategy-section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '8px' }}><JobBoardIcon size={18} style={{ color: 'var(--color-primary)' }} /> Estrategia de Búsqueda</h3>
                     
                     <div className="strategy-field">
                       <div className="strategy-field-label">Resumen de Estrategia</div>
@@ -570,7 +588,7 @@ export const DashboardPage: React.FC = () => {
                         {strategy.exclusions?.companies && strategy.exclusions.companies.length > 0 ? (
                           strategy.exclusions.companies.map((c, i) => (
                             <span key={i} className="strategy-tag" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)' }}>
-                              🚫 Excluir: {c}
+                              <ProhibitedIcon size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Excluir: {c}
                             </span>
                           ))
                         ) : 'Ninguna'}
@@ -580,7 +598,7 @@ export const DashboardPage: React.FC = () => {
 
                   {/* Memories / Preference learning console */}
                   <div className="memories-manager">
-                    <h3 className="strategy-section-title" style={{ marginBottom: '0.25rem' }}>🧠 Directivas de Aprendizaje</h3>
+                    <h3 className="strategy-section-title" style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}><BrainIcon size={18} style={{ color: 'var(--color-primary)' }} /> Directivas de Aprendizaje</h3>
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                       Filtros y reglas dinámicas que tu agente ha aprendido a lo largo de tus conversaciones.
                     </p>
@@ -597,7 +615,7 @@ export const DashboardPage: React.FC = () => {
                               title="Olvidar regla"
                               onClick={() => handleDeleteMemory(m.id)}
                             >
-                              🗑 Olvidar
+                              <TrashIcon size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Olvidar
                             </button>
                           </div>
                         ))
@@ -609,7 +627,7 @@ export const DashboardPage: React.FC = () => {
 
               {/* Korn Ferry KF4D Dimensions Card */}
               <div className="dashboard-card" style={{ padding: '1.5rem', marginTop: '1.5rem', width: '100%' }}>
-                <h3 className="strategy-section-title" style={{ marginBottom: '0.25rem' }}>🛡️ Korn Ferry KF4D (Las 4 Dimensiones del Éxito)</h3>
+                <h3 className="strategy-section-title" style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}><ShieldIcon size={18} style={{ color: 'var(--color-primary)' }} /> Korn Ferry KF4D (Las 4 Dimensiones del Éxito)</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
                   Evaluación cualitativa de tus competencias, experiencias, rasgos y drivers.
                 </p>
@@ -618,7 +636,7 @@ export const DashboardPage: React.FC = () => {
                   {/* Competencies */}
                   <div style={{ backgroundColor: 'var(--bg-card-hover, #f8fafc)', padding: '1rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
-                      🎯 Competencias
+                      <TargetIcon size={16} /> Competencias
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                       {strategy.kf_competencies && strategy.kf_competencies.length > 0 ? (
@@ -634,7 +652,7 @@ export const DashboardPage: React.FC = () => {
                   {/* Experiences */}
                   <div style={{ backgroundColor: 'var(--bg-card-hover, #f8fafc)', padding: '1rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
-                      📈 Experiencias Clave
+                      <ChartIcon size={16} /> Experiencias Clave
                     </h4>
                     <div style={{ fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       {profileDetails?.experience && profileDetails.experience.length > 0 ? (
@@ -653,7 +671,7 @@ export const DashboardPage: React.FC = () => {
                   {/* Traits */}
                   <div style={{ backgroundColor: 'var(--bg-card-hover, #f8fafc)', padding: '1rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
-                      👤 Rasgos
+                      <ProfileIcon size={16} /> Rasgos
                     </h4>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                       {strategy.kf_traits && strategy.kf_traits.length > 0 ? (
@@ -669,7 +687,7 @@ export const DashboardPage: React.FC = () => {
                   {/* Drivers */}
                   <div style={{ backgroundColor: 'var(--bg-card-hover, #f8fafc)', padding: '1rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
-                      ⚡ Drivers & Motivadores
+                      <LightningIcon size={16} /> Drivers & Motivadores
                     </h4>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                       {strategy.kf_drivers && strategy.kf_drivers.length > 0 ? (
@@ -695,7 +713,7 @@ export const DashboardPage: React.FC = () => {
               <div className="loading-spinner">Cargando configuración de búsqueda...</div>
             ) : (
               <div className="dashboard-card" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-                <h3 className="strategy-section-title">⚙️ Prompt de Búsqueda Activa (Claude for Chrome)</h3>
+                <h3 className="strategy-section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><SettingsIcon size={18} style={{ color: 'var(--color-primary)' }} /> Prompt de Búsqueda Activa (Claude for Chrome)</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
                   Este prompt es generado automáticamente por tu Zenith Agent según tu perfil y anclas de carrera. 
                   Puedes editarlo aquí, guardar los cambios y copiarlo para pegarlo en Claude for Chrome.
@@ -777,7 +795,11 @@ export const DashboardPage: React.FC = () => {
                     id="dashboard-copy-prompt-btn"
                     onClick={handleCopyPrompt}
                   >
-                    {copySuccess ? '✓ ¡Prompt Copiado!' : '📋 Copiar Prompt para Claude'}
+                    {copySuccess ? '✓ ¡Prompt Copiado!' : (
+                      <>
+                        <CopyIcon size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Copiar Prompt para Claude
+                      </>
+                    )}
                   </button>
 
                   <button
@@ -797,7 +819,7 @@ export const DashboardPage: React.FC = () => {
                     id="dashboard-save-prompt-btn"
                     onClick={() => handleSavePrompt()}
                   >
-                    💾 Guardar Cambios
+                    <SaveIcon size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Guardar Cambios
                   </button>
                 </div>
               </div>

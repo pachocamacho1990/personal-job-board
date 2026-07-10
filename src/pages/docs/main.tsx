@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { navigateTo } from '../../router';
 import '../../styles/styles.css';
 import '../../styles/docs.css';
+import { RocketIcon, SearchIcon, ProfileIcon, BrainIcon, ClipboardIcon, JobBoardIcon, HandshakeIcon } from '../../components/icons';
 
 
 export const DocsPage: React.FC = () => {
@@ -72,16 +73,16 @@ export const DocsPage: React.FC = () => {
   });
 
   return (
-    <div className="app-container">
+    <div className="docs-app-container">
       {/* Documentation Sidebar */}
       <aside className="docs-sidebar">
         <div className="sidebar-header">
-          <span className="logo-icon">🚀</span>
+          <span className="logo-icon" style={{ display: 'inline-flex', alignItems: 'center' }}><RocketIcon size={20} /></span>
           <span className="logo-text">Docs & APIs</span>
         </div>
 
         <div className="search-box">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon" style={{ display: 'inline-flex', alignItems: 'center' }}><SearchIcon size={14} /></span>
           <input
             type="text"
             className="search-input"
@@ -121,14 +122,14 @@ export const DocsPage: React.FC = () => {
               id="tabUserBtn"
               onClick={() => handleTabChange('user')}
             >
-              👤 Guía de Usuario
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><ProfileIcon size={14} /> Guía de Usuario</span>
             </button>
             <button
               className={`mode-tab ${activeMode === 'agent' ? 'active' : ''}`}
               id="tabAgentBtn"
               onClick={() => handleTabChange('agent')}
             >
-              🤖 Guía de Agentes (API)
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><BrainIcon size={14} /> Guía de Agentes (API)</span>
             </button>
           </div>
           <a
@@ -268,7 +269,7 @@ export const DocsPage: React.FC = () => {
               <h2>Módulos Principales</h2>
               <div className="feature-grid">
                 <div className="feature-card">
-                  <span className="feature-icon">📋</span>
+                  <span className="feature-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><ClipboardIcon size={24} /></span>
                   <h3>Multi-tableros</h3>
                   <p>
                     Crea instancias independientes de tableros. Separa procesos por semestres, años,
@@ -276,7 +277,7 @@ export const DocsPage: React.FC = () => {
                   </p>
                 </div>
                 <div className="feature-card">
-                  <span className="feature-icon">💼</span>
+                  <span className="feature-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><JobBoardIcon size={24} /></span>
                   <h3>Job Board (Kanban)</h3>
                   <p>
                     Arrastra tus aplicaciones de empleo a través de columnas de estado desde
@@ -284,7 +285,7 @@ export const DocsPage: React.FC = () => {
                   </p>
                 </div>
                 <div className="feature-card">
-                  <span className="feature-icon">🤝</span>
+                  <span className="feature-icon" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><HandshakeIcon size={24} /></span>
                   <h3>Business Board</h3>
                   <p>
                     Organiza relaciones de red como inversionistas y aceleradoras usando estados y
@@ -314,10 +315,10 @@ export const DocsPage: React.FC = () => {
                 </li>
                 <li>
                   <strong>Renombrar Tableros</strong>: Al pasar el cursor sobre cualquier tablero en el
-                  menú lateral, haz clic en el icono ✏️ para renombrarlo al instante.
+                  menú lateral, haz clic en el icono de lápiz para renombrarlo al instante.
                 </li>
                 <li>
-                  <strong>Eliminación Segura</strong>: Haz clic en el icono 🗑️ para eliminar un tablero
+                  <strong>Eliminación Segura</strong>: Haz clic en el icono de papelera para eliminar un tablero
                   obsoleto. El sistema protege tu cuenta impidiendo que elimines tu único tablero activo
                   y solicita confirmación expresa para evitar pérdidas de datos.
                 </li>
