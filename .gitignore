@@ -52,3 +52,9 @@ test-results/
 dist/
 server/dist/
 
+# Claude Code: per-machine permissions, not shared
+.claude/settings.local.json
+
+# Working notes and drafts
+scratch/
+
