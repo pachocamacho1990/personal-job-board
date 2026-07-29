@@ -1,0 +1,6 @@
+# Test-only dependencies. Kept out of requirements.txt so the runtime image
+# stays lean. Install inside the running container to run the suite:
+#   docker compose exec agent pip install -r requirements-dev.txt
+#   docker compose exec agent env PYTHONPATH=. pytest
+-r requirements.txt
+pytest==8.2.2

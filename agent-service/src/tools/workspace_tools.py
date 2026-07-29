@@ -3,12 +3,27 @@ import httpx
 from typing import Dict, Any, List, Optional
 from src.config import settings
 from src.db import db_manager
+from src.tools.browser import browser_manager
 
 logger = logging.getLogger(__name__)
 
 # ── 1. Tool Schemas (Sent to LLM) ───────────────────────
 
 WORKSPACE_TOOLS_SCHEMAS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "browse_url",
+            "description": "Abre una URL en el navegador integrado y extrae su contenido de texto. Útil para leer requisitos de vacantes u hojas de vida en línea.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "url": { "type": "string" }
+                },
+                "required": ["url"]
+            }
+        }
+    },
     {
         "type": "function",
         "function": {
@@ -477,7 +492,11 @@ async def execute_tool(name: str, arguments: Dict[str, Any], user_token: str, us
     Executes a workspace or memory tool requested by the LLM on behalf of the user.
     """
     try:
-        if name == "list_boards":
+        if name == "browse_url":
+            url = arguments.get("url")
+            return await browser_manager.navigate_and_read_markdown(url)
+
+        elif name == "list_boards":
             return await list_boards(user_token)
             
         elif name == "create_board":

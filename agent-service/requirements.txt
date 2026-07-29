@@ -12,3 +12,6 @@ langchain-openai
 langchain-anthropic
 pyyaml==6.0.1
 structlog==24.1.0
+playwright==1.44.0
+beautifulsoup4==4.12.3
+markdownify==0.12.1
