@@ -1,0 +1,267 @@
+/* ============================================================================
+   IBM Carbon Design System — token engine
+   ============================================================================
+
+   Two levels, and the separation between them is the whole point:
+
+   N1  Primitives. The official Carbon palette, as raw hex. Named after the
+       palette (--cds-blue-60), never after a purpose. These NEVER change
+       between themes: Blue 60 is #0f62fe in g10 and in g100 alike.
+
+   N2  Semantics. What a color is FOR (--cds-text-primary, --cds-layer-01),
+       expressed as var() references into N1. Switching theme redefines only
+       this level.
+
+   Hard rule for the rest of the codebase: components and page stylesheets
+   consume N2 only. A component that reaches for --cds-gray-70 directly cannot
+   follow a theme switch, and that is exactly the bug this structure prevents.
+
+   Imported once, from src/main.tsx — the single entry shared by all six HTML
+   pages. Do not import it anywhere else.
+
+   Scope note: the g100 dark overrides land in PJBA-9, the spacing and type
+   scales in PJBA-10, and the data-carbon-theme wiring in PJBA-11. This file
+   is deliberately colors-only for now.
+   ============================================================================ */
+
+/* ----------------------------------------------------------------------------
+   N1 · PRIMITIVES — the official Carbon palette
+   Theme-independent. Do not reference these outside the N2 block below.
+   ---------------------------------------------------------------------------- */
+
+:root {
+  /* Blue — primary interactive color */
+  --cds-blue-10: #edf5ff;
+  --cds-blue-20: #d0e2ff;
+  --cds-blue-30: #a6c8ff;
+  --cds-blue-40: #78a9ff;
+  --cds-blue-50: #4589ff;
+  --cds-blue-60: #0f62fe;
+  --cds-blue-70: #0043ce;
+  --cds-blue-80: #002d9c;
+  --cds-blue-90: #001d6c;
+  --cds-blue-100: #001141;
+
+  /* Purple — reserved for AI / agent surfaces */
+  --cds-purple-10: #f6f2ff;
+  --cds-purple-20: #e8daff;
+  --cds-purple-30: #d4bbff;
+  --cds-purple-40: #be95ff;
+  --cds-purple-50: #a56eff;
+  --cds-purple-60: #8a3ffc;
+  --cds-purple-70: #6929c4;
+  --cds-purple-80: #491d8b;
+  --cds-purple-90: #31135e;
+  --cds-purple-100: #1c0f30;
+
+  /* Teal */
+  --cds-teal-10: #d9fbfb;
+  --cds-teal-20: #9ef0f0;
+  --cds-teal-30: #3ddbd9;
+  --cds-teal-40: #08bdba;
+  --cds-teal-50: #009d9a;
+  --cds-teal-60: #007d79;
+  --cds-teal-70: #005d5d;
+  --cds-teal-80: #004144;
+  --cds-teal-90: #022b30;
+  --cds-teal-100: #081a1c;
+
+  /* Green — success */
+  --cds-green-10: #defbe6;
+  --cds-green-20: #a7f0ba;
+  --cds-green-30: #6fdc8c;
+  --cds-green-40: #42be65;
+  --cds-green-50: #24a148;
+  --cds-green-60: #198038;
+  --cds-green-70: #0e6027;
+  --cds-green-80: #044317;
+  --cds-green-90: #022d0d;
+  --cds-green-100: #071908;
+
+  /* Yellow — warning */
+  --cds-yellow-10: #fcf4d6;
+  --cds-yellow-20: #fddc69;
+  --cds-yellow-30: #f1c21b;
+  --cds-yellow-40: #d2a106;
+  --cds-yellow-50: #b28600;
+  --cds-yellow-60: #8e6a00;
+  --cds-yellow-70: #684e00;
+  --cds-yellow-80: #483700;
+  --cds-yellow-90: #302400;
+  --cds-yellow-100: #1c1500;
+
+  /* Red — error / danger */
+  --cds-red-10: #fff1f1;
+  --cds-red-20: #ffd7d9;
+  --cds-red-30: #ffb3b8;
+  --cds-red-40: #ff8389;
+  --cds-red-50: #fa4d56;
+  --cds-red-60: #da1e28;
+  --cds-red-70: #a2191f;
+  --cds-red-80: #750e13;
+  --cds-red-90: #520408;
+  --cds-red-100: #2d0709;
+
+  /* Gray — the structural neutrals */
+  --cds-gray-10: #f4f4f4;
+  --cds-gray-20: #e0e0e0;
+  --cds-gray-30: #c6c6c6;
+  --cds-gray-40: #a8a8a8;
+  --cds-gray-50: #8d8d8d;
+  --cds-gray-60: #6f6f6f;
+  --cds-gray-70: #525252;
+  --cds-gray-80: #393939;
+  --cds-gray-90: #262626;
+  --cds-gray-100: #161616;
+
+  /* Absolutes */
+  --cds-white: #ffffff;
+  --cds-black: #000000;
+
+  /* Off-palette steps Carbon uses for hover/active states. They sit between
+     published gray stops, so they exist as primitives rather than as one-off
+     literals buried in the semantic layer. */
+  --cds-gray-hover-light: #e8e8e8; /* between Gray 10 and Gray 20 */
+  --cds-gray-hover-dark: #4c4c4c;  /* between Gray 70 and Gray 80 */
+  --cds-blue-hover: #0353e9;       /* between Blue 60 and Blue 70 */
+  --cds-red-hover: #b81921;        /* between Red 60 and Red 70 */
+
+  /* RGB channel triplets, for the tokens Carbon defines as translucent. CSS
+     cannot pull the channels back out of a hex var(), so the few semantics
+     built with rgba() compose from these instead of hardcoding numbers. */
+  --cds-gray-100-rgb: 22, 22, 22;
+  --cds-gray-50-rgb: 141, 141, 141;
+  --cds-white-rgb: 255, 255, 255;
+}
+
+/* ----------------------------------------------------------------------------
+   N2 · SEMANTICS — Carbon g10 (light)
+   The only level a theme switch touches. Everything here points at N1.
+   ---------------------------------------------------------------------------- */
+
+:root {
+  /* — Backgrounds — the page shell */
+  --cds-background: var(--cds-gray-10);
+  --cds-background-inverse: var(--cds-gray-80);
+  --cds-background-brand: var(--cds-blue-60);
+  --cds-background-hover: rgba(var(--cds-gray-50-rgb), 0.12);
+  --cds-background-active: rgba(var(--cds-gray-50-rgb), 0.5);
+  --cds-background-selected: rgba(var(--cds-gray-50-rgb), 0.2);
+  --cds-background-selected-hover: rgba(var(--cds-gray-50-rgb), 0.32);
+  --cds-background-inverse-hover: var(--cds-gray-hover-dark);
+
+  /* — Layers — containers stacked on the background. In g10 the layers
+       alternate white/gray as they nest, which is what gives Carbon its
+       flat-but-legible depth without shadows. */
+  --cds-layer-01: var(--cds-white);
+  --cds-layer-02: var(--cds-gray-10);
+  --cds-layer-03: var(--cds-white);
+  --cds-layer-hover-01: var(--cds-gray-hover-light);
+  --cds-layer-hover-02: var(--cds-gray-hover-light);
+  --cds-layer-hover-03: var(--cds-gray-hover-light);
+  --cds-layer-active-01: var(--cds-gray-30);
+  --cds-layer-active-02: var(--cds-gray-30);
+  --cds-layer-selected-01: var(--cds-gray-20);
+  --cds-layer-selected-02: var(--cds-gray-20);
+  --cds-layer-selected-hover-01: var(--cds-gray-30);
+  --cds-layer-selected-inverse: var(--cds-gray-100);
+  --cds-layer-selected-disabled: var(--cds-gray-40);
+  --cds-layer-accent-01: var(--cds-gray-20);
+  --cds-layer-accent-hover-01: var(--cds-gray-30);
+
+  /* — Fields — input backgrounds */
+  --cds-field-01: var(--cds-white);
+  --cds-field-02: var(--cds-gray-10);
+  --cds-field-hover-01: var(--cds-gray-hover-light);
+  --cds-field-hover-02: var(--cds-gray-hover-light);
+  --cds-field-disabled: var(--cds-gray-10);
+
+  /* — Borders — subtle for structure, strong for definition */
+  --cds-border-subtle-00: var(--cds-gray-20);
+  --cds-border-subtle-01: var(--cds-gray-30);
+  --cds-border-subtle-02: var(--cds-gray-20);
+  --cds-border-subtle-selected-01: var(--cds-gray-30);
+  --cds-border-strong-01: var(--cds-gray-50);
+  --cds-border-strong-02: var(--cds-gray-50);
+  --cds-border-inverse: var(--cds-gray-100);
+  --cds-border-interactive: var(--cds-blue-60);
+  --cds-border-disabled: var(--cds-gray-30);
+  /* Convenience alias: the overwhelmingly common case is a subtle border on a
+     layer, and spelling it --cds-border-subtle keeps call sites readable. */
+  --cds-border-subtle: var(--cds-border-subtle-01);
+
+  /* — Text */
+  --cds-text-primary: var(--cds-gray-100);
+  --cds-text-secondary: var(--cds-gray-70);
+  --cds-text-placeholder: var(--cds-gray-40);
+  --cds-text-helper: var(--cds-gray-60);
+  --cds-text-error: var(--cds-red-60);
+  --cds-text-inverse: var(--cds-white);
+  --cds-text-on-color: var(--cds-white);
+  --cds-text-on-color-disabled: var(--cds-gray-40);
+  --cds-text-disabled: rgba(var(--cds-gray-100-rgb), 0.25);
+
+  /* — Icons — tracked separately from text: Carbon lets an icon read stronger
+       than its adjacent label. */
+  --cds-icon-primary: var(--cds-gray-100);
+  --cds-icon-secondary: var(--cds-gray-70);
+  --cds-icon-inverse: var(--cds-white);
+  --cds-icon-on-color: var(--cds-white);
+  --cds-icon-interactive: var(--cds-blue-60);
+  --cds-icon-disabled: rgba(var(--cds-gray-100-rgb), 0.25);
+
+  /* — Links */
+  --cds-link-primary: var(--cds-blue-60);
+  --cds-link-primary-hover: var(--cds-blue-70);
+  --cds-link-secondary: var(--cds-blue-70);
+  --cds-link-inverse: var(--cds-blue-40);
+  --cds-link-visited: var(--cds-purple-60);
+
+  /* — Interactive & focus */
+  --cds-interactive: var(--cds-blue-60);
+  --cds-focus: var(--cds-blue-60);
+  --cds-focus-inset: var(--cds-white);
+  --cds-focus-inverse: var(--cds-white);
+  --cds-highlight: var(--cds-blue-20);
+
+  /* — Buttons */
+  --cds-button-primary: var(--cds-blue-60);
+  --cds-button-primary-hover: var(--cds-blue-hover);
+  --cds-button-primary-active: var(--cds-blue-80);
+  --cds-button-secondary: var(--cds-gray-80);
+  --cds-button-secondary-hover: var(--cds-gray-hover-dark);
+  --cds-button-secondary-active: var(--cds-gray-60);
+  --cds-button-tertiary: var(--cds-blue-60);
+  --cds-button-tertiary-hover: var(--cds-blue-70);
+  --cds-button-tertiary-active: var(--cds-blue-80);
+  --cds-button-danger-primary: var(--cds-red-60);
+  --cds-button-danger-secondary: var(--cds-red-60);
+  --cds-button-danger-hover: var(--cds-red-hover);
+  --cds-button-danger-active: var(--cds-red-80);
+  --cds-button-disabled: var(--cds-gray-30);
+  --cds-button-separator: var(--cds-gray-20);
+
+  /* — Support — status and notification semantics.
+       Note the asymmetry: warning is Yellow 30 because darker yellows read as
+       brown, while error and success take the mid stops. Carbon picks these
+       per-hue for contrast, not for palette symmetry. */
+  --cds-support-error: var(--cds-red-60);
+  --cds-support-success: var(--cds-green-50);
+  --cds-support-warning: var(--cds-yellow-30);
+  --cds-support-info: var(--cds-blue-70);
+  --cds-support-caution-minor: var(--cds-yellow-30);
+  --cds-support-caution-major: var(--cds-yellow-40);
+  --cds-support-caution-undefined: var(--cds-purple-60);
+  --cds-support-error-inverse: var(--cds-red-50);
+  --cds-support-success-inverse: var(--cds-green-40);
+  --cds-support-warning-inverse: var(--cds-yellow-30);
+  --cds-support-info-inverse: var(--cds-blue-40);
+
+  /* — Overlay & skeleton */
+  --cds-overlay: rgba(var(--cds-gray-100-rgb), 0.5);
+  --cds-skeleton-background: var(--cds-gray-hover-light);
+  --cds-skeleton-element: var(--cds-gray-30);
+
+  /* — Miscellaneous controls */
+  --cds-toggle-off: var(--cds-gray-50);
+}

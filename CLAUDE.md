@@ -253,6 +253,23 @@ Both boards use `data-status` attributes for CSS styling:
 
 ## Important Patterns
 
+### Branching After a Merge (required)
+
+Once a branch is merged, **never** start the next piece of work from the stale local
+branch or from a local `main` that has not been refreshed. Always:
+
+```bash
+git checkout main
+git pull
+git checkout -b feature/<next-thing>
+```
+
+Merges on this repo are **rebase merges**, so the commits that land on `main` carry
+different SHAs than the ones pushed to the feature branch. A branch cut from a stale
+base therefore replays work that is already upstream and produces conflicts on the
+next PR. Pulling first is what keeps history linear and each PR limited to its own
+diff.
+
 ### Session Continuity (long-running work)
 
 Long efforts are tracked in Linear (team `personal-job-board-app`, prefix `PJBA`) and
