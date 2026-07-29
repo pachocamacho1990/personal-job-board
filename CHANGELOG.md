@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.12.0] - 2026-07-29
+
+### 🌐 Navegación web para el agente Zenith
+
+El agente puede ahora abrir una URL y leerla. Resuelve el caso de "pásale esta oferta al agente": pegar el enlace de una vacante y que extraiga los requisitos sin copiar y pegar a mano.
+
+#### Added
+- **Herramienta `browse_url`**: expuesta al LLM en `WORKSPACE_TOOLS_SCHEMAS` y despachada en `execute_tool` (`agent-service/src/tools/workspace_tools.py`). Recibe una URL y devuelve `{success, url, title, content}`.
+- **`agent-service/src/tools/browser.py`**: `BrowserManager`, singleton que mantiene un Chromium headless en background y arranca de forma perezosa en la primera navegación. Cada petición usa un contexto aislado, con user-agent de escritorio y espera a `networkidle` (timeout 15 s) para que carguen las SPAs.
+- **`html_to_markdown()`**: capa de parseo pura y sin I/O. Elimina `script`, `style`, `noscript`, `nav`, `footer`, `header`, `form`, `svg` e `iframe`, convierte a markdown ATX, compacta los saltos de línea repetidos y trunca a 15.000 caracteres para no desbordar la ventana de contexto del LLM.
+- **`agent-service/requirements-dev.txt`**: dependencias solo de test (`pytest`), fuera de la imagen de runtime. `DEPLOYMENT.md` documentaba cómo correr `pytest` en el contenedor, pero `pytest` no estaba instalado en ninguna parte y el suite era inejecutable.
+- **18 tests** en `agent-service/tests/test_browser.py` cubriendo el parseo (limpieza de ruido, headings ATX, enlaces y listas, truncado, fragmentos sin `<body>`, HTML malformado) y la orquestación con dobles de Playwright (éxito, respuesta nula, error HTTP, excepción de navegación, cierre del contexto en todos los casos).
+
+#### Fixed
+- **Fuga de Chromium al apagar**: el lifespan de FastAPI (`agent-service/src/main.py`) solo cerraba el pool de PostgreSQL, así que el navegador quedaba huérfano. Ahora también llama a `browser_manager.shutdown()`, que es seguro aunque nunca se haya navegado.
+
+#### Changed
+- **Imagen base del agente**: de `python:3.11-slim` a `mcr.microsoft.com/playwright/python:v1.44.0-jammy`, que ya trae los navegadores y sus dependencias de sistema.
+- **Dependencias**: `+playwright==1.44.0`, `+beautifulsoup4==4.12.3`, `+markdownify==0.12.1`.
+
+> **Nota sobre la 3.11.0**: aquella versión eliminó `playwright` y `browser-use` para aligerar la imagen del agente. Esto lo revierte **a propósito** — el coste (~2,9 GB de imagen) se acepta a cambio de que el agente pueda leer las ofertas por sí mismo. No volver a "limpiar" estas dependencias sin retirar antes la herramienta `browse_url`.
+
+---
+
 ## [3.11.0] - 2026-07-07
 
 ### 🚀 Onboarding laboral conversacional y búsqueda activa descentralizada (Fases 3, 4 y 5)

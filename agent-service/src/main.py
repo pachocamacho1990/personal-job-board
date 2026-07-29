@@ -10,6 +10,7 @@ from src.config import settings
 from src.db import db_manager
 from src.llm import llm_manager
 from src.tools.workspace_tools import WORKSPACE_TOOLS_SCHEMAS, execute_tool
+from src.tools.browser import browser_manager
 from pydantic import BaseModel
 
 
@@ -25,8 +26,9 @@ async def lifespan(app: FastAPI):
     # Startup: Connect PostgreSQL database pool
     await db_manager.connect()
     yield
-    # Shutdown: Close database pool
+    # Shutdown: Close database pool and the headless browser, if it was ever started
     await db_manager.disconnect()
+    await browser_manager.shutdown()
 
 app = FastAPI(
     title="Zenith AI Agent Microservice",
