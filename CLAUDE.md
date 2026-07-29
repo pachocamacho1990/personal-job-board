@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Version**: 3.10.0
+**Version**: 3.12.0
 
 A self-hosted career management platform supporting multiple **board instances** with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
 
@@ -252,6 +252,21 @@ Both boards use `data-status` attributes for CSS styling:
 - State persisted to localStorage
 
 ## Important Patterns
+
+### Session Continuity (long-running work)
+
+Long efforts are tracked in Linear (team `personal-job-board-app`, prefix `PJBA`) and
+handed off between sessions through `.claude/handoffs/`:
+
+- `CURRENT.md` — live state: where we stopped, the literal next step, gotchas.
+- `DECISIONS.md` — append-only architectural decisions and discarded paths.
+- `snapshots/` — mechanical dumps written by hooks (gitignored, emergency use only).
+
+The `handoff` skill (`.claude/skills/handoff/`) owns this protocol. Invoke it in
+`resume` mode when a handoff exists at session start, in `checkpoint` mode after
+closing each Linear issue, and in `save` mode when wrapping up. A `SessionStart` hook
+injects the open handoff automatically — but **verify it against the real repo state
+before trusting it**.
 
 ### Documentation Sync Requirement
 
