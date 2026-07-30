@@ -99,3 +99,33 @@ Meterlos en N2 rompería la regla de que N2 solo contiene referencias.
 **Descartado**: nombrarlos por rol (`--cds-gray-hover-light/dark`). Se agota en
 cuanto g100 necesita cinco más y dos valores distintos caen "entre Gray 70 y
 Gray 80".
+
+## 2026-07-30 · Radio 0 y ausencia de elevación quedan EN REVISIÓN
+
+Durante la migración (PJBA-10, PJBA-15) decidí radio 0 en todo salvo tags, y
+elevación solo en overlays, razonando que "las esquinas son estructura, no
+decoración" y que redondearlas es lo que más hace que una UI deje de leerse
+como Carbon.
+
+**El usuario ha visto el resultado desplegado y no le convence**: pide esquinas
+redondeadas, profundidad al hover y al click, y rellenos de columna más suaves.
+Su palabra fue que la app "se ve demasiado cuadrada".
+
+**Estado**: no revertidas, en revisión. La siguiente sesión debe estudiar la
+documentación real de Carbon antes de cambiar nada, porque hay dos respuestas
+legítimas y opuestas:
+
+- Si Carbon v11 es cuadrado por principio, el camino honesto es decírselo y
+  ofrecerle una **desviación consciente y documentada** del sistema — no fingir
+  que la documentación respalda lo que quiere.
+- Si mi lectura fue más rígida que la del propio Carbon, hay margen dentro del
+  sistema y se corrige sin más.
+
+**Lo que no está en revisión y es una omisión limpia**: nunca implementé el
+sistema de motion de Carbon. Tiene tokens de duración y easing documentados, y
+en la app no hay ninguno. Es la palanca más grande para lo que el usuario llama
+"premium" y no entra en conflicto con ninguna decisión anterior.
+
+**Restricción dura sobre cualquier cambio de color**: el barrido de contraste
+está en 0 elementos bajo AA en 12 combinaciones página/tema, y tiene que seguir
+en 0. "Colores más suaves" es exactamente el cambio que puede romperlo.
