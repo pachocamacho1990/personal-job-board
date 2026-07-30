@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+/* IBM Plex is loaded from the <head> of each HTML entry, not from here — see
+   PJBA-12. A CSS @import is invisible to the preload scanner, so the browser
+   only learns about the fonts after this stylesheet has downloaded and parsed. */
 
 /* Reset & Base Styles */
 * {
