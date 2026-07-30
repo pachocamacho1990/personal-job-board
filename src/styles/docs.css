@@ -94,7 +94,7 @@ aside.docs-sidebar {
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: var(--cds-text-placeholder);
+            color: var(--cds-text-secondary);
             margin-bottom: 0.5rem;
             font-weight: 700;
         }
@@ -119,7 +119,7 @@ aside.docs-sidebar {
         }
 
         .nav-link.active {
-            color: var(--cds-button-primary);
+            color: var(--cds-status-applied);
             background: var(--cds-layer-selected-01);
             font-weight: 500;
         }

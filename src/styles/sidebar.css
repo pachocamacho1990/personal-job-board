@@ -67,9 +67,9 @@
 
 .nav-item.active {
     background-color: var(--cds-highlight);
-    color: var(--cds-button-primary);
+    color: var(--cds-status-applied);
     font-weight: 600;
-    border-left: 3px solid var(--cds-button-primary);
+    border-left: 3px solid var(--cds-status-applied);
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
@@ -125,7 +125,7 @@
     width: 32px;
     height: 32px;
     background-color: var(--cds-highlight);
-    color: var(--cds-button-primary);
+    color: var(--cds-status-applied);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -195,7 +195,7 @@
 
 .board-nav-item.active {
     background-color: var(--cds-highlight);
-    color: var(--cds-button-primary);
+    color: var(--cds-status-applied);
     font-weight: 500;
 }
 
@@ -242,7 +242,7 @@
     gap: 0.4rem;
     padding: 0.4rem 0.6rem;
     font-size: 0.825rem;
-    color: var(--cds-button-primary);
+    color: var(--cds-link-primary);
     background: none;
     border: none;
     cursor: pointer;
@@ -254,7 +254,7 @@
 }
 
 .new-board-btn:hover {
-    color: var(--cds-button-primary-hover);
+    color: var(--cds-link-primary);
     text-decoration: underline;
 }
 
