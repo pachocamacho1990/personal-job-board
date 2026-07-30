@@ -6,7 +6,11 @@ import { createRoot } from 'react-dom/client';
 // This is the only place it should ever be imported.
 import './styles/theme.css';
 
+import { initTheme } from './theme';
 import { App } from './App';
+
+// Before the first render, so the tree never paints against the wrong theme.
+initTheme();
 
 const container = document.getElementById('root');
 if (container) {

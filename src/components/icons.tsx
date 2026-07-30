@@ -275,6 +275,15 @@ export const ClipboardIcon: React.FC<IconProps> = ({ size = 16, className, ...pr
   </svg>
 );
 
+/** Half-filled circle: the state of the theme rather than a sun/moon metaphor,
+ *  which reads as "it is night" instead of "this control switches contrast". */
+export const ContrastIcon: React.FC<IconProps> = ({ size = 16, className, ...props }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+    <circle cx="16" cy="16" r="13" />
+    <path d="M16 3a13 13 0 0 1 0 26z" fill="currentColor" stroke="none" />
+  </svg>
+);
+
 export const RocketLaunchIcon: React.FC<IconProps> = ({ size = 16, className, ...props }) => (
   <svg width={size} height={size} viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
     <path d="M4.5 27.5L8 24l-3-3 3.5-3.5 5 2-1 6.5z" />

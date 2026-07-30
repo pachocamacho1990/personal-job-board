@@ -11,8 +11,10 @@ import {
   DocsIcon,
   PlusIcon,
   EditIcon,
-  TrashIcon
+  TrashIcon,
+  ContrastIcon
 } from './icons';
+import { CarbonTheme, getCurrentTheme, toggleTheme } from '../theme';
 
 interface SidebarProps {
   activePage: 'dashboard' | 'jobs' | 'business' | 'docs' | 'profile';
@@ -35,6 +37,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [userEmail, setUserEmail] = useState<string>('');
   const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
+  // main.tsx has already applied the theme by the time this mounts, so the
+  // initial read reflects what is actually on <html>.
+  const [theme, setTheme] = useState<CarbonTheme>(() => getCurrentTheme());
 
   useEffect(() => {
     try {
@@ -177,6 +182,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </a>
         </nav>
         <div className="sidebar-footer">
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={() => setTheme(toggleTheme())}
+            aria-pressed={theme === 'g100'}
+            title={theme === 'g10' ? 'Cambiar a tema oscuro' : 'Cambiar a tema claro'}
+          >
+            <ContrastIcon size={18} />
+            <span>{theme === 'g10' ? 'Tema claro' : 'Tema oscuro'}</span>
+          </button>
           <div className="user-profile">
             <div className="user-avatar">{avatarChar}</div>
             <div className="user-info">
