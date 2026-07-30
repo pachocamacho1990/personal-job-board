@@ -222,16 +222,69 @@ SELECT * FROM job_history WHERE job_id = 1;
 - localStorage keys:
   - `authToken`: JWT token
   - `user`: User object (JSON)
-  - `isCompactView`: Job Board view preference
+  - `viewPreference`: Job Board view preference (`compact` / `comfortable`)
   - `businessBoardCompactView`: Business Board view preference
-  - `focusMode`: Focus Mode state (sidebar hidden)
+  - `focusModePreference`: Focus Mode state (sidebar hidden)
+  - `activeBoardId`: Currently selected board instance
+  - `carbonTheme`: Active Carbon theme (`g10` light / `g100` dark)
 - Sidebar navigation highlighting via `sidebar.js`
 
-### Color-Coded Columns
+### Color-Coded Columns (Carbon status tokens)
 
-Both boards use `data-status` attributes for CSS styling:
-- Job Board: interested (purple), applied (blue), forgotten (gray), interview (orange), pending (amber), offer (green), rejected (dark gray)
-- Business Board: researching (indigo), contacted (cyan), meeting (violet), negotiation (orange), signed (green)
+Both boards still key their styling off `data-status` attributes, but no stylesheet
+holds a colour any more. Every status resolves through a **triplet of semantic
+tokens** defined in `src/styles/theme.css`:
+
+| Token | Applied to |
+|-------|-----------|
+| `--cds-status-<name>` | Column header title + border, card left border (the accent) |
+| `--cds-status-<name>-header` | Column header fill |
+| `--cds-status-<name>-surface` | Column body / cards container fill |
+
+- Job Board statuses: `interested`, `applied`, `forgotten`, `interview`, `pending`, `offer`, `rejected`
+- Business Board statuses: `researching`, `contacted`, `meeting`, `negotiation`, `signed`
+
+Each triplet is defined **twice** — once under `:root` (g10, light) and once under
+`[data-carbon-theme='g100']` (dark). The light theme tints toward white (accent at
+the 70 stop, fills at 10/20); the dark theme inverts it (accent at 30, fills at
+80/90) so the same status reads at the same strength in both.
+
+Rules when touching board styling:
+
+1. Never write a hex, `rgb()` or `rgba()` in a page stylesheet — `src/styles/*.css`
+   contains zero colour literals and that is enforced.
+2. Never reach for an N1 primitive (`--cds-blue-60`) from a component stylesheet.
+   Primitives are theme-independent by design, so a component that consumes one
+   will not follow the theme switch. Consume N2 semantics only.
+3. Adding a status means adding its triplet to **both** theme blocks. A token
+   present only in g10 silently inherits its light value in dark mode.
+4. Verify with `python3 scripts/check-tokens.py` (structure, g10/g100 parity, WCAG
+   contrast). `python3 scripts/audit-undefined-tokens.py` catches `var()`
+   references that resolve to nothing, and
+   `python3 scripts/find-non-carbon-colors.py <file.css>` catches literals that
+   slipped back in.
+
+### Theming (g10 / g100)
+
+- The active theme is a `data-carbon-theme` attribute on `<html>` (`g10` light,
+  `g100` dark), applied by `src/theme.ts` before React mounts.
+- Resolution order on first load: stored preference wins; otherwise
+  `prefers-color-scheme`. Once the user chooses, the OS is no longer consulted.
+- The toggle lives at the foot of the Sidebar and persists to
+  `localStorage.carbonTheme`.
+- Typography is **IBM Plex Sans** and **IBM Plex Mono**, linked from the `<head>`
+  of each HTML entry — not via a CSS `@import`, which would block rendering.
+- `src/styles/theme.css` is imported exactly once, from `src/main.tsx`. Do not
+  import it anywhere else.
+
+### Shared UI Components
+
+- `src/components/Drawer.tsx` — the right-hand editing drawer shell shared by
+  `DetailPanel` and `BusinessDetailPanel` (aside, header, close button, Escape
+  handling, with a `blockedBy` prop for layers stacked above it).
+- `src/components/InlineNotification.tsx` — Carbon inline notification
+  (`error | success | info | warning`). Colour lives entirely in the modifier
+  class, so a caller cannot invent a kind that skips the contrast checks.
 
 ### UI Interaction Patterns
 

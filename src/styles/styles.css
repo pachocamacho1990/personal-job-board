@@ -25,7 +25,7 @@
 
 :root {
     --color-primary: var(--cds-button-primary);
-    --color-accent: var(--cds-purple-60); /* AI surfaces; PJBA-22 gives these a semantic */
+    --color-accent: var(--cds-agent-accent);
     --color-text-muted: var(--cds-text-secondary);
     --color-border: var(--cds-border-subtle-00);
     --color-success: var(--cds-support-success);
@@ -1086,7 +1086,9 @@ body.focus-mode .job-card.dimmed {
     border-left: 3px solid var(--cds-status-pending);
 }
 
-/* Center Peek Modal - Aurora Theme */
+/* Center Peek — the read-only job detail modal.
+   A layer-01 panel over --cds-overlay: Carbon dims the page rather than tinting
+   it, so the container reads as a raised surface without changing hue. */
 .center-peek-overlay {
     position: fixed;
     top: 0;
@@ -1542,7 +1544,10 @@ body.focus-mode .job-card.dimmed {
     margin-bottom: var(--cds-spacing-06);
 }
 
-/* Zenith Brand Identity Additions */
+/* Agent-origin cards.
+   A job the AI created is marked in purple — a left border plus a slow pulse
+   that stops on hover, once the card has the user's attention. The pulse uses
+   the -rgb form of the agent accent because it feeds an alpha into rgba(). */
 @keyframes pulseAgent {
     0% {
         box-shadow: 0 0 0 0 rgba(var(--cds-agent-accent-rgb), 0.4);

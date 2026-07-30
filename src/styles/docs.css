@@ -302,7 +302,9 @@ aside.docs-sidebar {
             background: var(--cds-terminal-border);
         }
 
-        /* Glassmorphic Alerts */
+        /* Alerts — flat Carbon panels: a background fill, a subtle border and a
+           square corner. No blur or translucency. The kind is carried by the
+           status-tinted left border plus the glyph in ::before. */
         .alert {
             background: var(--cds-background);
             border: 1px solid var(--cds-border-subtle-00);

@@ -14,10 +14,12 @@ graph TD
 
 ### Components
 
-1. **Frontend (Public)**: Vanilla JS SPA with three main views
+1. **Frontend**: React 19 + TypeScript SPA, built with Vite as a multi-page app
+   (one HTML entry per page, each mounting a React root)
    - Dashboard (home)
    - Job Board (Kanban)
    - Business Board (Kanban)
+   - Profile, Docs, Login
 2. **API (Server)**: Express.js application handling Auth, Jobs, Business, Dashboard
 3. **Database (Persistence)**: PostgreSQL storing Users, Jobs, and Business Entities
 4. **Gateway (Nginx)**: Handles routing, static file serving, and API proxying
@@ -126,44 +128,100 @@ graph TD
 
 ## Design System (UI)
 
-Aurora Design System - Modern, clean aesthetic with color-coded status columns.
+**IBM Carbon Design System.** Structural, square-cornered, colour-as-meaning. The
+full token reference lives in [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md); this section
+covers only how the app consumes it.
 
-### Status Colors - Job Board
-| Status | Color | Hex |
-|--------|-------|-----|
-| Interested | Purple | #A855F7 |
-| Applied | Blue | #3B82F6 |
-| Interview | Amber | #F59E0B |
-| Offer | Green | #22C55E |
-| Rejected | Slate | #64748B |
-| Rejected | Slate | #64748B |
-| Forgotten | Gray | #9CA3AF |
-| Archived | Black/Opacity | (Glass Effect) |
+### Token Engine
 
-### Status Colors - Business Board
-| Status | Color | Hex |
-|--------|-------|-----|
-| Researching | Indigo | #6366F1 |
-| Contacted | Cyan | #0891B2 |
-| Meeting | Violet | #8B5CF6 |
-| Negotiation | Orange | #EA580C |
-| Signed | Emerald | #059669 |
-| Rejected | Slate | #64748B |
+Everything is defined in `src/styles/theme.css`, imported once from `src/main.tsx`,
+in two levels:
 
-### Entity Type Icons
-| Type | Icon |
-|------|------|
-| Job | 💼 |
-| Connection (Job Board) | 🤝 |
-| Investor | 💸 |
-| VC | 🏛️ |
-| Accelerator | 🚀 |
-| Connection (Business) | 🤝 |
+| Level | What it is | Example | Changes with theme? |
+|-------|-----------|---------|---------------------|
+| **N1 — Primitives** | The official Carbon palette as raw hex, named after the palette | `--cds-blue-60: #0f62fe` | No |
+| **N2 — Semantics** | What a colour is *for*, as `var()` references into N1 | `--cds-text-primary`, `--cds-layer-01` | Yes |
+
+The eight stylesheets in `src/styles/` contain **zero colour literals** and consume
+N2 only. A component that reaches for an N1 primitive cannot follow a theme switch,
+which is precisely the bug the split prevents.
+
+Alongside colour sit the theme-independent scales: spacing (`--cds-spacing-01`…`13`),
+type (families, weights, sizes, line heights, letter spacing, plus composed styles),
+radius and elevation.
+
+### Themes
+
+Two themes, selected by a `data-carbon-theme` attribute on `<html>`:
+
+| Theme | Mode | Attribute value |
+|-------|------|-----------------|
+| **g10** | Light | `g10` (also the default when nothing is stored) |
+| **g100** | Dark | `g100` |
+
+- Applied by `src/theme.ts` before React mounts, so there is no flash of the wrong theme.
+- Resolution on first load: stored preference wins, otherwise `prefers-color-scheme`.
+  After an explicit choice the OS is no longer consulted.
+- Persisted to `localStorage.carbonTheme`; the toggle sits at the foot of the Sidebar.
+
+### Typography
+
+**IBM Plex Sans** (UI) and **IBM Plex Mono** (code, IDs, tool output), linked from the
+`<head>` of every HTML entry rather than through a CSS `@import`, which would serialise
+the font fetch behind the stylesheet. Carbon carries emphasis at weight 600, never 700.
+
+### Status Colors — token triplets
+
+Each board status resolves through three semantic tokens rather than a hex:
+
+| Token | Applied to |
+|-------|-----------|
+| `--cds-status-<name>` | Column header title and border, card left border |
+| `--cds-status-<name>-header` | Column header fill |
+| `--cds-status-<name>-surface` | Column body fill |
+
+**Job Board**: `interested` (purple), `applied` (blue), `interview` (yellow),
+`pending` (teal), `offer` (green), `rejected` (gray), `forgotten` (gray, one stop darker).
+
+**Business Board**: `researching` (blue), `contacted` (teal), `meeting` (purple),
+`negotiation` (red), `signed` (green).
+
+The hue names above are Carbon palette families, not literals. In g10 the accent sits at
+the 70 stop with 10/20 fills; in g100 that inverts to a 30 accent with 80/90 fills, so a
+status reads at the same strength on either background. Every pair is contrast-checked —
+see `scripts/check-tokens.py`.
+
+Beyond the board statuses, `--cds-agent-accent` marks anything the AI produced (agent-origin
+card border and pulse), and the support semantics (`--cds-support-error`, `-success`,
+`-info`, `-warning`, each with a `-subtle` fill) drive the inline notifications.
+
+### Iconography
+
+No emoji in the UI. Icons are inline SVG React components in `src/components/icons.tsx`,
+sized via a `size` prop and inheriting `currentColor` so they follow the theme:
+
+| Type | Component |
+|------|-----------|
+| Job | `JobBoardIcon` |
+| Connection (Job Board) | `BusinessIcon` |
+| Investor | `MoneyIcon` |
+| VC | `InstitutionIcon` |
+| Accelerator | `RocketIcon` |
+| Connection (Business) | `HandshakeIcon` |
+
+### Conformance Scripts
+
+| Script | Checks |
+|--------|--------|
+| `scripts/check-tokens.py` | Token structure, g10/g100 parity (a semantic missing from g100 silently inherits its light value), and WCAG contrast for every text/surface pair in both themes |
+| `scripts/audit-undefined-tokens.py` | `var()` references that resolve to nothing — the browser drops the whole declaration silently, so these are live bugs |
+| `scripts/find-non-carbon-colors.py <file.css>` | Colour literals, including `rgba()`, and whether each is in the Carbon palette |
 
 ### Navigation
 - **Left Sidebar**: Consistent across all pages
 - **Active Page**: Highlighted with accent color
 - **User Profile**: Displayed in sidebar footer
+- **Theme Toggle**: Sidebar footer, persists across sessions
 - **Logout**: Confirmation modal
 
 ### UX Patterns
@@ -181,6 +239,8 @@ Aurora Design System - Modern, clean aesthetic with color-coded status columns.
 
 ### UI Components
 - **Confirmation Modals**: Use generic overlay with `confirm/cancel` actions for destructive operations (Delete, Archive, Logout).
+- **`Drawer`** (`src/components/Drawer.tsx`): The right-hand editing drawer shell, shared by the Job and Business detail panels. Owns the aside, its positioning, the header with title and close button, and the Escape handler. A `blockedBy` prop lists layers stacked above it (confirmation dialog, file preview) — while any is open, Escape belongs to that layer.
+- **`InlineNotification`** (`src/components/InlineNotification.tsx`): Carbon inline notification in four kinds (`error`, `success`, `info`, `warning`) — a subtle fill, a solid status bar down the leading edge, and text that clears AA against that fill. All colour lives in the modifier class; there is no colour prop, so a caller cannot invent a kind that bypasses the contrast checks.
 
 ### Feature Workflows
 
