@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.13.0] - 2026-07-30
+
+### 🎨 Migración completa a IBM Carbon Design System (g10/g100)
+
+Toda la interfaz pasa a IBM Carbon, con tema claro y oscuro. El punto no era repintar: era que dejara de haber colores sueltos. Antes, cambiar un gris significaba buscarlo en ocho hojas de estilo y en los estilos inline de una docena de componentes. Ahora hay **un solo sitio** donde vive cada decisión de color.
+
+#### Added
+- **Motor de tokens de dos niveles** (`src/styles/theme.css`): primitivos N1 con la paleta oficial de Carbon, y semánticos N2 nombrados por propósito que apuntan a ellos. Cambiar de tema **solo** redefine N2. Regla dura: los componentes consumen N2, nunca N1 — un primitivo no puede seguir un cambio de tema.
+- **Tema oscuro g100** completo, con toggle persistente al pie de la Sidebar. La preferencia guardada gana a `prefers-color-scheme`, y persistir es opcional: aplicar el tema al arrancar **no** guarda una preferencia que el usuario nunca expresó.
+- **Escalas Carbon**: spacing 01–13, escala tipográfica con 11 estilos compuestos, radio 0 y elevación solo en overlays.
+- **Colores de estado como semánticos**: 12 estados × 3 tokens × 2 temas. `pending` era el único sin tokens — eran tres slates de Tailwind incrustados — y ahora es teal.
+- **Componentes compartidos**: `Drawer` (los dos paneles de detalle duplicaban la misma carcasa) e `InlineNotification` (tres banners que eran el mismo componente escrito tres veces). Ninguno acepta color por prop: el tipo es una clase modificadora, así que nadie puede inventarse una variante que se salte los checks de contraste.
+- **Scripts de conformidad** en `scripts/`: `check-tokens.py` (estructura, paridad g10/g100, contraste WCAG calculado), `audit-undefined-tokens.py` y `find-non-carbon-colors.py`.
+- **`tests/theme-toggle.spec.js`**: 8 tests E2E del contrato del toggle. Cada aserción mide un `background` computado junto al atributo, así que un cambio sin estilos detrás falla.
+
+#### Fixed
+- **Un input sin ningún indicador de foco.** El anillo del buscador del archivo apuntaba a `--color-primary-soft`, que ninguna hoja definía. Un `var()` indefinido descarta la declaración entera, así que quien navegara por teclado no veía dónde estaba.
+- **`docs.css` estilaba toda la aplicación.** Declaraba `h1`, `code`, `table` y otros a nivel raíz, y como Vite bundlea todo el CSS en un archivo que cargan las seis páginas, esas reglas se aplicaban en todas. En la página de login, un `h1` computaba 40px/700 y un `code` salía magenta sobre slate.
+- **La página de docs llevaba meses cayendo al fallback tipográfico**: su `<link>` de fuentes estaba malformado (`family=Outfit:Outfit:wght@…`), así que Google Fonts no servía nada.
+- **57 fallos de contraste AA**, encontrados midiendo cada nodo de texto en las seis páginas por ambos temas, no mirando capturas. Ahora son **0**. Entre ellos, los colores de estado ya incumplían AA **antes** de la migración: acento hue-60 sobre relleno hue-20 da 3.79, y `interview` daba 2.48.
+- **Tokens que no pintaban nada**: 14 referencias `var()` sin definir en 37 usos, la mayoría colores de texto que por tanto se heredaban en vez de aplicarse. Quedan 0.
+- **Reglas duplicadas y muertas**: el bloque `.dashboard-*` estaba declarado en dos hojas, y un alias de la sidebar se referenciaba a sí mismo, lo que lo hacía inválido y sin efecto desde siempre.
+
+#### Changed
+- IBM Plex se carga desde el `<head>` de cada HTML en vez de por `@import` en CSS, que el preload scanner no puede ver.
+- Estética aplanada: sin sombras fuera de los overlays, sin `backdrop-filter`, sin gradientes decorativos, radios a 0.
+- Estilos inline reducidos de 207 a 137; los que quedan son valores de un solo uso.
+- `DESIGN_SYSTEM.md` reescrito como fuente única; `DESIGN.md`, `CLAUDE.md` y `TESTING.md` actualizados; la página de docs in-app documenta ahora el theming y las 13 herramientas del agente.
+
+#### Notes
+- Los tres puntos de "semáforo" de macOS en el panel del login siguen siendo literales a propósito: citan una interfaz real, como haría un logo.
+- El panel showcase del login es oscuro en ambos temas por diseño, así que fija sus propios tokens con scope en vez de leer los semánticos temáticos.
+
+---
+
 ## [3.12.0] - 2026-07-29
 
 ### 🌐 Navegación web para el agente Zenith
