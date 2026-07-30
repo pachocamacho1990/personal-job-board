@@ -357,7 +357,7 @@ export const AgentConsole: React.FC = () => {
           <div className="agent-header-icon"><BrainIcon size={20} /></div>
           <div className="agent-header-info">
             <div className="agent-header-title">Zenith Agent</div>
-            <div className={`agent-header-status ${isOnline ? 'online' : 'offline'}`} style={{ color: isOnline ? 'var(--color-success)' : 'var(--color-text-muted)' }}>
+            <div className={`agent-header-status ${isOnline ? 'online' : 'offline'}`} style={{ color: isOnline ? 'var(--cds-support-success)' : 'var(--cds-text-secondary)' }}>
               {isOnline && <span className="agent-status-dot" />}
               {isOnline ? 'Online' : 'Conectando...'}
             </div>
@@ -397,7 +397,7 @@ export const AgentConsole: React.FC = () => {
         {/* View Selection: Chat vs History List */}
         {viewMode === 'list' ? (
           <div className="agent-conv-list">
-            <div style={{ padding: '0 4px 8px 4px', fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+            <div style={{ padding: '0 4px 8px 4px', fontSize: '0.8rem', color: 'var(--cds-text-secondary)', fontWeight: 600 }}>
               Chats Recientes
             </div>
             {conversations.length === 0 ? (
@@ -414,7 +414,7 @@ export const AgentConsole: React.FC = () => {
                     <div className="agent-conv-snippet">
                       {conv.lastMessage ? conv.lastMessage : 'Sin mensajes'}
                     </div>
-                    <div style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--cds-text-secondary)', marginTop: '4px' }}>
                       {formatConvDate(conv.lastActive || conv.createdAt)}
                     </div>
                   </div>

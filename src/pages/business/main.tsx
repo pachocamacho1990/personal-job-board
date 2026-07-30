@@ -175,7 +175,7 @@ export const BusinessPage: React.FC = () => {
               <h1 className="page-title" style={{ fontFamily: 'Outfit, sans-serif' }}>
                 Business Connections
               </h1>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+              <p style={{ color: 'var(--cds-text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
                 Manage investors, partners, and key professional relations.
               </p>
             </div>

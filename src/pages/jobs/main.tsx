@@ -387,7 +387,7 @@ export const JobsPage: React.FC = () => {
               <h1 className="page-title" style={{ fontFamily: 'Outfit, sans-serif' }}>
                 {pageHeaderTitle}
               </h1>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+              <p style={{ color: 'var(--cds-text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
                 Track your active job search pipelines and candidate funnel.
               </p>
             </div>
@@ -550,7 +550,7 @@ export const JobsPage: React.FC = () => {
                                     href={job.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    style={{ color: 'var(--primary)', fontSize: '0.8rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                    style={{ color: 'var(--cds-button-primary)', fontSize: '0.8rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <LinkIcon size={12} /> Ver publicación

@@ -309,13 +309,13 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                 id="lockedBanner"
                 style={{
                   display: 'block',
-                  background: '#f3f4f6',
-                  color: '#4b5563',
+                  background: 'var(--cds-layer-02)',
+                  color: 'var(--cds-text-secondary)',
                   padding: '1rem',
                   borderRadius: '6px',
                   marginBottom: '1rem',
                   textAlign: 'center',
-                  border: '1px dashed #d1d5db',
+                  border: '1px dashed var(--cds-border-strong-01)',
                 }}
               >
                 🔒 <strong>Locked</strong>
@@ -328,7 +328,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
               <div
                 id="timestampInfo"
                 className="timestamp-info"
-                style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}
+                style={{ display: 'block', fontSize: '0.8rem', color: 'var(--cds-text-secondary)', marginBottom: '1rem' }}
               >
                 Created: {formatFullDate(createdAt)}
                 {updatedAt && updatedAt !== createdAt && ` | Updated: ${formatFullDate(updatedAt)}`}
@@ -646,7 +646,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                   dangerouslySetInnerHTML={{
                     __html: comments
                       ? marked.parse(comments)
-                      : '<p style="color: var(--text-tertiary);">No comments yet...</p>',
+                      : '<p style="color: var(--cds-text-placeholder);">No comments yet...</p>',
                   }}
                 />
               ) : (
@@ -664,7 +664,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
               <div 
                 className={`form-group ai-copilot-accordion ${isCopilotOpen ? 'open' : ''}`}
                 style={{
-                  border: '1px solid var(--border)',
+                  border: '1px solid var(--cds-border-subtle-00)',
                   borderRadius: '8px',
                   padding: '1rem',
                   backgroundColor: 'rgba(99, 102, 241, 0.03)',
@@ -684,10 +684,10 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                   onClick={() => setIsCopilotOpen(!isCopilotOpen)}
                   id="copilotAccordionHeader"
                 >
-                  <span style={{ fontWeight: 700, color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontWeight: 700, color: 'var(--cds-text-primary)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                     <BrainIcon size={16} /> Copiloto de Postulación IA
                   </span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>
                     {isCopilotOpen ? '▲ Contraer' : '▼ Expandir'}
                   </span>
                 </div>
@@ -695,7 +695,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                 {isCopilotOpen && (
                   <div className="accordion-body" style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.25rem', display: 'block' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--cds-text-secondary)', marginBottom: '0.25rem', display: 'block' }}>
                         Tipo de Documento
                       </label>
                       <div className="type-selector" style={{ gap: '0.5rem' }}>
@@ -741,9 +741,9 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                           style={{ 
                             padding: '8px 16px', 
                             fontSize: '0.85rem',
-                            backgroundColor: copyDocSuccess ? '#D1FAE5' : '',
-                            color: copyDocSuccess ? '#065F46' : '',
-                            borderColor: copyDocSuccess ? '#A7F3D0' : ''
+                            backgroundColor: copyDocSuccess ? 'var(--cds-status-offer-surface)' : '',
+                            color: copyDocSuccess ? 'var(--cds-status-offer)' : '',
+                            borderColor: copyDocSuccess ? 'var(--cds-status-offer-header)' : ''
                           }}
                           onClick={handleCopyDocToClipboard}
                           id="copyCopilotDocBtn"
@@ -757,12 +757,12 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                       <div 
                         id="copilotDocResult"
                         style={{
-                          background: 'var(--canvas)',
-                          border: '1px solid var(--border)',
+                          background: 'var(--cds-layer-01)',
+                          border: '1px solid var(--cds-border-subtle-00)',
                           borderRadius: '6px',
                           padding: '1rem',
                           fontSize: '0.875rem',
-                          color: 'var(--text-main)',
+                          color: 'var(--cds-text-primary)',
                           maxHeight: '200px',
                           overflowY: 'auto',
                           fontFamily: 'monospace',
@@ -777,10 +777,10 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                         style={{ 
                           textAlign: 'center', 
                           padding: '1.5rem', 
-                          border: '1px dashed var(--border)', 
+                          border: '1px dashed var(--cds-border-subtle-00)', 
                           borderRadius: '6px',
                           fontSize: '0.8rem',
-                          color: 'var(--text-tertiary)'
+                          color: 'var(--cds-text-placeholder)'
                         }}
                       >
                         Presiona "Generar con IA" para redactar tu documento adaptado.
@@ -800,9 +800,9 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                   className="btn-secondary"
                   style={{
                     marginRight: '0.5rem',
-                    backgroundColor: '#EEF2FF',
-                    color: '#4F46E5',
-                    borderColor: '#E0E7FF',
+                    backgroundColor: 'var(--cds-status-applied-surface)',
+                    color: 'var(--cds-status-applied)',
+                    borderColor: 'var(--cds-status-applied-header)',
                   }}
                   onClick={() => setShowTransformConfirm(true)}
                 >
@@ -885,7 +885,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                   listStyleType: 'disc',
                   marginLeft: '1.5rem',
                   marginBottom: '1rem',
-                  color: 'var(--text-secondary)',
+                  color: 'var(--cds-text-secondary)',
                 }}
               >
                 <li>
@@ -909,7 +909,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
               <button
                 id="confirmTransform"
                 className="btn-primary"
-                style={{ backgroundColor: '#4F46E5' }}
+                style={{ backgroundColor: 'var(--cds-button-primary)' }}
                 onClick={async () => {
                   if (jobId) {
                     await onTransform(jobId);

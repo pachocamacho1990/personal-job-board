@@ -75,12 +75,12 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
       {!collapsed && (
         <div style={{ position: 'relative', width: '100%', display: 'flex', flexDirection: 'column' }}>
           {isEditing ? (
-            <div className="agent-msg-bubble" style={{ width: '100%', background: 'var(--color-bg-card)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px' }}>
+            <div className="agent-msg-bubble" style={{ width: '100%', background: 'var(--cds-layer-01)', border: '1px solid var(--cds-border-subtle-00)', display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px' }}>
               <textarea
                 className="agent-input-field"
                 value={editVal}
                 onChange={(e) => setEditVal(e.target.value)}
-                style={{ width: '100%', minHeight: '100px', maxHeight: 'none', padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', background: 'var(--bg-input)', resize: 'vertical', overflowY: 'auto' }}
+                style={{ width: '100%', minHeight: '100px', maxHeight: 'none', padding: '8px', borderRadius: '4px', border: '1px solid var(--cds-border-subtle-00)', fontSize: '0.85rem', color: 'var(--cds-text-primary)', background: 'var(--cds-field-01)', resize: 'vertical', overflowY: 'auto' }}
               />
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                 <button
@@ -92,9 +92,9 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
                   style={{
                     padding: '4px 10px',
                     fontSize: '0.75rem',
-                    border: '1px solid var(--border-color)',
+                    border: '1px solid var(--cds-border-subtle-00)',
                     background: 'transparent',
-                    color: 'var(--text-secondary)',
+                    color: 'var(--cds-text-secondary)',
                     borderRadius: '4px',
                     cursor: 'pointer'
                   }}
@@ -112,8 +112,8 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
                   style={{
                     padding: '4px 10px',
                     fontSize: '0.75rem',
-                    background: 'var(--primary)',
-                    color: '#ffffff',
+                    background: 'var(--cds-button-primary)',
+                    color: 'var(--cds-text-on-color)',
                     border: 'none',
                     borderRadius: '4px',
                     cursor: 'pointer'

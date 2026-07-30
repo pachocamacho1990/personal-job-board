@@ -212,8 +212,8 @@ export const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            {error && <div className="error-message" style={{ margin: '0 0 20px 0', padding: '12px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', color: 'var(--color-danger)' }}>{error}</div>}
-            {success && <div className="success-message" style={{ margin: '0 0 20px 0', padding: '12px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '6px', color: 'var(--color-success)' }}>{success}</div>}
+            {error && <div className="error-message" style={{ margin: '0 0 20px 0', padding: '12px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', color: 'var(--cds-support-error)' }}>{error}</div>}
+            {success && <div className="success-message" style={{ margin: '0 0 20px 0', padding: '12px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '6px', color: 'var(--cds-support-success)' }}>{success}</div>}
 
             {/* Información Básica */}
             <div className="profile-section">
@@ -406,7 +406,7 @@ export const ProfilePage: React.FC = () => {
                   value={newSkill}
                   onChange={(e) => setNewSkill(e.target.value)}
                   placeholder="Ej. Python, React, Docker"
-                  style={{ flex: 1, padding: '10px 12px', border: '1px solid var(--color-border)', borderRadius: '6px' }}
+                  style={{ flex: 1, padding: '10px 12px', border: '1px solid var(--cds-border-subtle-00)', borderRadius: '6px' }}
                 />
                 <button type="button" className="btn btn-secondary" onClick={handleAddSkill}>
                   Agregar

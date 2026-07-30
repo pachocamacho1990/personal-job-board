@@ -82,7 +82,7 @@ export const LoginPage: React.FC = () => {
       <div className="login-form-pane">
         <div className="login-form-wrapper">
           <div className="login-brand">
-            <RocketIcon size={24} style={{ color: 'var(--color-primary)' }} />
+            <RocketIcon size={24} style={{ color: 'var(--cds-button-primary)' }} />
             <span>Zenith</span>
           </div>
 
@@ -150,7 +150,7 @@ export const LoginPage: React.FC = () => {
               )}
             </a>
           </p>
-          <p className="toggle-mode" style={{ marginTop: '20px', borderTop: '1px solid var(--color-border)', paddingTop: '16px' }}>
+          <p className="toggle-mode" style={{ marginTop: '20px', borderTop: '1px solid var(--cds-border-subtle-00)', paddingTop: '16px' }}>
             <a
               href="/jobboard/docs.html"
               style={{ opacity: 0.8, fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
@@ -182,7 +182,7 @@ export const LoginPage: React.FC = () => {
                 </linearGradient>
                 <linearGradient id="accent-glow" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#8a3ffc" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#008580" stopOpacity="0.1" />
+                  <stop offset="100%" stopColor="var(--cds-teal-50)" stopOpacity="0.1" />
                 </linearGradient>
               </defs>
 
@@ -202,7 +202,7 @@ export const LoginPage: React.FC = () => {
 
               {/* Mock Job Card (Stripe Job offer portal) */}
               <g transform="translate(40, 50)">
-                <rect width="200" height="130" rx="8" fill="#161a22" stroke="rgba(15, 98, 254, 0.4)" strokeWidth="1.5" />
+                <rect width="200" height="130" rx="8" fill="var(--cds-terminal-bg)" stroke="rgba(15, 98, 254, 0.4)" strokeWidth="1.5" />
                 <rect width="200" height="8" rx="4" fill="rgba(15, 98, 254, 0.2)" />
                 {/* Browser dots */}
                 <circle cx="16" cy="18" r="4" fill="#ff5f56" />
@@ -211,7 +211,7 @@ export const LoginPage: React.FC = () => {
                 
                 {/* Job metadata */}
                 <text x="16" y="48" fill="#ffffff" fontSize="13" fontWeight="600" fontFamily="system-ui">Senior AI Specialist</text>
-                <text x="16" y="65" fill="#a4a9b4" fontSize="11" fontFamily="system-ui">Stripe • San Francisco, CA</text>
+                <text x="16" y="65" fill="var(--cds-terminal-text-secondary)" fontSize="11" fontFamily="system-ui">Stripe • San Francisco, CA</text>
                 <line x1="16" y1="78" x2="184" y2="78" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
                 
                 <rect x="16" y="92" width="60" height="18" rx="3" fill="rgba(15, 98, 254, 0.1)" stroke="rgba(15, 98, 254, 0.3)" strokeWidth="1" />
@@ -222,10 +222,10 @@ export const LoginPage: React.FC = () => {
 
               {/* Mock ATS Copilot Analyzer (Radial graph card) */}
               <g transform="translate(320, 80)">
-                <rect width="220" height="130" rx="8" fill="#161a22" stroke="rgba(138, 63, 252, 0.4)" strokeWidth="1.5" />
+                <rect width="220" height="130" rx="8" fill="var(--cds-terminal-bg)" stroke="rgba(138, 63, 252, 0.4)" strokeWidth="1.5" />
                 
                 <text x="18" y="32" fill="#ffffff" fontSize="13" fontWeight="600" fontFamily="system-ui">ATS Match Optimizador</text>
-                <text x="18" y="48" fill="#a4a9b4" fontSize="10" fontFamily="system-ui">Analizando currículum vs. vacante</text>
+                <text x="18" y="48" fill="var(--cds-terminal-text-secondary)" fontSize="10" fontFamily="system-ui">Analizando currículum vs. vacante</text>
                 
                 {/* Radial Gauge */}
                 <circle cx="50" cy="95" r="22" stroke="rgba(138, 63, 252, 0.15)" strokeWidth="4.5" />
@@ -236,31 +236,31 @@ export const LoginPage: React.FC = () => {
                 <rect x="94" y="76" width="108" height="6" rx="3" fill="rgba(255,255,255,0.05)" />
                 <rect x="94" y="76" width="88" height="6" rx="3" fill="#8a3ffc" />
                 <text x="94" y="98" fill="#ffffff" fontSize="11" fontWeight="600" fontFamily="system-ui">Directiva Encontrada</text>
-                <text x="94" y="112" fill="#a4a9b4" fontSize="9" fontFamily="system-ui">Matching keyword: "MLOps"</text>
+                <text x="94" y="112" fill="var(--cds-terminal-text-secondary)" fontSize="9" fontFamily="system-ui">Matching keyword: "MLOps"</text>
               </g>
 
               {/* Mock Automation Portal (Stages / Kanban flow) */}
               <g transform="translate(120, 260)">
-                <rect width="240" height="130" rx="8" fill="#161a22" stroke="rgba(0, 133, 128, 0.4)" strokeWidth="1.5" />
+                <rect width="240" height="130" rx="8" fill="var(--cds-terminal-bg)" stroke="rgba(0, 133, 128, 0.4)" strokeWidth="1.5" />
                 
                 {/* Brand Monogram & Title */}
                 <rect x="16" y="16" width="28" height="28" rx="4" fill="rgba(0, 133, 128, 0.15)" stroke="rgba(0, 133, 128, 0.3)" strokeWidth="1" />
                 {/* Inline sparkle */}
-                <path d="M30 22c0 2.2-1.8 4-4 4 2.2 0 4 1.8 4 4 0-2.2 1.8-4 4-4-2.2 0-4-1.8-4-4z" fill="#008580" />
+                <path d="M30 22c0 2.2-1.8 4-4 4 2.2 0 4 1.8 4 4 0-2.2 1.8-4 4-4-2.2 0-4-1.8-4-4z" fill="var(--cds-teal-50)" />
                 
                 <text x="56" y="28" fill="#ffffff" fontSize="13" fontWeight="600" fontFamily="system-ui">Pipeline Automatizado</text>
-                <text x="56" y="42" fill="#a4a9b4" fontSize="10" fontFamily="system-ui">Disparando tareas de postulación...</text>
+                <text x="56" y="42" fill="var(--cds-terminal-text-secondary)" fontSize="10" fontFamily="system-ui">Disparando tareas de postulación...</text>
 
                 {/* Checklist */}
                 <g transform="translate(16, 68)">
-                  <circle cx="8" cy="8" r="6" stroke="#008580" strokeWidth="1.5" fill="none" />
-                  <path d="M5 8 L7 10 L11 6" stroke="#008580" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="8" cy="8" r="6" stroke="var(--cds-teal-50)" strokeWidth="1.5" fill="none" />
+                  <path d="M5 8 L7 10 L11 6" stroke="var(--cds-teal-50)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   <text x="24" y="12" fill="#ffffff" fontSize="10" fontFamily="system-ui">Validar perfil profesional</text>
                 </g>
 
                 <g transform="translate(16, 94)">
-                  <circle cx="8" cy="8" r="6" stroke="#008580" strokeWidth="1.5" fill="none" />
-                  <path d="M5 8 L7 10 L11 6" stroke="#008580" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="8" cy="8" r="6" stroke="var(--cds-teal-50)" strokeWidth="1.5" fill="none" />
+                  <path d="M5 8 L7 10 L11 6" stroke="var(--cds-teal-50)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   <text x="24" y="12" fill="#ffffff" fontSize="10" fontFamily="system-ui">Generar carta de presentación con IA</text>
                 </g>
               </g>

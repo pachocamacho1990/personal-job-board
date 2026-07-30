@@ -80,9 +80,9 @@ export const ArchiveVault: React.FC<ArchiveVaultProps> = ({ isOpen, onClose, job
         <button id="closeArchiveModal" className="btn-icon close-peek" title="Close" onClick={onClose}>
           ×
         </button>
-        <div className="archive-header" style={{ padding: '2rem 2rem 0', borderBottom: '1px solid var(--border-color)' }}>
+        <div className="archive-header" style={{ padding: '2rem 2rem 0', borderBottom: '1px solid var(--cds-border-subtle-00)' }}>
           <h2>Archived Jobs</h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+          <p style={{ color: 'var(--cds-text-secondary)', marginBottom: '1rem' }}>
             Vault of processed cards. Restore them to bring them back to the board.
           </p>
         </div>
@@ -101,7 +101,7 @@ export const ArchiveVault: React.FC<ArchiveVaultProps> = ({ isOpen, onClose, job
               <button 
                 className="btn btn-secondary btn-sm"
                 onClick={() => setSearchQuery('')}
-                style={{ borderRadius: 'var(--radius-md)', padding: '0 12px' }}
+                style={{ borderRadius: 'var(--cds-radius-00)', padding: '0 12px' }}
               >
                 Clear
               </button>
@@ -112,13 +112,13 @@ export const ArchiveVault: React.FC<ArchiveVaultProps> = ({ isOpen, onClose, job
         <div id="archiveContent" className="peek-content" style={{ padding: 0, flexDirection: 'column' }}>
           {archivedJobs.length === 0 ? (
             <div className="archive-empty" style={{ padding: '3rem', textAlign: 'center' }}>
-              <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}><ArchiveIcon size={48} style={{ color: 'var(--color-primary)' }} /></div>
+              <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}><ArchiveIcon size={48} style={{ color: 'var(--cds-button-primary)' }} /></div>
               <h3>The Vault is Empty</h3>
               <p>Jobs you archive will appear here.</p>
             </div>
           ) : filteredJobs.length === 0 ? (
             <div className="archive-empty" style={{ padding: '3rem', textAlign: 'center' }}>
-              <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}><SearchIcon size={32} style={{ color: 'var(--color-text-muted)' }} /></div>
+              <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}><SearchIcon size={32} style={{ color: 'var(--cds-text-secondary)' }} /></div>
               <h3>No Matches Found</h3>
               <p>Try searching for a different keyword.</p>
             </div>
@@ -129,11 +129,11 @@ export const ArchiveVault: React.FC<ArchiveVaultProps> = ({ isOpen, onClose, job
                 <div
                   className="archive-row"
                   style={{
-                    background: 'var(--bg-secondary)',
-                    borderBottom: '2px solid var(--border-color)',
+                    background: 'var(--cds-background)',
+                    borderBottom: '2px solid var(--cds-border-subtle-00)',
                     fontWeight: '600',
-                    color: 'var(--text-secondary)',
-                    fontSize: 'var(--font-size-xs)',
+                    color: 'var(--cds-text-secondary)',
+                    fontSize: 'var(--cds-type-size-01)',
                     textTransform: 'uppercase',
                     position: 'sticky',
                     top: 0,
@@ -156,7 +156,7 @@ export const ArchiveVault: React.FC<ArchiveVaultProps> = ({ isOpen, onClose, job
                         <div className="archive-title" style={{ fontWeight: 600 }}>
                           {title || 'Untitled'}
                         </div>
-                        <div className="archive-company" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                        <div className="archive-company" style={{ color: 'var(--cds-text-secondary)', fontSize: '0.85rem' }}>
                           {subtitle || 'Unknown'}
                         </div>
                       </div>
