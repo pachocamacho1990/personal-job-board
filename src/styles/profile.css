@@ -2,25 +2,25 @@
     max-width: 1000px;
     margin: 40px auto;
     padding: 24px;
-    background: var(--color-canvas);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
+    background: var(--cds-layer-01);
+    border: 1px solid var(--cds-border-subtle-00);
+    border-radius: var(--cds-radius-00);
     box-shadow: none;
-    font-family: var(--font-family);
+    font-family: var(--cds-font-sans);
 }
 
 .profile-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--cds-border-subtle-00);
     padding-bottom: 20px;
     margin-bottom: 24px;
 }
 
 .profile-header h1 {
     font-size: 1.8rem;
-    color: var(--color-text-main);
+    color: var(--cds-text-primary);
     font-weight: 700;
 }
 
@@ -30,16 +30,16 @@
 }
 
 .profile-section {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
+    background: var(--cds-background);
+    border: 1px solid var(--cds-border-subtle-00);
+    border-radius: var(--cds-radius-00);
     padding: 20px;
     margin-bottom: 24px;
 }
 
 .profile-section h2 {
     font-size: 1.2rem;
-    color: var(--color-text-main);
+    color: var(--cds-text-primary);
     margin-bottom: 16px;
     font-weight: 600;
     display: flex;
@@ -66,17 +66,17 @@
 .form-group label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--color-text-muted);
+    color: var(--cds-text-secondary);
 }
 
 .form-group input,
 .form-group textarea,
 .form-group select {
     padding: 10px 12px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background: var(--color-canvas);
-    color: var(--color-text-main);
+    border: 1px solid var(--cds-border-subtle-00);
+    border-radius: var(--cds-radius-00);
+    background: var(--cds-layer-01);
+    color: var(--cds-text-primary);
     font-size: 0.95rem;
     transition: border-color 0.2s;
 }
@@ -85,14 +85,14 @@
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: var(--cds-button-primary);
     box-shadow: none;
 }
 
 .dynamic-item-card {
-    background: var(--color-canvas);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
+    background: var(--cds-layer-01);
+    border: 1px solid var(--cds-border-subtle-00);
+    border-radius: var(--cds-radius-00);
     padding: 16px;
     margin-bottom: 12px;
     position: relative;
@@ -104,24 +104,24 @@
     right: 12px;
     background: none;
     border: none;
-    color: var(--color-danger);
+    color: var(--cds-support-error);
     cursor: pointer;
     font-size: 0.9rem;
     font-weight: 600;
     padding: 4px 8px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--cds-radius-00);
     transition: background-color 0.2s;
 }
 
 .dynamic-item-card .remove-btn:hover {
-    background-color: rgba(239, 68, 68, 0.08);
+    background-color: var(--cds-support-error-subtle);
 }
 
 .btn {
     padding: 10px 20px;
     font-size: 0.95rem;
     font-weight: 600;
-    border-radius: var(--radius-sm);
+    border-radius: var(--cds-radius-00);
     cursor: pointer;
     transition: all 0.2s;
     border: none;
@@ -131,23 +131,23 @@
 }
 
 .btn-primary {
-    background: var(--color-primary);
+    background: var(--cds-button-primary);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--color-primary-hover);
+    background: var(--cds-button-primary-hover);
 }
 
 .btn-secondary {
-    background: var(--color-canvas);
-    border: 1px solid var(--color-border);
-    color: var(--color-text-muted);
+    background: var(--cds-layer-01);
+    border: 1px solid var(--cds-border-subtle-00);
+    color: var(--cds-text-secondary);
 }
 
 .btn-secondary:hover {
-    background: var(--color-surface);
-    color: var(--color-text-main);
+    background: var(--cds-background);
+    color: var(--cds-text-primary);
 }
 
 .btn-add {
@@ -164,9 +164,9 @@
 }
 
 .skill-chip {
-    background: rgba(79, 70, 229, 0.08);
-    color: var(--color-primary);
-    border: 1px solid rgba(79, 70, 229, 0.2);
+    background: var(--cds-status-applied-surface);
+    color: var(--cds-button-primary);
+    border: 1px solid var(--cds-status-applied-header);
     padding: 4px 10px;
     border-radius: 0;
     font-size: 0.85rem;
@@ -179,27 +179,27 @@
 .skill-chip button {
     background: none;
     border: none;
-    color: var(--color-primary);
+    color: var(--cds-button-primary);
     cursor: pointer;
     font-size: 0.8rem;
     line-height: 1;
 }
 
 .banner-claude-hint {
-    background: rgba(168, 85, 247, 0.05);
-    border: 1px solid rgba(168, 85, 247, 0.2);
-    border-radius: var(--radius-sm);
+    background: var(--cds-status-interested-surface);
+    border: 1px solid var(--cds-status-interested-header);
+    border-radius: var(--cds-radius-00);
     padding: 16px;
     margin-bottom: 24px;
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    color: var(--color-text-muted);
+    color: var(--cds-text-secondary);
     font-size: 0.9rem;
 }
 
 .banner-claude-hint strong {
-    color: var(--color-accent);
+    color: var(--cds-agent-accent);
 }
 
 .banner-claude-hint-icon {
