@@ -177,12 +177,12 @@ export const LoginPage: React.FC = () => {
                   <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255, 255, 255, 0.03)" strokeWidth="1" />
                 </pattern>
                 <linearGradient id="primary-glow" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#0f62fe" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#8a3ffc" stopOpacity="0.1" />
+                  <stop offset="0%" stopColor="var(--showcase-blue)" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="var(--showcase-purple)" stopOpacity="0.1" />
                 </linearGradient>
                 <linearGradient id="accent-glow" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#8a3ffc" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="var(--cds-teal-50)" stopOpacity="0.1" />
+                  <stop offset="0%" stopColor="var(--showcase-purple)" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="var(--showcase-teal)" stopOpacity="0.1" />
                 </linearGradient>
               </defs>
 
@@ -194,15 +194,15 @@ export const LoginPage: React.FC = () => {
               <path d="M470,220 L470,280 M380,180 L470,180 L470,220" stroke="rgba(138, 63, 252, 0.25)" strokeWidth="2" strokeDasharray="4 4" />
               
               {/* Connection glows */}
-              <circle cx="240" cy="240" r="4" fill="#0f62fe" />
-              <circle cx="240" cy="240" r="12" stroke="#0f62fe" strokeOpacity="0.3" strokeWidth="1.5" />
+              <circle cx="240" cy="240" r="4" fill="var(--showcase-blue)" />
+              <circle cx="240" cy="240" r="12" stroke="var(--showcase-blue)" strokeOpacity="0.3" strokeWidth="1.5" />
               
-              <circle cx="470" cy="220" r="4" fill="#8a3ffc" />
-              <circle cx="470" cy="220" r="12" stroke="#8a3ffc" strokeOpacity="0.3" strokeWidth="1.5" />
+              <circle cx="470" cy="220" r="4" fill="var(--showcase-purple)" />
+              <circle cx="470" cy="220" r="12" stroke="var(--showcase-purple)" strokeOpacity="0.3" strokeWidth="1.5" />
 
               {/* Mock Job Card (Stripe Job offer portal) */}
               <g transform="translate(40, 50)">
-                <rect width="200" height="130" rx="8" fill="var(--cds-terminal-bg)" stroke="rgba(15, 98, 254, 0.4)" strokeWidth="1.5" />
+                <rect width="200" height="130" rx="8" fill="var(--showcase-surface)" stroke="rgba(15, 98, 254, 0.4)" strokeWidth="1.5" />
                 <rect width="200" height="8" rx="4" fill="rgba(15, 98, 254, 0.2)" />
                 {/* Browser dots */}
                 <circle cx="16" cy="18" r="4" fill="#ff5f56" />
@@ -210,58 +210,58 @@ export const LoginPage: React.FC = () => {
                 <circle cx="40" cy="18" r="4" fill="#27c93f" />
                 
                 {/* Job metadata */}
-                <text x="16" y="48" fill="#ffffff" fontSize="13" fontWeight="600" fontFamily="var(--cds-font-sans)">Senior AI Specialist</text>
-                <text x="16" y="65" fill="var(--cds-terminal-text-secondary)" fontSize="11" fontFamily="var(--cds-font-sans)">Stripe • San Francisco, CA</text>
+                <text x="16" y="48" fill="var(--showcase-text)" fontSize="13" fontWeight="600" fontFamily="var(--cds-font-sans)">Senior AI Specialist</text>
+                <text x="16" y="65" fill="var(--showcase-text-muted)" fontSize="11" fontFamily="var(--cds-font-sans)">Stripe • San Francisco, CA</text>
                 <line x1="16" y1="78" x2="184" y2="78" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
                 
                 <rect x="16" y="92" width="60" height="18" rx="3" fill="rgba(15, 98, 254, 0.1)" stroke="rgba(15, 98, 254, 0.3)" strokeWidth="1" />
-                <text x="24" y="104" fill="#0f62fe" fontSize="9" fontWeight="600" fontFamily="var(--cds-font-sans)">Interested</text>
+                <text x="24" y="104" fill="var(--showcase-blue)" fontSize="9" fontWeight="600" fontFamily="var(--cds-font-sans)">Interested</text>
                 
-                <text x="140" y="104" fill="#198038" fontSize="10" fontWeight="600" fontFamily="var(--cds-font-sans)">$165k/yr</text>
+                <text x="140" y="104" fill="var(--showcase-green)" fontSize="10" fontWeight="600" fontFamily="var(--cds-font-sans)">$165k/yr</text>
               </g>
 
               {/* Mock ATS Copilot Analyzer (Radial graph card) */}
               <g transform="translate(320, 80)">
-                <rect width="220" height="130" rx="8" fill="var(--cds-terminal-bg)" stroke="rgba(138, 63, 252, 0.4)" strokeWidth="1.5" />
+                <rect width="220" height="130" rx="8" fill="var(--showcase-surface)" stroke="rgba(138, 63, 252, 0.4)" strokeWidth="1.5" />
                 
-                <text x="18" y="32" fill="#ffffff" fontSize="13" fontWeight="600" fontFamily="var(--cds-font-sans)">ATS Match Optimizador</text>
-                <text x="18" y="48" fill="var(--cds-terminal-text-secondary)" fontSize="10" fontFamily="var(--cds-font-sans)">Analizando currículum vs. vacante</text>
+                <text x="18" y="32" fill="var(--showcase-text)" fontSize="13" fontWeight="600" fontFamily="var(--cds-font-sans)">ATS Match Optimizador</text>
+                <text x="18" y="48" fill="var(--showcase-text-muted)" fontSize="10" fontFamily="var(--cds-font-sans)">Analizando currículum vs. vacante</text>
                 
                 {/* Radial Gauge */}
                 <circle cx="50" cy="95" r="22" stroke="rgba(138, 63, 252, 0.15)" strokeWidth="4.5" />
-                <circle cx="50" cy="95" r="22" stroke="#8a3ffc" strokeWidth="4.5" strokeDasharray="138" strokeDashoffset="24" strokeLinecap="round" />
-                <text x="50" y="99" fill="#ffffff" fontSize="11" fontWeight="700" textAnchor="middle" fontFamily="var(--cds-font-sans)">82%</text>
+                <circle cx="50" cy="95" r="22" stroke="var(--showcase-purple)" strokeWidth="4.5" strokeDasharray="138" strokeDashoffset="24" strokeLinecap="round" />
+                <text x="50" y="99" fill="var(--showcase-text)" fontSize="11" fontWeight="700" textAnchor="middle" fontFamily="var(--cds-font-sans)">82%</text>
 
                 {/* Score legend */}
                 <rect x="94" y="76" width="108" height="6" rx="3" fill="rgba(255,255,255,0.05)" />
-                <rect x="94" y="76" width="88" height="6" rx="3" fill="#8a3ffc" />
-                <text x="94" y="98" fill="#ffffff" fontSize="11" fontWeight="600" fontFamily="var(--cds-font-sans)">Directiva Encontrada</text>
-                <text x="94" y="112" fill="var(--cds-terminal-text-secondary)" fontSize="9" fontFamily="var(--cds-font-sans)">Matching keyword: "MLOps"</text>
+                <rect x="94" y="76" width="88" height="6" rx="3" fill="var(--showcase-purple)" />
+                <text x="94" y="98" fill="var(--showcase-text)" fontSize="11" fontWeight="600" fontFamily="var(--cds-font-sans)">Directiva Encontrada</text>
+                <text x="94" y="112" fill="var(--showcase-text-muted)" fontSize="9" fontFamily="var(--cds-font-sans)">Matching keyword: "MLOps"</text>
               </g>
 
               {/* Mock Automation Portal (Stages / Kanban flow) */}
               <g transform="translate(120, 260)">
-                <rect width="240" height="130" rx="8" fill="var(--cds-terminal-bg)" stroke="rgba(0, 133, 128, 0.4)" strokeWidth="1.5" />
+                <rect width="240" height="130" rx="8" fill="var(--showcase-surface)" stroke="rgba(0, 133, 128, 0.4)" strokeWidth="1.5" />
                 
                 {/* Brand Monogram & Title */}
                 <rect x="16" y="16" width="28" height="28" rx="4" fill="rgba(0, 133, 128, 0.15)" stroke="rgba(0, 133, 128, 0.3)" strokeWidth="1" />
                 {/* Inline sparkle */}
-                <path d="M30 22c0 2.2-1.8 4-4 4 2.2 0 4 1.8 4 4 0-2.2 1.8-4 4-4-2.2 0-4-1.8-4-4z" fill="var(--cds-teal-50)" />
+                <path d="M30 22c0 2.2-1.8 4-4 4 2.2 0 4 1.8 4 4 0-2.2 1.8-4 4-4-2.2 0-4-1.8-4-4z" fill="var(--showcase-teal)" />
                 
-                <text x="56" y="28" fill="#ffffff" fontSize="13" fontWeight="600" fontFamily="var(--cds-font-sans)">Pipeline Automatizado</text>
-                <text x="56" y="42" fill="var(--cds-terminal-text-secondary)" fontSize="10" fontFamily="var(--cds-font-sans)">Disparando tareas de postulación...</text>
+                <text x="56" y="28" fill="var(--showcase-text)" fontSize="13" fontWeight="600" fontFamily="var(--cds-font-sans)">Pipeline Automatizado</text>
+                <text x="56" y="42" fill="var(--showcase-text-muted)" fontSize="10" fontFamily="var(--cds-font-sans)">Disparando tareas de postulación...</text>
 
                 {/* Checklist */}
                 <g transform="translate(16, 68)">
-                  <circle cx="8" cy="8" r="6" stroke="var(--cds-teal-50)" strokeWidth="1.5" fill="none" />
-                  <path d="M5 8 L7 10 L11 6" stroke="var(--cds-teal-50)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <text x="24" y="12" fill="#ffffff" fontSize="10" fontFamily="var(--cds-font-sans)">Validar perfil profesional</text>
+                  <circle cx="8" cy="8" r="6" stroke="var(--showcase-teal)" strokeWidth="1.5" fill="none" />
+                  <path d="M5 8 L7 10 L11 6" stroke="var(--showcase-teal)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <text x="24" y="12" fill="var(--showcase-text)" fontSize="10" fontFamily="var(--cds-font-sans)">Validar perfil profesional</text>
                 </g>
 
                 <g transform="translate(16, 94)">
-                  <circle cx="8" cy="8" r="6" stroke="var(--cds-teal-50)" strokeWidth="1.5" fill="none" />
-                  <path d="M5 8 L7 10 L11 6" stroke="var(--cds-teal-50)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <text x="24" y="12" fill="#ffffff" fontSize="10" fontFamily="var(--cds-font-sans)">Generar carta de presentación con IA</text>
+                  <circle cx="8" cy="8" r="6" stroke="var(--showcase-teal)" strokeWidth="1.5" fill="none" />
+                  <path d="M5 8 L7 10 L11 6" stroke="var(--showcase-teal)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <text x="24" y="12" fill="var(--showcase-text)" fontSize="10" fontFamily="var(--cds-font-sans)">Generar carta de presentación con IA</text>
                 </g>
               </g>
             </svg>
