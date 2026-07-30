@@ -395,7 +395,7 @@ export const DashboardPage: React.FC = () => {
       <div className="main-content">
         <div className="page-header">
           <div>
-            <h1 className="page-title" id="welcomeTitle" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            <h1 className="page-title" id="welcomeTitle">
               Welcome back, {formattedUsername}
             </h1>
             <p style={{ color: 'var(--cds-text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
@@ -757,7 +757,7 @@ export const DashboardPage: React.FC = () => {
                       width: '100%', 
                       height: '220px', 
                       padding: '1rem', 
-                      fontFamily: 'monospace', 
+                      fontFamily: 'var(--cds-font-mono)', 
                       fontSize: '0.85rem', 
                       lineHeight: '1.4', 
                       borderRadius: 'var(--cds-radius-00)', 

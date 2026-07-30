@@ -765,7 +765,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                           color: 'var(--cds-text-primary)',
                           maxHeight: '200px',
                           overflowY: 'auto',
-                          fontFamily: 'monospace',
+                          fontFamily: 'var(--cds-font-mono)',
                           whiteSpace: 'pre-wrap',
                           lineHeight: '1.4'
                         }}

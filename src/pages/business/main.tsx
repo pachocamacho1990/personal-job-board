@@ -172,7 +172,7 @@ export const BusinessPage: React.FC = () => {
         <main className="board-section">
           <div className="page-header">
             <div>
-              <h1 className="page-title" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              <h1 className="page-title">
                 Business Connections
               </h1>
               <p style={{ color: 'var(--cds-text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
