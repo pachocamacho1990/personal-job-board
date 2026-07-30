@@ -410,14 +410,14 @@ export const DashboardPage: React.FC = () => {
             className={`dashboard-tab-btn ${activeTab === 'activity' ? 'active' : ''}`}
             onClick={() => setActiveTab('activity')}
           >
-            <MetricsIcon size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Resumen de Actividad
+            <MetricsIcon size={16} className="icon-inline" /> Resumen de Actividad
           </button>
           <button 
             className={`dashboard-tab-btn ${activeTab === 'strategy' ? 'active' : ''}`}
             onClick={() => setActiveTab('strategy')}
             id="strategyTabBtn"
           >
-            <StrategyIcon size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Mi Estrategia Profesional
+            <StrategyIcon size={16} className="icon-inline" /> Mi Estrategia Profesional
           </button>
           {(strategy.dominant_anchor || searchPrompt) && (
             <button 
@@ -425,7 +425,7 @@ export const DashboardPage: React.FC = () => {
               onClick={() => setActiveTab('search')}
               id="searchPromptTabBtn"
             >
-              <SettingsIcon size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Búsqueda Activa (Claude)
+              <SettingsIcon size={16} className="icon-inline" /> Búsqueda Activa (Claude)
             </button>
           )}
         </div>
@@ -517,7 +517,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="strategy-card-grid" id="strategyCardGrid">
                 {/* Radar Bar Schein anchors Card */}
                 <div className="dashboard-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <h3 className="strategy-section-title" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}><StrategyIcon size={18} style={{ color: 'var(--cds-button-primary)' }} /> Anclas de Carrera (Schein)</h3>
+                  <h3 className="strategy-section-title" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}><StrategyIcon size={18} className="text-accent" /> Anclas de Carrera (Schein)</h3>
                   <p style={{ fontSize: '0.85rem', color: 'var(--cds-text-secondary)', marginBottom: '1.25rem', width: '100%' }}>
                     Tus motivaciones profesionales predominantes inferidas en la entrevista.
                   </p>
@@ -525,12 +525,12 @@ export const DashboardPage: React.FC = () => {
                   <RadarChart anchors={anchors} />
 
                   <div style={{ marginTop: '1.5rem', width: '100%' }}>
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem' }}>Anclas Destacadas:</h4>
+                    <h4 className="tile-heading">Anclas Destacadas:</h4>
                     {anchors.slice(0, 3).map((anchor, idx) => (
                       <div key={anchor.key} style={{ marginBottom: '0.75rem', paddingBottom: '0.5rem', borderBottom: idx < 2 ? '1px solid var(--cds-border-subtle-00)' : 'none' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600 }}>
                           <span>{idx + 1}. {anchor.name}</span>
-                          <span style={{ color: 'var(--cds-button-primary)' }}>{anchor.val}%</span>
+                          <span className="text-accent">{anchor.val}%</span>
                         </div>
                         <p style={{ fontSize: '0.775rem', color: 'var(--cds-text-secondary)', marginTop: '0.15rem', margin: 0 }}>
                           {anchor.desc}
@@ -543,7 +543,7 @@ export const DashboardPage: React.FC = () => {
                 {/* Strategy fields Card */}
                 <div>
                   <div className="strategy-info-card">
-                    <h3 className="strategy-section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '8px' }}><JobBoardIcon size={18} style={{ color: 'var(--cds-button-primary)' }} /> Estrategia de Búsqueda</h3>
+                    <h3 className="strategy-section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '8px' }}><JobBoardIcon size={18} className="text-accent" /> Estrategia de Búsqueda</h3>
                     
                     <div className="strategy-field">
                       <div className="strategy-field-label">Resumen de Estrategia</div>
@@ -588,7 +588,7 @@ export const DashboardPage: React.FC = () => {
                         {strategy.exclusions?.companies && strategy.exclusions.companies.length > 0 ? (
                           strategy.exclusions.companies.map((c, i) => (
                             <span key={i} className="strategy-tag strategy-tag--danger">
-                              <ProhibitedIcon size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Excluir: {c}
+                              <ProhibitedIcon size={12} className="icon-inline--tight" /> Excluir: {c}
                             </span>
                           ))
                         ) : 'Ninguna'}
@@ -598,8 +598,8 @@ export const DashboardPage: React.FC = () => {
 
                   {/* Memories / Preference learning console */}
                   <div className="memories-manager">
-                    <h3 className="strategy-section-title" style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}><BrainIcon size={18} style={{ color: 'var(--cds-button-primary)' }} /> Directivas de Aprendizaje</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>
+                    <h3 className="strategy-section-title stack-tight" ><BrainIcon size={18} className="text-accent" /> Directivas de Aprendizaje</h3>
+                    <p className="tile-caption">
                       Filtros y reglas dinámicas que tu agente ha aprendido a lo largo de tus conversaciones.
                     </p>
                     <div className="memory-list" id="memoriesList">
@@ -615,7 +615,7 @@ export const DashboardPage: React.FC = () => {
                               title="Olvidar regla"
                               onClick={() => handleDeleteMemory(m.id)}
                             >
-                              <TrashIcon size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Olvidar
+                              <TrashIcon size={14} className="icon-inline--tight" /> Olvidar
                             </button>
                           </div>
                         ))
@@ -627,15 +627,15 @@ export const DashboardPage: React.FC = () => {
 
               {/* Korn Ferry KF4D Dimensions Card */}
               <div className="dashboard-card" style={{ padding: '1.5rem', marginTop: '1.5rem', width: '100%' }}>
-                <h3 className="strategy-section-title" style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}><ShieldIcon size={18} style={{ color: 'var(--cds-button-primary)' }} /> Korn Ferry KF4D (Las 4 Dimensiones del Éxito)</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--cds-text-secondary)', marginBottom: '1.5rem' }}>
+                <h3 className="strategy-section-title stack-tight" ><ShieldIcon size={18} className="text-accent" /> Korn Ferry KF4D (Las 4 Dimensiones del Éxito)</h3>
+                <p className="tile-caption tile-caption--spaced">
                   Evaluación cualitativa de tus competencias, experiencias, rasgos y drivers.
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
                   
                   {/* Competencies */}
                   <div className="info-tile">
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--cds-button-primary)' }}>
+                    <h4 className="tile-heading text-accent">
                       <TargetIcon size={16} /> Competencias
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -644,14 +644,14 @@ export const DashboardPage: React.FC = () => {
                           <div key={i} className="strategy-tag strategy-tag--compact" style={{ width: 'fit-content' }}>{c}</div>
                         ))
                       ) : (
-                        <div style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>Mapeando competencias...</div>
+                        <div className="tile-caption">Mapeando competencias...</div>
                       )}
                     </div>
                   </div>
 
                   {/* Experiences */}
                   <div className="info-tile">
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--cds-button-primary)' }}>
+                    <h4 className="tile-heading text-accent">
                       <ChartIcon size={16} /> Experiencias Clave
                     </h4>
                     <div style={{ fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -663,39 +663,39 @@ export const DashboardPage: React.FC = () => {
                           </div>
                         ))
                       ) : (
-                        <div style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>Completa tu perfil para mapear trayectorias.</div>
+                        <div className="tile-caption">Completa tu perfil para mapear trayectorias.</div>
                       )}
                     </div>
                   </div>
 
                   {/* Traits */}
                   <div className="info-tile">
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--cds-button-primary)' }}>
+                    <h4 className="tile-heading text-accent">
                       <ProfileIcon size={16} /> Rasgos
                     </h4>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    <div className="chip-row">
                       {strategy.kf_traits && strategy.kf_traits.length > 0 ? (
                         strategy.kf_traits.map((t: string, i: number) => (
                           <span key={i} className="strategy-tag strategy-tag--info strategy-tag--compact">{t}</span>
                         ))
                       ) : (
-                        <div style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>Mapeando rasgos...</div>
+                        <div className="tile-caption">Mapeando rasgos...</div>
                       )}
                     </div>
                   </div>
 
                   {/* Drivers */}
                   <div className="info-tile">
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--cds-button-primary)' }}>
+                    <h4 className="tile-heading text-accent">
                       <LightningIcon size={16} /> Drivers & Motivadores
                     </h4>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    <div className="chip-row">
                       {strategy.kf_drivers && strategy.kf_drivers.length > 0 ? (
                         strategy.kf_drivers.map((d: string, i: number) => (
                           <span key={i} className="strategy-tag strategy-tag--accent strategy-tag--compact">{d}</span>
                         ))
                       ) : (
-                        <div style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>Mapeando motivaciones...</div>
+                        <div className="tile-caption">Mapeando motivaciones...</div>
                       )}
                     </div>
                   </div>
@@ -713,14 +713,14 @@ export const DashboardPage: React.FC = () => {
               <div className="loading-spinner">Cargando configuración de búsqueda...</div>
             ) : (
               <div className="dashboard-card" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-                <h3 className="strategy-section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><SettingsIcon size={18} style={{ color: 'var(--cds-button-primary)' }} /> Prompt de Búsqueda Activa (Claude for Chrome)</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--cds-text-secondary)', marginBottom: '1.5rem' }}>
+                <h3 className="strategy-section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><SettingsIcon size={18} className="text-accent" /> Prompt de Búsqueda Activa (Claude for Chrome)</h3>
+                <p className="tile-caption tile-caption--spaced">
                   Este prompt es generado automáticamente por tu Zenith Agent según tu perfil y anclas de carrera. 
                   Puedes editarlo aquí, guardar los cambios y copiarlo para pegarlo en Claude for Chrome.
                 </p>
 
-                <div className="strategy-field" style={{ marginBottom: '1.5rem' }}>
-                  <label className="strategy-field-label" htmlFor="dashboard-board-select" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+                <div className="strategy-field stack-spaced" >
+                  <label className="strategy-field-label tile-label" htmlFor="dashboard-board-select" >
                     Tablero de destino para las vacantes encontradas:
                   </label>
                   <select
@@ -746,8 +746,8 @@ export const DashboardPage: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="strategy-field" style={{ marginBottom: '1.5rem' }}>
-                  <label className="strategy-field-label" htmlFor="dashboard-prompt-editor" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+                <div className="strategy-field stack-spaced" >
+                  <label className="strategy-field-label tile-label" htmlFor="dashboard-prompt-editor" >
                     Prompt de Búsqueda Personalizado:
                   </label>
                   <textarea
@@ -797,7 +797,7 @@ export const DashboardPage: React.FC = () => {
                   >
                     {copySuccess ? '✓ ¡Prompt Copiado!' : (
                       <>
-                        <CopyIcon size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Copiar Prompt para Claude
+                        <CopyIcon size={16} className="icon-inline" /> Copiar Prompt para Claude
                       </>
                     )}
                   </button>
@@ -819,7 +819,7 @@ export const DashboardPage: React.FC = () => {
                     id="dashboard-save-prompt-btn"
                     onClick={() => handleSavePrompt()}
                   >
-                    <SaveIcon size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Guardar Cambios
+                    <SaveIcon size={16} className="icon-inline" /> Guardar Cambios
                   </button>
                 </div>
               </div>

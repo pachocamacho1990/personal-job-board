@@ -378,3 +378,56 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+
+/* ── Strategy panel ──────────────────────────────────────
+   These replace the repeated inline styles in index/main.tsx. Every one of
+   them appeared at least twice, several of them five or six times. */
+
+/* The heading above each block inside a strategy tile. */
+.tile-heading {
+    font-size: var(--cds-heading-02-font-size);
+    font-weight: var(--cds-font-weight-semibold);
+    display: flex;
+    align-items: center;
+    gap: var(--cds-spacing-03);
+    margin-bottom: var(--cds-spacing-04);
+}
+
+/* Secondary line of text: captions, counts, timestamps. */
+.tile-caption {
+    font-size: var(--cds-type-size-02);
+    color: var(--cds-text-secondary);
+}
+
+.tile-caption--spaced {
+    margin-bottom: var(--cds-spacing-06);
+}
+
+/* A row of tags or chips that wraps. */
+.chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cds-spacing-03);
+}
+
+/* A label above a value, inside a tile. */
+.tile-label {
+    display: block;
+    margin-bottom: var(--cds-spacing-03);
+    font-weight: var(--cds-font-weight-semibold);
+}
+
+/* An icon sitting inline with text, nudged onto the baseline. */
+.icon-inline {
+    margin-right: var(--cds-spacing-03);
+    vertical-align: middle;
+}
+
+.icon-inline--tight {
+    margin-right: var(--cds-spacing-02);
+    vertical-align: middle;
+}
+
+.text-accent { color: var(--cds-button-primary); }
+.stack-tight { margin-bottom: var(--cds-spacing-02); display: flex; align-items: center; gap: var(--cds-spacing-03); }
+.stack-spaced { margin-bottom: var(--cds-spacing-06); }
