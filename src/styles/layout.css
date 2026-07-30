@@ -28,45 +28,10 @@ body {
 .page-title {
     font-size: 1.875rem;
     font-weight: 700;
-    color: var(--text-main);
+    color: var(--cds-text-primary);
 }
 
-/* Dashboard Grid */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 1.5rem;
-}
-
-/* Dashboard Cards */
-.dashboard-card {
-    background: var(--canvas);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    box-shadow: var(--shadow);
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--border);
-}
-
-.card-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--text-main);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 2rem 1rem;
-    color: var(--text-muted);
-}
+/* The dashboard grid, cards and empty state used to be declared here as well as
+   in dashboard.css — two copies of the same components, and the pair here was
+   the weaker one, with no hover state and no tabs. dashboard.css owns them now;
+   this file is the app shell and nothing else. */

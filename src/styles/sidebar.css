@@ -1,17 +1,13 @@
 /* Sidebar Styles */
+/* The seven local aliases that used to open this rule are gone. They existed to
+   say "inside the sidebar, --surface means the panel rather than the page", a
+   distinction the Carbon layer tokens already make. One of them,
+   --primary-soft: var(--cds-highlight), referenced itself, which makes the
+   declaration invalid at computed-value time — it had been doing nothing. */
 .app-sidebar {
-    /* Set light background variables specifically for sidebar */
-    --surface: var(--color-canvas);
-    --border: var(--color-border);
-    --text-main: var(--color-text-main);
-    --text-muted: var(--color-text-muted);
-    --primary: var(--color-primary);
-    --primary-soft: var(--primary-soft);
-    --surface-hover: var(--color-surface);
-
     width: 250px;
-    background-color: var(--surface);
-    border-right: 1px solid var(--border);
+    background-color: var(--cds-layer-01);
+    border-right: 1px solid var(--cds-border-subtle-00);
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -23,14 +19,14 @@
 
 .sidebar-header {
     padding: 1.5rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--cds-border-subtle-00);
 }
 
 .sidebar-brand {
-    font-family: var(--font-family);
+    font-family: var(--cds-font-sans);
     font-size: 1.35rem;
     font-weight: 700;
-    color: var(--color-text-main);
+    color: var(--cds-text-primary);
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -58,29 +54,29 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem 1rem;
-    color: var(--text-muted);
+    color: var(--cds-text-secondary);
     text-decoration: none;
-    border-radius: var(--radius);
+    border-radius: var(--cds-radius-00);
     transition: all 0.2s;
 }
 
 .nav-item:hover {
-    background-color: var(--surface-hover, #f1f5f9);
-    color: var(--text-main);
+    background-color: var(--cds-layer-hover-01);
+    color: var(--cds-text-primary);
 }
 
 .nav-item.active {
-    background-color: var(--primary-soft);
-    color: var(--primary);
+    background-color: var(--cds-highlight);
+    color: var(--cds-button-primary);
     font-weight: 600;
-    border-left: 3px solid var(--primary);
+    border-left: 3px solid var(--cds-button-primary);
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
 
 .sidebar-footer {
     padding: 1rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--cds-border-subtle-00);
 }
 
 /* Theme toggle. Styled off the legacy tokens this file still uses so it looks
@@ -94,8 +90,8 @@
     margin-bottom: 0.25rem;
     background: none;
     border: none;
-    border-radius: var(--radius);
-    color: var(--text-muted);
+    border-radius: var(--cds-radius-00);
+    color: var(--cds-text-secondary);
     font: inherit;
     font-size: 0.875rem;
     text-align: left;
@@ -104,8 +100,8 @@
 }
 
 .theme-toggle:hover {
-    background-color: var(--surface-hover, #f1f5f9);
-    color: var(--text-main);
+    background-color: var(--cds-layer-hover-01);
+    color: var(--cds-text-primary);
 }
 
 /* The icon reads as the state: unfilled half toward the light theme, rotated
@@ -128,8 +124,8 @@
 .user-avatar {
     width: 32px;
     height: 32px;
-    background-color: var(--primary-soft);
-    color: var(--primary);
+    background-color: var(--cds-highlight);
+    color: var(--cds-button-primary);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -146,7 +142,7 @@
 .user-name {
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--text-main);
+    color: var(--cds-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -155,15 +151,15 @@
 .logout-trigger {
     background: none;
     border: none;
-    color: var(--text-muted);
+    color: var(--cds-text-secondary);
     cursor: pointer;
     padding: 0.5rem;
-    border-radius: var(--radius);
+    border-radius: var(--cds-radius-00);
     transition: color 0.2s;
 }
 
 .logout-trigger:hover {
-    color: var(--danger);
+    color: var(--cds-support-error);
 }
 
 /* Subnavigation for Job Boards */
@@ -173,7 +169,7 @@
     flex-direction: column;
     gap: 0.25rem;
     padding-left: 0.75rem;
-    border-left: 1px solid var(--color-border);
+    border-left: 1px solid var(--cds-border-subtle-00);
     margin-bottom: 0.5rem;
     max-height: 200px;
     overflow-y: auto;
@@ -185,21 +181,21 @@
     justify-content: space-between;
     padding: 0.4rem 0.6rem;
     font-size: 0.875rem;
-    color: var(--text-secondary);
+    color: var(--cds-text-secondary);
     text-decoration: none;
-    border-radius: var(--radius);
+    border-radius: var(--cds-radius-00);
     transition: all 0.2s;
     cursor: pointer;
 }
 
 .board-nav-item:hover {
-    background-color: var(--color-tertiary);
-    color: var(--text-primary);
+    background-color: var(--cds-layer-selected-01);
+    color: var(--cds-text-primary);
 }
 
 .board-nav-item.active {
-    background-color: var(--primary-soft);
-    color: var(--color-primary);
+    background-color: var(--cds-highlight);
+    color: var(--cds-button-primary);
     font-weight: 500;
 }
 
@@ -226,19 +222,18 @@
     cursor: pointer;
     padding: 1px 3px;
     font-size: 0.75rem;
-    color: var(--text-tertiary);
-    border-radius: 3px;
+    color: var(--cds-text-placeholder);
     transition: all 0.2s;
 }
 
 .board-action-btn:hover {
-    color: var(--text-primary);
-    background-color: var(--color-border);
+    color: var(--cds-text-primary);
+    background-color: var(--cds-border-subtle-00);
 }
 
 .board-action-btn.delete:hover {
-    color: var(--danger);
-    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--cds-support-error);
+    background-color: var(--cds-support-error-subtle);
 }
 
 .new-board-btn {
@@ -247,7 +242,7 @@
     gap: 0.4rem;
     padding: 0.4rem 0.6rem;
     font-size: 0.825rem;
-    color: var(--color-primary);
+    color: var(--cds-button-primary);
     background: none;
     border: none;
     cursor: pointer;
@@ -259,7 +254,7 @@
 }
 
 .new-board-btn:hover {
-    color: var(--color-primary-hover);
+    color: var(--cds-button-primary-hover);
     text-decoration: underline;
 }
 
