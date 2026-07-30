@@ -1,96 +1,91 @@
 ---
-updated: 2026-07-30T17:05
+updated: 2026-07-30T18:16
 project: Migración a IBM Carbon (g10/g100)
 linear: https://linear.app/personal-pacho/project/migracion-a-ibm-carbon-design-system-g10g100-ce956a924d8d
-milestone: M0 COMPLETO (5/5) · siguiente M1 · Núcleo styles.css
+milestone: M0 y M1 COMPLETOS · siguiente M2 · CSS por página
 in_flight: ninguno
-next: PJBA-13 — repointar el :root de src/styles/styles.css (líneas 10–126) a los semánticos --cds-* y borrar la capa de alias legacy
-branch: feature/carbon-migration (pusheada, sincronizada con origin)
-verified: check-tokens.py OK · tsc limpio · vite build OK · 17/17 checks E2E del toggle en navegador real
+next: PJBA-16 — migrar src/styles/agent-console.css a Carbon (el mayor ofensor: ~12 tokens --agent-* propios, glassmorphism, 6 tokens indefinidos)
+branch: feature/carbon-migration (pusheada, sincronizada)
+verified: check-tokens.py OK · tsc limpio · vite build OK · capturas del board en g10 y g100 revisadas
 ---
 
 ## Dónde quedamos
 
-**M0 cerrado entero.** El motor de tokens Carbon existe, tiene tema oscuro, escalas
-completas, fuentes bien cargadas y un toggle funcional y persistente. Lo que **todavía no
-pasa** es que la app consuma nada de eso: `styles.css` y las hojas por página siguen sobre la
-capa `--color-*` heredada. Por eso la app se ve exactamente igual que antes y el tema oscuro,
-aunque funcione a nivel de atributo y tokens, no cambia ni un píxel visible. Eso es M1.
+M0 y M1 cerrados: 8 issues. El motor de tokens existe, tiene tema oscuro, y **`styles.css`
+ya lo consume de verdad** — el board renderiza en oscuro y no queda ni un literal de color en
+ese archivo. Lo que sigue en la capa legacy son las **hojas por página**, que es M2.
 
 ## Siguiente paso
 
-**PJBA-13** — repointar `src/styles/styles.css` a los semánticos. El bloque `:root` ocupa las
-líneas 10–126 (empieza justo tras el comentario que dejó PJBA-12 donde estaba el `@import`).
-Sustituir esas definiciones por referencias a `--cds-*` y eliminar la capa de alias legacy
-(`--bg-primary`, `--text-primary`, `--accent`, `--border`, `--surface`, `--canvas`, `--radius`,
-`--shadow`…).
+**PJBA-16** — `src/styles/agent-console.css` a Carbon. Es el archivo más grande (20 KB) y el
+que más deuda tiene:
 
-Tres avisos concretos, ya verificados:
+- ~12 tokens propios `--agent-*` que duplican semánticos que ya existen.
+- **6 tokens indefinidos** que hoy no pintan nada: `--color-text-primary` (4 usos),
+  `--color-text-secondary`, `--color-canvas-subtle`. Verificar con
+  `python3 <scratchpad>/audit_undefined.py` — o mejor, mover ese script a `scripts/`.
+- `backdrop-filter: blur`, hover-lift con sombra, gradiente shimmer → fuera.
+- Purgar `#EF4444`, `#DC2626`, `#F59E0B`, `#10B981`, `#A855F7`, `#8B5CF6`, `#4f46e5`.
+- Mono → `--cds-font-mono`.
 
-1. **El spacing no es un mapeo 1:1.** La escala vieja (`--spacing-xs…2xl` = 4/8/16/24/32/48)
-   no tiene paso de 12px ni nada por encima de 48px. Algunos call sites tendrán que moverse un
-   escalón de Carbon, no traducirse directo.
-2. **En g100, `layer-03` es Gray 70** y no admite tokens de baja énfasis: `text-helper` da
-   3.29 y `link-primary` 3.32, bajo AA. Solo `text-primary`, `text-secondary` y los iconos son
-   seguros a ese nivel de anidamiento.
-3. **`border-strong-01` va sobre `layer-01`, `border-strong-02` sobre `layer-02`.** El sufijo
-   es un contrato de emparejamiento, no un ranking.
+Herramientas ya escritas y reutilizables (están en el scratchpad de la sesión, conviene
+moverlas a `scripts/` en PJBA-16):
+- `find_colors.py <archivo.css>` — lista literales y marca los que no son Carbon.
+- `audit_undefined.py` — `var()` que no resuelven, con y sin fallback.
+- `audit_tokens.py` — quién consume cada token del `:root` de `styles.css`.
 
-Tras cada cambio: `python3 scripts/check-tokens.py` (estructura, paridad de temas, contraste
-AA) y `npm run build`.
+Y en el repo: `python3 scripts/check-tokens.py` tras cada cambio.
 
 ## Hecho en esta sesión
 
-Antes de Carbon: **PR #33 mergeado a `main`** — tool `browse_url` del agente Zenith terminada,
-testeada y documentada. Ver `CHANGELOG.md` `[3.12.0]`.
+Antes de Carbon: **PR #33 mergeado a `main`** (tool `browse_url` del agente, v3.12.0).
 
-M0 completo, cada issue con su comentario detallado en Linear:
+**M0** — PJBA-8 `da9aa1f`, PJBA-9 `9851e02`, PJBA-10 `cc42396`, PJBA-12 `e555b0c`,
+PJBA-11 `63f0333`.
 
-- **PJBA-8** (`da9aa1f`) — `src/styles/theme.css`: 94 primitivos N1 + 93 semánticos N2 g10.
-- **PJBA-9** (`9851e02`) — bloque `[data-carbon-theme='g100']`; familia Orange añadida a N1;
-  primitivos fuera de stop renombrados a escala interpolada (`--cds-gray-15/-64/-65/-72/-74/-83`).
-- **PJBA-10** (`cc42396`) — 83 tokens de escala: spacing 01–13, type scale (10 tamaños + 11
-  estilos compuestos), radio 0, elevación solo overlay.
-- **PJBA-12** (`e555b0c`) — IBM Plex al `<head>` de los 6 HTML, fuera el `@import`.
-- **PJBA-11** (`63f0333`) — `src/theme.ts`, atributo en `<html>` desde `main.tsx`, toggle al
-  pie de la Sidebar.
+**M1** — PJBA-13 `162acdb`, PJBA-14 `97ccb08`, PJBA-15 `1645fe3`.
+
+Cada issue tiene comentario detallado en Linear con sus desviaciones.
 
 ## En vuelo / a medias
 
-Nada. Working tree limpio y rama pusheada.
+Nada. Working tree limpio, rama pusheada.
 
 ## Decisiones tomadas
 
-Las duraderas están en `DECISIONS.md`. De esta sesión:
+Las duraderas en `DECISIONS.md`. De M1:
 
-- **Un solo PR al final de TODOS los milestones**, no uno por issue ni por milestone. Decisión
-  explícita del usuario. `feature/carbon-migration` es una rama de larga vida.
-- El toggle vive **al pie de la Sidebar**. Login y docs no la renderizan, pero sí respetan el
-  tema guardado: ubicación del control y aplicación del tema son cosas separadas.
-- Persistir el tema es **opt-in**, no efecto secundario de aplicarlo. Guardar el tema resuelto
-  al arrancar registraría una preferencia que el usuario nunca expresó.
-- Los pesos de fuente 500 y 700 **se mantienen** pese a que Carbon solo quiere 300/400/600:
-  hay 28 declaraciones vivas usándolos. Estrecharlos va con M1/M2.
+- **La capa de alias de `styles.css` sobrevive a propósito.** 34 nombres se leen desde 6 hojas
+  y 9 componentes sin migrar. Un `var()` indefinido no da error: apaga la regla en silencio.
+  La borra **PJBA-21**, no antes.
+- **Los colores de estado son semánticos, no literales.** 12 estados × 3 tokens × 2 temas.
+  `pending` era el único sin tokens (tres slates de Tailwind incrustados) y ahora es teal.
+- **Los acentos de estado en tema claro van en hue-70, no hue-60.** A 60 sobre relleno 20 dan
+  3.79 y no pasan AA. Era un bug preexistente, no algo que introdujera la migración.
+- **`--color-primary` → `--cds-button-primary`**, no `--cds-interactive`: interactive baja a
+  Blue 50 en g100 y falla bajo texto blanco de botón.
+- **Los overlays conservan sombra** (`--cds-shadow-overlay`); todo lo que está en flujo la
+  pierde.
 
 ## Trampas descubiertas
 
-- **`document.documentElement` no existe** cuando corre un init script de Playwright, así que
-  un `MutationObserver` sobre él nunca llega a instalarse y devuelve un falso negativo. Para
+- **Un `var()` indefinido no da error.** El navegador descarta la declaración entera y la regla
+  no hace nada. Es el modo de fallo dominante de esta migración: hoy quedan **13 tokens
+  indefinidos en 37 referencias**, todas en archivos de M2/M3.
+- **El contenedor `jobboard-agent` puede ser recreado** entre pasos (pasó esta sesión, exit 0,
+  sin OOM). Eso borra cualquier `pip install` manual; las deps de la imagen sobreviven.
+- **Un gris sólido no sustituye a un negro con alfa muy baja.** Apuntar el grid del `body` a
+  `--cds-border-subtle-00` lo convirtió en papel milimetrado. Las texturas al borde de lo
+  perceptible necesitan alfa, o sea un triplete RGB.
+- **Un triplete `-rgb` que no cuadre con su hex es invisible.** El checker ya lo vigila.
+- **Cuidado con los espacios finales al hacer replace exacto en CSS**:
+  `background-image: ` tenía uno y rompió el primer intento de sustitución.
+- **`document.documentElement` no existe** cuando corre un init script de Playwright; para
   medir cuándo se aplica un atributo hay que interceptar `Element.prototype.setAttribute`.
-- **`document.fonts.check()` devuelve `false` para fuentes declaradas pero no usadas.** No es
-  que falten: el navegador descarga el archivo en el primer uso. Se confirma añadiendo un
-  elemento que la use y volviendo a comprobar.
-- **`src/main.tsx` es el entry único.** Los 6 HTML lo cargan y `App.tsx` enruta por
-  `pathname`; los `src/pages/*/main.tsx` no son entries de Vite.
-- **Vite eleva los `@import` de CSS al inicio del bundle** — ya no aplica al de fuentes
-  (PJBA-12 lo eliminó), pero conviene recordarlo si se vuelve a añadir alguno.
-- **`pytest` no está instalado** en el contenedor `jobboard-agent` ni en el host, pese a lo que
-  dice `DEPLOYMENT.md:205`. Hay `agent-service/requirements-dev.txt`; instalarlo dentro del
-  contenedor, y se pierde al recrearlo.
-- **El agente no recarga código solo** (uvicorn sin `--reload`): `docker restart jobboard-agent`.
-- **Los merges de este repo son rebase merges**: los SHAs de `main` no coinciden con los de la
-  rama.
+- **`document.fonts.check()` da `false` para fuentes declaradas pero sin usar** — descarga
+  perezosa, no ausencia.
+- **Los merges de este repo son rebase merges.**
 
 ## Preguntas abiertas para el usuario
 
-Ninguna. M1 (PJBA-13, 14, 15) no depende de ninguna decisión pendiente.
+Ninguna. M2 (PJBA-16 → 21) no depende de decisiones pendientes.
