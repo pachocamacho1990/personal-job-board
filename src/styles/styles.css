@@ -779,7 +779,7 @@ body {
 
 .btn-preview.active {
     background: var(--cds-button-primary);
-    color: white;
+    color: var(--cds-text-on-color);
     border-color: var(--cds-button-primary);
 }
 
@@ -929,7 +929,7 @@ body {
 
 .btn-primary {
     background: var(--cds-button-primary);
-    color: white;
+    color: var(--cds-text-on-color);
 }
 
 .btn-primary:hover {
@@ -972,7 +972,7 @@ body {
 /* Focus Mode Styles */
 .btn-icon.active {
     background: var(--cds-button-primary);
-    color: white;
+    color: var(--cds-text-on-color);
     border-color: var(--cds-button-primary);
 }
 
@@ -1217,7 +1217,7 @@ body.focus-mode .job-card.dimmed {
 
 .journey-node {
     fill: var(--cds-button-primary);
-    stroke: white;
+    stroke: var(--cds-layer-01);
     stroke-width: 2px;
     transition: all 0.3s ease;
     opacity: 0.6;
@@ -1225,7 +1225,7 @@ body.focus-mode .job-card.dimmed {
 
 .journey-node.active {
     fill: var(--cds-button-primary);
-    stroke: white;
+    stroke: var(--cds-layer-01);
     stroke-width: 3px;
     opacity: 1;
     filter: drop-shadow(0 0 6px rgba(var(--cds-agent-accent-rgb), 0.5));

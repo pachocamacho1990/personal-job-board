@@ -650,7 +650,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                   border: '1px solid var(--cds-border-subtle-00)',
                   borderRadius: '8px',
                   padding: '1rem',
-                  backgroundColor: 'rgba(99, 102, 241, 0.03)',
+                  backgroundColor: 'var(--cds-status-applied-surface)',
                   marginTop: '1.5rem',
                   marginBottom: '1rem'
                 }}
