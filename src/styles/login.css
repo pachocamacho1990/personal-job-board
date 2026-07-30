@@ -11,16 +11,16 @@ body {
 .login-split-container {
     min-height: 100vh;
     display: flex;
-    font-family: var(--font-family);
-    background-color: var(--color-surface); /* IBM Carbon Gray 10 */
+    font-family: var(--cds-font-sans);
+    background-color: var(--cds-background); /* IBM Carbon Gray 10 */
 }
 
 /* Left side: Stark Form Pane */
 .login-form-pane {
     width: 40%;
     min-width: 420px;
-    background: var(--color-canvas); /* White */
-    border-right: 1px solid var(--color-border);
+    background: var(--cds-layer-01); /* White */
+    border-right: 1px solid var(--cds-border-subtle-00);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -40,7 +40,7 @@ body {
     margin-bottom: 48px;
     font-size: 18px;
     font-weight: 600;
-    color: var(--color-text-main);
+    color: var(--cds-text-primary);
     letter-spacing: -0.5px;
 }
 
@@ -51,13 +51,13 @@ body {
 .auth-header h1 {
     font-size: 28px;
     font-weight: 300; /* Carbon light weight title */
-    color: var(--color-text-main);
+    color: var(--cds-text-primary);
     margin: 0 0 8px 0;
 }
 
 .auth-header p {
     font-size: 14px;
-    color: var(--color-text-muted);
+    color: var(--cds-text-secondary);
     margin: 0;
     line-height: 1.4;
 }
@@ -77,45 +77,42 @@ body {
 .form-group label {
     font-size: 12px;
     font-weight: 500;
-    color: var(--color-text-muted);
+    color: var(--cds-text-secondary);
 }
 
 .form-group input {
     padding: 10px 14px;
-    border: 1px solid #8d8d8d; /* Carbon Gray 50 border */
-    border-radius: 4px;
+    border: 1px solid var(--cds-border-strong-01);
     font-size: 14px;
     font-family: inherit;
-    color: var(--color-text-main);
-    background: #f4f4f4; /* Carbon Gray 10 input bg */
+    color: var(--cds-text-primary);
+    background: var(--cds-field-01);
     transition: all 0.15s ease;
     box-sizing: border-box;
     width: 100%;
 }
 
 .form-group input:focus {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--cds-button-primary);
     outline-offset: -2px;
-    background: #ffffff;
+    background: var(--cds-layer-01);
     border-color: transparent;
 }
 
 .error-message {
     padding: 12px 16px;
-    background: #fff0f0;
-    border: 1px solid var(--color-danger);
-    border-radius: 4px;
-    color: var(--color-danger);
+    background: var(--cds-support-error-subtle);
+    border: 1px solid var(--cds-support-error);
+    color: var(--cds-support-error);
     font-size: 13px;
     margin-bottom: 20px;
 }
 
 .btn-submit {
     padding: 12px 16px;
-    background: var(--color-primary);
+    background: var(--cds-button-primary);
     color: white;
     border: none;
-    border-radius: 4px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -129,7 +126,7 @@ body {
 }
 
 .btn-submit:hover:not(:disabled) {
-    background: var(--color-primary-hover);
+    background: var(--cds-button-primary-hover);
 }
 
 .btn-submit:disabled {
@@ -139,25 +136,25 @@ body {
 
 .toggle-mode {
     font-size: 13.5px;
-    color: var(--color-text-muted);
+    color: var(--cds-text-secondary);
     margin-top: 24px;
 }
 
 .toggle-mode a {
-    color: var(--color-primary);
+    color: var(--cds-button-primary);
     text-decoration: none;
     cursor: pointer;
 }
 
 .toggle-mode a:hover {
     text-decoration: underline;
-    color: var(--color-primary-hover);
+    color: var(--cds-button-primary-hover);
 }
 
 /* Right side: Blueprint Technical Showcase */
 .login-showcase-pane {
     width: 60%;
-    background-color: #0b0e14; /* Deep dark blue-black */
+    background-color: var(--cds-terminal-bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -177,12 +174,11 @@ body {
 
 .blueprint-container {
     width: 100%;
-    background: rgba(255, 255, 255, 0.015);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
+    background: transparent;
+    border: 1px solid var(--cds-terminal-border);
+    border-radius: 0;
     padding: 10px;
     box-sizing: border-box;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .blueprint-svg {
@@ -200,8 +196,8 @@ body {
 }
 
 .showcase-text {
-    color: #ffffff;
-    font-family: var(--font-family);
+    color: var(--cds-terminal-text);
+    font-family: var(--cds-font-sans);
 }
 
 .showcase-text h2 {
@@ -214,7 +210,7 @@ body {
 
 .showcase-text p {
     font-size: 14px;
-    color: #a4a9b4;
+    color: var(--cds-terminal-text-secondary);
     margin: 0;
     line-height: 1.6;
 }

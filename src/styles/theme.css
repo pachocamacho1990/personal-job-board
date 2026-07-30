@@ -521,11 +521,15 @@
   --cds-grid-line: rgba(var(--cds-gray-100-rgb), 0.025);
   --cds-support-error-rgb: var(--cds-red-60-rgb);
 
-  /* — Terminal surface. Tool output stays dark in both themes: it is a console
-       transcript, and reading it as one is the point. The only thing the dark
-       theme changes is the border, which needs more separation there. */
+  /* — Always-dark surfaces. Named for their first use, tool output, but the
+       concept is broader: a surface that stays dark in both themes because
+       reading it as a console is the point. Code blocks and the login showcase
+       panel use it too. The dark theme only widens the border, which needs
+       more separation there. */
   --cds-terminal-bg: var(--cds-gray-100);
   --cds-terminal-border: var(--cds-gray-80);
+  --cds-terminal-text: var(--cds-gray-10);
+  --cds-terminal-text-secondary: var(--cds-gray-40);
 }
 
 /* ----------------------------------------------------------------------------
@@ -743,4 +747,6 @@
 
   --cds-terminal-bg: var(--cds-gray-100);
   --cds-terminal-border: var(--cds-gray-70);
+  --cds-terminal-text: var(--cds-gray-10);
+  --cds-terminal-text-secondary: var(--cds-gray-40);
 }
