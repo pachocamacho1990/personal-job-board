@@ -1,6 +1,6 @@
 /* Scoped Docs Page Styles */
 .docs-app-container {
-    --code-bg: #1e293b;
+    --code-bg: var(--cds-terminal-bg);
     display: grid;
     grid-template-columns: 280px 1fr;
     min-height: 100vh;
@@ -33,7 +33,7 @@ aside.docs-sidebar {
         }
 
         .logo-text {
-            font-family: var(--font-title);
+            font-family: var(--cds-font-sans);
             font-weight: 700;
             font-size: 1.25rem;
             letter-spacing: -0.02em;
@@ -46,7 +46,7 @@ aside.docs-sidebar {
 
         .search-input {
             width: 100%;
-            background: #F8FAFC;
+            background: var(--cds-layer-02);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
             padding: 0.6rem 1rem 0.6rem 2.2rem;
@@ -59,8 +59,8 @@ aside.docs-sidebar {
 
         .search-input:focus {
             border-color: var(--primary);
-            background: #FFFFFF;
-            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
+            background: var(--cds-layer-01);
+            box-shadow: 0 0 0 2px var(--cds-focus);
         }
 
         .search-icon {
@@ -68,7 +68,7 @@ aside.docs-sidebar {
             left: 0.8rem;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-light);
+            color: var(--cds-text-placeholder);
             font-size: 0.875rem;
         }
 
@@ -91,11 +91,11 @@ aside.docs-sidebar {
         }
 
         .nav-section-title {
-            font-family: var(--font-title);
+            font-family: var(--cds-font-sans);
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: var(--text-light);
+            color: var(--cds-text-placeholder);
             margin-bottom: 0.5rem;
             font-weight: 700;
         }
@@ -121,7 +121,7 @@ aside.docs-sidebar {
 
         .nav-link.active {
             color: var(--primary);
-            background: var(--surface-active);
+            background: var(--cds-layer-selected-01);
             font-weight: 500;
         }
 
@@ -145,7 +145,7 @@ aside.docs-sidebar {
         .mode-tabs {
             display: flex;
             gap: 0.5rem;
-            background: #F1F5F9;
+            background: var(--cds-layer-accent-01);
             border: 1px solid var(--border);
             padding: 0.25rem;
             border-radius: var(--radius-md);
@@ -158,7 +158,7 @@ aside.docs-sidebar {
             padding: 0.6rem 1.2rem;
             border-radius: var(--radius-sm);
             cursor: pointer;
-            font-family: var(--font-title);
+            font-family: var(--cds-font-sans);
             font-weight: 600;
             font-size: 0.875rem;
             display: flex;
@@ -173,9 +173,8 @@ aside.docs-sidebar {
 
         .mode-tab.active {
             background: var(--primary);
-            color: #FFFFFF;
-            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
-        }
+            color: var(--cds-text-on-color);
+                }
 
         .back-link {
             color: var(--text-muted);
@@ -201,8 +200,8 @@ aside.docs-sidebar {
             display: block;
         }
 
-        h1 {
-            font-family: var(--font-title);
+        .docs-content h1 {
+            font-family: var(--cds-font-sans);
             font-size: 2.5rem;
             font-weight: 700;
             letter-spacing: -0.03em;
@@ -210,8 +209,8 @@ aside.docs-sidebar {
             color: var(--text-main);
         }
 
-        h2 {
-            font-family: var(--font-title);
+        .docs-content h2 {
+            font-family: var(--cds-font-sans);
             font-size: 1.75rem;
             font-weight: 600;
             letter-spacing: -0.02em;
@@ -219,15 +218,15 @@ aside.docs-sidebar {
             color: var(--primary);
         }
 
-        h3 {
-            font-family: var(--font-title);
+        .docs-content h3 {
+            font-family: var(--cds-font-sans);
             font-size: 1.25rem;
             font-weight: 600;
             margin: 1.5rem 0 0.75rem;
             color: var(--text-main);
         }
 
-        p {
+        .docs-content p {
             margin-bottom: 1.25rem;
             color: var(--text-muted);
             font-size: 1rem;
@@ -239,21 +238,21 @@ aside.docs-sidebar {
             font-weight: 600;
         }
 
-        code {
-            font-family: 'Courier New', Courier, monospace;
-            background: #F1F5F9;
+        .docs-content code {
+            font-family: var(--cds-font-mono);
+            background: var(--cds-layer-accent-01);
             border: 1px solid var(--border);
             padding: 0.2rem 0.4rem;
             border-radius: 0;
             font-size: 0.875rem;
-            color: #D946EF;
+            color: var(--cds-text-error);
         }
 
         /* Code Blocks */
         .code-block-wrapper {
             position: relative;
             background: var(--code-bg);
-            border: 1px solid #1E293B;
+            border: 1px solid var(--cds-terminal-border);
             border-radius: var(--radius-md);
             margin: 1.5rem 0;
             overflow: hidden;
@@ -265,11 +264,11 @@ aside.docs-sidebar {
             justify-content: space-between;
             align-items: center;
             padding: 0.5rem 1rem;
-            background: #1E293B;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: var(--cds-terminal-bg);
+            border-bottom: 1px solid var(--cds-terminal-border);
             font-size: 0.75rem;
-            color: var(--text-light);
-            font-family: var(--font-title);
+            color: var(--cds-text-placeholder);
+            font-family: var(--cds-font-sans);
             font-weight: 600;
         }
 
@@ -283,14 +282,14 @@ aside.docs-sidebar {
             background: none;
             border: none;
             padding: 0;
-            color: #E2E8F0;
+            color: var(--cds-text-inverse);
             font-size: 0.875rem;
             line-height: 1.5;
         }
 
         .copy-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--cds-terminal-border);
+            border: 1px solid var(--cds-terminal-border);
             color: var(--text-muted);
             padding: 0.25rem 0.6rem;
             border-radius: var(--radius-sm);
@@ -301,7 +300,7 @@ aside.docs-sidebar {
 
         .copy-btn:hover {
             color: var(--text-main);
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--cds-terminal-border);
         }
 
         /* Glassmorphic Alerts */
@@ -325,7 +324,7 @@ aside.docs-sidebar {
 
         .alert-info {
             border-left: 4px solid var(--primary);
-            background: rgba(79, 70, 229, 0.03);
+            background: var(--cds-status-applied-surface);
         }
 
         .alert-info::before {
@@ -333,8 +332,8 @@ aside.docs-sidebar {
         }
 
         .alert-warning {
-            border-left: 4px solid var(--accent);
-            background: rgba(168, 85, 247, 0.03);
+            border-left: 4px solid var(--cds-support-warning);
+            background: var(--cds-status-interview-surface);
         }
 
         .alert-warning::before {
@@ -342,33 +341,33 @@ aside.docs-sidebar {
         }
 
         /* Table Design */
-        table {
+        .docs-content table {
             width: 100%;
             border-collapse: collapse;
             margin: 1.5rem 0;
-            background: #FFFFFF;
+            background: var(--cds-layer-01);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
             overflow: hidden;
             box-shadow: var(--shadow);
         }
 
-        th,
-        td {
+        .docs-content th,
+        .docs-content td {
             padding: 0.75rem 1rem;
             text-align: left;
             font-size: 0.875rem;
         }
 
-        th {
-            background: #F8FAFC;
+        .docs-content th {
+            background: var(--cds-layer-02);
             color: var(--text-main);
-            font-family: var(--font-title);
+            font-family: var(--cds-font-sans);
             font-weight: 600;
             border-bottom: 1px solid var(--border);
         }
 
-        td {
+        .docs-content td {
             color: var(--text-muted);
             border-bottom: 1px solid var(--border);
         }
@@ -378,13 +377,13 @@ aside.docs-sidebar {
         }
 
         tr:hover td {
-            background: #F8FAFC;
+            background: var(--cds-layer-02);
             color: var(--text-main);
         }
 
         /* SVG Architecture diagram styling */
         .diagram-container {
-            background: #FFFFFF;
+            background: var(--cds-layer-01);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             padding: 2rem;
@@ -408,7 +407,7 @@ aside.docs-sidebar {
         }
 
         .feature-card {
-            background: #FFFFFF;
+            background: var(--cds-layer-01);
             border: 1px solid var(--border);
             padding: 1.5rem;
             border-radius: var(--radius-lg);
