@@ -4,6 +4,7 @@ import { BusinessEntity, FileAttachment } from '../types';
 import { getFileIcon, formatFileSize } from '../utils';
 import { marked } from 'marked';
 import { HandshakeIcon, MoneyIcon, InstitutionIcon, RocketLaunchIcon } from './icons';
+import { Drawer } from './Drawer';
 
 interface BusinessDetailPanelProps {
   entityId: number | null;
@@ -100,17 +101,6 @@ export const BusinessDetailPanel: React.FC<BusinessDetailPanelProps> = ({
     }
   }, [entityId, isOpen]);
 
-  // Esc key closes panel
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen && !showDeleteConfirm && !fileToDeleteId && !fileToPreview) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, showDeleteConfirm, fileToDeleteId, fileToPreview]);
-
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const data = {
@@ -170,19 +160,12 @@ export const BusinessDetailPanel: React.FC<BusinessDetailPanelProps> = ({
 
   return (
     <>
-      <aside
-        id="detailPanel"
-        className={`detail-panel ${isOpen ? 'open' : ''}`}
-        style={{ position: 'fixed', right: 0, top: 0, height: '100vh', zIndex: 200 }}
+      <Drawer
+        isOpen={isOpen}
+        title={entityId ? 'Edit Entity' : 'New Entity'}
+        onClose={onClose}
+        blockedBy={[showDeleteConfirm, fileToDeleteId, fileToPreview]}
       >
-        <div className="panel-content">
-          <div className="panel-header">
-            <h2 id="panelTitle">{entityId ? 'Edit Entity' : 'New Entity'}</h2>
-            <button id="closePanel" className="btn-icon" aria-label="Close panel" onClick={onClose}>
-              &times;
-            </button>
-          </div>
-
           <form id="entityForm" className="job-form" onSubmit={handleFormSubmit}>
             <div className="form-group">
               <label>Type</label>
@@ -442,8 +425,7 @@ export const BusinessDetailPanel: React.FC<BusinessDetailPanelProps> = ({
               )}
             </div>
           </form>
-        </div>
-      </aside>
+      </Drawer>
 
       {/* Delete Entity Confirmation Modal */}
       {showDeleteConfirm && (
