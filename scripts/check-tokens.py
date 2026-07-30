@@ -21,6 +21,7 @@ import re
 import sys
 
 PATH = "src/styles/theme.css"
+SCALES_MARKER = "N1 · SCALES"
 N2_MARKER = "N2 · SEMANTICS"
 G100_SELECTOR = "[data-carbon-theme='g100']"
 
@@ -34,14 +35,17 @@ def defs_in(text):
 
 def load():
     text = open(PATH).read()
-    assert N2_MARKER in text, f"{N2_MARKER!r} banner not found"
+    for marker in (SCALES_MARKER, N2_MARKER):
+        assert marker in text, f"{marker!r} banner not found"
     assert G100_SELECTOR in text, f"{G100_SELECTOR} block not found"
 
-    # N1 primitives, then g10 semantics, then the g100 override block.
+    # N1 palette, N1 scales, g10 semantics, then the g100 override block.
     n1_text, rest = text.split(N2_MARKER, 1)
+    palette_text, scales_text = n1_text.split(SCALES_MARKER, 1)
     g10_text, g100_text = rest.split(G100_SELECTOR, 1)
 
-    return text, defs_in(n1_text), defs_in(g10_text), defs_in(g100_text)
+    return (text, defs_in(palette_text), defs_in(scales_text),
+            defs_in(g10_text), defs_in(g100_text))
 
 
 # ── color math ───────────────────────────────────────────
@@ -146,9 +150,49 @@ KNOWN_EXCEPTIONS = {
 AA_TEXT, AA_UI = 4.5, 3.0
 
 
-def main():
-    text, n1, g10, g100 = load()
+def rem_to_px(value):
+    m = re.fullmatch(r"([\d.]+)rem", value.strip())
+    return float(m.group(1)) * 16 if m else None
 
+
+def check_scales(scales, failures):
+    """The scales carry no color, so contrast says nothing about them. What can
+    silently go wrong is a transposed step or a composed type style that stopped
+    pointing at the atoms."""
+    scale_map = dict(scales)
+
+    # Spacing must climb monotonically. A swapped pair still renders, just wrong.
+    steps = []
+    for i in range(1, 14):
+        name = f"--cds-spacing-{i:02d}"
+        if name not in scale_map:
+            failures.append(f"spacing scale: {name} is missing")
+            continue
+        px = rem_to_px(scale_map[name])
+        if px is None:
+            failures.append(f"spacing scale: {name} = {scale_map[name]!r} is not in rem")
+        else:
+            steps.append((name, px))
+
+    for (prev_name, prev_px), (name, px) in zip(steps, steps[1:]):
+        if px <= prev_px:
+            failures.append(
+                f"spacing scale is not monotonic: {name} ({px:g}px) <= {prev_name} ({prev_px:g}px)")
+
+    # Composed type styles must be built from the atoms, not from raw values.
+    composed = [(n, v) for n, v in scales
+                if re.search(r"--cds-(label|helper-text|body|code|heading)-\d+-", n)]
+    raw = [(n, v.strip()) for n, v in composed if "var(" not in v]
+    if raw:
+        failures.append(f"composed type styles not built from atoms: {raw}")
+
+    return len(steps), len(composed)
+
+
+def main():
+    text, palette, scales, g10, g100 = load()
+
+    n1 = palette + scales
     n1_map, g10_map, g100_map = dict(n1), dict(g10), dict(g100)
     base = {**n1_map, **g10_map}
 
@@ -161,7 +205,8 @@ def main():
     if dangling:
         failures.append(f"var() references to undefined tokens: {dangling}")
 
-    for scope_name, pairs in (("N1", n1), ("g10", g10), ("g100", g100)):
+    for scope_name, pairs in (("N1 palette", palette), ("N1 scales", scales),
+                              ("g10", g10), ("g100", g100)):
         names = [n for n, _ in pairs]
         dupes = sorted({n for n in names if names.count(n) > 1})
         if dupes:
@@ -232,8 +277,13 @@ def main():
         if fg in g10_map:
             report(fg, "--cds-layer-01", AA_TEXT)
 
+    # ── 4. scales ──
+    spacing_steps, composed_styles = check_scales(scales, failures)
+
     # ── summary ──
-    print(f"\n  N1 primitives : {len(n1)}")
+    print(f"\n  N1 palette    : {len(palette)}")
+    print(f"  N1 scales     : {len(scales)}  ({spacing_steps} spacing steps, "
+          f"{composed_styles} composed type styles)")
     print(f"  g10 semantics : {len(g10)}")
     print(f"  g100 semantics: {len(g100)}")
 

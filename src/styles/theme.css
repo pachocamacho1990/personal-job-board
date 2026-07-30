@@ -19,9 +19,12 @@
    Imported once, from src/main.tsx — the single entry shared by all six HTML
    pages. Do not import it anywhere else.
 
-   Scope note: the g100 dark overrides land in PJBA-9, the spacing and type
-   scales in PJBA-10, and the data-carbon-theme wiring in PJBA-11. This file
-   is deliberately colors-only for now.
+   Alongside the color levels sit the non-color scales — spacing, type, radius
+   and elevation. They are theme-independent, so they live with the primitives
+   rather than in either theme block.
+
+   Scope note: wiring data-carbon-theme onto <html> plus the persistent toggle
+   is PJBA-11; until then g100 is defined but unreachable from the UI.
    ============================================================================ */
 
 /* ----------------------------------------------------------------------------
@@ -159,6 +162,141 @@
   --cds-gray-100-rgb: 22, 22, 22;
   --cds-gray-50-rgb: 141, 141, 141;
   --cds-white-rgb: 255, 255, 255;
+}
+
+/* ----------------------------------------------------------------------------
+   N1 · SCALES — spacing, type, radius, elevation
+
+   Theme-independent, like the palette: 16px is 16px in g10 and g100 alike.
+   ---------------------------------------------------------------------------- */
+
+:root {
+  /* — Spacing — Carbon's 01–13 scale.
+
+       Not a doubling scale: it is dense at the bottom (2, 4, 8, 12, 16) where
+       component padding lives, and coarse at the top (64, 80, 96, 160) where
+       page composition happens. That is why the existing xs–2xl scale cannot
+       simply be renamed onto it — the old scale had no 12px step and nothing
+       above 48px. Repointing the call sites is PJBA-13. */
+  --cds-spacing-01: 0.125rem; /*   2px */
+  --cds-spacing-02: 0.25rem;  /*   4px */
+  --cds-spacing-03: 0.5rem;   /*   8px */
+  --cds-spacing-04: 0.75rem;  /*  12px */
+  --cds-spacing-05: 1rem;     /*  16px */
+  --cds-spacing-06: 1.5rem;   /*  24px */
+  --cds-spacing-07: 2rem;     /*  32px */
+  --cds-spacing-08: 2.5rem;   /*  40px */
+  --cds-spacing-09: 3rem;     /*  48px */
+  --cds-spacing-10: 4rem;     /*  64px */
+  --cds-spacing-11: 5rem;     /*  80px */
+  --cds-spacing-12: 6rem;     /*  96px */
+  --cds-spacing-13: 10rem;    /* 160px */
+
+  /* — Type: families */
+  --cds-font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --cds-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* — Type: weights. Carbon carries emphasis with weight 600, never 700 —
+       heavier than semibold reads as shouting in this type system. */
+  --cds-font-weight-light: 300;
+  --cds-font-weight-regular: 400;
+  --cds-font-weight-semibold: 600;
+
+  /* — Type: size scale */
+  --cds-type-size-01: 0.75rem;   /* 12px */
+  --cds-type-size-02: 0.875rem;  /* 14px */
+  --cds-type-size-03: 1rem;      /* 16px */
+  --cds-type-size-04: 1.125rem;  /* 18px */
+  --cds-type-size-05: 1.25rem;   /* 20px */
+  --cds-type-size-06: 1.5rem;    /* 24px */
+  --cds-type-size-07: 1.75rem;   /* 28px */
+  --cds-type-size-08: 2rem;      /* 32px */
+  --cds-type-size-09: 2.625rem;  /* 42px */
+  --cds-type-size-10: 3.375rem;  /* 54px */
+
+  /* — Type: line heights. Tighter as type grows, which is why these are
+       separate atoms rather than one global multiplier. */
+  --cds-line-height-01: 1.28572; /* 14/18 — compact body and small headings */
+  --cds-line-height-02: 1.5;     /* 16/24 — reading body */
+  --cds-line-height-03: 1.4;     /* 20/28 — mid headings */
+  --cds-line-height-04: 1.25;    /* 32/40 — large headings */
+
+  /* — Type: letter spacing. Carbon opens up small type and lets large type
+       sit at zero. */
+  --cds-letter-spacing-01: 0.32px; /* 12px type */
+  --cds-letter-spacing-02: 0.16px; /* 14px type */
+  --cds-letter-spacing-03: 0;      /* 16px and up */
+
+  /* — Type: composed styles. The atoms above are the vocabulary; these are the
+       sentences the UI actually speaks, matching Carbon's named type styles. */
+  --cds-label-01-font-size: var(--cds-type-size-01);
+  --cds-label-01-line-height: var(--cds-line-height-01);
+  --cds-label-01-letter-spacing: var(--cds-letter-spacing-01);
+  --cds-label-01-font-weight: var(--cds-font-weight-regular);
+
+  --cds-helper-text-01-font-size: var(--cds-type-size-01);
+  --cds-helper-text-01-line-height: var(--cds-line-height-01);
+  --cds-helper-text-01-letter-spacing: var(--cds-letter-spacing-01);
+  --cds-helper-text-01-font-weight: var(--cds-font-weight-regular);
+
+  --cds-body-01-font-size: var(--cds-type-size-02);
+  --cds-body-01-line-height: var(--cds-line-height-01);
+  --cds-body-01-letter-spacing: var(--cds-letter-spacing-02);
+  --cds-body-01-font-weight: var(--cds-font-weight-regular);
+
+  --cds-body-02-font-size: var(--cds-type-size-03);
+  --cds-body-02-line-height: var(--cds-line-height-02);
+  --cds-body-02-letter-spacing: var(--cds-letter-spacing-03);
+  --cds-body-02-font-weight: var(--cds-font-weight-regular);
+
+  --cds-code-01-font-size: var(--cds-type-size-01);
+  --cds-code-01-line-height: var(--cds-line-height-01);
+  --cds-code-01-letter-spacing: var(--cds-letter-spacing-01);
+  --cds-code-01-font-weight: var(--cds-font-weight-regular);
+
+  --cds-code-02-font-size: var(--cds-type-size-02);
+  --cds-code-02-line-height: var(--cds-line-height-01);
+  --cds-code-02-letter-spacing: var(--cds-letter-spacing-02);
+  --cds-code-02-font-weight: var(--cds-font-weight-regular);
+
+  --cds-heading-01-font-size: var(--cds-type-size-02);
+  --cds-heading-01-line-height: var(--cds-line-height-01);
+  --cds-heading-01-letter-spacing: var(--cds-letter-spacing-02);
+  --cds-heading-01-font-weight: var(--cds-font-weight-semibold);
+
+  --cds-heading-02-font-size: var(--cds-type-size-03);
+  --cds-heading-02-line-height: var(--cds-line-height-03);
+  --cds-heading-02-letter-spacing: var(--cds-letter-spacing-03);
+  --cds-heading-02-font-weight: var(--cds-font-weight-semibold);
+
+  --cds-heading-03-font-size: var(--cds-type-size-05);
+  --cds-heading-03-line-height: var(--cds-line-height-03);
+  --cds-heading-03-letter-spacing: var(--cds-letter-spacing-03);
+  --cds-heading-03-font-weight: var(--cds-font-weight-regular);
+
+  --cds-heading-04-font-size: var(--cds-type-size-07);
+  --cds-heading-04-line-height: var(--cds-line-height-04);
+  --cds-heading-04-letter-spacing: var(--cds-letter-spacing-03);
+  --cds-heading-04-font-weight: var(--cds-font-weight-regular);
+
+  --cds-heading-05-font-size: var(--cds-type-size-08);
+  --cds-heading-05-line-height: var(--cds-line-height-04);
+  --cds-heading-05-letter-spacing: var(--cds-letter-spacing-03);
+  --cds-heading-05-font-weight: var(--cds-font-weight-regular);
+
+  /* — Radius. Carbon is square: corners are structure, not decoration, and
+       rounding them is the single change that most makes a UI stop reading as
+       Carbon. The pill exists only for tags, which are pill-shaped by spec.
+       Purging the existing 4/6/8px radii is PJBA-15. */
+  --cds-radius-00: 0;
+  --cds-radius-pill: 62.5rem;
+
+  /* — Elevation. Carbon separates surfaces with layer color, not shadow. The
+       one sanctioned shadow is for things that float above the page and must
+       be dismissible — menus, popovers, modals. Anything that sits in the
+       page flow gets --cds-shadow-none. */
+  --cds-shadow-none: none;
+  --cds-shadow-overlay: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* ----------------------------------------------------------------------------
