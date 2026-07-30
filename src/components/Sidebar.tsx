@@ -104,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <>
               <div id="boardsSubnav" className="boards-subnav">
                 {boards.length === 0 ? (
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', padding: '0.5rem 0.75rem' }}>
+                  <div style={{ color: 'var(--cds-text-secondary)', fontSize: '0.75rem', padding: '0.5rem 0.75rem' }}>
                     Sin tableros
                   </div>
                 ) : (
