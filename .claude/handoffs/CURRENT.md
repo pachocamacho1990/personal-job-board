@@ -1,101 +1,137 @@
 ---
-updated: 2026-07-30T22:52
-project: Migración a IBM Carbon (g10/g100) — COMPLETA
-linear: https://linear.app/personal-pacho/project/migracion-a-ibm-carbon-design-system-g10g100-ce956a924d8d
-milestone: los 6 completos · 26/26 issues en Done
+updated: 2026-07-30T23:05
+project: Refinamiento "premium" sobre Carbon — NUEVO, sin arrancar
+linear: sin issues todavía (ver Siguiente paso: hay que investigar antes de poder escribirlos)
+milestone: ninguno · la migración Carbon anterior está COMPLETA (26/26, PR #34 abierto)
 in_flight: ninguno
-next: abrir el PR de feature/carbon-migration a main y revisarlo
-branch: feature/carbon-migration (32 commits, pusheada y sincronizada)
-verified: gate de conformidad 5/5 · 0 texto bajo AA en 12 combinaciones página/tema · 75 tests backend · 8 tests E2E del toggle · tsc y build limpios
+next: estudiar https://carbondesignsystem.com a fondo — qué permite Carbon de verdad en radios, elevación y motion — y solo entonces escribir los issues en Linear
+branch: feature/carbon-migration (33 commits, pusheada; el PR #34 sigue sin mergear)
+verified: gate 5/5 · 0 texto bajo AA en 12 combinaciones · 75 tests backend · 8 E2E del toggle · tsc y build limpios
 ---
 
 ## Dónde quedamos
 
-**La migración está terminada.** Los 26 issues cerrados, cada uno con su comentario en Linear
-explicando qué se hizo y en qué se desvió de la descripción original.
+La migración a Carbon está **terminada y verificada** (26/26 issues, PR #34 abierto y sin
+mergear). Pero el usuario desplegó la app, la miró, y **no le convence el resultado visual**.
 
-Lo único pendiente es **abrir el PR** — decisión tomada al principio: un solo PR al terminar
-los 6 milestones, no uno por issue ni por milestone.
+Esa reacción es el punto de partida del trabajo nuevo. No es un bug: es una crítica de diseño
+sobre decisiones que tomé yo, y hay que tratarla como tal.
+
+## El encargo, en sus palabras
+
+Cito casi literal porque es subjetivo y se pierde al parafrasear:
+
+> "veo componentes que no necesariamente deben tener esquinas rectas, personalmente me gustan
+> más las esquinas redondeadas y que haya un efecto de profundidad al click o hover"
+>
+> "quiero algo un poco más premium pero es que honestamente no sé cómo definirlo"
+>
+> "los colores de las columnas del job board me parecen demasiado fuertes, me gustaría algo un
+> poco más suave"
+>
+> "siento que la aplicación se ve demasiado cuadrada"
+>
+> "creo que hay detalles sutiles que sin perder el esquema carbon podemos implementar para que
+> se vea mucho más saludable y un poco más con animaciones"
+
+Y una hipótesis suya que hay que verificar, no descartar:
+
+> "Yo entiendo que el Design System Carbon de IBM como que tiene varias maneras de usarse"
+
+Pidió explícitamente: **entrar a https://carbondesignsystem.com y estudiar la documentación**,
+con Playwright si hace falta.
+
+## Contexto crítico: esto revisa decisiones mías, no deuda heredada
+
+Tres de las cuatro quejas apuntan a cosas que **implementé a propósito** durante la migración,
+y están registradas en `DECISIONS.md` y en los comentarios de Linear:
+
+1. **Radio 0 en todo** (PJBA-10, PJBA-15). Lo justifiqué como "las esquinas son estructura, no
+   decoración" y dije que redondearlas es lo que más hace que una UI deje de leerse como
+   Carbon. **Hay que comprobar si eso es cierto en la documentación real de Carbon v11**, o si
+   fue una lectura mía demasiado rígida. La única excepción que dejé es
+   `--cds-radius-pill` para tags.
+2. **Sin sombras salvo overlays** (PJBA-15). Quité 8 declaraciones de elevación y el hover-lift
+   de la consola del agente. Carbon separa superficies por color de capa, no por elevación —
+   pero **Carbon sí tiene tokens de elevación**, y no los estudié a fondo.
+3. **Colores de columna en hue-20 / hue-10** (PJBA-13). Los subí de acento hue-60 a hue-70
+   porque a 60 no pasaban AA sobre relleno hue-20. Pero **el relleno en sí no lo cuestioné**, y
+   la queja del usuario es sobre el relleno, no sobre el texto. Rellenos más suaves
+   (`--cds-layer-*` con un borde de color, en vez de un tinte de hue) probablemente resuelven
+   esto **y** mantienen el contraste.
+
+Lo cuarto es una **omisión limpia, no una decisión**: nunca implementé **nada del sistema de
+motion de Carbon**. Carbon tiene tokens de duración y curvas de easing documentadas, y en la
+app no hay ninguno. Es la palanca más grande y más barata para lo que él llama "premium", y no
+entra en conflicto con nada de lo hecho.
 
 ## Siguiente paso
 
+**Investigar antes de escribir issues.** No se pueden redactar issues útiles sin saber qué
+permite Carbon de verdad. Páginas a estudiar como mínimo:
+
+- `/elements/motion/overview/` — duraciones, easings, cuándo animar (el hueco más claro)
+- `/elements/color/overview/` y `/elements/color/usage/` — cómo se usan los tintes de hue
+- `/guidelines/styling/` y lo que haya de elevación / sombras
+- `/elements/themes/overview/` — si hay variantes más allá de g10/g100
+- Componentes concretos con radio: tags, botones, cards
+- Buscar si existe algo tipo "expressive", "fluid" o variantes de producto que relajen el radio
+
+Es trabajo de lectura, **paralelizable** (varias páginas, cero conflicto de ficheros): lanzar
+agentes por área y sintetizar. Ver la memoria `parallel-agents-when-no-conflicts`.
+
+**Producto de la investigación**: un informe honesto que diga, para cada queja, si Carbon lo
+permite, lo desaconseja o es indiferente. Si Carbon de verdad es cuadrado por principio, hay
+que decírselo claramente y ofrecerle la alternativa (una desviación consciente y documentada
+del sistema), no fingir que la documentación respalda lo que él quiere.
+
+**Solo después**: escribir los issues en Linear y proponerle el plan.
+
+## Herramientas que ya existen y hay que respetar
+
+Cualquier cambio visual tiene que seguir pasando esto:
+
 ```bash
-gh pr create --base main --head feature/carbon-migration
-```
-
-El cuerpo debería liderar con para qué era el trabajo (que dejara de haber colores sueltos,
-no repintar) y listar los bugs preexistentes que destapó, porque son la parte que un revisor
-no espera. Están todos en la entrada `[3.13.0]` de `CHANGELOG.md`.
-
-Tras el merge, seguir la rutina: `checkout main` → `pull` → rama nueva. Los merges de este
-repo son rebase merges.
-
-## Cómo verificar que sigue sano
-
-```bash
-npm run check:design      # gate de conformidad, 5 checks
-npm test                  # 75 tests de backend (desde la raíz)
+npm run check:design                             # gate: 5 checks, 0 color no-Carbon
+npm test                                         # 75 tests backend
 npx playwright test tests/theme-toggle.spec.js   # 8 tests del toggle
 ```
 
-## Hecho
+Y el barrido de contraste, que **no está en el repo** — vive en el scratchpad de la sesión
+anterior. **Merece moverse a `scripts/`**: recorre cada nodo de texto de las 6 páginas en
+ambos temas y mide contraste real resolviendo el fondo efectivo. Encontró 57 fallos que no se
+veían en ninguna captura. Si se tocan colores de columna o se añaden sombras, hay que volver a
+correrlo — y ahora mismo habría que reescribirlo.
 
-- **M0** tokens y theming — PJBA-8 `da9aa1f`, 9 `9851e02`, 10 `cc42396`, 12 `e555b0c`, 11 `63f0333`
-- **M1** núcleo styles.css — PJBA-13 `162acdb`, 14 `97ccb08`, 15 `1645fe3`
-- **M2** CSS por página — PJBA-16 `b63b33f`, 17 `ced3799`, 18 `e0e63dc`, 19 `3035ca4`, 20 `59e92af`, 21 `5018fae`
-- **M3** componentes — PJBA-22 `69fa2a2`, 23 `62b1b4c`, 24 `38626c6`, 25 `ea0515e`, 26 `65d6599`, 27 `09bf2c9`
-- **M4** documentación — PJBA-30 `87f66cf`, 28+29 `3059e7c` (tres agentes en paralelo)
-- **M5** QA y release — PJBA-32 `c88a39f`, 33 `f286b22`, 31 `d369121`
+**Ojo**: bajar el contraste es exactamente el riesgo de "colores más suaves". El barrido está
+en 0 y tiene que seguir en 0.
 
-## Deuda conocida, fuera del alcance de esta migración
+## Decisiones tomadas
 
-Los agentes de M4 la encontraron al revisar la documentación. No es Carbon, así que no se tocó:
-
-1. **Las cuatro recetas "Adding New…" de `CLAUDE.md`** apuntan todas a la estructura
-   pre-React: `public/js/app.js`, `shared/journey-map.js`, controladores `.js`. Ninguna de
-   esas rutas existe. Es lo más engañoso que queda en el archivo.
-2. `CLAUDE.md` dice "Global arrays: `jobs[]` / `entities[]`", contradiciendo su propia tabla
-   de deuda técnica, y menciona un `sidebar.js` que no existe.
-3. `TESTING.md` lista 5 archivos de test cuando hay 8, y dice `.js` cuando son `.ts`.
-4. `DESIGN.md:99` dice rate limit "5 req/15min"; el real es 15 intentos fallidos por 15 min.
-5. **Emoji supervivientes** al commit que decía haberlos eliminado todos: `🤝` en
-   `DetailPanel.tsx:877` y `content: '💡'` / `'⚠️'` en las alertas de `docs.css`.
-6. Los **11 estilos tipográficos compuestos** tienen solo 3 call sites: la escala está
-   definida pero apenas adoptada.
-
-## Decisiones duraderas
-
-En `DECISIONS.md`. Las que más condicionaron el trabajo:
-
-- **Los componentes consumen N2, nunca N1.** Un primitivo no puede seguir un cambio de tema.
-  El gate lo vigila.
-- **Un relleno que lleva texto encima necesita un token que se quede en el stop 60 en ambos
-  temas** (`button-primary`, `button-danger-primary`), no uno que aclare en oscuro
-  (`interactive`, `support-error`). Este error se cometió dos veces.
-- **El color nunca va inline.** Un color inline gana en silencio a la regla CSS y es invisible
-  para cualquier barrido que lea hojas de estilo. Por eso los tipos de `InlineNotification` y
-  de los tags son clases modificadoras.
-- **Las superficies siempre-oscuras** (salida de terminal, bloques de código, panel showcase
-  del login) fijan tokens con scope; no pueden leer los semánticos temáticos.
+En `DECISIONS.md`. La entrada nueva de esta sesión registra que **radio 0 y ausencia de
+elevación quedan formalmente en revisión** — no revertidas, en revisión pendiente de la
+investigación.
 
 ## Trampas descubiertas
 
-- **Un `var()` indefinido no da error.** El navegador descarta la declaración entera. Mordió
-  cuatro veces: un input sin indicador de foco, los títulos de docs en fallback, `Sidebar.tsx`
-  roto por una limpieza mía, y 37 referencias muertas en componentes.
-- **Un barrido que solo busca hex y `rgba()` deja pasar los colores con nombre.** `color: white`
-  sobrevivió seis milestones porque `find-non-carbon-colors.py` nunca los miró. Un gate sin
-  probar es peor que no tener gate: el primero que escribió el agente estaba verde y
-  equivocado.
-- **Vite bundlea todo el CSS en un archivo que cargan las 6 páginas.** Un selector de elemento
-  a nivel raíz en cualquier hoja aplica en toda la app.
-- **Medir el contraste encuentra lo que mirar capturas no.** 57 fallos AA, ninguno evidente a
-  ojo.
-- **El contenedor `jobboard-agent` se recrea solo** cada cierto tiempo: borra `/tmp` y
-  cualquier `pip install`. Volver a copiar los scripts con `docker cp`.
-- **`document.documentElement` no existe** cuando corre un init script de Playwright.
+Las de la migración siguen vigentes y están en el archivo
+`archive/2026-07-30-pjba-8-33-migracion-carbon-completa.md`. Las que más importan aquí:
+
+- **Un `var()` indefinido no da error**: el navegador descarta la declaración entera.
+- **Un barrido que solo busca hex y `rgba()` deja pasar `color: white`.** Sobrevivió seis
+  milestones.
+- **Medir el contraste encuentra lo que mirar capturas no.**
+- **El contenedor `jobboard-agent` se recrea solo** y borra `/tmp`: volver a copiar los
+  scripts de Playwright con `docker cp` antes de usarlos.
 - **Los merges de este repo son rebase merges.**
 
-## Preguntas abiertas
+## Preguntas abiertas para el usuario
 
-Ninguna. Solo queda abrir el PR.
+1. **¿El PR #34 se mergea antes de empezar esto, o el refinamiento va en la misma rama?**
+   Recomiendo mergear primero: la migración está verificada y cerrada, y mezclarla con un
+   cambio de dirección visual hace el PR irrevisable.
+2. **¿Proyecto nuevo en Linear o issues sueltos?** Depende del tamaño que salga de la
+   investigación.
+3. Él mismo dijo "honestamente no sé cómo definirlo". Puede ayudar **enseñarle dos o tres
+   variantes construidas** (radio 4px vs 8px, con y sin elevación al hover) en vez de pedirle
+   que lo especifique con palabras.
