@@ -158,7 +158,7 @@ const RadarChart: React.FC<{ anchors: { name: string; key: string; val: number }
         {/* Filled polygon for user values */}
         <polygon
           points={dataPoints}
-          fill="rgba(99, 102, 241, 0.2)"
+          fill="var(--cds-status-applied)" fillOpacity="0.2"
           stroke="url(#radarGrad)"
           strokeWidth="2.5"
           style={{ transition: 'all 0.5s ease-in-out' }}

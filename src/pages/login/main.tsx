@@ -174,7 +174,7 @@ export const LoginPage: React.FC = () => {
               {/* Background Grid Pattern */}
               <defs>
                 <pattern id="grid-pattern" width="30" height="30" patternUnits="userSpaceOnUse">
-                  <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255, 255, 255, 0.03)" strokeWidth="1" />
+                  <path d="M 30 0 L 0 0 0 30" fill="none" stroke="var(--showcase-text)" strokeOpacity="0.03" strokeWidth="1" />
                 </pattern>
                 <linearGradient id="primary-glow" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="var(--showcase-blue)" stopOpacity="0.4" />
@@ -190,8 +190,8 @@ export const LoginPage: React.FC = () => {
               <rect width="100%" height="100%" fill="url(#grid-pattern)" />
 
               {/* Connecting Pipeline Paths (Flowchart lines) */}
-              <path d="M120,160 L240,160 L240,240 M240,240 L380,240 L380,310" stroke="rgba(15, 98, 254, 0.25)" strokeWidth="2" strokeDasharray="4 4" />
-              <path d="M470,220 L470,280 M380,180 L470,180 L470,220" stroke="rgba(138, 63, 252, 0.25)" strokeWidth="2" strokeDasharray="4 4" />
+              <path d="M120,160 L240,160 L240,240 M240,240 L380,240 L380,310" stroke="var(--showcase-blue)" strokeOpacity="0.25" strokeWidth="2" strokeDasharray="4 4" />
+              <path d="M470,220 L470,280 M380,180 L470,180 L470,220" stroke="var(--showcase-purple)" strokeOpacity="0.25" strokeWidth="2" strokeDasharray="4 4" />
               
               {/* Connection glows */}
               <circle cx="240" cy="240" r="4" fill="var(--showcase-blue)" />
@@ -202,8 +202,8 @@ export const LoginPage: React.FC = () => {
 
               {/* Mock Job Card (Stripe Job offer portal) */}
               <g transform="translate(40, 50)">
-                <rect width="200" height="130" rx="8" fill="var(--showcase-surface)" stroke="rgba(15, 98, 254, 0.4)" strokeWidth="1.5" />
-                <rect width="200" height="8" rx="4" fill="rgba(15, 98, 254, 0.2)" />
+                <rect width="200" height="130" rx="8" fill="var(--showcase-surface)" stroke="var(--showcase-blue)" strokeOpacity="0.4" strokeWidth="1.5" />
+                <rect width="200" height="8" rx="4" fill="var(--showcase-blue)" fillOpacity="0.2" />
                 {/* Browser dots */}
                 <circle cx="16" cy="18" r="4" fill="#ff5f56" />
                 <circle cx="28" cy="18" r="4" fill="#ffbd2e" />
@@ -212,9 +212,9 @@ export const LoginPage: React.FC = () => {
                 {/* Job metadata */}
                 <text x="16" y="48" fill="var(--showcase-text)" fontSize="13" fontWeight="600" fontFamily="var(--cds-font-sans)">Senior AI Specialist</text>
                 <text x="16" y="65" fill="var(--showcase-text-muted)" fontSize="11" fontFamily="var(--cds-font-sans)">Stripe • San Francisco, CA</text>
-                <line x1="16" y1="78" x2="184" y2="78" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+                <line x1="16" y1="78" x2="184" y2="78" stroke="var(--showcase-text)" strokeOpacity="0.08" strokeWidth="1" />
                 
-                <rect x="16" y="92" width="60" height="18" rx="3" fill="rgba(15, 98, 254, 0.1)" stroke="rgba(15, 98, 254, 0.3)" strokeWidth="1" />
+                <rect x="16" y="92" width="60" height="18" rx="3" fill="var(--showcase-blue)" fillOpacity="0.1" stroke="var(--showcase-blue)" strokeOpacity="0.3" strokeWidth="1" />
                 <text x="24" y="104" fill="var(--showcase-blue)" fontSize="9" fontWeight="600" fontFamily="var(--cds-font-sans)">Interested</text>
                 
                 <text x="140" y="104" fill="var(--showcase-green)" fontSize="10" fontWeight="600" fontFamily="var(--cds-font-sans)">$165k/yr</text>
@@ -222,18 +222,18 @@ export const LoginPage: React.FC = () => {
 
               {/* Mock ATS Copilot Analyzer (Radial graph card) */}
               <g transform="translate(320, 80)">
-                <rect width="220" height="130" rx="8" fill="var(--showcase-surface)" stroke="rgba(138, 63, 252, 0.4)" strokeWidth="1.5" />
+                <rect width="220" height="130" rx="8" fill="var(--showcase-surface)" stroke="var(--showcase-purple)" strokeOpacity="0.4" strokeWidth="1.5" />
                 
                 <text x="18" y="32" fill="var(--showcase-text)" fontSize="13" fontWeight="600" fontFamily="var(--cds-font-sans)">ATS Match Optimizador</text>
                 <text x="18" y="48" fill="var(--showcase-text-muted)" fontSize="10" fontFamily="var(--cds-font-sans)">Analizando currículum vs. vacante</text>
                 
                 {/* Radial Gauge */}
-                <circle cx="50" cy="95" r="22" stroke="rgba(138, 63, 252, 0.15)" strokeWidth="4.5" />
+                <circle cx="50" cy="95" r="22" stroke="var(--showcase-purple)" strokeOpacity="0.15" strokeWidth="4.5" />
                 <circle cx="50" cy="95" r="22" stroke="var(--showcase-purple)" strokeWidth="4.5" strokeDasharray="138" strokeDashoffset="24" strokeLinecap="round" />
                 <text x="50" y="99" fill="var(--showcase-text)" fontSize="11" fontWeight="700" textAnchor="middle" fontFamily="var(--cds-font-sans)">82%</text>
 
                 {/* Score legend */}
-                <rect x="94" y="76" width="108" height="6" rx="3" fill="rgba(255,255,255,0.05)" />
+                <rect x="94" y="76" width="108" height="6" rx="3" fill="var(--showcase-text)" fillOpacity="0.05" />
                 <rect x="94" y="76" width="88" height="6" rx="3" fill="var(--showcase-purple)" />
                 <text x="94" y="98" fill="var(--showcase-text)" fontSize="11" fontWeight="600" fontFamily="var(--cds-font-sans)">Directiva Encontrada</text>
                 <text x="94" y="112" fill="var(--showcase-text-muted)" fontSize="9" fontFamily="var(--cds-font-sans)">Matching keyword: "MLOps"</text>
@@ -241,10 +241,10 @@ export const LoginPage: React.FC = () => {
 
               {/* Mock Automation Portal (Stages / Kanban flow) */}
               <g transform="translate(120, 260)">
-                <rect width="240" height="130" rx="8" fill="var(--showcase-surface)" stroke="rgba(0, 133, 128, 0.4)" strokeWidth="1.5" />
+                <rect width="240" height="130" rx="8" fill="var(--showcase-surface)" stroke="var(--showcase-teal)" strokeOpacity="0.4" strokeWidth="1.5" />
                 
                 {/* Brand Monogram & Title */}
-                <rect x="16" y="16" width="28" height="28" rx="4" fill="rgba(0, 133, 128, 0.15)" stroke="rgba(0, 133, 128, 0.3)" strokeWidth="1" />
+                <rect x="16" y="16" width="28" height="28" rx="4" fill="var(--showcase-teal)" fillOpacity="0.15" stroke="var(--showcase-teal)" strokeOpacity="0.3" strokeWidth="1" />
                 {/* Inline sparkle */}
                 <path d="M30 22c0 2.2-1.8 4-4 4 2.2 0 4 1.8 4 4 0-2.2 1.8-4 4-4-2.2 0-4-1.8-4-4z" fill="var(--showcase-teal)" />
                 

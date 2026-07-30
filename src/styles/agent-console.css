@@ -533,7 +533,7 @@ main.docs-content.agent-open {
   border-radius: var(--cds-radius-00);
   border: none;
   background: var(--cds-interactive);
-  color: white;
+  color: var(--cds-text-on-color);
   cursor: pointer;
   display: flex;
   align-items: center;

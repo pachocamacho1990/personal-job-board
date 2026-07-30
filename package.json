@@ -3,6 +3,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "test": "jest",
+    "check:design": "python3 scripts/conformance-gate.py",
     "test:ui": "playwright test",
     "test:ui:ui": "playwright test --ui",
     "test:ui:headed": "playwright test --headed"

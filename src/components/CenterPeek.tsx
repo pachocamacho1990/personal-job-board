@@ -78,11 +78,11 @@ export const CenterPeek: React.FC<CenterPeekProps> = ({ jobId, isOpen, onClose, 
         </button>
         <div id="peekContent" className="peek-content">
           {loading ? (
-            <div style={{ color: 'white', padding: '2rem' }}>Loading details...</div>
+            <div style={{ color: 'var(--cds-text-primary)', padding: '2rem' }}>Loading details...</div>
           ) : error ? (
             <div style={{ color: 'var(--cds-support-error)', padding: '2rem' }}>{error}</div>
           ) : !job ? (
-            <div style={{ color: 'white', padding: '2rem' }}>Job details not found.</div>
+            <div style={{ color: 'var(--cds-text-primary)', padding: '2rem' }}>Job details not found.</div>
           ) : (
             <>
               <div className="journey-map-section">

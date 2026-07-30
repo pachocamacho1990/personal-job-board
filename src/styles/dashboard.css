@@ -111,7 +111,7 @@
 .list-item:hover .item-action {
     background: var(--cds-button-primary);
     border-color: var(--cds-button-primary);
-    color: white;
+    color: var(--cds-text-on-color);
 }
 
 .loading-spinner {
