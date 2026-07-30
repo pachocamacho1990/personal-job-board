@@ -3,8 +3,10 @@
     --sidebar-width: 250px;
 }
 
+/* Layout only — the typographic and colour base for body lives in
+   styles.css. This file used to set background-color as well, a second copy
+   of the same decision. */
 body {
-    background-color: var(--surface);
     display: flex;
     min-height: 100vh;
 }
