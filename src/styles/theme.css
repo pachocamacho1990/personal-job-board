@@ -23,8 +23,10 @@
    and elevation. They are theme-independent, so they live with the primitives
    rather than in either theme block.
 
-   Scope note: wiring data-carbon-theme onto <html> plus the persistent toggle
-   is PJBA-11; until then g100 is defined but unreachable from the UI.
+   Theme switching is live: src/theme.ts sets data-carbon-theme on <html> before
+   React mounts, and the Sidebar toggle persists the choice to localStorage.
+   Both themes are therefore reachable from the UI — verify any change to this
+   file with `python3 scripts/check-tokens.py`, which enforces g10/g100 parity.
    ============================================================================ */
 
 /* ----------------------------------------------------------------------------
@@ -165,7 +167,6 @@
   --cds-purple-60-rgb: 138, 63, 252;
   --cds-gray-100-rgb: 22, 22, 22;
   --cds-gray-50-rgb: 141, 141, 141;
-  --cds-white-rgb: 255, 255, 255;
 }
 
 /* ----------------------------------------------------------------------------

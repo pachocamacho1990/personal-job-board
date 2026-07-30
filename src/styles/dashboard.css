@@ -1,4 +1,7 @@
-/* Redesigned Dashboard Styles - Zenith Brand */
+/* Dashboard — widget grid and cards.
+   Carbon separates surfaces with layer color rather than shadow, so a card is a
+   layer-01 panel on the background and hover shifts the fill and border instead
+   of lifting the card. Colors are N2 semantics only; see src/styles/theme.css. */
 .dashboard-grid {
     margin-top: 1.5rem;
 }

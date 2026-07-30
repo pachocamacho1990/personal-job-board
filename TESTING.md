@@ -37,7 +37,8 @@ npm test
 
 ## 2. Manual Verification (Acceptance Testing)
 
-Since the frontend is a Vanilla JS SPA, visual verification complements automated tests.
+The frontend is a React 19 + TypeScript SPA built with Vite. Visual verification
+complements the automated tests, since the Jest suite covers the API only.
 
 ### Test Checklist
 
@@ -79,7 +80,38 @@ Since the frontend is a Vanilla JS SPA, visual verification complements automate
 - [ ] Create entity (Investor/VC/Accelerator/Connection) → Appears correctly
 - [ ] Drag entity between columns → Status updates
 - [ ] Toggle compact view → Works independently from Job Board
-- [ ] Color-coded columns visible (Indigo, Cyan, Violet, Orange, Green)
+- [ ] Color-coded columns visible and distinguishable (researching, contacted, meeting, negotiation, signed)
+
+#### Design System (Carbon tokens & themes)
+
+Run the token checks before any visual pass — they catch in seconds what is tedious
+to spot by eye:
+
+```bash
+python3 scripts/check-tokens.py            # structure, g10/g100 parity, WCAG contrast
+python3 scripts/audit-undefined-tokens.py  # var() references that resolve to nothing
+python3 scripts/find-non-carbon-colors.py src/styles/styles.css   # per-file literal scan
+```
+
+- [ ] `scripts/check-tokens.py` exits `OK` — structure, theme parity and contrast all pass
+- [ ] `scripts/audit-undefined-tokens.py` reports no undefined `var()` references
+- [ ] `scripts/find-non-carbon-colors.py` reports 0 literals for each file in `src/styles/`
+- [ ] Sidebar theme toggle switches light (g10) ↔ dark (g100) with no reload
+- [ ] `<html>` carries the matching `data-carbon-theme` attribute after the toggle
+- [ ] Theme choice persists: reload and navigate between pages → still applied
+- [ ] With no stored choice, the app follows the OS `prefers-color-scheme`; after an explicit choice, changing the OS setting no longer overrides it
+- [ ] No flash of the wrong theme on first paint (theme applied before React mounts)
+
+**Verify every screen in both themes** — a token missing from `g100` inherits its
+light value silently, so it only shows up by looking:
+
+- [ ] Login, Dashboard, Job Board, Business Board, Profile, Docs
+- [ ] Detail drawers (job and business), Center Peek, Archive Vault, confirmation modals
+- [ ] Agent console, including tool-output surfaces
+- [ ] Board columns: header fill, header title and card border legible on every status
+- [ ] Inline notifications in all four kinds (error, success, info, warning)
+- [ ] Focus rings visible against the background in both themes
+- [ ] IBM Plex Sans / IBM Plex Mono actually load (no fallback system font)
 
 #### Navigation
 - [ ] Sidebar highlights current page
