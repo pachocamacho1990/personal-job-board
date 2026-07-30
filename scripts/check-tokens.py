@@ -139,6 +139,17 @@ ON_COLOR = [
     ("--cds-text-inverse", "--cds-background-inverse"),
 ]
 
+# Board statuses. The accent is heading text sitting on its own two fills, so
+# both pairs are body-text contrast in both themes — this is where a tint chosen
+# for the light theme quietly becomes unreadable in the dark one.
+STATUSES = ["interested", "applied", "interview", "offer", "rejected", "forgotten",
+            "researching", "contacted", "meeting", "negotiation", "signed"]
+
+STATUS_PAIRS = [
+    (f"--cds-status-{s}", f"--cds-status-{s}-{fill}")
+    for s in STATUSES for fill in ("header", "surface")
+]
+
 # Carbon's own palette puts these below threshold. Reported, never silently passed.
 KNOWN_EXCEPTIONS = {
     "--cds-text-placeholder": "Carbon uses Gray 40; documented as not meeting AA. Never rely on a placeholder to convey information.",
@@ -270,6 +281,10 @@ def main():
 
     print("\n  Foreground on fills (AA 4.5:1)")
     for fg, bg in ON_COLOR:
+        report(fg, bg, AA_TEXT)
+
+    print("\n  Board status accents on their own fills (AA 4.5:1)")
+    for fg, bg in STATUS_PAIRS:
         report(fg, bg, AA_TEXT)
 
     print("\n  Known Carbon exceptions (reported, not enforced)")
