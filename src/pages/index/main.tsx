@@ -587,7 +587,7 @@ export const DashboardPage: React.FC = () => {
                       <div className="strategy-field-val" id="strategyExclusionsVal">
                         {strategy.exclusions?.companies && strategy.exclusions.companies.length > 0 ? (
                           strategy.exclusions.companies.map((c, i) => (
-                            <span key={i} className="strategy-tag" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--cds-support-error)' }}>
+                            <span key={i} className="strategy-tag strategy-tag--danger">
                               <ProhibitedIcon size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Excluir: {c}
                             </span>
                           ))
@@ -641,7 +641,7 @@ export const DashboardPage: React.FC = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                       {strategy.kf_competencies && strategy.kf_competencies.length > 0 ? (
                         strategy.kf_competencies.map((c: string, i: number) => (
-                          <div key={i} className="strategy-tag" style={{ margin: 0, width: 'fit-content', fontSize: '0.75rem' }}>{c}</div>
+                          <div key={i} className="strategy-tag strategy-tag--compact" style={{ width: 'fit-content' }}>{c}</div>
                         ))
                       ) : (
                         <div style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>Mapeando competencias...</div>
@@ -676,7 +676,7 @@ export const DashboardPage: React.FC = () => {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                       {strategy.kf_traits && strategy.kf_traits.length > 0 ? (
                         strategy.kf_traits.map((t: string, i: number) => (
-                          <span key={i} className="strategy-tag" style={{ margin: 0, backgroundColor: 'rgba(99, 102, 241, 0.08)', color: 'var(--cds-highlight)', fontSize: '0.75rem' }}>{t}</span>
+                          <span key={i} className="strategy-tag strategy-tag--info strategy-tag--compact">{t}</span>
                         ))
                       ) : (
                         <div style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>Mapeando rasgos...</div>
@@ -692,7 +692,7 @@ export const DashboardPage: React.FC = () => {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                       {strategy.kf_drivers && strategy.kf_drivers.length > 0 ? (
                         strategy.kf_drivers.map((d: string, i: number) => (
-                          <span key={i} className="strategy-tag" style={{ margin: 0, backgroundColor: 'var(--cds-status-interested-surface)', color: 'var(--cds-status-interested)', fontSize: '0.75rem' }}>{d}</span>
+                          <span key={i} className="strategy-tag strategy-tag--accent strategy-tag--compact">{d}</span>
                         ))
                       ) : (
                         <div style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>Mapeando motivaciones...</div>

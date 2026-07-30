@@ -285,6 +285,36 @@
     margin-bottom: 0.35rem;
 }
 
+/* Colour modifiers. These call sites used to pass backgroundColor and color as
+   inline styles, which is how one of them ended up using --cds-highlight — a
+   background token — as a text colour, unreadable on a light fill. A modifier
+   cannot make that mistake: the pair is decided once, here, and both halves are
+   contrast-checked. */
+.strategy-tag--danger {
+    background-color: var(--cds-support-error-subtle);
+    color: var(--cds-support-error);
+    border-color: var(--cds-support-error-subtle-border);
+}
+
+.strategy-tag--info {
+    background-color: var(--cds-support-info-subtle);
+    color: var(--cds-status-applied);
+    border-color: var(--cds-support-info-subtle-border);
+}
+
+.strategy-tag--accent {
+    background-color: var(--cds-status-interested-surface);
+    color: var(--cds-status-interested);
+    border-color: var(--cds-status-interested-header);
+}
+
+/* Used inside the compact info tiles, where the tag sits in a list rather than
+   inline with prose. */
+.strategy-tag--compact {
+    margin: 0;
+    font-size: var(--cds-type-size-01);
+}
+
 /* Memories Manager Rules List */
 .memories-manager {
     margin-top: 2rem;

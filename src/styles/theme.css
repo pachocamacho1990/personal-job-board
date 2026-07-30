@@ -514,6 +514,12 @@
   /* — Subtle error fill, for danger buttons and error notifications. */
   --cds-support-error-subtle: var(--cds-red-10);
   --cds-support-error-subtle-border: var(--cds-red-20);
+  --cds-support-success-subtle: var(--cds-green-10);
+  --cds-support-success-subtle-border: var(--cds-green-20);
+  --cds-support-info-subtle: var(--cds-blue-10);
+  --cds-support-info-subtle-border: var(--cds-blue-20);
+  --cds-support-warning-subtle: var(--cds-yellow-10);
+  --cds-support-warning-subtle-border: var(--cds-yellow-20);
 
   /* — Page grid. Needs alpha rather than a palette stop: the nearest solid
        gray reads as graph paper, and the whole point of this texture is to sit
@@ -739,6 +745,12 @@
   /* — Subtle error fill */
   --cds-support-error-subtle: var(--cds-red-90);
   --cds-support-error-subtle-border: var(--cds-red-80);
+  --cds-support-success-subtle: var(--cds-green-90);
+  --cds-support-success-subtle-border: var(--cds-green-80);
+  --cds-support-info-subtle: var(--cds-blue-90);
+  --cds-support-info-subtle-border: var(--cds-blue-80);
+  --cds-support-warning-subtle: var(--cds-yellow-90);
+  --cds-support-warning-subtle-border: var(--cds-yellow-80);
 
   /* Light-on-dark, and a touch stronger: the same 2.5% disappears entirely
      against Gray 100. */
