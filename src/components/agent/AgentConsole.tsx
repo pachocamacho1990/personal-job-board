@@ -357,7 +357,7 @@ export const AgentConsole: React.FC = () => {
           <div className="agent-header-icon"><BrainIcon size={20} /></div>
           <div className="agent-header-info">
             <div className="agent-header-title">Zenith Agent</div>
-            <div className={`agent-header-status ${isOnline ? 'online' : 'offline'}`} style={{ color: isOnline ? 'var(--cds-support-success)' : 'var(--cds-text-secondary)' }}>
+            <div className={`agent-header-status ${isOnline ? 'online' : 'offline'}`}>
               {isOnline && <span className="agent-status-dot" />}
               {isOnline ? 'Online' : 'Conectando...'}
             </div>

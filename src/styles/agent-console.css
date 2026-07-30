@@ -112,7 +112,7 @@ main.docs-content.agent-open {
   right: 6px;
   width: 16px;
   height: 16px;
-  background: var(--cds-support-error);
+  background: var(--cds-button-danger-primary);
   color: var(--cds-text-on-color);
   border-radius: 50%;
   font-size: 0.6rem;
@@ -162,13 +162,18 @@ main.docs-content.agent-open {
   line-height: 1.2;
 }
 
+/* The online/offline colour used to be an inline style on the element, which
+   silently won over this rule. Modifier classes instead, so the pairing is
+   decided here and the contrast sweep can see it. */
 .agent-header-status {
   font-size: 0.7rem;
-  color: var(--cds-support-success);
   display: flex;
   align-items: center;
   gap: 4px;
 }
+
+.agent-header-status.online { color: var(--cds-status-offer); }
+.agent-header-status.offline { color: var(--cds-text-secondary); }
 
 .agent-status-dot {
   width: 6px;
@@ -440,9 +445,9 @@ main.docs-content.agent-open {
 }
 
 .agent-action-btn.variant-primary {
-  background: var(--cds-interactive);
-  color: white;
-  border-color: var(--cds-interactive);
+  background: var(--cds-button-primary);
+  color: var(--cds-text-on-color);
+  border-color: var(--cds-button-primary);
 }
 
 .agent-action-btn.variant-primary:hover {
@@ -554,7 +559,7 @@ main.docs-content.agent-open {
 /* ── Timestamp ───────────────────────────── */
 .agent-msg-time {
   font-size: 0.65rem;
-  color: var(--cds-text-placeholder);
+  color: var(--cds-text-secondary);
   margin-top: 4px;
   padding: 0 2px;
 }
