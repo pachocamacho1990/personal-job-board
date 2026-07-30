@@ -127,6 +127,7 @@ TEXT_AA = [
 # fails by construction (border-strong-01 on layer-02 in g100 is 2.30), so each
 # one is checked against the surfaces it is actually for.
 UI_AA = [
+    ("--cds-rating-filled", ["--cds-layer-01", "--cds-background"]),
     ("--cds-border-strong-01", ["--cds-background", "--cds-layer-01", "--cds-field-01"]),
     ("--cds-border-strong-02", ["--cds-layer-02"]),
     ("--cds-interactive", MAIN_SURFACES),
@@ -134,6 +135,7 @@ UI_AA = [
 
 # Foreground/fill pairs checked directly rather than against every surface.
 ON_COLOR = [
+    ("--cds-support-error", "--cds-support-error-subtle"),
     ("--cds-text-on-color", "--cds-button-primary"),
     ("--cds-text-on-color", "--cds-button-danger-primary"),
     ("--cds-text-inverse", "--cds-background-inverse"),
@@ -143,7 +145,7 @@ ON_COLOR = [
 # both pairs are body-text contrast in both themes — this is where a tint chosen
 # for the light theme quietly becomes unreadable in the dark one.
 STATUSES = ["interested", "applied", "interview", "offer", "rejected", "forgotten",
-            "researching", "contacted", "meeting", "negotiation", "signed"]
+            "pending", "researching", "contacted", "meeting", "negotiation", "signed"]
 
 STATUS_PAIRS = [
     (f"--cds-status-{s}", f"--cds-status-{s}-{fill}")
@@ -230,6 +232,22 @@ def main():
         no_ref = [(n, v.strip()) for n, v in pairs if "var(" not in v]
         if no_ref:
             failures.append(f"{scope_name}: semantics not pointing at a primitive: {no_ref}")
+
+    # An -rgb triplet that drifts from its hex twin is invisible: the color
+    # simply renders slightly wrong wherever alpha is involved.
+    for name, value in palette:
+        if not name.endswith("-rgb"):
+            continue
+        twin = name[:-4]
+        hex_value = to_rgb(n1_map.get(twin, ""))
+        try:
+            triplet = tuple(int(p) for p in value.split(","))
+        except ValueError:
+            failures.append(f"{name} is not three integers: {value!r}")
+            continue
+        if hex_value and triplet != hex_value:
+            failures.append(
+                f"{name} = {triplet} does not match {twin} = {hex_value}")
 
     # ── 2. theme parity ──
     missing = sorted(set(g10_map) - set(g100_map))

@@ -159,6 +159,8 @@
      cannot pull the channels back out of a hex var(), so the few semantics
      built with rgba() compose from these instead of hardcoding numbers. */
   --cds-gray-10-rgb: 244, 244, 244;
+  --cds-purple-40-rgb: 190, 149, 255;
+  --cds-purple-60-rgb: 138, 63, 252;
   --cds-gray-100-rgb: 22, 22, 22;
   --cds-gray-50-rgb: 141, 141, 141;
   --cds-white-rgb: 255, 255, 255;
@@ -486,6 +488,30 @@
   --cds-status-signed: var(--cds-green-70);
   --cds-status-signed-header: var(--cds-green-20);
   --cds-status-signed-surface: var(--cds-green-10);
+
+  /* Pending was the one status with no tokens at all — it was three Tailwind
+     slates inlined in styles.css. Teal, because every other hue on the job
+     board is taken and teal is only used by the business board. */
+  --cds-status-pending: var(--cds-teal-70);
+  --cds-status-pending-header: var(--cds-teal-20);
+  --cds-status-pending-surface: var(--cds-teal-10);
+
+  /* — Agent identity. Purple marks anything the AI produced: the border on an
+       agent-created card, the pulse on an unseen one, the connection badge.
+       The -rgb twin exists for the keyframes, which need the color at partial
+       alpha and cannot get the channels out of a hex var(). */
+  --cds-agent-accent: var(--cds-purple-60);
+  --cds-agent-accent-rgb: var(--cds-purple-60-rgb);
+
+  /* — Star rating. Yellow 50 rather than a brighter gold: the filled/empty
+       distinction is the information being conveyed, so it has to clear 3:1
+       against the card, and the lighter yellows do not. */
+  --cds-rating-filled: var(--cds-yellow-50);
+  --cds-rating-empty: var(--cds-gray-30);
+
+  /* — Subtle error fill, for danger buttons and error notifications. */
+  --cds-support-error-subtle: var(--cds-red-10);
+  --cds-support-error-subtle-border: var(--cds-red-20);
 }
 
 /* ----------------------------------------------------------------------------
@@ -677,4 +703,22 @@
   --cds-status-signed: var(--cds-green-30);
   --cds-status-signed-header: var(--cds-green-80);
   --cds-status-signed-surface: var(--cds-green-90);
+
+  --cds-status-pending: var(--cds-teal-30);
+  --cds-status-pending-header: var(--cds-teal-80);
+  --cds-status-pending-surface: var(--cds-teal-90);
+
+  /* — Agent identity. Purple 40 here: Purple 60 is a mid tone that all but
+       disappears against Gray 90 and Gray 100 layers. */
+  --cds-agent-accent: var(--cds-purple-40);
+  --cds-agent-accent-rgb: var(--cds-purple-40-rgb);
+
+  /* — Star rating. The dark theme can afford the brighter yellow, which reads
+       far better here than the muted one the light theme needs. */
+  --cds-rating-filled: var(--cds-yellow-30);
+  --cds-rating-empty: var(--cds-gray-60);
+
+  /* — Subtle error fill */
+  --cds-support-error-subtle: var(--cds-red-90);
+  --cds-support-error-subtle-border: var(--cds-red-80);
 }
