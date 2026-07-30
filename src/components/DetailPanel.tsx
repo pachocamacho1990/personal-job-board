@@ -330,7 +330,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                     onChange={() => setType('connection')}
                     disabled={isLocked}
                   />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><HandshakeIcon size={14} /> Connection</span>
+                  <span className="inline-icon-label"><HandshakeIcon size={14} /> Connection</span>
                 </label>
                 <label className="type-option">
                   <input
@@ -341,7 +341,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                     onChange={() => setType('job')}
                     disabled={isLocked}
                   />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><JobBoardIcon size={14} /> Job Application</span>
+                  <span className="inline-icon-label"><JobBoardIcon size={14} /> Job Application</span>
                 </label>
               </div>
             </div>
@@ -358,7 +358,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                     onChange={() => setOrigin('human')}
                     disabled={isLocked}
                   />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><ProfileIcon size={14} /> Human</span>
+                  <span className="inline-icon-label"><ProfileIcon size={14} /> Human</span>
                 </label>
                 <label className="type-option">
                   <input
@@ -369,7 +369,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                     onChange={() => setOrigin('agent')}
                     disabled={isLocked}
                   />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><BrainIcon size={14} /> AI Agent</span>
+                  <span className="inline-icon-label"><BrainIcon size={14} /> AI Agent</span>
                 </label>
               </div>
             </div>
@@ -467,7 +467,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                     style={{ whiteSpace: 'nowrap', textDecoration: 'none', padding: '6px 10px' }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><LinkIcon size={12} /> Open</span>
+                    <span className="inline-icon-label inline-icon-label--tight"><LinkIcon size={12} /> Open</span>
                   </a>
                 )}
               </div>
@@ -690,7 +690,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                             checked={docType === 'cover_letter'}
                             onChange={() => handleDocTypeChange('cover_letter')}
                           />
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>Carta de Presentación</span>
+                          <span className="inline-icon-label">Carta de Presentación</span>
                         </label>
                         <label className="type-option" style={{ flex: 1, padding: '8px 10px', fontSize: '0.85rem' }}>
                           <input
@@ -700,7 +700,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                             checked={docType === 'resume_bullets'}
                             onChange={() => handleDocTypeChange('resume_bullets')}
                           />
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><TargetIcon size={14} /> CV Optimizado (ATS)</span>
+                          <span className="inline-icon-label"><TargetIcon size={14} /> CV Optimizado (ATS)</span>
                         </label>
                       </div>
                     </div>
@@ -714,7 +714,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                         disabled={isGeneratingDoc}
                         id="generateCopilotBtn"
                       >
-                        {isGeneratingDoc ? 'Generando...' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SettingsIcon size={14} /> Generar con IA</span>}
+                        {isGeneratingDoc ? 'Generando...' : <span className="inline-icon-label"><SettingsIcon size={14} /> Generar con IA</span>}
                       </button>
 
                       {generatedDocContent && (
@@ -731,7 +731,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                           onClick={handleCopyDocToClipboard}
                           id="copyCopilotDocBtn"
                         >
-                          {copyDocSuccess ? '¡Copiado!' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><CopyIcon size={14} /> Copiar Contenido</span>}
+                          {copyDocSuccess ? '¡Copiado!' : <span className="inline-icon-label"><CopyIcon size={14} /> Copiar Contenido</span>}
                         </button>
                       )}
                     </div>
@@ -789,7 +789,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                   }}
                   onClick={() => setShowTransformConfirm(true)}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><RocketLaunchIcon size={14} /> Transform to Connection</span>
+                  <span className="inline-icon-label"><RocketLaunchIcon size={14} /> Transform to Connection</span>
                 </button>
               )}
               {!isLocked && <button type="submit" className="btn-primary">Save</button>}
@@ -801,7 +801,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                   style={{ marginRight: 'auto' }}
                   onClick={() => setShowArchiveConfirm(true)}
                 >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><ArchiveIcon size={14} /> Archive</span>
+                  <span className="inline-icon-label"><ArchiveIcon size={14} /> Archive</span>
                 </button>
               )}
               {jobId && !isLocked && (
@@ -899,7 +899,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                   }
                 }}
               >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><RocketLaunchIcon size={14} /> Transform</span>
+                <span className="inline-icon-label"><RocketLaunchIcon size={14} /> Transform</span>
               </button>
             </div>
           </div>

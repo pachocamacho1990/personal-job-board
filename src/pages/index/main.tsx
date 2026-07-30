@@ -634,7 +634,7 @@ export const DashboardPage: React.FC = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
                   
                   {/* Competencies */}
-                  <div style={{ backgroundColor: 'var(--cds-layer-02)', padding: '1rem', borderRadius: 'var(--cds-radius-00)', border: '1px solid var(--cds-border-subtle-00)' }}>
+                  <div className="info-tile">
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--cds-button-primary)' }}>
                       <TargetIcon size={16} /> Competencias
                     </h4>
@@ -650,7 +650,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
 
                   {/* Experiences */}
-                  <div style={{ backgroundColor: 'var(--cds-layer-02)', padding: '1rem', borderRadius: 'var(--cds-radius-00)', border: '1px solid var(--cds-border-subtle-00)' }}>
+                  <div className="info-tile">
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--cds-button-primary)' }}>
                       <ChartIcon size={16} /> Experiencias Clave
                     </h4>
@@ -669,7 +669,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
 
                   {/* Traits */}
-                  <div style={{ backgroundColor: 'var(--cds-layer-02)', padding: '1rem', borderRadius: 'var(--cds-radius-00)', border: '1px solid var(--cds-border-subtle-00)' }}>
+                  <div className="info-tile">
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--cds-button-primary)' }}>
                       <ProfileIcon size={16} /> Rasgos
                     </h4>
@@ -685,7 +685,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
 
                   {/* Drivers */}
-                  <div style={{ backgroundColor: 'var(--cds-layer-02)', padding: '1rem', borderRadius: 'var(--cds-radius-00)', border: '1px solid var(--cds-border-subtle-00)' }}>
+                  <div className="info-tile">
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--cds-button-primary)' }}>
                       <LightningIcon size={16} /> Drivers & Motivadores
                     </h4>

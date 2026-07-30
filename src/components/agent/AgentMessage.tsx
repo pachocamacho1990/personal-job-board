@@ -51,11 +51,11 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
 
   // Tool call label
   const toolLabel = message.type === 'tool_call' ? (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+    <span className="inline-icon-label">
       <SettingsIcon size={13} /> {message.toolName || 'tool'}
     </span>
   ) : message.type === 'thinking' ? (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+    <span className="inline-icon-label">
       <BrainIcon size={13} /> Thinking
     </span>
   ) : null;

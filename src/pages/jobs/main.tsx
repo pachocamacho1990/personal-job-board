@@ -410,9 +410,9 @@ export const JobsPage: React.FC = () => {
               </button>
               <button
                 id="archiveBtn"
-                className="btn-icon"
+                className="btn-icon inline-icon-center"
                 title="View Archive"
-                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                
                 onClick={() => setIsArchiveVaultOpen(true)}
               >
                 <ArchiveIcon size={18} />
@@ -497,7 +497,7 @@ export const JobsPage: React.FC = () => {
                                 <h3>{title}</h3>
                                 <div style={{ display: 'flex', gap: '4px', marginLeft: 'auto' }}>
                                   <span className={`type-badge ${job.type}`}>
-                                    <span className="type-emoji" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                    <span className="type-emoji inline-icon" >
                                       {isConnection ? <BusinessIcon size={12} /> : <JobBoardIcon size={12} />}
                                     </span>
                                     {typeName}
@@ -506,7 +506,7 @@ export const JobsPage: React.FC = () => {
                                     className={`type-badge ${originClass}`}
                                     title={`Created by ${isAgent ? 'AI Agent' : 'Human'}`}
                                   >
-                                    <span className="type-emoji" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                    <span className="type-emoji inline-icon" >
                                       {isAgent ? <RobotIcon size={12} /> : <ProfileIcon size={12} />}
                                     </span>
                                   </span>
@@ -525,7 +525,7 @@ export const JobsPage: React.FC = () => {
                                 {getRatingStars(job.rating)}
                                 <div style={{ display: 'flex', gap: '4px' }}>
                                   <span className={`type-badge ${job.type}`}>
-                                    <span className="type-emoji" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                    <span className="type-emoji inline-icon" >
                                       {isConnection ? <BusinessIcon size={12} /> : <JobBoardIcon size={12} />}
                                     </span>
                                     {typeName}
@@ -534,7 +534,7 @@ export const JobsPage: React.FC = () => {
                                     className={`type-badge ${originClass}`}
                                     title={`Created by ${isAgent ? 'AI Agent' : 'Human'}`}
                                   >
-                                    <span className="type-emoji" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                    <span className="type-emoji inline-icon" >
                                       {isAgent ? <RobotIcon size={12} /> : <ProfileIcon size={12} />}
                                     </span>
                                   </span>

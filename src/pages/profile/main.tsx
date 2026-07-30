@@ -190,7 +190,7 @@ export const ProfilePage: React.FC = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="profile-header">
-              <h1 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><ClipboardIcon size={22} /> Perfil Profesional</h1>
+              <h1 className="inline-icon-label"><ClipboardIcon size={22} /> Perfil Profesional</h1>
               <div className="profile-header-actions">
                 <button 
                   type="button" 
@@ -206,7 +206,7 @@ export const ProfilePage: React.FC = () => {
                   disabled={isSaving}
                   id="profile-save-btn"
                 >
-                  {isSaving ? 'Guardando...' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><SaveIcon size={14} /> Guardar y Continuar</span>}
+                  {isSaving ? 'Guardando...' : <span className="inline-icon-label"><SaveIcon size={14} /> Guardar y Continuar</span>}
                 </button>
               </div>
             </div>
