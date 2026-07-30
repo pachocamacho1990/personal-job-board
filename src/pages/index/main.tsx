@@ -105,8 +105,8 @@ const RadarChart: React.FC<{ anchors: { name: string; key: string; val: number }
         {/* definitions */}
         <defs>
           <linearGradient id="radarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#6366f1" />
-            <stop offset="100%" stopColor="#a855f7" />
+            <stop offset="0%" stopColor="var(--cds-interactive)" />
+            <stop offset="100%" stopColor="var(--cds-agent-accent)" />
           </linearGradient>
         </defs>
 
@@ -116,7 +116,7 @@ const RadarChart: React.FC<{ anchors: { name: string; key: string; val: number }
             key={idx}
             points={pts}
             fill="none"
-            stroke="var(--border-color, #e2e8f0)"
+            stroke="var(--cds-border-subtle-00)"
             strokeWidth="1"
             strokeDasharray={idx === 3 ? "0" : "3 3"}
           />
@@ -132,7 +132,7 @@ const RadarChart: React.FC<{ anchors: { name: string; key: string; val: number }
               y1={center}
               x2={outer.x}
               y2={outer.y}
-              stroke="var(--border-color, #e2e8f0)"
+              stroke="var(--cds-border-subtle-00)"
               strokeWidth="1"
             />
           );
@@ -146,7 +146,7 @@ const RadarChart: React.FC<{ anchors: { name: string; key: string; val: number }
               key={lvl}
               x={pt.x + 4}
               y={pt.y + 10}
-              fill="var(--text-secondary)"
+              fill="var(--cds-text-secondary)"
               fontSize="9"
               fontWeight="bold"
             >
@@ -173,8 +173,8 @@ const RadarChart: React.FC<{ anchors: { name: string; key: string; val: number }
                 cx={x}
                 cy={y}
                 r="5"
-                fill="var(--primary, #6366f1)"
-                stroke="#ffffff"
+                fill="var(--cds-button-primary)"
+                stroke="var(--cds-layer-01)"
                 strokeWidth="1.5"
               />
             </g>
@@ -194,7 +194,7 @@ const RadarChart: React.FC<{ anchors: { name: string; key: string; val: number }
               key={i}
               x={outer.x}
               y={outer.y + 4}
-              fill="var(--text-primary)"
+              fill="var(--cds-text-primary)"
               fontSize="10"
               fontWeight="600"
               textAnchor={textAnchor}
@@ -398,7 +398,7 @@ export const DashboardPage: React.FC = () => {
             <h1 className="page-title" id="welcomeTitle" style={{ fontFamily: 'Outfit, sans-serif' }}>
               Welcome back, {formattedUsername}
             </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+            <p style={{ color: 'var(--cds-text-secondary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
               Here is what's happening with your Zenith Career Command Center.
             </p>
           </div>
@@ -436,7 +436,7 @@ export const DashboardPage: React.FC = () => {
             <div className="dashboard-card">
               <div className="card-header">
                 <div className="card-title">
-                  <CalendarIcon size={18} style={{ marginRight: '8px', verticalAlign: 'middle', color: 'var(--color-primary)' }} /> Upcoming Interviews
+                  <CalendarIcon size={18} style={{ marginRight: '8px', verticalAlign: 'middle', color: 'var(--cds-button-primary)' }} /> Upcoming Interviews
                 </div>
               </div>
               <div id="interviewsList">
@@ -471,7 +471,7 @@ export const DashboardPage: React.FC = () => {
             <div className="dashboard-card">
               <div className="card-header">
                 <div className="card-title">
-                  <RobotIcon size={18} style={{ marginRight: '8px', verticalAlign: 'middle', color: 'var(--color-accent)' }} /> New AI Matches
+                  <RobotIcon size={18} style={{ marginRight: '8px', verticalAlign: 'middle', color: 'var(--cds-agent-accent)' }} /> New AI Matches
                 </div>
               </div>
               <div id="newMatchesList">
@@ -517,8 +517,8 @@ export const DashboardPage: React.FC = () => {
                 <div className="strategy-card-grid" id="strategyCardGrid">
                 {/* Radar Bar Schein anchors Card */}
                 <div className="dashboard-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <h3 className="strategy-section-title" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}><StrategyIcon size={18} style={{ color: 'var(--color-primary)' }} /> Anclas de Carrera (Schein)</h3>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem', width: '100%' }}>
+                  <h3 className="strategy-section-title" style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}><StrategyIcon size={18} style={{ color: 'var(--cds-button-primary)' }} /> Anclas de Carrera (Schein)</h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--cds-text-secondary)', marginBottom: '1.25rem', width: '100%' }}>
                     Tus motivaciones profesionales predominantes inferidas en la entrevista.
                   </p>
                   
@@ -527,12 +527,12 @@ export const DashboardPage: React.FC = () => {
                   <div style={{ marginTop: '1.5rem', width: '100%' }}>
                     <h4 style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.75rem' }}>Anclas Destacadas:</h4>
                     {anchors.slice(0, 3).map((anchor, idx) => (
-                      <div key={anchor.key} style={{ marginBottom: '0.75rem', paddingBottom: '0.5rem', borderBottom: idx < 2 ? '1px solid var(--border-color)' : 'none' }}>
+                      <div key={anchor.key} style={{ marginBottom: '0.75rem', paddingBottom: '0.5rem', borderBottom: idx < 2 ? '1px solid var(--cds-border-subtle-00)' : 'none' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600 }}>
                           <span>{idx + 1}. {anchor.name}</span>
-                          <span style={{ color: 'var(--primary)' }}>{anchor.val}%</span>
+                          <span style={{ color: 'var(--cds-button-primary)' }}>{anchor.val}%</span>
                         </div>
-                        <p style={{ fontSize: '0.775rem', color: 'var(--text-secondary)', marginTop: '0.15rem', margin: 0 }}>
+                        <p style={{ fontSize: '0.775rem', color: 'var(--cds-text-secondary)', marginTop: '0.15rem', margin: 0 }}>
                           {anchor.desc}
                         </p>
                       </div>
@@ -543,7 +543,7 @@ export const DashboardPage: React.FC = () => {
                 {/* Strategy fields Card */}
                 <div>
                   <div className="strategy-info-card">
-                    <h3 className="strategy-section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '8px' }}><JobBoardIcon size={18} style={{ color: 'var(--color-primary)' }} /> Estrategia de Búsqueda</h3>
+                    <h3 className="strategy-section-title" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '8px' }}><JobBoardIcon size={18} style={{ color: 'var(--cds-button-primary)' }} /> Estrategia de Búsqueda</h3>
                     
                     <div className="strategy-field">
                       <div className="strategy-field-label">Resumen de Estrategia</div>
@@ -587,7 +587,7 @@ export const DashboardPage: React.FC = () => {
                       <div className="strategy-field-val" id="strategyExclusionsVal">
                         {strategy.exclusions?.companies && strategy.exclusions.companies.length > 0 ? (
                           strategy.exclusions.companies.map((c, i) => (
-                            <span key={i} className="strategy-tag" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)' }}>
+                            <span key={i} className="strategy-tag" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--cds-support-error)' }}>
                               <ProhibitedIcon size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Excluir: {c}
                             </span>
                           ))
@@ -598,8 +598,8 @@ export const DashboardPage: React.FC = () => {
 
                   {/* Memories / Preference learning console */}
                   <div className="memories-manager">
-                    <h3 className="strategy-section-title" style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}><BrainIcon size={18} style={{ color: 'var(--color-primary)' }} /> Directivas de Aprendizaje</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    <h3 className="strategy-section-title" style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}><BrainIcon size={18} style={{ color: 'var(--cds-button-primary)' }} /> Directivas de Aprendizaje</h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>
                       Filtros y reglas dinámicas que tu agente ha aprendido a lo largo de tus conversaciones.
                     </p>
                     <div className="memory-list" id="memoriesList">
@@ -627,15 +627,15 @@ export const DashboardPage: React.FC = () => {
 
               {/* Korn Ferry KF4D Dimensions Card */}
               <div className="dashboard-card" style={{ padding: '1.5rem', marginTop: '1.5rem', width: '100%' }}>
-                <h3 className="strategy-section-title" style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}><ShieldIcon size={18} style={{ color: 'var(--color-primary)' }} /> Korn Ferry KF4D (Las 4 Dimensiones del Éxito)</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                <h3 className="strategy-section-title" style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}><ShieldIcon size={18} style={{ color: 'var(--cds-button-primary)' }} /> Korn Ferry KF4D (Las 4 Dimensiones del Éxito)</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--cds-text-secondary)', marginBottom: '1.5rem' }}>
                   Evaluación cualitativa de tus competencias, experiencias, rasgos y drivers.
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
                   
                   {/* Competencies */}
-                  <div style={{ backgroundColor: 'var(--bg-card-hover, #f8fafc)', padding: '1rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
+                  <div style={{ backgroundColor: 'var(--cds-layer-02)', padding: '1rem', borderRadius: 'var(--cds-radius-00)', border: '1px solid var(--cds-border-subtle-00)' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--cds-button-primary)' }}>
                       <TargetIcon size={16} /> Competencias
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -644,58 +644,58 @@ export const DashboardPage: React.FC = () => {
                           <div key={i} className="strategy-tag" style={{ margin: 0, width: 'fit-content', fontSize: '0.75rem' }}>{c}</div>
                         ))
                       ) : (
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Mapeando competencias...</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>Mapeando competencias...</div>
                       )}
                     </div>
                   </div>
 
                   {/* Experiences */}
-                  <div style={{ backgroundColor: 'var(--bg-card-hover, #f8fafc)', padding: '1rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
+                  <div style={{ backgroundColor: 'var(--cds-layer-02)', padding: '1rem', borderRadius: 'var(--cds-radius-00)', border: '1px solid var(--cds-border-subtle-00)' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--cds-button-primary)' }}>
                       <ChartIcon size={16} /> Experiencias Clave
                     </h4>
                     <div style={{ fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       {profileDetails?.experience && profileDetails.experience.length > 0 ? (
                         profileDetails.experience.slice(0, 3).map((e: any, i: number) => (
-                          <div key={i} style={{ borderLeft: '2px solid var(--primary)', paddingLeft: '0.5rem', color: 'var(--text-primary)' }}>
+                          <div key={i} style={{ borderLeft: '2px solid var(--cds-button-primary)', paddingLeft: '0.5rem', color: 'var(--cds-text-primary)' }}>
                             <strong style={{ display: 'block', fontSize: '0.8rem' }}>{e.role}</strong>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{e.company}</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--cds-text-secondary)' }}>{e.company}</span>
                           </div>
                         ))
                       ) : (
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Completa tu perfil para mapear trayectorias.</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>Completa tu perfil para mapear trayectorias.</div>
                       )}
                     </div>
                   </div>
 
                   {/* Traits */}
-                  <div style={{ backgroundColor: 'var(--bg-card-hover, #f8fafc)', padding: '1rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
+                  <div style={{ backgroundColor: 'var(--cds-layer-02)', padding: '1rem', borderRadius: 'var(--cds-radius-00)', border: '1px solid var(--cds-border-subtle-00)' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--cds-button-primary)' }}>
                       <ProfileIcon size={16} /> Rasgos
                     </h4>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                       {strategy.kf_traits && strategy.kf_traits.length > 0 ? (
                         strategy.kf_traits.map((t: string, i: number) => (
-                          <span key={i} className="strategy-tag" style={{ margin: 0, backgroundColor: 'rgba(99, 102, 241, 0.08)', color: 'var(--color-primary-light, #818cf8)', fontSize: '0.75rem' }}>{t}</span>
+                          <span key={i} className="strategy-tag" style={{ margin: 0, backgroundColor: 'rgba(99, 102, 241, 0.08)', color: 'var(--cds-highlight)', fontSize: '0.75rem' }}>{t}</span>
                         ))
                       ) : (
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Mapeando rasgos...</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>Mapeando rasgos...</div>
                       )}
                     </div>
                   </div>
 
                   {/* Drivers */}
-                  <div style={{ backgroundColor: 'var(--bg-card-hover, #f8fafc)', padding: '1rem', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--primary)' }}>
+                  <div style={{ backgroundColor: 'var(--cds-layer-02)', padding: '1rem', borderRadius: 'var(--cds-radius-00)', border: '1px solid var(--cds-border-subtle-00)' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--cds-button-primary)' }}>
                       <LightningIcon size={16} /> Drivers & Motivadores
                     </h4>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                       {strategy.kf_drivers && strategy.kf_drivers.length > 0 ? (
                         strategy.kf_drivers.map((d: string, i: number) => (
-                          <span key={i} className="strategy-tag" style={{ margin: 0, backgroundColor: 'rgba(168, 85, 247, 0.08)', color: '#c084fc', fontSize: '0.75rem' }}>{d}</span>
+                          <span key={i} className="strategy-tag" style={{ margin: 0, backgroundColor: 'var(--cds-status-interested-surface)', color: 'var(--cds-status-interested)', fontSize: '0.75rem' }}>{d}</span>
                         ))
                       ) : (
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Mapeando motivaciones...</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--cds-text-secondary)' }}>Mapeando motivaciones...</div>
                       )}
                     </div>
                   </div>
@@ -713,8 +713,8 @@ export const DashboardPage: React.FC = () => {
               <div className="loading-spinner">Cargando configuración de búsqueda...</div>
             ) : (
               <div className="dashboard-card" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-                <h3 className="strategy-section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><SettingsIcon size={18} style={{ color: 'var(--color-primary)' }} /> Prompt de Búsqueda Activa (Claude for Chrome)</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                <h3 className="strategy-section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><SettingsIcon size={18} style={{ color: 'var(--cds-button-primary)' }} /> Prompt de Búsqueda Activa (Claude for Chrome)</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--cds-text-secondary)', marginBottom: '1.5rem' }}>
                   Este prompt es generado automáticamente por tu Zenith Agent según tu perfil y anclas de carrera. 
                   Puedes editarlo aquí, guardar los cambios y copiarlo para pegarlo en Claude for Chrome.
                 </p>
@@ -729,10 +729,10 @@ export const DashboardPage: React.FC = () => {
                     style={{ 
                       width: '100%', 
                       padding: '0.75rem', 
-                      borderRadius: 'var(--border-radius-sm)', 
-                      backgroundColor: 'var(--bg-card-hover)', 
-                      color: 'var(--text-primary)', 
-                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--cds-radius-00)', 
+                      backgroundColor: 'var(--cds-layer-02)', 
+                      color: 'var(--cds-text-primary)', 
+                      border: '1px solid var(--cds-border-subtle-00)',
                       fontSize: '0.9rem'
                     }}
                     value={selectedBoardId}
@@ -760,10 +760,10 @@ export const DashboardPage: React.FC = () => {
                       fontFamily: 'monospace', 
                       fontSize: '0.85rem', 
                       lineHeight: '1.4', 
-                      borderRadius: 'var(--border-radius-sm)', 
-                      backgroundColor: 'var(--bg-card-hover)', 
-                      color: 'var(--text-primary)', 
-                      border: '1px solid var(--border-color)',
+                      borderRadius: 'var(--cds-radius-00)', 
+                      backgroundColor: 'var(--cds-layer-02)', 
+                      color: 'var(--cds-text-primary)', 
+                      border: '1px solid var(--cds-border-subtle-00)',
                       resize: 'vertical'
                     }}
                     value={editedPrompt}
@@ -772,7 +772,7 @@ export const DashboardPage: React.FC = () => {
                 </div>
 
                 {saveSuccess && (
-                  <div className="success-message" style={{ color: 'var(--color-success)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+                  <div className="success-message" style={{ color: 'var(--cds-support-success)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
                     ✅ {saveSuccess}
                   </div>
                 )}
@@ -784,9 +784,9 @@ export const DashboardPage: React.FC = () => {
                     style={{ 
                       flex: 1, 
                       padding: '0.75rem 1.5rem', 
-                      backgroundColor: 'var(--color-primary)', 
-                      color: '#ffffff', 
-                      borderRadius: 'var(--border-radius-sm)', 
+                      backgroundColor: 'var(--cds-button-primary)', 
+                      color: 'var(--cds-text-on-color)', 
+                      borderRadius: 'var(--cds-radius-00)', 
                       fontWeight: 600,
                       cursor: 'pointer',
                       border: 'none',
@@ -808,12 +808,12 @@ export const DashboardPage: React.FC = () => {
                     style={{ 
                       flex: 1, 
                       padding: '0.75rem 1.5rem', 
-                      borderRadius: 'var(--border-radius-sm)', 
+                      borderRadius: 'var(--cds-radius-00)', 
                       fontWeight: 600,
                       cursor: 'pointer',
-                      border: '1px solid var(--border-color)',
+                      border: '1px solid var(--cds-border-subtle-00)',
                       backgroundColor: 'transparent',
-                      color: 'var(--text-primary)',
+                      color: 'var(--cds-text-primary)',
                       textAlign: 'center'
                     }}
                     id="dashboard-save-prompt-btn"

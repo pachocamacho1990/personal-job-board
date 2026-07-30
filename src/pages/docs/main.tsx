@@ -175,15 +175,15 @@ export const DocsPage: React.FC = () => {
                     width="120"
                     height="60"
                     rx="8"
-                    fill="#4F46E5"
+                    fill="var(--cds-status-applied-surface)"
                     fillOpacity="0.2"
-                    stroke="#818CF8"
+                    stroke="var(--cds-status-applied)"
                     strokeWidth="2"
                   />
                   <text
                     x="70"
                     y="85"
-                    fill="#0F172A"
+                    fill="var(--cds-text-primary)"
                     fontFamily="Plus Jakarta Sans"
                     fontSize="14"
                     fontWeight="600"
@@ -192,8 +192,8 @@ export const DocsPage: React.FC = () => {
                     Navegador
                   </text>
 
-                  <path d="M130 80 H210" stroke="#94A3B8" strokeWidth="2" strokeDasharray="4 4" />
-                  <polygon points="210,80 200,75 200,85" fill="#94A3B8" />
+                  <path d="M130 80 H210" stroke="var(--cds-border-strong-01)" strokeWidth="2" strokeDasharray="4 4" />
+                  <polygon points="210,80 200,75 200,85" fill="var(--cds-border-strong-01)" />
 
                   <rect
                     x="220"
@@ -201,15 +201,15 @@ export const DocsPage: React.FC = () => {
                     width="140"
                     height="60"
                     rx="8"
-                    fill="#A855F7"
+                    fill="var(--cds-status-interested-surface)"
                     fillOpacity="0.2"
-                    stroke="#C084FC"
+                    stroke="var(--cds-status-interested)"
                     strokeWidth="2"
                   />
                   <text
                     x="290"
                     y="78"
-                    fill="#0F172A"
+                    fill="var(--cds-text-primary)"
                     fontFamily="Plus Jakarta Sans"
                     fontSize="14"
                     fontWeight="600"
@@ -220,7 +220,7 @@ export const DocsPage: React.FC = () => {
                   <text
                     x="290"
                     y="98"
-                    fill="#94A3B8"
+                    fill="var(--cds-text-secondary)"
                     fontFamily="Plus Jakarta Sans"
                     fontSize="11"
                     textAnchor="middle"
@@ -228,8 +228,8 @@ export const DocsPage: React.FC = () => {
                     y Node.js API
                   </text>
 
-                  <path d="M360 80 H440" stroke="#94A3B8" strokeWidth="2" strokeDasharray="4 4" />
-                  <polygon points="440,80 430,75 430,85" fill="#94A3B8" />
+                  <path d="M360 80 H440" stroke="var(--cds-border-strong-01)" strokeWidth="2" strokeDasharray="4 4" />
+                  <polygon points="440,80 430,75 430,85" fill="var(--cds-border-strong-01)" />
 
                   <rect
                     x="450"
@@ -237,15 +237,15 @@ export const DocsPage: React.FC = () => {
                     width="140"
                     height="60"
                     rx="8"
-                    fill="#10B981"
+                    fill="var(--cds-status-offer-surface)"
                     fillOpacity="0.2"
-                    stroke="#34D399"
+                    stroke="var(--cds-status-offer)"
                     strokeWidth="2"
                   />
                   <text
                     x="520"
                     y="78"
-                    fill="#0F172A"
+                    fill="var(--cds-text-primary)"
                     fontFamily="Plus Jakarta Sans"
                     fontSize="14"
                     fontWeight="600"
@@ -256,7 +256,7 @@ export const DocsPage: React.FC = () => {
                   <text
                     x="520"
                     y="98"
-                    fill="#94A3B8"
+                    fill="var(--cds-text-secondary)"
                     fontFamily="Plus Jakarta Sans"
                     fontSize="11"
                     textAnchor="middle"

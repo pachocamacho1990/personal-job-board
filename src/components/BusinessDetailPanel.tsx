@@ -415,7 +415,7 @@ export const BusinessDetailPanel: React.FC<BusinessDetailPanelProps> = ({
                   dangerouslySetInnerHTML={{
                     __html: notes
                       ? marked.parse(notes)
-                      : '<p style="color: var(--text-tertiary);">No comments yet...</p>',
+                      : '<p style="color: var(--cds-text-placeholder);">No comments yet...</p>',
                   }}
                 />
               ) : (

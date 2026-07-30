@@ -112,7 +112,7 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({ history, currentStatus }
                 y1={padding.top + 10}
                 x2={x}
                 y2={height - padding.bottom}
-                stroke="#E2E8F0"
+                stroke="var(--cds-border-subtle-01)"
                 strokeDasharray="4"
               />
               <text x={x} y={padding.top - 5} className="status-column-label" textAnchor="middle">
