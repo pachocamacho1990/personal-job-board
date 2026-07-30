@@ -9,28 +9,50 @@
     box-sizing: border-box;
 }
 
+/* ============================================================================
+   BRIDGE LAYER
+
+   Every name here is legacy. Nothing defines a value any more — each one
+   forwards to a Carbon semantic in theme.css, so the whole app follows the
+   theme without its call sites having been touched yet.
+
+   This layer is temporary and is meant to shrink to nothing. It survives this
+   issue because 34 of these names are read from six other stylesheets and nine
+   components that M2 has not migrated yet, and an undefined var() does not
+   error — the browser silently drops the declaration. Deleting them early
+   would blank out rules with no warning anywhere.
+
+   PJBA-21 removes this block once every consumer reads --cds-* directly. Until
+   then: do not add names here, and repoint call sites rather than reaching for
+   a bridge token in new code.
+   ============================================================================ */
+
 :root {
-    /* 1. Color Palette: IBM Carbon Gray 10 (Light-first Theme) */
-    --color-primary: #0f62fe; /* IBM Blue 60 */
-    --color-primary-hover: #0353e9; /* IBM Blue 50 */
-    --color-accent: #8a3ffc; /* IBM Purple 60 (used for AI features) */
+    /* — Brand and interaction.
+         --color-primary forwards to button-primary rather than interactive:
+         two of its nine uses are primary button fills, and interactive drops
+         to Blue 50 in g100, which fails contrast under white button text.
+         Blue 60 still clears the 3:1 bar for the border and stroke uses. */
+    --color-primary: var(--cds-button-primary);
+    --color-primary-hover: var(--cds-button-primary-hover);
+    --color-accent: var(--cds-purple-60); /* AI surfaces; PJBA-22 gives these a semantic */
 
-    /* Neutrals - Carbon Gray 10 (Light) */
-    --color-surface: #f4f4f4; /* Gray 10 Page Background */
-    --color-canvas: #ffffff; /* Gray 00 (White) Card/Container Background */
-    --color-tertiary: #e0e0e0; /* Gray 20 Active/Hover Background */
-    --color-text-main: #161616; /* Gray 100 Main Text */
-    --color-text-muted: #525252; /* Gray 70 Muted Text */
-    --color-text-light: #8d8d8d; /* Gray 50 Secondary/Light Text */
-    --color-border: #e0e0e0; /* Gray 20 Border */
+    /* — Neutrals */
+    --color-surface: var(--cds-background);
+    --color-canvas: var(--cds-layer-01);
+    --color-tertiary: var(--cds-layer-selected-01);
+    --color-text-main: var(--cds-text-primary);
+    --color-text-muted: var(--cds-text-secondary);
+    --color-text-light: var(--cds-text-placeholder);
+    --color-border: var(--cds-border-subtle-00);
 
-    /* Functional */
-    --color-success: #24a148; /* Carbon Green */
-    --color-warning: #f1c21b; /* Carbon Yellow */
-    --color-danger: #da1e28; /* Carbon Red */
+    /* — Functional */
+    --color-success: var(--cds-support-success);
+    --color-danger: var(--cds-support-error);
 
-    /* Legacy Mappings (to prevent breakage) */
-    --bg-primary: var(--color-surface);
+    /* — Second-generation aliases. These forward to the first generation above
+         rather than straight to Carbon, so there is exactly one place to edit
+         when a mapping turns out wrong. */
     --bg-secondary: var(--color-surface);
     --bg-tertiary: var(--color-canvas);
     --border-color: var(--color-border);
@@ -38,93 +60,106 @@
     --text-secondary: var(--color-text-muted);
     --text-tertiary: var(--color-text-light);
     --accent: var(--color-primary);
-    --accent-hover: var(--color-primary-hover);
     --danger: var(--color-danger);
     --canvas: var(--color-canvas);
     --border: var(--color-border);
-    --radius: var(--radius-md);
-    --shadow: none; /* Carbon avoids shadows */
+    --radius: var(--cds-radius-00);
+    --shadow: var(--cds-shadow-none);
     --surface: var(--color-surface);
-    --surface-hover: var(--color-tertiary);
-    --primary-soft: rgba(15, 98, 254, 0.08); /* Transparent blue for badges/selections */
+    --surface-hover: var(--cds-layer-hover-01);
+    --primary-soft: var(--cds-highlight);
 
-    /* Status Colors (Carbon alignment for light theme) */
-    --color-interested: #8a3ffc; /* Purple 60 */
-    --color-interested-bg: #f5f0ff;
-    --color-interested-light: #ede6ff;
+    /* — Board status colors. Three tokens each: the accent for heading text and
+         the header border, -light for the header fill, -bg for the column body.
+         The theme-aware definitions live in theme.css, because these tints only
+         work in one theme — a pale lilac column body over a dark page is the
+         bug that mapping prevents. */
+    --color-interested: var(--cds-status-interested);
+    --color-interested-bg: var(--cds-status-interested-surface);
+    --color-interested-light: var(--cds-status-interested-header);
 
-    --color-applied: #0f62fe; /* Blue 60 */
-    --color-applied-bg: #eaf1ff;
-    --color-applied-light: #deebff;
+    --color-applied: var(--cds-status-applied);
+    --color-applied-bg: var(--cds-status-applied-surface);
+    --color-applied-light: var(--cds-status-applied-header);
 
-    --color-interview: #b78103; /* Yellow 70 (dark yellow for readability on white) */
-    --color-interview-bg: #fff9e6;
-    --color-interview-light: #fff3cd;
+    --color-interview: var(--cds-status-interview);
+    --color-interview-bg: var(--cds-status-interview-surface);
+    --color-interview-light: var(--cds-status-interview-header);
 
-    --color-offer: #198038; /* Green 60 */
-    --color-offer-bg: #eafcf1;
-    --color-offer-light: #d4edda;
+    --color-offer: var(--cds-status-offer);
+    --color-offer-bg: var(--cds-status-offer-surface);
+    --color-offer-light: var(--cds-status-offer-header);
 
-    --color-rejected: #6f6f6f; /* Gray 60 */
-    --color-rejected-bg: #f1f1f1;
-    --color-rejected-light: #e2e3e5;
+    --color-rejected: var(--cds-status-rejected);
+    --color-rejected-bg: var(--cds-status-rejected-surface);
+    --color-rejected-light: var(--cds-status-rejected-header);
 
-    --color-forgotten: #393939; /* Gray 80 */
-    --color-forgotten-bg: #e3e3e3;
-    --color-forgotten-light: #d6d8db;
+    --color-forgotten: var(--cds-status-forgotten);
+    --color-forgotten-bg: var(--cds-status-forgotten-surface);
+    --color-forgotten-light: var(--cds-status-forgotten-header);
 
-    /* Business Board Status Colors */
-    --color-researching: #0f62fe; /* Blue 60 */
-    --color-researching-bg: #eaf1ff;
-    --color-researching-light: #deebff;
+    /* Business Board */
+    --color-researching: var(--cds-status-researching);
+    --color-researching-bg: var(--cds-status-researching-surface);
+    --color-researching-light: var(--cds-status-researching-header);
 
-    --color-contacted: #008580; /* Teal 60 */
-    --color-contacted-bg: #e5f6f6;
-    --color-contacted-light: #cceef0;
+    --color-contacted: var(--cds-status-contacted);
+    --color-contacted-bg: var(--cds-status-contacted-surface);
+    --color-contacted-light: var(--cds-status-contacted-header);
 
-    --color-meeting: #8a3ffc; /* Purple 60 */
-    --color-meeting-bg: #f5f0ff;
-    --color-meeting-light: #ede6ff;
+    --color-meeting: var(--cds-status-meeting);
+    --color-meeting-bg: var(--cds-status-meeting-surface);
+    --color-meeting-light: var(--cds-status-meeting-header);
 
-    --color-negotiation: #da1e28; /* Red 60 */
-    --color-negotiation-bg: #fff0f0;
-    --color-negotiation-light: #fcdbd9;
+    --color-negotiation: var(--cds-status-negotiation);
+    --color-negotiation-bg: var(--cds-status-negotiation-surface);
+    --color-negotiation-light: var(--cds-status-negotiation-header);
 
-    --color-signed: #198038; /* Green 60 */
-    --color-signed-bg: #eafcf1;
-    --color-signed-light: #d4edda;
+    --color-signed: var(--cds-status-signed);
+    --color-signed-bg: var(--cds-status-signed-surface);
+    --color-signed-light: var(--cds-status-signed-header);
 
-    /* Spacing (4px baseline scale) */
-    --spacing-xs: 4px;
-    --spacing-sm: 8px;
-    --spacing-md: 16px;
-    --spacing-lg: 24px;
-    --spacing-xl: 32px;
-    --spacing-2xl: 48px;
+    /* — Spacing. Not a clean mapping: the old scale has no 12px step, so it
+         skips --cds-spacing-04 entirely, and its 48px top maps to spacing-09
+         with four Carbon steps left unused above it. Call sites that want the
+         missing step have to move to --cds-spacing-* directly. */
+    --spacing-xs: var(--cds-spacing-02);  /*  4px */
+    --spacing-sm: var(--cds-spacing-03);  /*  8px */
+    --spacing-md: var(--cds-spacing-05);  /* 16px */
+    --spacing-lg: var(--cds-spacing-06);  /* 24px */
+    --spacing-xl: var(--cds-spacing-07);  /* 32px */
+    --spacing-2xl: var(--cds-spacing-09); /* 48px */
 
-    /* Typography */
-    --font-family: 'IBM Plex Sans', -apple-system, sans-serif;
-    --font-family-mono: 'IBM Plex Mono', monospace;
-    --font-size-xs: 0.75rem;
-    --font-size-sm: 0.875rem;
-    --font-size-base: 0.9375rem;
-    --font-size-lg: 1.125rem;
-    --font-size-xl: 1.25rem;
-    --font-size-2xl: 1.5rem;
-    --font-weight-normal: 400;
-    --font-weight-medium: 500;
-    --font-weight-semibold: 600;
+    /* — Typography */
+    --font-family: var(--cds-font-sans);
+    --font-family-mono: var(--cds-font-mono);
+    --font-size-xs: var(--cds-type-size-01);
+    --font-size-sm: var(--cds-type-size-02);
+    --font-size-lg: var(--cds-type-size-04);
+    --font-size-xl: var(--cds-type-size-05);
+    --font-size-2xl: var(--cds-type-size-06);
+    --font-weight-normal: var(--cds-font-weight-regular);
+    --font-weight-medium: 500;  /* off-scale; Carbon stops at 400 and 600 */
+    --font-weight-semibold: var(--cds-font-weight-semibold);
 
-    /* Shadows - Soft premium shadows for depth (as in reference image) */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.03);
+    /* --font-size-base was 0.9375rem (15px), which is not on the Carbon scale.
+       Rounded to 16px, the reading body size. */
+    --font-size-base: var(--cds-type-size-03);
 
-    /* Border Radius - Sleek rounded style (as in reference image) */
-    --radius-sm: 4px;
-    --radius-md: 6px;
-    --radius-lg: 8px;
-    --radius-full: 9999px;
+    /* — Elevation. Carbon separates surfaces with layer color, so all three
+         former shadows collapse to none. PJBA-15 removes the call sites. */
+    --shadow-sm: var(--cds-shadow-none);
+    --shadow-md: var(--cds-shadow-none);
+    --shadow-lg: var(--cds-shadow-none);
+
+    /* — Radius. Flat: corners are structure here, not decoration. Carbon has no
+         4/6/8px step, so repointing these is what actually squares the UI;
+         PJBA-15 then only has to delete the now-redundant call sites.
+         --radius-full is gone — nothing read it, and pills use
+         --cds-radius-pill directly. */
+    --radius-sm: var(--cds-radius-00);
+    --radius-md: var(--cds-radius-00);
+    --radius-lg: var(--cds-radius-00);
 }
 
 body {

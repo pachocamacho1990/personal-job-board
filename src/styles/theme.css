@@ -429,6 +429,63 @@
 
   /* — Miscellaneous controls */
   --cds-toggle-off: var(--cds-gray-50);
+
+  /* — Board status colors.
+
+       Each status gets three tokens, matching how a column is actually built:
+       the accent carries the heading text and the header border, -header fills
+       the column header, and -surface fills the column body behind the cards.
+       The two fills are deliberately close, with -header the stronger of the
+       pair, so the header reads as part of the column rather than a stripe.
+
+       These have to be semantic rather than raw hex because the tints only
+       work in one theme: a pale lilac column body over a dark page is exactly
+       the bug this layer prevents. */
+  --cds-status-interested: var(--cds-purple-70);
+  --cds-status-interested-header: var(--cds-purple-20);
+  --cds-status-interested-surface: var(--cds-purple-10);
+
+  --cds-status-applied: var(--cds-blue-70);
+  --cds-status-applied-header: var(--cds-blue-20);
+  --cds-status-applied-surface: var(--cds-blue-10);
+
+  --cds-status-interview: var(--cds-yellow-70);
+  --cds-status-interview-header: var(--cds-yellow-20);
+  --cds-status-interview-surface: var(--cds-yellow-10);
+
+  --cds-status-offer: var(--cds-green-70);
+  --cds-status-offer-header: var(--cds-green-20);
+  --cds-status-offer-surface: var(--cds-green-10);
+
+  --cds-status-rejected: var(--cds-gray-70);
+  --cds-status-rejected-header: var(--cds-gray-20);
+  --cds-status-rejected-surface: var(--cds-gray-10);
+
+  /* Forgotten sits a step darker than rejected so the two neutral columns stay
+     distinguishable from each other. */
+  --cds-status-forgotten: var(--cds-gray-80);
+  --cds-status-forgotten-header: var(--cds-gray-30);
+  --cds-status-forgotten-surface: var(--cds-gray-20);
+
+  --cds-status-researching: var(--cds-blue-70);
+  --cds-status-researching-header: var(--cds-blue-20);
+  --cds-status-researching-surface: var(--cds-blue-10);
+
+  --cds-status-contacted: var(--cds-teal-70);
+  --cds-status-contacted-header: var(--cds-teal-20);
+  --cds-status-contacted-surface: var(--cds-teal-10);
+
+  --cds-status-meeting: var(--cds-purple-70);
+  --cds-status-meeting-header: var(--cds-purple-20);
+  --cds-status-meeting-surface: var(--cds-purple-10);
+
+  --cds-status-negotiation: var(--cds-red-70);
+  --cds-status-negotiation-header: var(--cds-red-20);
+  --cds-status-negotiation-surface: var(--cds-red-10);
+
+  --cds-status-signed: var(--cds-green-70);
+  --cds-status-signed-header: var(--cds-green-20);
+  --cds-status-signed-surface: var(--cds-green-10);
 }
 
 /* ----------------------------------------------------------------------------
@@ -573,4 +630,51 @@
 
   /* — Miscellaneous controls */
   --cds-toggle-off: var(--cds-gray-60);
+
+  /* — Board status colors. The light theme tints toward white; here the fills
+       go to the dark end of each hue and the accent climbs to 30, which is the
+       stop that stays legible both on its own fill and on a gray layer. */
+  --cds-status-interested: var(--cds-purple-30);
+  --cds-status-interested-header: var(--cds-purple-80);
+  --cds-status-interested-surface: var(--cds-purple-90);
+
+  --cds-status-applied: var(--cds-blue-30);
+  --cds-status-applied-header: var(--cds-blue-80);
+  --cds-status-applied-surface: var(--cds-blue-90);
+
+  --cds-status-interview: var(--cds-yellow-30);
+  --cds-status-interview-header: var(--cds-yellow-80);
+  --cds-status-interview-surface: var(--cds-yellow-90);
+
+  --cds-status-offer: var(--cds-green-30);
+  --cds-status-offer-header: var(--cds-green-80);
+  --cds-status-offer-surface: var(--cds-green-90);
+
+  --cds-status-rejected: var(--cds-gray-30);
+  --cds-status-rejected-header: var(--cds-gray-70);
+  --cds-status-rejected-surface: var(--cds-gray-80);
+
+  --cds-status-forgotten: var(--cds-gray-40);
+  --cds-status-forgotten-header: var(--cds-gray-80);
+  --cds-status-forgotten-surface: var(--cds-gray-90);
+
+  --cds-status-researching: var(--cds-blue-30);
+  --cds-status-researching-header: var(--cds-blue-80);
+  --cds-status-researching-surface: var(--cds-blue-90);
+
+  --cds-status-contacted: var(--cds-teal-30);
+  --cds-status-contacted-header: var(--cds-teal-80);
+  --cds-status-contacted-surface: var(--cds-teal-90);
+
+  --cds-status-meeting: var(--cds-purple-30);
+  --cds-status-meeting-header: var(--cds-purple-80);
+  --cds-status-meeting-surface: var(--cds-purple-90);
+
+  --cds-status-negotiation: var(--cds-red-30);
+  --cds-status-negotiation-header: var(--cds-red-80);
+  --cds-status-negotiation-surface: var(--cds-red-90);
+
+  --cds-status-signed: var(--cds-green-30);
+  --cds-status-signed-header: var(--cds-green-80);
+  --cds-status-signed-surface: var(--cds-green-90);
 }
