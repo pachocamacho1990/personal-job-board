@@ -4,6 +4,7 @@ import { Job, FileAttachment, JobHistory } from '../types';
 import { getFileIcon, formatFileSize, formatFullDate } from '../utils';
 import { marked } from 'marked';
 import { BrainIcon, JobBoardIcon, LinkIcon, CopyIcon, TargetIcon, SettingsIcon, RocketLaunchIcon, ArchiveIcon, HandshakeIcon, ProfileIcon } from './icons';
+import { Drawer } from './Drawer';
 
 interface DetailPanelProps {
   jobId: number | null;
@@ -209,17 +210,6 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
   };
 
 
-  // Esc key closes panel
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen && !showArchiveConfirm && !showTransformConfirm && !showDeleteConfirm && !fileToDeleteId && !fileToPreview) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, showArchiveConfirm, showTransformConfirm, showDeleteConfirm, fileToDeleteId, fileToPreview]);
-
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -290,19 +280,12 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
 
   return (
     <>
-      <aside
-        id="detailPanel"
-        className={`detail-panel ${isOpen ? 'open' : ''}`}
-        style={{ position: 'fixed', right: 0, top: 0, height: '100vh', zIndex: 200 }}
+      <Drawer
+        isOpen={isOpen}
+        title={jobId ? 'Job Details' : 'Add New Card'}
+        onClose={onClose}
+        blockedBy={[showArchiveConfirm, showTransformConfirm, showDeleteConfirm, fileToDeleteId, fileToPreview]}
       >
-        <div className="panel-content">
-          <div className="panel-header">
-            <h2 id="panelTitle">{jobId ? 'Job Details' : 'Add New Card'}</h2>
-            <button id="closePanel" className="btn-icon" aria-label="Close panel" onClick={onClose}>
-              &times;
-            </button>
-          </div>
-
           <form id="jobForm" className="job-form" onSubmit={handleFormSubmit}>
             {isLocked && (
               <div
@@ -833,8 +816,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
               )}
             </div>
           </form>
-        </div>
-      </aside>
+      </Drawer>
 
       {/* Archive Confirmation Modal */}
       {showArchiveConfirm && (
