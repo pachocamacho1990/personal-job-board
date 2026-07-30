@@ -152,7 +152,24 @@ body {
 }
 
 /* Right side: Blueprint Technical Showcase */
+/* The showcase panel is dark in both themes by design, so it cannot read the
+   themed semantics: those resolve to light-theme values here, which would be
+   wrong on a permanently dark surface. It pins its own scoped tokens to the
+   on-dark stop of each hue instead. They are still var() references into the
+   palette — the panel decides once, and the SVG inside reads these rather than
+   literals.
+
+   The macOS traffic-light dots stay literal on purpose: they quote a real
+   interface, the way a logo does, and theming them would break the reference. */
 .login-showcase-pane {
+    --showcase-text: var(--cds-terminal-text);
+    --showcase-text-muted: var(--cds-terminal-text-secondary);
+    --showcase-surface: var(--cds-terminal-bg);
+    --showcase-blue: var(--cds-blue-60);
+    --showcase-purple: var(--cds-purple-60);
+    --showcase-teal: var(--cds-teal-50);
+    --showcase-green: var(--cds-green-60);
+
     width: 60%;
     background-color: var(--cds-terminal-bg);
     display: flex;
