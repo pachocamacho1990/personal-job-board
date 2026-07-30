@@ -1565,3 +1565,51 @@ body.focus-mode .job-card.dimmed {
     box-shadow: 0 0 12px rgba(var(--cds-agent-accent-rgb), 0.25) !important;
     animation: none;
 }
+/* ── Inline notification ─────────────────────────────────
+   Carbon's pattern: a subtle fill, a solid status bar down the leading edge,
+   and text that clears AA against that fill. Every colour is in a modifier, so
+   a caller cannot invent a kind that skips the contrast checks. */
+.inline-notification {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--cds-spacing-03);
+    padding: var(--cds-spacing-05);
+    margin-bottom: var(--cds-spacing-06);
+    border-left: 3px solid;
+    font-size: var(--cds-body-01-font-size);
+    line-height: var(--cds-body-01-line-height);
+}
+
+.inline-notification-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cds-spacing-02);
+}
+
+.inline-notification-title {
+    font-weight: var(--cds-font-weight-semibold);
+}
+
+.inline-notification--error {
+    background: var(--cds-support-error-subtle);
+    border-left-color: var(--cds-support-error);
+    color: var(--cds-support-error);
+}
+
+.inline-notification--success {
+    background: var(--cds-support-success-subtle);
+    border-left-color: var(--cds-status-offer);
+    color: var(--cds-status-offer);
+}
+
+.inline-notification--info {
+    background: var(--cds-support-info-subtle);
+    border-left-color: var(--cds-status-applied);
+    color: var(--cds-status-applied);
+}
+
+.inline-notification--warning {
+    background: var(--cds-support-warning-subtle);
+    border-left-color: var(--cds-status-interview);
+    color: var(--cds-status-interview);
+}

@@ -6,6 +6,7 @@ import { ProfileExperience, ProfileEducation, ProfileLanguage, ProfileData } fro
 import { BrainIcon, ClipboardIcon, SaveIcon } from '../../components/icons';
 import '../../styles/styles.css';
 import '../../styles/profile.css';
+import { InlineNotification } from '../../components/InlineNotification';
 
 export const ProfilePage: React.FC = () => {
   const [fullName, setFullName] = useState<string>('');
@@ -182,12 +183,10 @@ export const ProfilePage: React.FC = () => {
       <main className="main-content" style={{ overflowY: 'auto' }}>
         <div className="profile-page-container">
           
-          <div className="banner-claude-hint">
-             <span className="banner-claude-hint-icon" style={{ display: 'inline-flex', alignItems: 'center' }}><BrainIcon size={16} /></span>
-            <div>
-              <strong>Consejo de Automatización:</strong> Puedes usar la extensión <strong>Claude for Chrome</strong> para ir a tu perfil de LinkedIn, copiar tu información y pedirle que rellene automáticamente este formulario.
-            </div>
-          </div>
+          <InlineNotification kind="info" title="Consejo de Automatización:">
+            Puedes usar la extensión <strong>Claude for Chrome</strong> para ir a tu perfil de
+            LinkedIn, copiar tu información y pedirle que rellene automáticamente este formulario.
+          </InlineNotification>
 
           <form onSubmit={handleSubmit}>
             <div className="profile-header">
@@ -212,8 +211,8 @@ export const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            {error && <div className="error-message" style={{ margin: '0 0 20px 0', padding: '12px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '6px', color: 'var(--cds-support-error)' }}>{error}</div>}
-            {success && <div className="success-message" style={{ margin: '0 0 20px 0', padding: '12px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '6px', color: 'var(--cds-support-success)' }}>{success}</div>}
+            {error && <InlineNotification kind="error">{error}</InlineNotification>}
+            {success && <InlineNotification kind="success">{success}</InlineNotification>}
 
             {/* Información Básica */}
             <div className="profile-section">

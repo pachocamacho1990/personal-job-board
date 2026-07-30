@@ -185,23 +185,5 @@
     line-height: 1;
 }
 
-.banner-claude-hint {
-    background: var(--cds-status-interested-surface);
-    border: 1px solid var(--cds-status-interested-header);
-    border-radius: var(--cds-radius-00);
-    padding: 16px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    color: var(--cds-text-secondary);
-    font-size: 0.9rem;
-}
-
-.banner-claude-hint strong {
-    color: var(--cds-agent-accent);
-}
-
-.banner-claude-hint-icon {
-    font-size: 1.5rem;
-}
+/* .banner-claude-hint vivía aquí: era una notificación inline con otro nombre.
+   Ahora la sirve el componente InlineNotification. */
