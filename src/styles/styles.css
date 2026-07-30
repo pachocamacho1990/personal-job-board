@@ -1613,3 +1613,42 @@ body.focus-mode .job-card.dimmed {
     border-left-color: var(--cds-status-interview);
     color: var(--cds-status-interview);
 }
+
+/* ── Layout utilities ────────────────────────────────────
+   Both of these replace an inline style that was repeated verbatim across the
+   codebase. An inline style cannot be restyled, cannot be overridden by a
+   theme, and has to be corrected in every copy when it turns out wrong — which
+   is how the same three declarations ended up written 31 times. */
+
+/* An icon followed by its label. 21 call sites wrote this exact triple, at a
+   6px gap — a value that is not on the Carbon spacing scale, which steps 4, 8,
+   12. Snapped to 8px rather than 4px: 8 is what Carbon itself puts between a
+   button icon and its label, and 4 reads cramped at label sizes. */
+.inline-icon-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--cds-spacing-03);
+}
+
+.inline-icon-label--tight { gap: var(--cds-spacing-02); }
+
+/* An icon on its own, aligned to the text beside it. */
+.inline-icon {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* An icon centred inside a fixed box — buttons, avatars, status chips. */
+.inline-icon-center {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* A small panel of secondary information: the strategy tiles on the dashboard.
+   Four copies of the same four declarations. */
+.info-tile {
+    background-color: var(--cds-layer-02);
+    border: 1px solid var(--cds-border-subtle-00);
+    padding: var(--cds-spacing-05);
+}

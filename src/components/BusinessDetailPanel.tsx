@@ -178,7 +178,7 @@ export const BusinessDetailPanel: React.FC<BusinessDetailPanelProps> = ({
                     checked={type === 'connection'}
                     onChange={() => setType('connection')}
                   />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><HandshakeIcon size={14} /> Connection</span>
+                  <span className="inline-icon-label"><HandshakeIcon size={14} /> Connection</span>
                 </label>
                 <label className="type-option">
                   <input
@@ -188,7 +188,7 @@ export const BusinessDetailPanel: React.FC<BusinessDetailPanelProps> = ({
                     checked={type === 'investor'}
                     onChange={() => setType('investor')}
                   />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><MoneyIcon size={14} /> Investor</span>
+                  <span className="inline-icon-label"><MoneyIcon size={14} /> Investor</span>
                 </label>
                 <label className="type-option">
                   <input
@@ -198,7 +198,7 @@ export const BusinessDetailPanel: React.FC<BusinessDetailPanelProps> = ({
                     checked={type === 'vc'}
                     onChange={() => setType('vc')}
                   />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><InstitutionIcon size={14} /> VC Fund</span>
+                  <span className="inline-icon-label"><InstitutionIcon size={14} /> VC Fund</span>
                 </label>
                 <label className="type-option">
                   <input
@@ -208,7 +208,7 @@ export const BusinessDetailPanel: React.FC<BusinessDetailPanelProps> = ({
                     checked={type === 'accelerator'}
                     onChange={() => setType('accelerator')}
                   />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><RocketLaunchIcon size={14} /> Accelerator</span>
+                  <span className="inline-icon-label"><RocketLaunchIcon size={14} /> Accelerator</span>
                 </label>
               </div>
             </div>

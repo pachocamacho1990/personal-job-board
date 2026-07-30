@@ -447,10 +447,10 @@ export const AgentConsole: React.FC = () => {
             {isGenerating && (
               <div className="agent-stop-container">
                 <button 
-                  className="agent-stop-btn" 
+                  className="agent-stop-btn inline-icon-label" 
                   onClick={handleStop}
                   aria-label="Detener generación de IA"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  
                 >
                   <StopIcon size={12} /> Detener respuesta
                 </button>
