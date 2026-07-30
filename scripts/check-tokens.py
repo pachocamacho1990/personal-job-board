@@ -136,6 +136,9 @@ UI_AA = [
 # Foreground/fill pairs checked directly rather than against every surface.
 ON_COLOR = [
     ("--cds-support-error", "--cds-support-error-subtle"),
+    ("--cds-status-offer", "--cds-support-success-subtle"),
+    ("--cds-status-applied", "--cds-support-info-subtle"),
+    ("--cds-status-interview", "--cds-support-warning-subtle"),
     ("--cds-text-on-color", "--cds-button-primary"),
     ("--cds-text-on-color", "--cds-button-danger-primary"),
     ("--cds-text-inverse", "--cds-background-inverse"),
