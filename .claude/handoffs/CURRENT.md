@@ -1,10 +1,10 @@
 ---
-updated: 2026-07-30T18:16
+updated: 2026-07-30T20:27
 project: Migración a IBM Carbon (g10/g100)
 linear: https://linear.app/personal-pacho/project/migracion-a-ibm-carbon-design-system-g10g100-ce956a924d8d
-milestone: M0 y M1 COMPLETOS · siguiente M2 · CSS por página
+milestone: M0, M1 y M2 COMPLETOS (14/26 issues) · siguiente M3 · Componentes y primitivas
 in_flight: ninguno
-next: PJBA-16 — migrar src/styles/agent-console.css a Carbon (el mayor ofensor: ~12 tokens --agent-* propios, glassmorphism, 6 tokens indefinidos)
+next: PJBA-22 — matar los literales de color en TSX y arreglar los 9 tokens indefinidos que quedan, todos en estilos inline de componentes
 branch: feature/carbon-migration (pusheada, sincronizada)
 verified: check-tokens.py OK · tsc limpio · vite build OK · capturas del board en g10 y g100 revisadas
 ---
