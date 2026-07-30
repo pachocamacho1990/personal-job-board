@@ -1,110 +1,101 @@
 ---
-updated: 2026-07-30T20:30
-project: Migración a IBM Carbon (g10/g100)
+updated: 2026-07-30T22:52
+project: Migración a IBM Carbon (g10/g100) — COMPLETA
 linear: https://linear.app/personal-pacho/project/migracion-a-ibm-carbon-design-system-g10g100-ce956a924d8d
-milestone: M0, M1 y M2 COMPLETOS (14/26 issues) · siguiente M3 · Componentes y primitivas
+milestone: los 6 completos · 26/26 issues en Done
 in_flight: ninguno
-next: PJBA-22 — matar los literales de color en TSX y arreglar los 9 tokens indefinidos, todos en estilos inline de componentes
-branch: feature/carbon-migration (18 commits, pusheada y sincronizada)
-verified: check-tokens.py OK · tsc limpio · vite build OK · las 6 páginas capturadas en g10 y g100
+next: abrir el PR de feature/carbon-migration a main y revisarlo
+branch: feature/carbon-migration (32 commits, pusheada y sincronizada)
+verified: gate de conformidad 5/5 · 0 texto bajo AA en 12 combinaciones página/tema · 75 tests backend · 8 tests E2E del toggle · tsc y build limpios
 ---
 
 ## Dónde quedamos
 
-**Toda la capa CSS está migrada.** Las ocho hojas de `src/styles/` no contienen ni un literal
-de color y leen solo semánticos `--cds-*`. El tema oscuro funciona de verdad en board,
-dashboard, perfil, login, docs y consola del agente.
+**La migración está terminada.** Los 26 issues cerrados, cada uno con su comentario en Linear
+explicando qué se hizo y en qué se desvió de la descripción original.
 
-Lo que queda de deuda está **en los componentes**: estilos inline en TSX con hex crudos y
-tokens que no resuelven. Eso es M3.
+Lo único pendiente es **abrir el PR** — decisión tomada al principio: un solo PR al terminar
+los 6 milestones, no uno por issue ni por milestone.
 
 ## Siguiente paso
 
-**PJBA-22** — literales de color en TSX. El trabajo concreto, ya medido:
+```bash
+gh pr create --base main --head feature/carbon-migration
+```
 
-`python3 scripts/audit-undefined-tokens.py` devuelve **9 tokens indefinidos en 28
-referencias**, todas en componentes y todas preexistentes (nunca estuvieron definidas en
-ningún `:root`):
+El cuerpo debería liderar con para qué era el trabajo (que dejara de haber colores sueltos,
+no repintar) y listar los bugs preexistentes que destapó, porque son la parte que un revisor
+no espera. Están todos en la entrada `[3.13.0]` de `CHANGELOG.md`.
 
-- `--primary` — 8 usos en `src/pages/index/main.tsx`, 1 en `AgentMessage.tsx`
-- `--border-radius-sm` — 8 usos en `index/main.tsx`
-- `--bg-card-hover` — 6 usos en `index/main.tsx` (4 con fallback, 2 sin)
-- `--text-main` — 2 usos en `DetailPanel.tsx`
-- `--color-bg-card`, `--bg-input` — `AgentMessage.tsx`
-- `--color-primary-light` — `index/main.tsx`
+Tras el merge, seguir la rutina: `checkout main` → `pull` → rama nueva. Los merges de este
+repo son rebase merges.
 
-**No tocar `--hover-x` ni `--hover-y`** (`login.css`): los pone el JS para el seguimiento del
-cursor, no son tokens.
+## Cómo verificar que sigue sano
 
-Además, buscar hex crudos en TSX:
-`grep -rniE "#[0-9a-f]{3,8}\b" src/components src/pages --include="*.tsx"`
+```bash
+npm run check:design      # gate de conformidad, 5 checks
+npm test                  # 75 tests de backend (desde la raíz)
+npx playwright test tests/theme-toggle.spec.js   # 8 tests del toggle
+```
 
-**Cuando PJBA-22 termine**, el bloque BRIDGE LAYER de `src/styles/styles.css` debe
-desaparecer entero. Ahora tiene 17 tokens y el comentario del bloque explica que 16 existen
-solo para esos estilos inline. El único que sobreviviría es `--font-weight-medium` (peso 500,
-fuera de la escala de Carbon) — decidir entonces si se estrecha a 400/600.
+## Hecho
 
-Herramientas en el repo, correr tras **cada** cambio:
-- `python3 scripts/check-tokens.py` — estructura, paridad g10/g100, contraste WCAG
-- `python3 scripts/audit-undefined-tokens.py` — `var()` que no resuelven
-- `python3 scripts/find-non-carbon-colors.py <archivo.css>` — literales fuera de paleta
+- **M0** tokens y theming — PJBA-8 `da9aa1f`, 9 `9851e02`, 10 `cc42396`, 12 `e555b0c`, 11 `63f0333`
+- **M1** núcleo styles.css — PJBA-13 `162acdb`, 14 `97ccb08`, 15 `1645fe3`
+- **M2** CSS por página — PJBA-16 `b63b33f`, 17 `ced3799`, 18 `e0e63dc`, 19 `3035ca4`, 20 `59e92af`, 21 `5018fae`
+- **M3** componentes — PJBA-22 `69fa2a2`, 23 `62b1b4c`, 24 `38626c6`, 25 `ea0515e`, 26 `65d6599`, 27 `09bf2c9`
+- **M4** documentación — PJBA-30 `87f66cf`, 28+29 `3059e7c` (tres agentes en paralelo)
+- **M5** QA y release — PJBA-32 `c88a39f`, 33 `f286b22`, 31 `d369121`
 
-## Hecho en esta sesión
+## Deuda conocida, fuera del alcance de esta migración
 
-Antes de Carbon: **PR #33 mergeado a `main`** (tool `browse_url` del agente, v3.12.0).
+Los agentes de M4 la encontraron al revisar la documentación. No es Carbon, así que no se tocó:
 
-- **M0** — PJBA-8 `da9aa1f`, PJBA-9 `9851e02`, PJBA-10 `cc42396`, PJBA-12 `e555b0c`,
-  PJBA-11 `63f0333`
-- **M1** — PJBA-13 `162acdb`, PJBA-14 `97ccb08`, PJBA-15 `1645fe3`
-- **M2** — PJBA-16 `b63b33f`, PJBA-17 `ced3799`, PJBA-18 `e0e63dc`, PJBA-19 `3035ca4`,
-  PJBA-20 `59e92af`, PJBA-21 `5018fae`
+1. **Las cuatro recetas "Adding New…" de `CLAUDE.md`** apuntan todas a la estructura
+   pre-React: `public/js/app.js`, `shared/journey-map.js`, controladores `.js`. Ninguna de
+   esas rutas existe. Es lo más engañoso que queda en el archivo.
+2. `CLAUDE.md` dice "Global arrays: `jobs[]` / `entities[]`", contradiciendo su propia tabla
+   de deuda técnica, y menciona un `sidebar.js` que no existe.
+3. `TESTING.md` lista 5 archivos de test cuando hay 8, y dice `.js` cuando son `.ts`.
+4. `DESIGN.md:99` dice rate limit "5 req/15min"; el real es 15 intentos fallidos por 15 min.
+5. **Emoji supervivientes** al commit que decía haberlos eliminado todos: `🤝` en
+   `DetailPanel.tsx:877` y `content: '💡'` / `'⚠️'` en las alertas de `docs.css`.
+6. Los **11 estilos tipográficos compuestos** tienen solo 3 call sites: la escala está
+   definida pero apenas adoptada.
 
-Cada issue tiene comentario detallado en Linear con sus desviaciones.
+## Decisiones duraderas
 
-## En vuelo / a medias
+En `DECISIONS.md`. Las que más condicionaron el trabajo:
 
-Nada. Working tree limpio, rama pusheada.
-
-## Decisiones tomadas
-
-Las duraderas en `DECISIONS.md`. Resumen:
-
-- **Un solo PR al terminar los 6 milestones.** Decisión explícita del usuario.
-- **Los colores de estado son semánticos**, 12 estados × 3 tokens × 2 temas. `pending` era el
-  único sin tokens y ahora es teal.
-- **Los acentos de estado en claro van en hue-70, no hue-60** — a 60 sobre relleno 20 dan 3.79
-  y no pasan AA. Bug preexistente.
-- **`--cds-terminal-*` significa "superficie que sigue oscura en ambos temas"**, no solo
-  terminal: la usan la salida de herramientas, los bloques de código de docs y el panel
-  showcase del login.
-- **Los overlays conservan sombra**; todo lo que está en flujo la pierde.
-- **`--color-primary` → `--cds-button-primary`**, no `--cds-interactive`.
+- **Los componentes consumen N2, nunca N1.** Un primitivo no puede seguir un cambio de tema.
+  El gate lo vigila.
+- **Un relleno que lleva texto encima necesita un token que se quede en el stop 60 en ambos
+  temas** (`button-primary`, `button-danger-primary`), no uno que aclare en oscuro
+  (`interactive`, `support-error`). Este error se cometió dos veces.
+- **El color nunca va inline.** Un color inline gana en silencio a la regla CSS y es invisible
+  para cualquier barrido que lea hojas de estilo. Por eso los tipos de `InlineNotification` y
+  de los tags son clases modificadoras.
+- **Las superficies siempre-oscuras** (salida de terminal, bloques de código, panel showcase
+  del login) fijan tokens con scope; no pueden leer los semánticos temáticos.
 
 ## Trampas descubiertas
 
-- **Un `var()` indefinido no da error.** El navegador descarta la declaración entera y la regla
-  no hace nada. Es el modo de fallo dominante de esta migración y ya ha mordido tres veces:
-  `--color-primary-soft` dejaba un input **sin ningún indicador de foco**; `--font-title` (8
-  usos) hacía que los títulos de docs cayeran al fallback; y quitar los alias locales de la
-  sidebar en PJBA-19 **rompió `Sidebar.tsx`** hasta que el audit lo destapó en PJBA-21.
-  **Correr el audit después de cada eliminación, no al final.**
+- **Un `var()` indefinido no da error.** El navegador descarta la declaración entera. Mordió
+  cuatro veces: un input sin indicador de foco, los títulos de docs en fallback, `Sidebar.tsx`
+  roto por una limpieza mía, y 37 referencias muertas en componentes.
+- **Un barrido que solo busca hex y `rgba()` deja pasar los colores con nombre.** `color: white`
+  sobrevivió seis milestones porque `find-non-carbon-colors.py` nunca los miró. Un gate sin
+  probar es peor que no tener gate: el primero que escribió el agente estaba verde y
+  equivocado.
 - **Vite bundlea todo el CSS en un archivo que cargan las 6 páginas.** Un selector de elemento
-  a nivel raíz en cualquier hoja aplica en toda la app: `docs.css` estilaba los `h1` y `code`
-  de la app entera. Verificado en la página de login antes y después.
-- **El contenedor `jobboard-agent` se recrea solo cada cierto tiempo** (pasó dos veces esta
-  sesión, exit 0 sin OOM). Borra `/tmp` y cualquier `pip install` manual; las deps de la imagen
-  sobreviven. Volver a copiar los scripts con `docker cp` antes de usarlos.
-- **Un gris sólido no sustituye a un negro con alfa muy baja.** El grid del `body` apuntado a
-  `--cds-border-subtle-00` quedó como papel milimetrado. Texturas al borde de lo perceptible
-  necesitan alfa, o sea un triplete RGB.
-- **Un triplete `-rgb` que no cuadre con su hex es invisible.** El checker ya lo vigila.
-- **Cuidado con los espacios finales al hacer replace exacto en CSS.**
-- **`document.documentElement` no existe** cuando corre un init script de Playwright; para
-  medir cuándo se aplica un atributo hay que interceptar `Element.prototype.setAttribute`.
-- **`document.fonts.check()` da `false` para fuentes declaradas pero sin usar** — descarga
-  perezosa, no ausencia.
+  a nivel raíz en cualquier hoja aplica en toda la app.
+- **Medir el contraste encuentra lo que mirar capturas no.** 57 fallos AA, ninguno evidente a
+  ojo.
+- **El contenedor `jobboard-agent` se recrea solo** cada cierto tiempo: borra `/tmp` y
+  cualquier `pip install`. Volver a copiar los scripts con `docker cp`.
+- **`document.documentElement` no existe** cuando corre un init script de Playwright.
 - **Los merges de este repo son rebase merges.**
 
-## Preguntas abiertas para el usuario
+## Preguntas abiertas
 
-Ninguna. M3 (PJBA-22 → 27) no depende de decisiones pendientes.
+Ninguna. Solo queda abrir el PR.
