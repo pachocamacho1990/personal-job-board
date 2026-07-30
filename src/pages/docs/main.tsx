@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { navigateTo } from '../../router';
 import '../../styles/styles.css';
 import '../../styles/docs.css';
-import { RocketIcon, SearchIcon, ProfileIcon, BrainIcon, ClipboardIcon, JobBoardIcon, HandshakeIcon } from '../../components/icons';
+import { RocketIcon, SearchIcon, ProfileIcon, BrainIcon, ClipboardIcon, JobBoardIcon, HandshakeIcon, ContrastIcon } from '../../components/icons';
 
 
 export const DocsPage: React.FC = () => {
@@ -46,6 +46,7 @@ export const DocsPage: React.FC = () => {
     { id: 'business', label: 'Business Board' },
     { id: 'transform', label: 'Transformación de Vacante' },
     { id: 'files', label: 'Gestión de Archivos' },
+    { id: 'theming', label: 'Temas y Apariencia' },
   ];
 
   const agentNavLinks = [
@@ -55,6 +56,7 @@ export const DocsPage: React.FC = () => {
     { id: 'agent-jobs', label: 'API de Vacantes' },
     { id: 'agent-biz', label: 'API de Business Board' },
     { id: 'agent-dash', label: 'API de Dashboard' },
+    { id: 'agent-tools', label: 'Herramientas de Zenith' },
   ];
 
   const currentNavLinks = activeMode === 'user' ? userNavLinks : agentNavLinks;
@@ -505,6 +507,87 @@ export const DocsPage: React.FC = () => {
                 </li>
               </ul>
             </section>
+
+            {/* Section: Theming */}
+            <section
+              id="theming"
+              className={`doc-section ${activeSection === 'theming' ? 'active' : ''}`}
+            >
+              <h1>Temas y Apariencia</h1>
+              <p>
+                Toda la interfaz está construida sobre el <strong>IBM Carbon Design System</strong>{' '}
+                y se distribuye en dos temas oficiales. No son dos hojas de estilo distintas: es el
+                mismo conjunto de tokens semánticos resuelto con dos paletas, de modo que cualquier
+                pantalla (tableros, paneles de detalle, consola del agente o esta misma
+                documentación) responde al cambio de forma simultánea.
+              </p>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tema</th>
+                    <th>Identificador de Carbon</th>
+                    <th>Uso recomendado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>Claro</strong>
+                    </td>
+                    <td>
+                      <code>g10</code>
+                    </td>
+                    <td>Entornos con luz ambiental alta; es el tema por defecto.</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Oscuro</strong>
+                    </td>
+                    <td>
+                      <code>g100</code>
+                    </td>
+                    <td>Sesiones largas o de noche; reduce la fatiga visual.</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h3>Cómo cambiar de tema</h3>
+              <p>
+                El control vive al pie de la barra lateral, justo encima de tu perfil de usuario.
+                Es un botón de alternancia que muestra el tema activo:{' '}
+                <span className="inline-icon-label">
+                  <ContrastIcon size={14} /> Tema claro
+                </span>{' '}
+                o{' '}
+                <span className="inline-icon-label">
+                  <ContrastIcon size={14} /> Tema oscuro
+                </span>
+                . Un solo clic conmuta entre ambos y el cambio se aplica de inmediato, sin recargar
+                la página.
+              </p>
+
+              <h3>Cómo se decide el tema inicial</h3>
+              <ol>
+                <li>
+                  <strong>Tu elección previa manda</strong>: si alguna vez pulsaste el botón, esa
+                  preferencia queda guardada en <code>localStorage</code> bajo la clave{' '}
+                  <code>carbonTheme</code> y es la que se aplica al abrir la app.
+                </li>
+                <li>
+                  <strong>Si nunca elegiste</strong>: la app sigue la preferencia del sistema
+                  operativo mediante la media query <code>prefers-color-scheme</code>. Si tu equipo
+                  está en modo oscuro, la primera visita arranca en <code>g100</code>.
+                </li>
+              </ol>
+
+              <div className="alert alert-info">
+                Una vez que eliges un tema de forma explícita, el sistema operativo deja de
+                consultarse. Cambiar el portátil a modo oscuro no revertirá silenciosamente tu
+                decisión; para volver a otro tema basta con pulsar de nuevo el botón de la barra
+                lateral.
+              </div>
+            </section>
           </div>
         )}
 
@@ -893,6 +976,168 @@ export const DocsPage: React.FC = () => {
 }`}
                   </code>
                 </pre>
+              </div>
+            </section>
+
+            {/* Section: Agent Tools */}
+            <section
+              id="agent-tools"
+              className={`doc-section ${activeSection === 'agent-tools' ? 'active' : ''}`}
+            >
+              <h1>Herramientas del Agente Zenith</h1>
+              <p>
+                Además de la API REST descrita arriba, la plataforma incluye a{' '}
+                <strong>Zenith</strong>, el agente conversacional propio. Zenith no consume la API a
+                ciegas: dispone de un catálogo de herramientas declaradas que el modelo puede
+                invocar durante la conversación, siempre en nombre del usuario autenticado y con su
+                mismo token.
+              </p>
+
+              <h3>Catálogo de herramientas</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Herramienta</th>
+                    <th>Qué hace</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <code>browse_url</code>
+                    </td>
+                    <td>
+                      Abre una URL en un navegador integrado y devuelve su contenido legible.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>list_boards</code> / <code>create_board</code>
+                    </td>
+                    <td>Consulta los tableros del usuario (con su conteo) o crea uno nuevo.</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>list_jobs</code> / <code>create_job_card</code>
+                    </td>
+                    <td>
+                      Lista tarjetas de un tablero (filtrando por estado o texto) y crea vacantes
+                      nuevas.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>update_job_status</code>
+                    </td>
+                    <td>Mueve una tarjeta entre columnas del Kanban.</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>archive_job</code> / <code>delete_job</code>
+                    </td>
+                    <td>Archiva una tarjeta o la elimina de forma permanente.</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>save_preference</code> / <code>delete_preference</code>
+                    </td>
+                    <td>
+                      Memoria de largo plazo: guarda o retira criterios y hechos del usuario.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>save_skill</code>
+                    </td>
+                    <td>Registra una receta reutilizable para automatizar tareas repetitivas.</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>save_career_strategy</code>
+                    </td>
+                    <td>
+                      Persiste el ancla de carrera, los roles objetivo y el prompt de búsqueda
+                      activa al cerrar la entrevista.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>navigate_to</code>
+                    </td>
+                    <td>Lleva la interfaz del usuario a una vista concreta de la aplicación.</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h3>
+                Navegación web: <code>browse_url</code>
+              </h3>
+              <p>
+                Resuelve el caso de "pásale esta oferta al agente": en lugar de copiar y pegar la
+                descripción a mano, basta con darle el enlace de la vacante para que extraiga los
+                requisitos por su cuenta. Internamente levanta un Chromium headless de forma
+                perezosa, abre un contexto aislado por petición, espera a que la red quede en reposo
+                (para que las SPA alcancen a renderizar) y convierte el DOM resultante a markdown
+                compacto, descartando antes el ruido estructural (<code>script</code>,{' '}
+                <code>style</code>, <code>nav</code>, <code>footer</code>, <code>header</code>,{' '}
+                <code>form</code>, <code>svg</code> e <code>iframe</code>).
+              </p>
+
+              <div className="code-block-wrapper">
+                <div className="code-block-header">
+                  <span>tool call: browse_url</span>
+                  <button
+                    className="copy-btn"
+                    onClick={() =>
+                      handleCopyCode(
+                        `{\n  "name": "browse_url",\n  "arguments": {\n    "url": "https://ejemplo.com/vacante/backend-engineer"\n  }\n}`,
+                        6
+                      )
+                    }
+                  >
+                    {copiedIndex === 6 ? '¡Copiado!' : 'Copiar'}
+                  </button>
+                </div>
+                <pre>
+                  <code>
+                    {`// Invocación
+{
+  "name": "browse_url",
+  "arguments": {
+    "url": "https://ejemplo.com/vacante/backend-engineer"
+  }
+}
+
+// Resultado exitoso
+{
+  "success": true,
+  "url": "https://ejemplo.com/vacante/backend-engineer",
+  "title": "Backend Engineer - Ejemplo S.A.",
+  "content": "# Backend Engineer\\n\\nBuscamos una persona con..."
+}
+
+// Resultado fallido
+{
+  "success": false,
+  "error": "HTTP Error 404 when accessing https://ejemplo.com/vacante/backend-engineer."
+}`}
+                  </code>
+                </pre>
+              </div>
+
+              <div className="alert alert-info">
+                <strong>Límites operativos:</strong> la carga de la página caduca a los{' '}
+                <strong>15 segundos</strong> y el contenido devuelto se trunca a{' '}
+                <strong>15.000 caracteres</strong> para no desbordar la ventana de contexto del
+                modelo. Si la lectura falla, la herramienta responde con{' '}
+                <code>success: false</code> y un mensaje de error en lugar de interrumpir la
+                conversación.
+              </div>
+
+              <div className="alert alert-warning">
+                <code>browse_url</code> lee páginas públicas: no inicia sesión ni rellena
+                formularios. Los portales que exigen autenticación o que bloquean el tráfico
+                automatizado devolverán un error HTTP o una página vacía.
               </div>
             </section>
           </div>
