@@ -2,27 +2,17 @@
    ZENITH AGENT CONSOLE — Styles
    ============================================ */
 
-/* ── Agent-specific Design Tokens ────────── */
+/* ── Agent console tokens ─────────────────
+
+   This block used to hold twenty values, seventeen of them colours that
+   restated a Carbon semantic in raw hex — and therefore only worked in the
+   light theme. They are gone; the rules below read the semantics directly.
+
+   What survives is the two that were never colours: a panel width and a
+   transition duration. Both are local layout decisions with no equivalent in
+   the token engine. */
 :root {
   --agent-panel-width: 400px;
-  --agent-bg: #ffffff; /* Carbon White */
-  --agent-border: #e0e0e0; /* Carbon Gray 20 */
-  --agent-accent: #0f62fe; /* IBM Blue 60 */
-  --agent-accent-soft: rgba(15, 98, 254, 0.08);
-  --agent-accent-medium: rgba(15, 98, 254, 0.16);
-  --agent-bubble-agent: #f4f4f4; /* Carbon Gray 10 */
-  --agent-bubble-user: #0f62fe; /* IBM Blue 60 for user messages */
-  --agent-text-user: #ffffff; /* White text on blue user bubbles */
-  --agent-text-agent: #161616; /* Gray 100 text for agent messages */
-  --agent-thinking-bg: #fff8e1; /* Warm light yellow */
-  --agent-thinking-border: #ffe082;
-  --agent-tool-bg: #161616; /* Keep terminal output dark for high-tech contrast */
-  --agent-tool-border: #393939;
-  --agent-suggestion-bg: #f2f0ff; /* Light purple */
-  --agent-suggestion-border: #d4c4fc;
-  --agent-progress-track: #e0e0e0;
-  --agent-progress-fill: var(--agent-accent);
-  --agent-status-bar-bg: #f4f4f4;
   --agent-transition: 0.15s ease;
 }
 
@@ -36,8 +26,8 @@
   transform: translateX(100%);
   transition: transform var(--agent-transition);
   z-index: 200;
-  background: var(--agent-bg);
-  border-left: 1px solid var(--agent-border);
+  background: var(--cds-layer-01);
+  border-left: 1px solid var(--cds-border-subtle-00);
   display: flex;
   flex-direction: column;
   box-shadow: none;
@@ -75,8 +65,8 @@ main.docs-content.agent-open {
   z-index: 201;
   width: 40px;
   height: 72px;
-  background: var(--agent-bg);
-  border: 1px solid var(--agent-border);
+  background: var(--cds-layer-01);
+  border: 1px solid var(--cds-border-subtle-00);
   border-right: none;
   border-radius: 0px;
   cursor: pointer;
@@ -91,7 +81,7 @@ main.docs-content.agent-open {
 
 .agent-toggle-btn:hover {
   width: 44px;
-  background: var(--agent-accent-soft);
+  background: var(--cds-highlight);
   box-shadow: none;
 }
 
@@ -105,7 +95,7 @@ main.docs-content.agent-open {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--agent-accent);
+  color: var(--cds-interactive);
 }
 
 /* Hide toggle when panel is open */
@@ -122,8 +112,8 @@ main.docs-content.agent-open {
   right: 6px;
   width: 16px;
   height: 16px;
-  background: #EF4444;
-  color: white;
+  background: var(--cds-support-error);
+  color: var(--cds-text-on-color);
   border-radius: 50%;
   font-size: 0.6rem;
   font-weight: 700;
@@ -134,8 +124,8 @@ main.docs-content.agent-open {
 }
 
 @keyframes agent-badge-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--cds-support-error-rgb), 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(var(--cds-support-error-rgb), 0); }
 }
 
 /* ── Panel Header ────────────────────────── */
@@ -152,7 +142,7 @@ main.docs-content.agent-open {
 .agent-header-icon {
   width: 32px;
   height: 32px;
-  background: var(--agent-accent-soft);
+  background: var(--cds-highlight);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
@@ -232,7 +222,7 @@ main.docs-content.agent-open {
 }
 
 .agent-chat::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--cds-border-strong-01);
   border-radius: 4px;
 }
 
@@ -273,13 +263,13 @@ main.docs-content.agent-open {
 
 /* User bubble */
 .agent-msg.role-user .agent-msg-bubble {
-  background: var(--agent-bubble-user);
-  color: var(--agent-text-user);
+  background: var(--cds-button-primary);
+  color: var(--cds-text-on-color);
 }
 
 /* Agent bubble */
 .agent-msg.role-agent .agent-msg-bubble {
-  background: var(--agent-bubble-agent);
+  background: var(--cds-layer-02);
   color: var(--color-text-main);
   border: 1px solid var(--color-border);
 }
@@ -292,9 +282,9 @@ main.docs-content.agent-open {
 
 /* ── Thinking Block ──────────────────────── */
 .agent-msg.type-thinking .agent-msg-bubble {
-  background: var(--agent-thinking-bg);
-  border: 1px solid var(--agent-thinking-border);
-  border-left: 3px solid #F59E0B;
+  background: var(--cds-status-interview-surface);
+  border: 1px solid var(--cds-status-interview-header);
+  border-left: 3px solid var(--cds-support-warning);
   font-size: 0.8rem;
   color: var(--color-text-muted);
   font-style: italic;
@@ -302,18 +292,18 @@ main.docs-content.agent-open {
 
 /* ── Tool Call Block ─────────────────────── */
 .agent-msg.type-tool_call .agent-msg-bubble {
-  background: var(--agent-tool-bg);
-  border: 1px solid var(--agent-tool-border);
-  border-left: 3px solid #10B981;
+  background: var(--cds-terminal-bg);
+  border: 1px solid var(--cds-terminal-border);
+  border-left: 3px solid var(--cds-support-success);
   font-size: 0.8rem;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 /* ── Suggestion Block ────────────────────── */
 .agent-msg.type-suggestion .agent-msg-bubble {
-  background: var(--agent-suggestion-bg);
-  border: 1px solid var(--agent-suggestion-border);
-  border-left: 3px solid #A855F7;
+  background: var(--cds-status-interested-surface);
+  border: 1px solid var(--cds-status-interested-header);
+  border-left: 3px solid var(--cds-agent-accent);
 }
 
 /* ── Collapsible Toggle ──────────────────── */
@@ -361,7 +351,7 @@ main.docs-content.agent-open {
 
 .agent-progress-bar-track {
   height: 6px;
-  background: var(--agent-progress-track);
+  background: var(--cds-layer-accent-01);
   border-radius: 0;
   overflow: hidden;
   margin-bottom: 12px;
@@ -369,29 +359,17 @@ main.docs-content.agent-open {
 
 .agent-progress-bar-fill {
   height: 100%;
-  background: var(--agent-progress-fill);
+  background: var(--cds-interactive);
   border-radius: 0;
   transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
-.agent-progress-bar-fill::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  animation: agent-shimmer 1.5s ease-in-out infinite;
-}
-
-@keyframes agent-shimmer {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(100%); }
-}
 
 .agent-progress-pct {
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--agent-accent);
+  color: var(--cds-interactive);
   margin-left: auto;
 }
 
@@ -414,7 +392,7 @@ main.docs-content.agent-open {
 }
 
 .agent-progress-step.running {
-  color: var(--agent-accent);
+  color: var(--cds-interactive);
   font-weight: 500;
 }
 
@@ -433,7 +411,7 @@ main.docs-content.agent-open {
   display: inline-block;
   width: 12px;
   height: 12px;
-  border: 2px solid var(--agent-accent);
+  border: 2px solid var(--cds-interactive);
   border-top-color: transparent;
   border-radius: 50%;
   animation: agent-spin 0.8s linear infinite;
@@ -462,15 +440,13 @@ main.docs-content.agent-open {
 }
 
 .agent-action-btn.variant-primary {
-  background: var(--agent-accent);
+  background: var(--cds-interactive);
   color: white;
-  border-color: var(--agent-accent);
+  border-color: var(--cds-interactive);
 }
 
 .agent-action-btn.variant-primary:hover {
   background: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .agent-action-btn.variant-secondary {
@@ -487,11 +463,11 @@ main.docs-content.agent-open {
 .agent-action-btn.variant-danger {
   background: transparent;
   color: var(--color-danger);
-  border-color: rgba(239, 68, 68, 0.3);
+  border-color: var(--cds-support-error);
 }
 
 .agent-action-btn.variant-danger:hover {
-  background: rgba(239, 68, 68, 0.08);
+  background: var(--cds-support-error-subtle);
 }
 
 .agent-action-btn:disabled {
@@ -521,7 +497,7 @@ main.docs-content.agent-open {
 }
 
 .agent-input-wrapper:focus-within {
-  border-color: var(--agent-accent);
+  border-color: var(--cds-interactive);
   box-shadow: none;
 }
 
@@ -551,7 +527,7 @@ main.docs-content.agent-open {
   height: 34px;
   border-radius: var(--radius-sm);
   border: none;
-  background: var(--agent-accent);
+  background: var(--cds-interactive);
   color: white;
   cursor: pointer;
   display: flex;
@@ -595,9 +571,8 @@ main.docs-content.agent-open {
   right: 0;
   height: 38px;
   z-index: 199;
-  background: var(--agent-status-bar-bg);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid var(--agent-border);
+  background: var(--cds-layer-02);
+  border-top: 1px solid var(--cds-border-subtle-00);
   display: flex;
   align-items: center;
   padding: 0 20px;
@@ -627,15 +602,15 @@ main.docs-content.agent-open {
   flex: 1;
   font-size: 0.78rem;
   font-weight: 500;
-  color: var(--agent-accent);
+  color: var(--cds-interactive);
 }
 
 .agent-status-bar-action {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--agent-accent);
+  color: var(--cds-interactive);
   background: none;
-  border: 1px solid var(--agent-border);
+  border: 1px solid var(--cds-border-subtle-00);
   border-radius: var(--radius-sm);
   padding: 3px 10px;
   cursor: pointer;
@@ -643,7 +618,7 @@ main.docs-content.agent-open {
 }
 
 .agent-status-bar-action:hover {
-  background: var(--agent-accent-soft);
+  background: var(--cds-highlight);
 }
 
 /* ── Responsive ──────────────────────────── */
@@ -688,7 +663,7 @@ main.docs-content.agent-open {
 .agent-header-btn {
   background: none;
   border: 1px solid transparent;
-  color: var(--color-text-secondary);
+  color: var(--cds-text-secondary);
   font-size: 1rem;
   cursor: pointer;
   width: 32px;
@@ -701,15 +676,15 @@ main.docs-content.agent-open {
 }
 
 .agent-header-btn:hover {
-  background: var(--agent-accent-soft);
-  color: var(--agent-accent);
-  border-color: var(--agent-border);
+  background: var(--cds-highlight);
+  color: var(--cds-interactive);
+  border-color: var(--cds-border-subtle-00);
 }
 
 .agent-header-btn.active {
-  background: var(--agent-accent-soft);
-  color: var(--agent-accent);
-  border-color: var(--agent-accent-medium);
+  background: var(--cds-highlight);
+  color: var(--cds-interactive);
+  border-color: var(--cds-status-applied-header);
 }
 
 .agent-conv-list {
@@ -727,8 +702,8 @@ main.docs-content.agent-open {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: var(--agent-bg);
-  border: 1px solid var(--agent-border);
+  background: var(--cds-layer-01);
+  border: 1px solid var(--cds-border-subtle-00);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -737,12 +712,12 @@ main.docs-content.agent-open {
 }
 
 .agent-conv-item:hover {
-  border-color: var(--agent-accent);
+  border-color: var(--cds-interactive);
 }
 
 .agent-conv-item.active {
-  background: var(--agent-accent-soft);
-  border-color: var(--agent-accent);
+  background: var(--cds-highlight);
+  border-color: var(--cds-interactive);
 }
 
 .agent-conv-info {
@@ -753,7 +728,7 @@ main.docs-content.agent-open {
 .agent-conv-title {
   font-size: 0.88rem;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--cds-text-primary);
   margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
@@ -783,7 +758,7 @@ main.docs-content.agent-open {
 }
 
 .agent-conv-delete:hover {
-  background: rgba(239, 68, 68, 0.08);
+  background: var(--cds-support-error-subtle);
   color: var(--danger);
 }
 
@@ -801,8 +776,8 @@ main.docs-content.agent-open {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #EF4444;
-  color: #FFFFFF;
+  background: var(--cds-support-error);
+  color: var(--cds-text-on-color);
   border: none;
   border-radius: var(--radius-sm);
   padding: 6px 14px;
@@ -815,7 +790,7 @@ main.docs-content.agent-open {
 }
 
 .agent-stop-btn:hover {
-  background: #DC2626;
+  background: var(--cds-button-danger-hover);
 }
 
 @keyframes pulse-stop {
@@ -832,8 +807,8 @@ main.docs-content.agent-open {
 
 /* ── Strategy Panel & Active Search Mode ── */
 .agent-ready-panel {
-  background: var(--agent-accent-soft);
-  border: 1px solid var(--agent-border);
+  background: var(--cds-highlight);
+  border: 1px solid var(--cds-border-subtle-00);
   border-radius: var(--radius-sm);
   margin: 12px 16px;
   padding: 12px;
@@ -848,7 +823,7 @@ main.docs-content.agent-open {
   align-items: center;
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--agent-accent);
+  color: var(--cds-interactive);
   cursor: pointer;
   user-select: none;
 }
@@ -862,7 +837,7 @@ main.docs-content.agent-open {
 
 .agent-strategy-summary {
   font-size: 0.78rem;
-  color: var(--color-text-primary);
+  color: var(--cds-text-primary);
   line-height: 1.4;
   background: var(--color-canvas);
   padding: 8px;
@@ -881,9 +856,9 @@ main.docs-content.agent-open {
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 0;
-  background: rgba(139, 92, 246, 0.08);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  color: #8b5cf6;
+  background: var(--cds-status-interested-surface);
+  border: 1px solid var(--cds-status-interested-header);
+  color: var(--cds-agent-accent);
 }
 
 .agent-board-select-container {
@@ -904,7 +879,7 @@ main.docs-content.agent-open {
   border: 1px solid var(--color-border);
   font-size: 0.78rem;
   background: var(--color-canvas);
-  color: var(--color-text-primary);
+  color: var(--cds-text-primary);
   cursor: pointer;
 }
 
@@ -913,11 +888,11 @@ main.docs-content.agent-open {
   height: 90px;
   font-size: 0.72rem;
   font-family: monospace;
-  background: var(--color-canvas-subtle);
+  background: var(--cds-layer-02);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: 8px;
-  color: var(--color-text-primary);
+  color: var(--cds-text-primary);
   resize: none;
   line-height: 1.35;
 }
@@ -930,8 +905,8 @@ main.docs-content.agent-open {
   padding: 8px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #FFFFFF;
-  background: var(--agent-accent);
+  color: var(--cds-text-on-color);
+  background: var(--cds-interactive);
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -939,7 +914,7 @@ main.docs-content.agent-open {
 }
 
 .agent-copy-btn:hover {
-  background: #4f46e5;
+  background: var(--cds-interactive);
 }
 
 .agent-copy-btn.success {
