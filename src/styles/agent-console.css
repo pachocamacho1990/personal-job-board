@@ -131,19 +131,19 @@ main.docs-content.agent-open {
 /* ── Panel Header ────────────────────────── */
 .agent-header {
   padding: 16px 20px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--cds-border-subtle-00);
   display: flex;
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-  background: var(--color-canvas);
+  background: var(--cds-layer-01);
 }
 
 .agent-header-icon {
   width: 32px;
   height: 32px;
   background: var(--cds-highlight);
-  border-radius: var(--radius-sm);
+  border-radius: var(--cds-radius-00);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -155,16 +155,16 @@ main.docs-content.agent-open {
 }
 
 .agent-header-title {
-  font-family: var(--font-family);
+  font-family: var(--cds-font-sans);
   font-size: 1rem;
   font-weight: 700;
-  color: var(--color-text-main);
+  color: var(--cds-text-primary);
   line-height: 1.2;
 }
 
 .agent-header-status {
   font-size: 0.7rem;
-  color: var(--color-success);
+  color: var(--cds-support-success);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -173,7 +173,7 @@ main.docs-content.agent-open {
 .agent-status-dot {
   width: 6px;
   height: 6px;
-  background: var(--color-success);
+  background: var(--cds-support-success);
   border-radius: 50%;
   animation: agent-status-pulse 2s ease-in-out infinite;
 }
@@ -188,8 +188,8 @@ main.docs-content.agent-open {
   border: none;
   cursor: pointer;
   padding: 6px;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-muted);
+  border-radius: var(--cds-radius-00);
+  color: var(--cds-text-secondary);
   font-size: 1.1rem;
   transition: all 0.15s;
   display: flex;
@@ -198,8 +198,8 @@ main.docs-content.agent-open {
 }
 
 .agent-close-btn:hover {
-  background: var(--color-tertiary);
-  color: var(--color-text-main);
+  background: var(--cds-layer-selected-01);
+  color: var(--cds-text-primary);
 }
 
 /* ── Chat Area ───────────────────────────── */
@@ -255,7 +255,7 @@ main.docs-content.agent-open {
 
 .agent-msg-bubble {
   padding: 10px 14px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--cds-radius-00);
   font-size: 0.875rem;
   line-height: 1.55;
   word-break: break-word;
@@ -270,8 +270,8 @@ main.docs-content.agent-open {
 /* Agent bubble */
 .agent-msg.role-agent .agent-msg-bubble {
   background: var(--cds-layer-02);
-  color: var(--color-text-main);
-  border: 1px solid var(--color-border);
+  color: var(--cds-text-primary);
+  border: 1px solid var(--cds-border-subtle-00);
 }
 
 /* Bold / markdown-like rendering in messages */
@@ -286,7 +286,7 @@ main.docs-content.agent-open {
   border: 1px solid var(--cds-status-interview-header);
   border-left: 3px solid var(--cds-support-warning);
   font-size: 0.8rem;
-  color: var(--color-text-muted);
+  color: var(--cds-text-secondary);
   font-style: italic;
 }
 
@@ -312,7 +312,7 @@ main.docs-content.agent-open {
   border: none;
   cursor: pointer;
   font-size: 0.75rem;
-  color: var(--color-text-muted);
+  color: var(--cds-text-secondary);
   padding: 2px 0;
   display: flex;
   align-items: center;
@@ -322,7 +322,7 @@ main.docs-content.agent-open {
 }
 
 .agent-msg-collapse-toggle:hover {
-  color: var(--color-text-main);
+  color: var(--cds-text-primary);
 }
 
 .agent-msg-collapsed .agent-msg-content {
@@ -331,9 +331,9 @@ main.docs-content.agent-open {
 
 /* ── Progress Block ──────────────────────── */
 .agent-progress {
-  background: var(--color-canvas);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  background: var(--cds-layer-01);
+  border: 1px solid var(--cds-border-subtle-00);
+  border-radius: var(--cds-radius-00);
   padding: 14px;
   max-width: 92%;
   animation: agent-msg-in 0.25s ease-out;
@@ -342,7 +342,7 @@ main.docs-content.agent-open {
 .agent-progress-title {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--color-text-main);
+  color: var(--cds-text-primary);
   margin-bottom: 10px;
   display: flex;
   align-items: center;
@@ -384,11 +384,11 @@ main.docs-content.agent-open {
   align-items: center;
   gap: 8px;
   font-size: 0.78rem;
-  color: var(--color-text-muted);
+  color: var(--cds-text-secondary);
 }
 
 .agent-progress-step.completed {
-  color: var(--color-success);
+  color: var(--cds-support-success);
 }
 
 .agent-progress-step.running {
@@ -397,7 +397,7 @@ main.docs-content.agent-open {
 }
 
 .agent-progress-step.failed {
-  color: var(--color-danger);
+  color: var(--cds-support-error);
 }
 
 .agent-step-icon {
@@ -431,7 +431,7 @@ main.docs-content.agent-open {
 
 .agent-action-btn {
   padding: 7px 16px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--cds-radius-00);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -446,23 +446,23 @@ main.docs-content.agent-open {
 }
 
 .agent-action-btn.variant-primary:hover {
-  background: var(--color-primary-hover);
+  background: var(--cds-button-primary-hover);
 }
 
 .agent-action-btn.variant-secondary {
   background: transparent;
-  color: var(--color-text-muted);
-  border-color: var(--color-border);
+  color: var(--cds-text-secondary);
+  border-color: var(--cds-border-subtle-00);
 }
 
 .agent-action-btn.variant-secondary:hover {
-  background: var(--color-tertiary);
-  color: var(--color-text-main);
+  background: var(--cds-layer-selected-01);
+  color: var(--cds-text-primary);
 }
 
 .agent-action-btn.variant-danger {
   background: transparent;
-  color: var(--color-danger);
+  color: var(--cds-support-error);
   border-color: var(--cds-support-error);
 }
 
@@ -480,8 +480,8 @@ main.docs-content.agent-open {
 /* ── Input Area ──────────────────────────── */
 .agent-input-area {
   padding: 12px 16px;
-  border-top: 1px solid var(--color-border);
-  background: var(--color-canvas);
+  border-top: 1px solid var(--cds-border-subtle-00);
+  background: var(--cds-layer-01);
   flex-shrink: 0;
 }
 
@@ -489,9 +489,9 @@ main.docs-content.agent-open {
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  background: var(--cds-background);
+  border: 1px solid var(--cds-border-subtle-00);
+  border-radius: var(--cds-radius-00);
   padding: 6px 6px 6px 14px;
   transition: border-color 0.2s;
 }
@@ -506,8 +506,8 @@ main.docs-content.agent-open {
   border: none;
   background: transparent;
   font-size: 0.875rem;
-  font-family: var(--font-family);
-  color: var(--color-text-main);
+  font-family: var(--cds-font-sans);
+  color: var(--cds-text-primary);
   resize: none;
   max-height: 120px;
   line-height: 1.4;
@@ -515,7 +515,7 @@ main.docs-content.agent-open {
 }
 
 .agent-input-field::placeholder {
-  color: var(--color-text-light);
+  color: var(--cds-text-placeholder);
 }
 
 .agent-input-field:focus {
@@ -525,7 +525,7 @@ main.docs-content.agent-open {
 .agent-send-btn {
   width: 34px;
   height: 34px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--cds-radius-00);
   border: none;
   background: var(--cds-interactive);
   color: white;
@@ -538,11 +538,11 @@ main.docs-content.agent-open {
 }
 
 .agent-send-btn:hover:not(:disabled) {
-  background: var(--color-primary-hover);
+  background: var(--cds-button-primary-hover);
 }
 
 .agent-send-btn:disabled {
-  background: var(--color-border);
+  background: var(--cds-border-subtle-00);
   cursor: not-allowed;
 }
 
@@ -554,7 +554,7 @@ main.docs-content.agent-open {
 /* ── Timestamp ───────────────────────────── */
 .agent-msg-time {
   font-size: 0.65rem;
-  color: var(--color-text-light);
+  color: var(--cds-text-placeholder);
   margin-top: 4px;
   padding: 0 2px;
 }
@@ -611,7 +611,7 @@ main.docs-content.agent-open {
   color: var(--cds-interactive);
   background: none;
   border: 1px solid var(--cds-border-subtle-00);
-  border-radius: var(--radius-sm);
+  border-radius: var(--cds-radius-00);
   padding: 3px 10px;
   cursor: pointer;
   transition: all 0.15s;
@@ -668,7 +668,7 @@ main.docs-content.agent-open {
   cursor: pointer;
   width: 32px;
   height: 32px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--cds-radius-00);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -694,7 +694,7 @@ main.docs-content.agent-open {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: var(--color-surface);
+  background: var(--cds-background);
 }
 
 .agent-conv-item {
@@ -704,7 +704,7 @@ main.docs-content.agent-open {
   padding: 12px 16px;
   background: var(--cds-layer-01);
   border: 1px solid var(--cds-border-subtle-00);
-  border-radius: var(--radius-sm);
+  border-radius: var(--cds-radius-00);
   cursor: pointer;
   transition: all 0.2s ease;
   gap: 12px;
@@ -737,7 +737,7 @@ main.docs-content.agent-open {
 
 .agent-conv-snippet {
   font-size: 0.76rem;
-  color: var(--color-text-muted);
+  color: var(--cds-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -746,11 +746,11 @@ main.docs-content.agent-open {
 .agent-conv-delete {
   background: none;
   border: none;
-  color: var(--color-text-muted);
+  color: var(--cds-text-secondary);
   font-size: 0.95rem;
   cursor: pointer;
   padding: 6px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--cds-radius-00);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -759,7 +759,7 @@ main.docs-content.agent-open {
 
 .agent-conv-delete:hover {
   background: var(--cds-support-error-subtle);
-  color: var(--danger);
+  color: var(--cds-support-error);
 }
 
 /* ── Stop Generation Button ──────────────── */
@@ -779,7 +779,7 @@ main.docs-content.agent-open {
   background: var(--cds-support-error);
   color: var(--cds-text-on-color);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--cds-radius-00);
   padding: 6px 14px;
   font-size: 0.8rem;
   font-weight: 600;
@@ -809,7 +809,7 @@ main.docs-content.agent-open {
 .agent-ready-panel {
   background: var(--cds-highlight);
   border: 1px solid var(--cds-border-subtle-00);
-  border-radius: var(--radius-sm);
+  border-radius: var(--cds-radius-00);
   margin: 12px 16px;
   padding: 12px;
   display: flex;
@@ -839,10 +839,10 @@ main.docs-content.agent-open {
   font-size: 0.78rem;
   color: var(--cds-text-primary);
   line-height: 1.4;
-  background: var(--color-canvas);
+  background: var(--cds-layer-01);
   padding: 8px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
+  border-radius: var(--cds-radius-00);
+  border: 1px solid var(--cds-border-subtle-00);
 }
 
 .agent-strategy-meta {
@@ -870,15 +870,15 @@ main.docs-content.agent-open {
 .agent-board-select-label {
   font-size: 0.74rem;
   font-weight: 600;
-  color: var(--color-text-muted);
+  color: var(--cds-text-secondary);
 }
 
 .agent-board-select {
   padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
+  border-radius: var(--cds-radius-00);
+  border: 1px solid var(--cds-border-subtle-00);
   font-size: 0.78rem;
-  background: var(--color-canvas);
+  background: var(--cds-layer-01);
   color: var(--cds-text-primary);
   cursor: pointer;
 }
@@ -889,8 +889,8 @@ main.docs-content.agent-open {
   font-size: 0.72rem;
   font-family: monospace;
   background: var(--cds-layer-02);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--cds-border-subtle-00);
+  border-radius: var(--cds-radius-00);
   padding: 8px;
   color: var(--cds-text-primary);
   resize: none;
@@ -908,7 +908,7 @@ main.docs-content.agent-open {
   color: var(--cds-text-on-color);
   background: var(--cds-interactive);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--cds-radius-00);
   cursor: pointer;
   transition: background 0.2s ease;
 }
@@ -918,6 +918,6 @@ main.docs-content.agent-open {
 }
 
 .agent-copy-btn.success {
-  background: var(--color-success);
+  background: var(--cds-support-success);
 }
 

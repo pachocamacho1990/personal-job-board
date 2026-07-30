@@ -10,166 +10,47 @@
 }
 
 /* ============================================================================
-   BRIDGE LAYER
+   BRIDGE LAYER — the last of it
 
-   Every name here is legacy. Nothing defines a value any more — each one
-   forwards to a Carbon semantic in theme.css, so the whole app follows the
-   theme without its call sites having been touched yet.
+   PJBA-13 opened this with 83 legacy names forwarding to Carbon semantics.
+   Every stylesheet now reads --cds-* directly, so 66 of them are gone.
 
-   This layer is temporary and is meant to shrink to nothing. It survives this
-   issue because 34 of these names are read from six other stylesheets and nine
-   components that M2 has not migrated yet, and an undefined var() does not
-   error — the browser silently drops the declaration. Deleting them early
-   would blank out rules with no warning anywhere.
+   The 17 below survive for one reason: they are read from inline styles in
+   TSX, which PJBA-22 migrates. --font-weight-medium is the exception — it is
+   read from this file, and stays because weight 500 is off the Carbon scale
+   and still appears in live declarations.
 
-   PJBA-21 removes this block once every consumer reads --cds-* directly. Until
-   then: do not add names here, and repoint call sites rather than reaching for
-   a bridge token in new code.
+   Nothing may be added here. When PJBA-22 lands, this block goes with it.
    ============================================================================ */
 
 :root {
-    /* — Brand and interaction.
-         --color-primary forwards to button-primary rather than interactive:
-         two of its nine uses are primary button fills, and interactive drops
-         to Blue 50 in g100, which fails contrast under white button text.
-         Blue 60 still clears the 3:1 bar for the border and stroke uses. */
     --color-primary: var(--cds-button-primary);
-    --color-primary-hover: var(--cds-button-primary-hover);
     --color-accent: var(--cds-purple-60); /* AI surfaces; PJBA-22 gives these a semantic */
-
-    /* — Neutrals */
-    --color-surface: var(--cds-background);
-    --color-canvas: var(--cds-layer-01);
-    --color-tertiary: var(--cds-layer-selected-01);
-    --color-text-main: var(--cds-text-primary);
     --color-text-muted: var(--cds-text-secondary);
-    --color-text-light: var(--cds-text-placeholder);
     --color-border: var(--cds-border-subtle-00);
-
-    /* — Functional */
     --color-success: var(--cds-support-success);
     --color-danger: var(--cds-support-error);
-
-    /* — Second-generation aliases. These forward to the first generation above
-         rather than straight to Carbon, so there is exactly one place to edit
-         when a mapping turns out wrong. */
-    --bg-secondary: var(--color-surface);
-    --bg-tertiary: var(--color-canvas);
-    --border-color: var(--color-border);
-    --text-primary: var(--color-text-main);
-    --text-secondary: var(--color-text-muted);
-    --text-tertiary: var(--color-text-light);
-    --accent: var(--color-primary);
-    --danger: var(--color-danger);
-    --canvas: var(--color-canvas);
-    --border: var(--color-border);
-    --radius: var(--cds-radius-00);
-    --shadow: var(--cds-shadow-none);
-    --surface: var(--color-surface);
-    --surface-hover: var(--cds-layer-hover-01);
-    --primary-soft: var(--cds-highlight);
-
-    /* — Board status colors. Three tokens each: the accent for heading text and
-         the header border, -light for the header fill, -bg for the column body.
-         The theme-aware definitions live in theme.css, because these tints only
-         work in one theme — a pale lilac column body over a dark page is the
-         bug that mapping prevents. */
-    --color-interested: var(--cds-status-interested);
-    --color-interested-bg: var(--cds-status-interested-surface);
-    --color-interested-light: var(--cds-status-interested-header);
-
-    --color-applied: var(--cds-status-applied);
-    --color-applied-bg: var(--cds-status-applied-surface);
-    --color-applied-light: var(--cds-status-applied-header);
-
-    --color-interview: var(--cds-status-interview);
-    --color-interview-bg: var(--cds-status-interview-surface);
-    --color-interview-light: var(--cds-status-interview-header);
-
-    --color-offer: var(--cds-status-offer);
-    --color-offer-bg: var(--cds-status-offer-surface);
-    --color-offer-light: var(--cds-status-offer-header);
-
-    --color-rejected: var(--cds-status-rejected);
-    --color-rejected-bg: var(--cds-status-rejected-surface);
-    --color-rejected-light: var(--cds-status-rejected-header);
-
-    --color-forgotten: var(--cds-status-forgotten);
-    --color-forgotten-bg: var(--cds-status-forgotten-surface);
-    --color-forgotten-light: var(--cds-status-forgotten-header);
-
-    /* Business Board */
-    --color-researching: var(--cds-status-researching);
-    --color-researching-bg: var(--cds-status-researching-surface);
-    --color-researching-light: var(--cds-status-researching-header);
-
-    --color-contacted: var(--cds-status-contacted);
-    --color-contacted-bg: var(--cds-status-contacted-surface);
-    --color-contacted-light: var(--cds-status-contacted-header);
-
-    --color-meeting: var(--cds-status-meeting);
-    --color-meeting-bg: var(--cds-status-meeting-surface);
-    --color-meeting-light: var(--cds-status-meeting-header);
-
-    --color-negotiation: var(--cds-status-negotiation);
-    --color-negotiation-bg: var(--cds-status-negotiation-surface);
-    --color-negotiation-light: var(--cds-status-negotiation-header);
-
-    --color-signed: var(--cds-status-signed);
-    --color-signed-bg: var(--cds-status-signed-surface);
-    --color-signed-light: var(--cds-status-signed-header);
-
-    /* — Spacing. Not a clean mapping: the old scale has no 12px step, so it
-         skips --cds-spacing-04 entirely, and its 48px top maps to spacing-09
-         with four Carbon steps left unused above it. Call sites that want the
-         missing step have to move to --cds-spacing-* directly. */
-    --spacing-xs: var(--cds-spacing-02);  /*  4px */
-    --spacing-sm: var(--cds-spacing-03);  /*  8px */
-    --spacing-md: var(--cds-spacing-05);  /* 16px */
-    --spacing-lg: var(--cds-spacing-06);  /* 24px */
-    --spacing-xl: var(--cds-spacing-07);  /* 32px */
-    --spacing-2xl: var(--cds-spacing-09); /* 48px */
-
-    /* — Typography */
-    --font-family: var(--cds-font-sans);
-    --font-family-mono: var(--cds-font-mono);
+    --bg-secondary: var(--cds-background);
+    --border-color: var(--cds-border-subtle-00);
+    --text-primary: var(--cds-text-primary);
+    --text-secondary: var(--cds-text-secondary);
+    --text-tertiary: var(--cds-text-placeholder);
+    --danger: var(--cds-support-error);
+    --canvas: var(--cds-layer-01);
+    --border: var(--cds-border-subtle-00);
     --font-size-xs: var(--cds-type-size-01);
-    --font-size-sm: var(--cds-type-size-02);
-    --font-size-lg: var(--cds-type-size-04);
-    --font-size-xl: var(--cds-type-size-05);
-    --font-size-2xl: var(--cds-type-size-06);
-    --font-weight-normal: var(--cds-font-weight-regular);
     --font-weight-medium: 500;  /* off-scale; Carbon stops at 400 and 600 */
-    --font-weight-semibold: var(--cds-font-weight-semibold);
-
-    /* --font-size-base was 0.9375rem (15px), which is not on the Carbon scale.
-       Rounded to 16px, the reading body size. */
-    --font-size-base: var(--cds-type-size-03);
-
-    /* — Elevation. Carbon separates surfaces with layer color, so all three
-         former shadows collapse to none. PJBA-15 removes the call sites. */
-    --shadow-sm: var(--cds-shadow-none);
-    --shadow-md: var(--cds-shadow-none);
-    --shadow-lg: var(--cds-shadow-none);
-
-    /* — Radius. Flat: corners are structure here, not decoration. Carbon has no
-         4/6/8px step, so repointing these is what actually squares the UI;
-         PJBA-15 then only has to delete the now-redundant call sites.
-         --radius-full is gone — nothing read it, and pills use
-         --cds-radius-pill directly. */
-    --radius-sm: var(--cds-radius-00);
     --radius-md: var(--cds-radius-00);
-    --radius-lg: var(--cds-radius-00);
 }
 
 body {
-    font-family: var(--font-family);
-    background-color: var(--color-surface);
+    font-family: var(--cds-font-sans);
+    background-color: var(--cds-background);
     background-image:
         linear-gradient(var(--cds-grid-line) 1px, transparent 1px),
         linear-gradient(90deg, var(--cds-grid-line) 1px, transparent 1px);
     background-size: 24px 24px;
-    color: var(--color-text-main);
+    color: var(--cds-text-primary);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
 }
@@ -190,9 +71,9 @@ body {
 }
 
 .app-header {
-    padding: var(--spacing-lg) var(--spacing-xl);
-    background: var(--color-canvas);
-    border-bottom: 1px solid var(--color-border);
+    padding: var(--cds-spacing-06) var(--cds-spacing-07);
+    background: var(--cds-layer-01);
+    border-bottom: 1px solid var(--cds-border-subtle-00);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -200,25 +81,25 @@ body {
 }
 
 .app-header h1 {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-main);
+    font-size: var(--cds-type-size-05);
+    font-weight: var(--cds-font-weight-semibold);
+    color: var(--cds-text-primary);
 }
 
 .header-actions {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: var(--cds-spacing-05);
 }
 
 /* Kanban Board */
 .kanban-board {
     display: flex;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-lg);
+    gap: var(--cds-spacing-06);
+    padding: var(--cds-spacing-06);
     overflow-x: auto;
     flex: 1;
-    background: var(--color-surface);
+    background: var(--cds-background);
 }
 
 .column {
@@ -227,185 +108,185 @@ body {
     max-width: 350px;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--cds-spacing-05);
 }
 
 .column-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--color-canvas);
-    border: 1px solid var(--color-border);
-    margin-bottom: var(--spacing-xs);
+    padding: var(--cds-spacing-03) var(--cds-spacing-05);
+    background: var(--cds-layer-01);
+    border: 1px solid var(--cds-border-subtle-00);
+    margin-bottom: var(--cds-spacing-02);
 }
 
 .column-header h2 {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
+    font-size: var(--cds-type-size-02);
+    font-weight: var(--cds-font-weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 /* Column-specific colors */
 .column[data-status="interested"] .column-header {
-    background: var(--color-interested-light);
-    border-color: var(--color-interested);
+    background: var(--cds-status-interested-header);
+    border-color: var(--cds-status-interested);
 }
 
 .column[data-status="interested"] .column-header h2 {
-    color: var(--color-interested);
+    color: var(--cds-status-interested);
 }
 
 .column[data-status="interested"] .cards-container {
-    background: var(--color-interested-bg);
+    background: var(--cds-status-interested-surface);
 }
 
 .column[data-status="applied"] .column-header {
-    background: var(--color-applied-light);
-    border-color: var(--color-applied);
+    background: var(--cds-status-applied-header);
+    border-color: var(--cds-status-applied);
 }
 
 .column[data-status="applied"] .column-header h2 {
-    color: var(--color-applied);
+    color: var(--cds-status-applied);
 }
 
 .column[data-status="applied"] .cards-container {
-    background: var(--color-applied-bg);
+    background: var(--cds-status-applied-surface);
 }
 
 .column[data-status="interview"] .column-header {
-    background: var(--color-interview-light);
-    border-color: var(--color-interview);
+    background: var(--cds-status-interview-header);
+    border-color: var(--cds-status-interview);
 }
 
 .column[data-status="interview"] .column-header h2 {
-    color: var(--color-interview);
+    color: var(--cds-status-interview);
 }
 
 .column[data-status="interview"] .cards-container {
-    background: var(--color-interview-bg);
+    background: var(--cds-status-interview-surface);
 }
 
 .column[data-status="offer"] .column-header {
-    background: var(--color-offer-light);
-    border-color: var(--color-offer);
+    background: var(--cds-status-offer-header);
+    border-color: var(--cds-status-offer);
 }
 
 .column[data-status="offer"] .column-header h2 {
-    color: var(--color-offer);
+    color: var(--cds-status-offer);
 }
 
 .column[data-status="offer"] .cards-container {
-    background: var(--color-offer-bg);
+    background: var(--cds-status-offer-surface);
 }
 
 .column[data-status="rejected"] .column-header {
-    background: var(--color-rejected-light);
-    border-color: var(--color-rejected);
+    background: var(--cds-status-rejected-header);
+    border-color: var(--cds-status-rejected);
 }
 
 .column[data-status="rejected"] .column-header h2 {
-    color: var(--color-rejected);
+    color: var(--cds-status-rejected);
 }
 
 .column[data-status="rejected"] .cards-container {
-    background: var(--color-rejected-bg);
+    background: var(--cds-status-rejected-surface);
 }
 
 .column[data-status="forgotten"] .column-header {
-    background: var(--color-forgotten-light);
-    border-color: var(--color-forgotten);
+    background: var(--cds-status-forgotten-header);
+    border-color: var(--cds-status-forgotten);
 }
 
 .column[data-status="forgotten"] .column-header h2 {
-    color: var(--color-forgotten);
+    color: var(--cds-status-forgotten);
 }
 
 .column[data-status="forgotten"] .cards-container {
-    background: var(--color-forgotten-bg);
+    background: var(--cds-status-forgotten-surface);
 }
 
 /* Business Board Column Status Colors */
 .column[data-status="researching"] .column-header {
-    background: var(--color-researching-light);
-    border-color: var(--color-researching);
+    background: var(--cds-status-researching-header);
+    border-color: var(--cds-status-researching);
 }
 
 .column[data-status="researching"] .column-header h2 {
-    color: var(--color-researching);
+    color: var(--cds-status-researching);
 }
 
 .column[data-status="researching"] .cards-container {
-    background: var(--color-researching-bg);
+    background: var(--cds-status-researching-surface);
 }
 
 .column[data-status="contacted"] .column-header {
-    background: var(--color-contacted-light);
-    border-color: var(--color-contacted);
+    background: var(--cds-status-contacted-header);
+    border-color: var(--cds-status-contacted);
 }
 
 .column[data-status="contacted"] .column-header h2 {
-    color: var(--color-contacted);
+    color: var(--cds-status-contacted);
 }
 
 .column[data-status="contacted"] .cards-container {
-    background: var(--color-contacted-bg);
+    background: var(--cds-status-contacted-surface);
 }
 
 .column[data-status="meeting"] .column-header {
-    background: var(--color-meeting-light);
-    border-color: var(--color-meeting);
+    background: var(--cds-status-meeting-header);
+    border-color: var(--cds-status-meeting);
 }
 
 .column[data-status="meeting"] .column-header h2 {
-    color: var(--color-meeting);
+    color: var(--cds-status-meeting);
 }
 
 .column[data-status="meeting"] .cards-container {
-    background: var(--color-meeting-bg);
+    background: var(--cds-status-meeting-surface);
 }
 
 .column[data-status="negotiation"] .column-header {
-    background: var(--color-negotiation-light);
-    border-color: var(--color-negotiation);
+    background: var(--cds-status-negotiation-header);
+    border-color: var(--cds-status-negotiation);
 }
 
 .column[data-status="negotiation"] .column-header h2 {
-    color: var(--color-negotiation);
+    color: var(--cds-status-negotiation);
 }
 
 .column[data-status="negotiation"] .cards-container {
-    background: var(--color-negotiation-bg);
+    background: var(--cds-status-negotiation-surface);
 }
 
 .column[data-status="signed"] .column-header {
-    background: var(--color-signed-light);
-    border-color: var(--color-signed);
+    background: var(--cds-status-signed-header);
+    border-color: var(--cds-status-signed);
 }
 
 .column[data-status="signed"] .column-header h2 {
-    color: var(--color-signed);
+    color: var(--cds-status-signed);
 }
 
 .column[data-status="signed"] .cards-container {
-    background: var(--color-signed-bg);
+    background: var(--cds-status-signed-surface);
 }
 
 .count-badge {
     background: var(--cds-layer-accent-01);
     padding: 2px 8px;
     border-radius: var(--cds-radius-pill);
-    font-size: var(--font-size-xs);
+    font-size: var(--cds-type-size-01);
     font-weight: var(--font-weight-medium);
-    color: var(--text-secondary);
+    color: var(--cds-text-secondary);
 }
 
 .cards-container {
     flex: 1;
     background: transparent;
     border: none;
-    padding: var(--spacing-xs);
+    padding: var(--cds-spacing-02);
     min-height: 200px;
     overflow-y: auto;
 }
@@ -416,18 +297,18 @@ body {
 
 /* Job Card */
 .job-card {
-    background: var(--color-canvas);
-    border: 1px solid var(--color-border);
-    padding: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    background: var(--cds-layer-01);
+    border: 1px solid var(--cds-border-subtle-00);
+    padding: var(--cds-spacing-05);
+    margin-bottom: var(--cds-spacing-05);
     cursor: pointer;
     transition: all 0.15s ease;
     position: relative;
 }
 
 .job-card:hover {
-    background-color: var(--color-canvas);
-    border-color: var(--color-primary);
+    background-color: var(--cds-layer-01);
+    border-color: var(--cds-button-primary);
 }
 
 /* Card Header with Type Badge */
@@ -435,7 +316,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--cds-spacing-03);
 }
 
 .type-badge {
@@ -447,17 +328,17 @@ body {
     font-size: 11px;
     font-weight: var(--font-weight-medium);
     background: var(--cds-layer-accent-01);
-    color: var(--text-secondary);
+    color: var(--cds-text-secondary);
 }
 
 .type-badge.connection {
     background: var(--cds-status-interested-header);
-    color: var(--color-interested);
+    color: var(--cds-status-interested);
 }
 
 .type-badge.job {
     background: var(--cds-status-applied-header);
-    color: var(--color-applied);
+    color: var(--cds-status-applied);
 }
 
 /* Origin Badge Styles */
@@ -469,7 +350,7 @@ body {
 
 .type-badge.origin-human {
     background: var(--cds-layer-accent-01);
-    color: var(--color-text-muted);
+    color: var(--cds-text-secondary);
 }
 
 /* Shine Animation for Unseen Agent Jobs */
@@ -531,27 +412,27 @@ body {
 
 /* Card colors based on status - subtle left accent */
 .column[data-status="interested"] .job-card {
-    border-left: 3px solid var(--color-interested);
+    border-left: 3px solid var(--cds-status-interested);
 }
 
 .column[data-status="applied"] .job-card {
-    border-left: 3px solid var(--color-applied);
+    border-left: 3px solid var(--cds-status-applied);
 }
 
 .column[data-status="interview"] .job-card {
-    border-left: 3px solid var(--color-interview);
+    border-left: 3px solid var(--cds-status-interview);
 }
 
 .column[data-status="offer"] .job-card {
-    border-left: 3px solid var(--color-offer);
+    border-left: 3px solid var(--cds-status-offer);
 }
 
 .column[data-status="rejected"] .job-card {
-    border-left: 3px solid var(--color-rejected);
+    border-left: 3px solid var(--cds-status-rejected);
 }
 
 .column[data-status="forgotten"] .job-card {
-    border-left: 3px solid var(--color-forgotten);
+    border-left: 3px solid var(--cds-status-forgotten);
     opacity: 0.85;
 }
 
@@ -570,7 +451,7 @@ body {
 
 .job-card.locked:hover {
     transform: none;
-    border-color: var(--color-border);
+    border-color: var(--cds-border-subtle-00);
 }
 
 .job-card.locked::after {
@@ -585,50 +466,50 @@ body {
 }
 
 .job-card h3 {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    margin-bottom: var(--spacing-sm);
-    color: var(--text-primary);
+    font-size: var(--cds-type-size-03);
+    font-weight: var(--cds-font-weight-semibold);
+    margin-bottom: var(--cds-spacing-03);
+    color: var(--cds-text-primary);
 }
 
 .job-card p {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-xs);
+    font-size: var(--cds-type-size-02);
+    color: var(--cds-text-secondary);
+    margin-bottom: var(--cds-spacing-02);
     line-height: 1.5;
 }
 
 .job-card .company {
-    color: var(--text-primary);
+    color: var(--cds-text-primary);
     font-weight: var(--font-weight-medium);
 }
 
 /* Compact View Styles */
 .job-card.compact {
-    padding: var(--spacing-sm);
-    margin-bottom: var(--spacing-xs);
+    padding: var(--cds-spacing-03);
+    margin-bottom: var(--cds-spacing-02);
 }
 
 .job-card.compact .card-header {
     margin-bottom: 0;
-    gap: var(--spacing-xs);
+    gap: var(--cds-spacing-02);
 }
 
 .job-card.compact h3 {
-    font-size: var(--font-size-sm);
+    font-size: var(--cds-type-size-02);
     margin-bottom: 2px;
     display: inline;
-    margin-left: var(--spacing-xs);
+    margin-left: var(--cds-spacing-02);
 }
 
 .job-card.compact p {
-    font-size: var(--font-size-xs);
+    font-size: var(--cds-type-size-01);
     margin-bottom: 0;
     display: inline;
 }
 
 .job-card.compact .company {
-    font-size: var(--font-size-xs);
+    font-size: var(--cds-type-size-01);
 }
 
 .job-card.compact .rating-stars {
@@ -648,7 +529,7 @@ body {
 .job-card.compact .compact-row {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: var(--cds-spacing-02);
 }
 
 .job-card.compact .compact-row h3 {
@@ -657,15 +538,15 @@ body {
 
 /* Compact view metadata line */
 .job-card.compact .metadata {
-    color: var(--text-secondary);
-    font-size: var(--font-size-xs);
+    color: var(--cds-text-secondary);
+    font-size: var(--cds-type-size-01);
     margin-top: 2px;
     display: block;
 }
 
 .job-card.compact .metadata-separator {
     margin: 0 4px;
-    color: var(--text-tertiary);
+    color: var(--cds-text-placeholder);
 }
 
 /* Card footer for compact view */
@@ -679,7 +560,7 @@ body {
 /* Timestamp on cards - subtle and minimal */
 .job-card .timestamp {
     font-size: 11px;
-    color: var(--text-tertiary);
+    color: var(--cds-text-placeholder);
     font-style: normal;
     opacity: 0.7;
     margin-top: 6px;
@@ -692,11 +573,11 @@ body {
 
 /* Timestamp info section in detail panel */
 .timestamp-info {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    padding: var(--spacing-sm) var(--spacing-md);
-    margin-bottom: var(--spacing-md);
-    font-size: var(--font-size-xs);
+    background: var(--cds-background);
+    border: 1px solid var(--cds-border-subtle-00);
+    padding: var(--cds-spacing-03) var(--cds-spacing-05);
+    margin-bottom: var(--cds-spacing-05);
+    font-size: var(--cds-type-size-01);
 }
 
 .timestamp-row {
@@ -715,21 +596,21 @@ body {
 }
 
 .timestamp-label {
-    color: var(--text-tertiary);
-    font-weight: var(--font-weight-normal);
+    color: var(--cds-text-placeholder);
+    font-weight: var(--cds-font-weight-regular);
     font-size: 11px;
 }
 
 .timestamp-value {
-    color: var(--text-secondary);
+    color: var(--cds-text-secondary);
     font-size: 11px;
 }
 
 /* Detail Panel */
 .detail-panel {
     width: 400px;
-    background: var(--bg-secondary);
-    border-left: 1px solid var(--border-color);
+    background: var(--cds-background);
+    border-left: 1px solid var(--cds-border-subtle-00);
     display: none;
     flex-direction: column;
     overflow: hidden;
@@ -747,45 +628,45 @@ body {
 }
 
 .panel-header {
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
+    padding: var(--cds-spacing-06);
+    border-bottom: 1px solid var(--cds-border-subtle-00);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .panel-header h2 {
-    font-size: var(--font-size-lg);
+    font-size: var(--cds-type-size-04);
     font-weight: 500;
 }
 
 /* Job Form */
 .job-form {
-    padding: var(--spacing-lg);
+    padding: var(--cds-spacing-06);
     overflow-y: auto;
     flex: 1;
 }
 
 .form-group {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--cds-spacing-05);
 }
 
 .form-group label {
     display: block;
-    margin-bottom: var(--spacing-xs);
-    font-size: var(--font-size-sm);
+    margin-bottom: var(--cds-spacing-02);
+    font-size: var(--cds-type-size-02);
     font-weight: 500;
-    color: var(--text-secondary);
+    color: var(--cds-text-secondary);
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--border-color);
-    font-family: var(--font-family);
-    font-size: var(--font-size-base);
+    padding: var(--cds-spacing-03);
+    border: 1px solid var(--cds-border-subtle-00);
+    font-family: var(--cds-font-sans);
+    font-size: var(--cds-type-size-03);
     transition: border-color 0.2s ease;
 }
 
@@ -793,7 +674,7 @@ body {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: var(--accent);
+    border-color: var(--cds-button-primary);
 }
 
 .form-group textarea {
@@ -803,24 +684,24 @@ body {
 /* Type Selector */
 .type-selector {
     display: flex;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-xs);
+    gap: var(--cds-spacing-05);
+    margin-top: var(--cds-spacing-02);
 }
 
 .type-option {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md);
-    border: 1px solid var(--border-color);
+    gap: var(--cds-spacing-03);
+    padding: var(--cds-spacing-05);
+    border: 1px solid var(--cds-border-subtle-00);
     cursor: pointer;
     transition: all 0.15s ease;
 }
 
 .type-option:hover {
-    background: var(--bg-tertiary);
-    border-color: var(--accent);
+    background: var(--cds-layer-01);
+    border-color: var(--cds-button-primary);
 }
 
 .type-option input[type="radio"] {
@@ -830,14 +711,14 @@ body {
 
 .type-option input[type="radio"]:checked+span {
     font-weight: var(--font-weight-medium);
-    color: var(--accent);
+    color: var(--cds-button-primary);
 }
 
 /* Rating Input */
 .rating-input {
     display: flex;
     gap: 4px;
-    margin-top: var(--spacing-xs);
+    margin-top: var(--cds-spacing-02);
 }
 
 .rating-input input[type="radio"] {
@@ -867,31 +748,31 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--cds-spacing-02);
 }
 
 .btn-preview {
     padding: 4px 12px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--cds-border-subtle-00);
     background: transparent;
-    color: var(--text-secondary);
-    font-family: var(--font-family);
-    font-size: var(--font-size-sm);
+    color: var(--cds-text-secondary);
+    font-family: var(--cds-font-sans);
+    font-size: var(--cds-type-size-02);
     font-weight: var(--font-weight-medium);
     cursor: pointer;
     transition: all 0.15s ease;
 }
 
 .btn-preview:hover {
-    background: var(--bg-secondary);
-    border-color: var(--accent);
-    color: var(--accent);
+    background: var(--cds-background);
+    border-color: var(--cds-button-primary);
+    color: var(--cds-button-primary);
 }
 
 .btn-preview.active {
-    background: var(--accent);
+    background: var(--cds-button-primary);
     color: white;
-    border-color: var(--accent);
+    border-color: var(--cds-button-primary);
 }
 
 /* Markdown Preview Styling */
@@ -899,10 +780,10 @@ body {
     min-height: 200px;
     max-height: 400px;
     overflow-y: auto;
-    padding: var(--spacing-md);
-    border: 1px solid var(--border-color);
-    background: var(--bg-secondary);
-    font-size: var(--font-size-base);
+    padding: var(--cds-spacing-05);
+    border: 1px solid var(--cds-border-subtle-00);
+    background: var(--cds-background);
+    font-size: var(--cds-type-size-03);
     line-height: 1.6;
 }
 
@@ -912,10 +793,10 @@ body {
 .markdown-preview h4,
 .markdown-preview h5,
 .markdown-preview h6 {
-    margin-top: var(--spacing-lg);
-    margin-bottom: var(--spacing-sm);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
+    margin-top: var(--cds-spacing-06);
+    margin-bottom: var(--cds-spacing-03);
+    font-weight: var(--cds-font-weight-semibold);
+    color: var(--cds-text-primary);
 }
 
 .markdown-preview h1 {
@@ -943,7 +824,7 @@ body {
 }
 
 .markdown-preview p {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--cds-spacing-05);
 }
 
 .markdown-preview p:last-child {
@@ -952,12 +833,12 @@ body {
 
 .markdown-preview ul,
 .markdown-preview ol {
-    margin-left: var(--spacing-xl);
-    margin-bottom: var(--spacing-md);
+    margin-left: var(--cds-spacing-07);
+    margin-bottom: var(--cds-spacing-05);
 }
 
 .markdown-preview li {
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--cds-spacing-02);
 }
 
 .markdown-preview code {
@@ -969,28 +850,28 @@ body {
 }
 
 .markdown-preview pre {
-    padding: var(--spacing-md);
+    padding: var(--cds-spacing-05);
     background: var(--cds-layer-02);
     overflow-x: auto;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--cds-spacing-05);
 }
 
 .markdown-preview pre code {
     padding: 0;
     background: transparent;
-    color: var(--text-primary);
+    color: var(--cds-text-primary);
 }
 
 .markdown-preview blockquote {
-    margin: var(--spacing-md) 0;
-    padding-left: var(--spacing-lg);
-    border-left: 3px solid var(--border-color);
-    color: var(--text-secondary);
+    margin: var(--cds-spacing-05) 0;
+    padding-left: var(--cds-spacing-06);
+    border-left: 3px solid var(--cds-border-subtle-00);
+    color: var(--cds-text-secondary);
     font-style: italic;
 }
 
 .markdown-preview a {
-    color: var(--accent);
+    color: var(--cds-button-primary);
     text-decoration: none;
 }
 
@@ -999,8 +880,8 @@ body {
 }
 
 .markdown-preview strong {
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
+    font-weight: var(--cds-font-weight-semibold);
+    color: var(--cds-text-primary);
 }
 
 .markdown-preview em {
@@ -1009,14 +890,14 @@ body {
 
 .markdown-preview hr {
     border: none;
-    border-top: 1px solid var(--border-color);
-    margin: var(--spacing-lg) 0;
+    border-top: 1px solid var(--cds-border-subtle-00);
+    margin: var(--cds-spacing-06) 0;
 }
 
 .form-actions {
     display: flex;
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-lg);
+    gap: var(--cds-spacing-03);
+    margin-top: var(--cds-spacing-06);
 }
 
 /* Buttons */
@@ -1024,43 +905,43 @@ body {
 .btn-danger,
 .btn-secondary,
 .btn-icon {
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--cds-spacing-03) var(--cds-spacing-05);
     border: 1px solid transparent;
-    font-family: var(--font-family);
-    font-size: var(--font-size-sm);
+    font-family: var(--cds-font-sans);
+    font-size: var(--cds-type-size-02);
     font-weight: var(--font-weight-medium);
     cursor: pointer;
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-sm);
+    gap: var(--cds-spacing-03);
     line-height: 1.2;
 }
 
 .btn-primary {
-    background: var(--color-primary);
+    background: var(--cds-button-primary);
     color: white;
 }
 
 .btn-primary:hover {
-    background: var(--color-primary-hover);
+    background: var(--cds-button-primary-hover);
 }
 
 .btn-secondary {
-    background: var(--color-canvas);
-    border-color: var(--color-border);
-    color: var(--color-text-main);
+    background: var(--cds-layer-01);
+    border-color: var(--cds-border-subtle-00);
+    color: var(--cds-text-primary);
 }
 
 .btn-secondary:hover {
-    background: var(--color-surface);
+    background: var(--cds-background);
     border-color: var(--cds-border-strong-01);
 }
 
 .btn-danger {
     background: var(--cds-support-error-subtle);
-    color: var(--color-danger);
+    color: var(--cds-support-error);
     border: 1px solid var(--cds-support-error-subtle-border);
 }
 
@@ -1070,21 +951,21 @@ body {
 
 .btn-icon {
     background: transparent;
-    color: var(--color-text-muted);
+    color: var(--cds-text-secondary);
     padding: 6px;
     font-size: 1.25rem;
 }
 
 .btn-icon:hover {
-    background: var(--color-surface);
-    color: var(--color-text-main);
+    background: var(--cds-background);
+    color: var(--cds-text-primary);
 }
 
 /* Focus Mode Styles */
 .btn-icon.active {
-    background: var(--color-primary);
+    background: var(--cds-button-primary);
     color: white;
-    border-color: var(--color-primary);
+    border-color: var(--cds-button-primary);
 }
 
 body.focus-mode .column[data-status="rejected"],
@@ -1132,39 +1013,39 @@ body.focus-mode .job-card.dimmed {
 }
 
 .modal {
-    background: var(--color-canvas);
-    padding: var(--spacing-lg);
+    background: var(--cds-layer-01);
+    padding: var(--cds-spacing-06);
     box-shadow: var(--cds-shadow-overlay);
     width: 90%;
     max-width: 400px;
     transform: scale(0.95);
     animation: scaleIn 0.2s forwards;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--cds-border-subtle-00);
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--cds-spacing-05);
 }
 
 .modal-header h2 {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-main);
+    font-size: var(--cds-type-size-04);
+    font-weight: var(--cds-font-weight-semibold);
+    color: var(--cds-text-primary);
 }
 
 .modal-body p {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-base);
-    margin-bottom: var(--spacing-lg);
+    color: var(--cds-text-secondary);
+    font-size: var(--cds-type-size-03);
+    margin-bottom: var(--cds-spacing-06);
 }
 
 .modal-footer {
     display: flex;
     justify-content: flex-end;
-    gap: var(--spacing-md);
+    gap: var(--cds-spacing-05);
 }
 
 @keyframes fadeIn {
@@ -1223,13 +1104,13 @@ body.focus-mode .job-card.dimmed {
     width: 95%;
     max-width: 1200px;
     max-height: 90vh;
-    background: var(--color-canvas);
-    border: 1px solid var(--color-border);
+    background: var(--cds-layer-01);
+    border: 1px solid var(--cds-border-subtle-00);
     box-shadow: var(--cds-shadow-overlay);
     position: relative;
     display: flex;
     flex-direction: column;
-    color: var(--color-text-main);
+    color: var(--cds-text-primary);
     overflow: hidden;
     animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1248,11 +1129,11 @@ body.focus-mode .job-card.dimmed {
 
 .close-peek {
     position: absolute;
-    top: var(--spacing-md);
-    right: var(--spacing-md);
-    background: var(--color-tertiary);
-    border: 1px solid var(--color-border);
-    color: var(--color-text-muted);
+    top: var(--cds-spacing-05);
+    right: var(--cds-spacing-05);
+    background: var(--cds-layer-selected-01);
+    border: 1px solid var(--cds-border-subtle-00);
+    color: var(--cds-text-secondary);
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -1264,8 +1145,8 @@ body.focus-mode .job-card.dimmed {
 }
 
 .close-peek:hover {
-    background: var(--color-border);
-    color: var(--color-text-main);
+    background: var(--cds-border-subtle-00);
+    color: var(--cds-text-primary);
 }
 
 .peek-content {
@@ -1278,37 +1159,37 @@ body.focus-mode .job-card.dimmed {
 /* Journey Map Section */
 .journey-map-section {
     flex: 2;
-    padding: var(--spacing-xl);
-    border-right: 1px solid var(--color-border);
+    padding: var(--cds-spacing-07);
+    border-right: 1px solid var(--cds-border-subtle-00);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    background: var(--color-surface);
+    background: var(--cds-background);
 }
 
 .job-details-section {
     flex: 1;
-    background: var(--color-canvas);
-    padding: var(--spacing-xl);
+    background: var(--cds-layer-01);
+    padding: var(--cds-spacing-07);
     overflow-y: auto;
 }
 
 .journey-header {
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-md);
-    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--cds-spacing-06);
+    padding-bottom: var(--cds-spacing-05);
+    border-bottom: 1px solid var(--cds-border-subtle-00);
 }
 
 .journey-header h1 {
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-semibold);
-    margin-bottom: var(--spacing-xs);
-    color: var(--color-text-main);
+    font-size: var(--cds-type-size-06);
+    font-weight: var(--cds-font-weight-semibold);
+    margin-bottom: var(--cds-spacing-02);
+    color: var(--cds-text-primary);
 }
 
 .journey-header .company {
-    font-size: var(--font-size-base);
-    color: var(--color-text-muted);
+    font-size: var(--cds-type-size-03);
+    color: var(--cds-text-secondary);
 }
 
 /* SVG Graph - Light Theme with Horizontal Scroll */
@@ -1316,16 +1197,16 @@ body.focus-mode .job-card.dimmed {
     flex: 1;
     min-height: 300px;
     position: relative;
-    margin-top: var(--spacing-md);
-    background: var(--color-canvas);
-    border: 1px solid var(--color-border);
-    padding: var(--spacing-lg) var(--spacing-md);
+    margin-top: var(--cds-spacing-05);
+    background: var(--cds-layer-01);
+    border: 1px solid var(--cds-border-subtle-00);
+    padding: var(--cds-spacing-06) var(--cds-spacing-05);
     overflow-x: auto;
     overflow-y: hidden;
 }
 
 .journey-node {
-    fill: var(--color-primary);
+    fill: var(--cds-button-primary);
     stroke: white;
     stroke-width: 2px;
     transition: all 0.3s ease;
@@ -1333,7 +1214,7 @@ body.focus-mode .job-card.dimmed {
 }
 
 .journey-node.active {
-    fill: var(--color-primary);
+    fill: var(--cds-button-primary);
     stroke: white;
     stroke-width: 3px;
     opacity: 1;
@@ -1342,13 +1223,13 @@ body.focus-mode .job-card.dimmed {
 
 .journey-path {
     fill: none;
-    stroke: var(--color-border);
+    stroke: var(--cds-border-subtle-00);
     stroke-width: 2px;
     stroke-dasharray: 4;
 }
 
 .journey-path.active {
-    stroke: var(--color-primary);
+    stroke: var(--cds-button-primary);
     stroke-dasharray: none;
     stroke-width: 3px;
     stroke-linecap: round;
@@ -1357,47 +1238,47 @@ body.focus-mode .job-card.dimmed {
 
 .status-column-label {
     font-size: 11px;
-    fill: var(--color-text-muted);
+    fill: var(--cds-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-weight: var(--font-weight-semibold);
+    font-weight: var(--cds-font-weight-semibold);
     text-anchor: middle;
 }
 
 .time-label {
     font-size: 10px;
-    fill: var(--color-text-light);
+    fill: var(--cds-text-placeholder);
     text-anchor: start;
 }
 
 /* Detail Fields - Light Theme */
 .detail-row {
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--cds-spacing-06);
 }
 
 .detail-label {
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
+    font-size: var(--cds-type-size-01);
+    color: var(--cds-text-secondary);
     text-transform: uppercase;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--cds-spacing-02);
     letter-spacing: 0.05em;
     font-weight: var(--font-weight-medium);
 }
 
 .detail-value {
-    font-size: var(--font-size-base);
-    color: var(--color-text-main);
+    font-size: var(--cds-type-size-03);
+    color: var(--cds-text-primary);
     line-height: 1.6;
 }
 
 .detail-value.markdown-body {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
+    font-size: var(--cds-type-size-02);
+    color: var(--cds-text-secondary);
 }
 
 /* Archive Modal Styles */
 .archive-header {
-    background: var(--color-canvas);
+    background: var(--cds-layer-01);
 }
 
 .archive-list {
@@ -1408,26 +1289,26 @@ body.focus-mode .job-card.dimmed {
 }
 
 .archive-search-container {
-    padding: var(--spacing-md) var(--spacing-xl);
-    background: var(--color-canvas);
-    border-bottom: 1px solid var(--border-color);
+    padding: var(--cds-spacing-05) var(--cds-spacing-07);
+    background: var(--cds-layer-01);
+    border-bottom: 1px solid var(--cds-border-subtle-00);
     display: flex;
-    gap: var(--spacing-md);
+    gap: var(--cds-spacing-05);
 }
 
 .archive-search-input {
     flex: 1;
     padding: 8px 14px;
-    border: 1px solid var(--border-color);
-    background: var(--color-surface);
-    color: var(--color-text-main);
-    font-size: var(--font-size-sm);
+    border: 1px solid var(--cds-border-subtle-00);
+    background: var(--cds-background);
+    color: var(--cds-text-primary);
+    font-size: var(--cds-type-size-02);
     transition: all 0.25s ease;
 }
 
 .archive-search-input:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: var(--cds-button-primary);
     box-shadow: 0 0 0 2px var(--cds-focus);
 }
 
@@ -1435,28 +1316,28 @@ body.focus-mode .job-card.dimmed {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-md) var(--spacing-xl);
-    border-top: 1px solid var(--border-color);
-    background: var(--color-canvas);
-    gap: var(--spacing-md);
+    padding: var(--cds-spacing-05) var(--cds-spacing-07);
+    border-top: 1px solid var(--cds-border-subtle-00);
+    background: var(--cds-layer-01);
+    gap: var(--cds-spacing-05);
 }
 
 .pagination-info {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    font-size: var(--cds-type-size-02);
+    color: var(--cds-text-secondary);
 }
 
 .archive-row {
     display: flex;
     align-items: center;
-    padding: var(--spacing-md) var(--spacing-xl);
-    border-bottom: 1px solid var(--border-color);
-    background: var(--color-canvas);
+    padding: var(--cds-spacing-05) var(--cds-spacing-07);
+    border-bottom: 1px solid var(--cds-border-subtle-00);
+    background: var(--cds-layer-01);
     transition: background 0.15s ease;
 }
 
 .archive-row:hover {
-    background: var(--color-surface);
+    background: var(--cds-background);
 }
 
 .archive-row:last-child {
@@ -1475,75 +1356,75 @@ body.focus-mode .job-card.dimmed {
 }
 
 .archive-company {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    font-size: var(--cds-type-size-02);
+    color: var(--cds-text-secondary);
 }
 
 .archive-col-status {
     width: 180px;
-    margin-left: var(--spacing-lg);
+    margin-left: var(--cds-spacing-06);
 }
 
 .archive-status-select {
     width: 100%;
     padding: 6px 10px;
-    border: 1px solid var(--border-color);
-    font-size: var(--font-size-sm);
-    background: var(--color-surface);
+    border: 1px solid var(--cds-border-subtle-00);
+    font-size: var(--cds-type-size-02);
+    background: var(--cds-background);
     cursor: pointer;
 }
 
 .archive-empty {
-    padding: var(--spacing-2xl);
+    padding: var(--cds-spacing-09);
     text-align: center;
-    color: var(--text-secondary);
+    color: var(--cds-text-secondary);
 }
 
 /* ===== File Attachments Styles ===== */
 .attachments-section {
-    border: 1px solid var(--border-color);
-    padding: var(--spacing-md);
-    background: var(--bg-secondary);
+    border: 1px solid var(--cds-border-subtle-00);
+    padding: var(--cds-spacing-05);
+    background: var(--cds-background);
 }
 
 .attachments-section>label {
     display: block;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--cds-spacing-03);
     font-weight: var(--font-weight-medium);
-    color: var(--text-primary);
+    color: var(--cds-text-primary);
 }
 
 .files-list {
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--cds-spacing-03);
 }
 
 .no-files,
 .loading-files,
 .files-error {
-    padding: var(--spacing-sm);
+    padding: var(--cds-spacing-03);
     text-align: center;
-    color: var(--text-tertiary);
-    font-size: var(--font-size-sm);
+    color: var(--cds-text-placeholder);
+    font-size: var(--cds-type-size-02);
     font-style: italic;
 }
 
 .files-error {
-    color: var(--color-danger);
+    color: var(--cds-support-error);
 }
 
 .file-item {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm);
-    background: var(--color-canvas);
-    border: 1px solid var(--border-color);
-    margin-bottom: var(--spacing-xs);
+    gap: var(--cds-spacing-03);
+    padding: var(--cds-spacing-03);
+    background: var(--cds-layer-01);
+    border: 1px solid var(--cds-border-subtle-00);
+    margin-bottom: var(--cds-spacing-02);
     transition: background 0.15s ease;
 }
 
 .file-item:hover {
-    background: var(--color-surface);
+    background: var(--cds-background);
 }
 
 .file-item:last-child {
@@ -1556,8 +1437,8 @@ body.focus-mode .job-card.dimmed {
 
 .file-name {
     flex: 1;
-    font-size: var(--font-size-sm);
-    color: var(--text-primary);
+    font-size: var(--cds-type-size-02);
+    color: var(--cds-text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1565,7 +1446,7 @@ body.focus-mode .job-card.dimmed {
 
 .file-actions {
     display: flex;
-    gap: var(--spacing-xs);
+    gap: var(--cds-spacing-02);
 }
 
 .file-actions .btn-icon {
@@ -1574,12 +1455,12 @@ body.focus-mode .job-card.dimmed {
 }
 
 .file-upload-area {
-    margin-top: var(--spacing-sm);
+    margin-top: var(--cds-spacing-03);
 }
 
 .btn-sm {
     padding: 6px 12px;
-    font-size: var(--font-size-xs);
+    font-size: var(--cds-type-size-01);
 }
 
 /* File Preview Modal */
@@ -1595,24 +1476,24 @@ body.focus-mode .job-card.dimmed {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-bottom: 1px solid var(--border-color);
-    background: var(--color-canvas);
+    padding: var(--cds-spacing-05) var(--cds-spacing-06);
+    border-bottom: 1px solid var(--cds-border-subtle-00);
+    background: var(--cds-layer-01);
 }
 
 .file-preview-header h3 {
-    font-size: var(--font-size-lg);
+    font-size: var(--cds-type-size-04);
     font-weight: var(--font-weight-medium);
     margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding-right: var(--spacing-md);
+    padding-right: var(--cds-spacing-05);
 }
 
 .file-preview-actions {
     display: flex;
-    gap: var(--spacing-sm);
+    gap: var(--cds-spacing-03);
     align-items: center;
 }
 
@@ -1622,12 +1503,12 @@ body.focus-mode .job-card.dimmed {
 
 .file-preview-body {
     flex: 1;
-    padding: var(--spacing-lg);
+    padding: var(--cds-spacing-06);
     overflow: auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-surface);
+    background: var(--cds-background);
     min-height: 400px;
 }
 
@@ -1645,12 +1526,12 @@ body.focus-mode .job-card.dimmed {
 
 .preview-fallback {
     text-align: center;
-    padding: var(--spacing-xl);
-    color: var(--text-secondary);
+    padding: var(--cds-spacing-07);
+    color: var(--cds-text-secondary);
 }
 
 .preview-fallback p {
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--cds-spacing-06);
 }
 
 /* Zenith Brand Identity Additions */
@@ -1667,12 +1548,12 @@ body.focus-mode .job-card.dimmed {
 }
 
 .job-card.agent-origin {
-    border-left: 4px solid var(--color-interested) !important;
+    border-left: 4px solid var(--cds-status-interested) !important;
     animation: pulseAgent 3s infinite;
 }
 
 .job-card.agent-origin:hover {
-    border-left-color: var(--color-interested) !important;
+    border-left-color: var(--cds-status-interested) !important;
     box-shadow: 0 0 12px rgba(var(--cds-agent-accent-rgb), 0.25) !important;
     animation: none;
 }
