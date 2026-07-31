@@ -302,6 +302,59 @@
        page flow gets --cds-shadow-none. */
   --cds-shadow-none: none;
   --cds-shadow-overlay: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+  /* — Motion. Carbon splits movement into two registers. *Productive* motion is
+       efficient and stays out of the way: button states, dropdowns, revealing
+       information. That is most of this app. *Expressive* motion is vibrant and
+       deliberately visible, and Carbon insists it stay occasional — opening a
+       page, the primary action, a system notification. Using it everywhere is
+       what kills it.
+
+       Durations and curves are theme-independent, so they live here in N1 and
+       are NOT repeated in the g100 block.
+
+       Pick a curve by what the element is doing:
+         standard — visible from start to finish (a card expanding, rows sorting)
+         entrance — arriving on screen (modal, toast, dropdown opening)
+         exit     — leaving for good (closing a modal). If it leaves but stays
+                    nearby ready to return — our Drawer — use standard instead. */
+  --cds-duration-fast-01: 70ms;      /* button, toggle */
+  --cds-duration-fast-02: 110ms;     /* fade */
+  --cds-duration-moderate-01: 150ms; /* small expansion, short travel */
+  --cds-duration-moderate-02: 240ms; /* expansion, toast, system message */
+  --cds-duration-slow-01: 400ms;     /* large expansion, important notification */
+  --cds-duration-slow-02: 700ms;     /* background dimming */
+
+  --cds-easing-standard-productive: cubic-bezier(0.2, 0, 0.38, 0.9);
+  --cds-easing-standard-expressive: cubic-bezier(0.4, 0.14, 0.3, 1);
+  --cds-easing-entrance-productive: cubic-bezier(0, 0, 0.38, 0.9);
+  --cds-easing-entrance-expressive: cubic-bezier(0, 0, 0.3, 1);
+  --cds-easing-exit-productive: cubic-bezier(0.2, 0, 1, 0.9);
+  --cds-easing-exit-expressive: cubic-bezier(0.4, 0.14, 1, 1);
+
+  /* — Ambient loops. Carbon's scale tops out at 700ms and describes interaction
+       motion: something moved because the user did something. A spinner or an
+       idle pulse is neither, so no Carbon token fits. These are app-local and
+       deliberately outside the Carbon scale — the --app- prefix says so — and
+       they live here only so that no stylesheet holds a raw duration. */
+  --app-duration-spin: 800ms;
+  --app-duration-spin-slow: 1200ms;
+  --app-duration-pulse: 2000ms;
+  --app-duration-pulse-slow: 3000ms;
+}
+
+/* Carbon's adaptive-motion guidance: always leave a static path. Collapsing the
+   durations rather than dropping the transitions keeps every rule below intact —
+   states still change, they just arrive instantly. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --cds-duration-fast-01: 1ms;
+    --cds-duration-fast-02: 1ms;
+    --cds-duration-moderate-01: 1ms;
+    --cds-duration-moderate-02: 1ms;
+    --cds-duration-slow-01: 1ms;
+    --cds-duration-slow-02: 1ms;
+  }
 }
 
 /* ----------------------------------------------------------------------------

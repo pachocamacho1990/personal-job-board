@@ -53,7 +53,8 @@ aside.docs-sidebar {
             font-size: 0.875rem;
             font-family: var(--cds-font-sans);
             outline: none;
-            transition: all 0.2s;
+            transition: border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                        background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
         }
 
         .search-input:focus {
@@ -106,7 +107,8 @@ aside.docs-sidebar {
             padding: 0.4rem 0.75rem;
             border-radius: var(--cds-radius-00);
             font-size: 0.875rem;
-            transition: all 0.2s;
+            transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                        color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -163,7 +165,8 @@ aside.docs-sidebar {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.2s;
+            transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                        color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
         }
 
         .mode-tab:hover {
@@ -182,7 +185,7 @@ aside.docs-sidebar {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: color 0.2s;
+            transition: color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
         }
 
         .back-link:hover {
@@ -294,7 +297,8 @@ aside.docs-sidebar {
             border-radius: var(--cds-radius-00);
             cursor: pointer;
             font-size: 0.75rem;
-            transition: all 0.2s;
+            transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                        color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
         }
 
         .copy-btn:hover {
@@ -412,7 +416,8 @@ aside.docs-sidebar {
             border: 1px solid var(--cds-border-subtle-00);
             padding: 1.5rem;
             border-radius: var(--cds-radius-00);
-            transition: all 0.2s;
+            transition: border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                        box-shadow var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
             box-shadow: var(--cds-shadow-none);
         }
 

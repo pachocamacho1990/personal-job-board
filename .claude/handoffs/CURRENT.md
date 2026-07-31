@@ -1,137 +1,120 @@
 ---
-updated: 2026-07-30T23:05
-project: Refinamiento "premium" sobre Carbon — NUEVO, sin arrancar
-linear: sin issues todavía (ver Siguiente paso: hay que investigar antes de poder escribirlos)
-milestone: ninguno · la migración Carbon anterior está COMPLETA (26/26, PR #34 abierto)
-in_flight: ninguno
-next: estudiar https://carbondesignsystem.com a fondo — qué permite Carbon de verdad en radios, elevación y motion — y solo entonces escribir los issues en Linear
-branch: feature/carbon-migration (33 commits, pusheada; el PR #34 sigue sin mergear)
-verified: gate 5/5 · 0 texto bajo AA en 12 combinaciones · 75 tests backend · 8 E2E del toggle · tsc y build limpios
+updated: 2026-07-30T23:50
+project: M6 · Refinamiento premium sobre Carbon — investigación cerrada, issues escritos
+linear: PJBA-34→41 en el milestone "M6 · Refinamiento premium" del proyecto Migración a IBM Carbon
+milestone: M6 (0/8) · los milestones M0–M5 de la migración están al 100%
+in_flight: PJBA-34 (tokens de motion) — arrancando
+next: añadir los 12 tokens de motion a la sección N1 de src/styles/theme.css (junto a spacing/radio, alrededor de la línea 292) y migrar las 57 transiciones a mano
+branch: feature/carbon-migration (33 commits, pusheada; PR #34 abierto A PROPÓSITO, no se mergea hasta cerrar M6)
+verified: sin cambios de código todavía en esta sesión · último estado verificado: gate 5/5, contraste 0 fallos, 75 tests backend, 8 E2E, tsc y build limpios
 ---
 
 ## Dónde quedamos
 
-La migración a Carbon está **terminada y verificada** (26/26 issues, PR #34 abierto y sin
-mergear). Pero el usuario desplegó la app, la miró, y **no le convence el resultado visual**.
+La migración a Carbon está cerrada (26/26). El PR #34 sigue abierto **a propósito**: el usuario no
+quiere mandarlo a `main` hasta resolver sus objeciones visuales.
 
-Esa reacción es el punto de partida del trabajo nuevo. No es un bug: es una crítica de diseño
-sobre decisiones que tomé yo, y hay que tratarla como tal.
+Esta sesión hizo la investigación que faltaba y la convirtió en 8 issues. **No se ha tocado código
+todavía.**
 
-## El encargo, en sus palabras
+## Lo que la investigación estableció
 
-Cito casi literal porque es subjetivo y se pierde al parafrasear:
+Fuentes primarias: el código fuente de `carbon-design-system/carbon` (rama `main`) y los `.mdx` de
+`carbon-website`, no la web renderizada — el sitio es un Gatsby SPA y WebFetch lo trunca. La ruta
+que funciona es `raw.githubusercontent.com/carbon-design-system/carbon-website/main/src/pages/<ruta>.mdx`
+y `gh api "repos/carbon-design-system/carbon/git/trees/main?recursive=1"` para localizar ficheros.
 
-> "veo componentes que no necesariamente deben tener esquinas rectas, personalmente me gustan
-> más las esquinas redondeadas y que haya un efecto de profundidad al click o hover"
->
-> "quiero algo un poco más premium pero es que honestamente no sé cómo definirlo"
->
-> "los colores de las columnas del job board me parecen demasiado fuertes, me gustaría algo un
-> poco más suave"
->
-> "siento que la aplicación se ve demasiado cuadrada"
->
-> "creo que hay detalles sutiles que sin perder el esquema carbon podemos implementar para que
-> se vea mucho más saludable y un poco más con animaciones"
+**Tres de las cuatro objeciones del usuario son válidas y Carbon las soporta.** La postura "Carbon
+es cuadrado y plano por principio" que se aplicó en M0–M5 fue una lectura demasiado rígida:
 
-Y una hipótesis suya que hay que verificar, no descartar:
+1. **Radio** — `$button-border-radius: 0 !default` (el `!default` es un override sancionado);
+   popover expone `--cds-popover-border-radius`; content-switcher usa 4px nativo; y existe
+   `tile--decorator-rounded` con 8px (`$spacing-03`). El default es 0, el vocabulario no.
+2. **Elevación** — existe el token `$shadow` (negro @ 0.3 alpha) y el mixin oficial
+   `box-shadow: 0 2px 6px $shadow` en `packages/styles/scss/utilities/_box-shadow.scss`. Lo que no
+   existe es una rampa multinivel.
+3. **Columnas** — el modelo de layering dice superficies en gris (`layer-01/02/03`) y hue solo
+   como acento. Suavizar aquí **sube** el margen de contraste, no lo baja.
+4. **Motion** — hueco total, no decisión. Carbon define 6 duraciones y 6 easings exactos.
 
-> "Yo entiendo que el Design System Carbon de IBM como que tiene varias maneras de usarse"
+**Hallazgo extra: Carbon for AI.** Estable, con tokens reales (`ai-aura-*`, `ai-border-start/end`,
+`ai-drop-shadow`, `ai-inner-shadow`). Prohibido como decoración, permitido para marcar IA — y esta
+app tiene IA de verdad (Zenith, `origin='agent'`, widget de AI matches).
 
-Pidió explícitamente: **entrar a https://carbondesignsystem.com y estudiar la documentación**,
-con Playwright si hace falta.
+**Carbon MCP**: existe en `https://mcp.carbondesignsystem.com/mcp`, requiere token + session ID vía
+IBMid. Probado: **401 sin credenciales**. No desbloquea nada de M6 y no debe bloquearlo.
 
-## Contexto crítico: esto revisa decisiones mías, no deuda heredada
+## Los issues de M6
 
-Tres de las cuatro quejas apuntan a cosas que **implementé a propósito** durante la migración,
-y están registradas en `DECISIONS.md` y en los comentarios de Linear:
-
-1. **Radio 0 en todo** (PJBA-10, PJBA-15). Lo justifiqué como "las esquinas son estructura, no
-   decoración" y dije que redondearlas es lo que más hace que una UI deje de leerse como
-   Carbon. **Hay que comprobar si eso es cierto en la documentación real de Carbon v11**, o si
-   fue una lectura mía demasiado rígida. La única excepción que dejé es
-   `--cds-radius-pill` para tags.
-2. **Sin sombras salvo overlays** (PJBA-15). Quité 8 declaraciones de elevación y el hover-lift
-   de la consola del agente. Carbon separa superficies por color de capa, no por elevación —
-   pero **Carbon sí tiene tokens de elevación**, y no los estudié a fondo.
-3. **Colores de columna en hue-20 / hue-10** (PJBA-13). Los subí de acento hue-60 a hue-70
-   porque a 60 no pasaban AA sobre relleno hue-20. Pero **el relleno en sí no lo cuestioné**, y
-   la queja del usuario es sobre el relleno, no sobre el texto. Rellenos más suaves
-   (`--cds-layer-*` con un borde de color, en vez de un tinte de hue) probablemente resuelven
-   esto **y** mantienen el contraste.
-
-Lo cuarto es una **omisión limpia, no una decisión**: nunca implementé **nada del sistema de
-motion de Carbon**. Carbon tiene tokens de duración y curvas de easing documentadas, y en la
-app no hay ninguno. Es la palanca más grande y más barata para lo que él llama "premium", y no
-entra en conflicto con nada de lo hecho.
+| Issue | Qué | Bloqueado por |
+|-------|-----|---------------|
+| PJBA-34 | Tokens de motion + migrar las 57 transiciones | — |
+| PJBA-35 | Página de comparación de variantes (gate de decisión) | — |
+| PJBA-36 | Escala de radio, revertir el radio 0 absoluto | PJBA-35 |
+| PJBA-37 | Profundidad en hover/click | PJBA-34, PJBA-35 |
+| PJBA-38 | Suavizar columnas: superficies grises, hue como acento | — |
+| PJBA-39 | Registro Carbon for AI | PJBA-36 |
+| PJBA-40 | Re-verificación y cierre de M6 + merge del PR #34 | todos |
+| PJBA-41 | Conectar Carbon MCP (bloqueado por alta manual del usuario) | — |
 
 ## Siguiente paso
 
-**Investigar antes de escribir issues.** No se pueden redactar issues útiles sin saber qué
-permite Carbon de verdad. Páginas a estudiar como mínimo:
+**PJBA-34.** Añadir a `src/styles/theme.css`, en la sección N1 de escalas (junto al bloque de radio
+de la línea 292), doce custom properties en `:root` — **no** duplicadas en el bloque
+`[data-carbon-theme='g100']`, porque son independientes del tema:
 
-- `/elements/motion/overview/` — duraciones, easings, cuándo animar (el hueco más claro)
-- `/elements/color/overview/` y `/elements/color/usage/` — cómo se usan los tintes de hue
-- `/guidelines/styling/` y lo que haya de elevación / sombras
-- `/elements/themes/overview/` — si hay variantes más allá de g10/g100
-- Componentes concretos con radio: tags, botones, cards
-- Buscar si existe algo tipo "expressive", "fluid" o variantes de producto que relajen el radio
+- `--cds-duration-fast-01: 70ms`, `-fast-02: 110ms`, `-moderate-01: 150ms`,
+  `-moderate-02: 240ms`, `-slow-01: 400ms`, `-slow-02: 700ms`
+- `--cds-easing-standard-productive: cubic-bezier(0.2, 0, 0.38, 0.9)`
+- `--cds-easing-standard-expressive: cubic-bezier(0.4, 0.14, 0.3, 1)`
+- `--cds-easing-entrance-productive: cubic-bezier(0, 0, 0.38, 0.9)`
+- `--cds-easing-entrance-expressive: cubic-bezier(0, 0, 0.3, 1)`
+- `--cds-easing-exit-productive: cubic-bezier(0.2, 0, 1, 0.9)`
+- `--cds-easing-exit-expressive: cubic-bezier(0.4, 0.14, 1, 1)`
 
-Es trabajo de lectura, **paralelizable** (varias páginas, cero conflicto de ficheros): lanzar
-agentes por área y sintetizar. Ver la memoria `parallel-agents-when-no-conflicts`.
-
-**Producto de la investigación**: un informe honesto que diga, para cada queja, si Carbon lo
-permite, lo desaconseja o es indiferente. Si Carbon de verdad es cuadrado por principio, hay
-que decírselo claramente y ofrecerle la alternativa (una desviación consciente y documentada
-del sistema), no fingir que la documentación respalda lo que él quiere.
-
-**Solo después**: escribir los issues en Linear y proponerle el plan.
-
-## Herramientas que ya existen y hay que respetar
-
-Cualquier cambio visual tiene que seguir pasando esto:
-
-```bash
-npm run check:design                             # gate: 5 checks, 0 color no-Carbon
-npm test                                         # 75 tests backend
-npx playwright test tests/theme-toggle.spec.js   # 8 tests del toggle
-```
-
-Y el barrido de contraste, que **no está en el repo** — vive en el scratchpad de la sesión
-anterior. **Merece moverse a `scripts/`**: recorre cada nodo de texto de las 6 páginas en
-ambos temas y mide contraste real resolviendo el fondo efectivo. Encontró 57 fallos que no se
-veían en ninguna captura. Si se tocan colores de columna o se añaden sombras, hay que volver a
-correrlo — y ahora mismo habría que reescribirlo.
-
-**Ojo**: bajar el contraste es exactamente el riesgo de "colores más suaves". El barrido está
-en 0 y tiene que seguir en 0.
+Luego migrar las 57 `transition:` (7 en `dashboard.css`, la variable local
+`--agent-transition` en `agent-console.css:16`, resto repartido), sustituir los `transition: all`
+por listas explícitas de propiedad, y añadir el bloque `@media (prefers-reduced-motion: reduce)`.
 
 ## Decisiones tomadas
 
-En `DECISIONS.md`. La entrada nueva de esta sesión registra que **radio 0 y ausencia de
-elevación quedan formalmente en revisión** — no revertidas, en revisión pendiente de la
-investigación.
+En `DECISIONS.md`. **Pendiente**: la entrada de PJBA-15 que declara radio 0 y ausencia de elevación
+ya no está "en revisión" — está **desmentida** por la investigación y hay que reescribirla, no
+matizarla. Eso lo hace PJBA-36.
+
+## Herramientas de verificación
+
+```bash
+npm run check:design                             # gate: 5 checks
+python3 scripts/check-tokens.py                  # estructura, paridad g10/g100, WCAG
+python3 scripts/audit-undefined-tokens.py        # var() que no resuelven
+python3 scripts/contrast-sweep.py                # 0 fallos, 6 páginas × 2 temas
+npm test                                         # 75 tests backend
+npx playwright test tests/theme-toggle.spec.js   # 8 E2E del toggle
+```
+
+El barrido de contraste **sí está en el repo** (`scripts/contrast-sweep.py`, commit `49d45ea`) —
+el handoff anterior decía lo contrario y era información obsoleta.
 
 ## Trampas descubiertas
 
-Las de la migración siguen vigentes y están en el archivo
-`archive/2026-07-30-pjba-8-33-migracion-carbon-completa.md`. Las que más importan aquí:
+Las de la migración siguen vigentes (ver `archive/2026-07-30-pjba-8-33-migracion-carbon-completa.md`):
 
 - **Un `var()` indefinido no da error**: el navegador descarta la declaración entera.
-- **Un barrido que solo busca hex y `rgba()` deja pasar `color: white`.** Sobrevivió seis
-  milestones.
-- **Medir el contraste encuentra lo que mirar capturas no.**
-- **El contenedor `jobboard-agent` se recrea solo** y borra `/tmp`: volver a copiar los
-  scripts de Playwright con `docker cp` antes de usarlos.
+- **Un barrido que solo busca hex y `rgba()` deja pasar `color: white`.** Sobrevivió seis milestones.
+- **Medir el contraste encuentra lo que mirar capturas no.** 57 fallos invisibles.
+- **El contenedor `jobboard-agent` se recrea solo** y borra `/tmp`: volver a copiar los scripts de
+  Playwright con `docker cp` antes de usarlos.
 - **Los merges de este repo son rebase merges.**
+
+Nuevas de esta sesión:
+
+- **`carbondesignsystem.com` es un Gatsby SPA**: WebFetch devuelve contenido truncado. Ir siempre
+  al `.mdx` en `raw.githubusercontent.com`.
+- **El `!default` de Sass en Carbon marca los puntos de override sancionados.** Es la señal a
+  buscar antes de declarar que algo "no se puede cambiar sin salirse del sistema".
 
 ## Preguntas abiertas para el usuario
 
-1. **¿El PR #34 se mergea antes de empezar esto, o el refinamiento va en la misma rama?**
-   Recomiendo mergear primero: la migración está verificada y cerrada, y mezclarla con un
-   cambio de dirección visual hace el PR irrevisable.
-2. **¿Proyecto nuevo en Linear o issues sueltos?** Depende del tamaño que salga de la
-   investigación.
-3. Él mismo dijo "honestamente no sé cómo definirlo". Puede ayudar **enseñarle dos o tres
-   variantes construidas** (radio 4px vs 8px, con y sin elevación al hover) en vez de pedirle
-   que lo especifique con palabras.
+1. Los valores concretos de radio y el tratamiento de hover salen de PJBA-35, no están decididos.
+2. El alta de Carbon MCP (PJBA-41) requiere que él entre con IBMid; nadie más puede hacerlo.

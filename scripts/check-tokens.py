@@ -33,6 +33,22 @@ def defs_in(text):
     return re.findall(r"^\s*(--cds-[a-z0-9-]+)\s*:\s*([^;]+);", text, re.M)
 
 
+# A @media (prefers-reduced-motion: reduce) block redefines duration tokens on
+# purpose — that is the whole mechanism. Without pulling those blocks out first,
+# every token they touch reads as "defined more than once". Split them off, and
+# check separately that they only ever override something that already exists.
+REDUCED_MOTION = re.compile(
+    r"@media\s*\(\s*prefers-reduced-motion\s*:\s*reduce\s*\)\s*\{.*?\n\}\n", re.S)
+
+
+def split_reduced_motion(text):
+    """(text without reduced-motion blocks, defs found inside them)."""
+    overrides = []
+    for block in REDUCED_MOTION.findall(text):
+        overrides += defs_in(block)
+    return REDUCED_MOTION.sub("", text), overrides
+
+
 def load():
     text = open(PATH).read()
     for marker in (SCALES_MARKER, N2_MARKER):
@@ -44,8 +60,10 @@ def load():
     palette_text, scales_text = n1_text.split(SCALES_MARKER, 1)
     g10_text, g100_text = rest.split(G100_SELECTOR, 1)
 
+    scales_text, motion_overrides = split_reduced_motion(scales_text)
+
     return (text, defs_in(palette_text), defs_in(scales_text),
-            defs_in(g10_text), defs_in(g100_text))
+            defs_in(g10_text), defs_in(g100_text), motion_overrides)
 
 
 # ── color math ───────────────────────────────────────────
@@ -206,7 +224,7 @@ def check_scales(scales, failures):
 
 
 def main():
-    text, palette, scales, g10, g100 = load()
+    text, palette, scales, g10, g100, motion_overrides = load()
 
     n1 = palette + scales
     n1_map, g10_map, g100_map = dict(n1), dict(g10), dict(g100)
@@ -227,6 +245,17 @@ def main():
         dupes = sorted({n for n in names if names.count(n) > 1})
         if dupes:
             failures.append(f"{scope_name}: tokens defined more than once: {dupes}")
+
+    # A reduced-motion block may only shorten a duration that already exists.
+    # Anything else in there is a token defined where nobody will look for it.
+    scale_names = {n for n, _ in scales}
+    for name, _ in motion_overrides:
+        if name not in scale_names:
+            failures.append(
+                f"reduced-motion block defines {name}, which has no base definition in N1 scales")
+        elif "duration" not in name:
+            failures.append(
+                f"reduced-motion block overrides {name}, which is not a duration")
 
     for scope_name, pairs in (("g10", g10), ("g100", g100)):
         hexed = [(n, v.strip()) for n, v in pairs if re.search(r"#[0-9a-fA-F]{3,8}", v)]

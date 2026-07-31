@@ -386,6 +386,36 @@ def check_undefined_vars(root):
     return r
 
 
+MOTION_DECL = re.compile(r"\b(?:transition|animation)(?:-duration|-delay|-timing-function)?\s*:")
+TIME_LITERAL = re.compile(r"(?<![\w-])\d*\.?\d+m?s(?![\w-])")
+BEZIER_LITERAL = re.compile(r"cubic-bezier\s*\(")
+
+
+def check_motion_literals(root):
+    """A hand-written 0.15s is the motion equivalent of a hex: it renders, it
+    looks fine, and it quietly opts out of the system. Keyword easings survive
+    the scan — `linear` on a spinner and `ease-in-out` on an idle pulse describe
+    ambient loops, which Carbon's interaction scale does not cover."""
+    r = Result("Duration and easing literals",
+               "src/styles/*.css and src/**/*.tsx; theme.css holds the scale")
+    files = [p for p in sorted((root / "src/styles").glob("*.css"))
+             if p.name != THEME_FILE]
+    files += sorted((root / "src").rglob("*.tsx"))
+    for path in files:
+        for i, line in enumerate(strip_comments(path.read_text()).splitlines(), 1):
+            if not MOTION_DECL.search(line):
+                continue
+            for m in TIME_LITERAL.finditer(line):
+                r.violations.append(
+                    (path, i, f"duration literal {m.group(0)!r} — must be a "
+                              "--cds-duration-* or --app-duration-* token"))
+            if BEZIER_LITERAL.search(line):
+                r.violations.append(
+                    (path, i, "inline cubic-bezier() — must be a --cds-easing-* token"))
+    r.detail = f"{len(files)} files scanned; {THEME_FILE} excluded (it is the scale)"
+    return r
+
+
 def check_token_engine(root):
     r = Result("Token engine (delegated to scripts/check-tokens.py)",
                "N1/N2 structure, g10/g100 parity, WCAG contrast, spacing, -rgb twins")
@@ -403,8 +433,8 @@ def check_token_engine(root):
     return r
 
 
-CHECKS = [check_css_literals, check_tsx_literals, check_n1_leakage,
-          check_undefined_vars, check_token_engine]
+CHECKS = [check_css_literals, check_tsx_literals, check_motion_literals,
+          check_n1_leakage, check_undefined_vars, check_token_engine]
 
 
 # ── output ───────────────────────────────────────────────

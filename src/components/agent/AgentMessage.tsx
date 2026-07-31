@@ -140,7 +140,7 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: '4px',
-                    transition: 'opacity 0.2s'
+                    transition: 'opacity var(--cds-duration-fast-02) var(--cds-easing-standard-productive)'
                   }}
                   title="Editar mensaje"
                 >
