@@ -78,7 +78,7 @@
     background: var(--cds-layer-01);
     color: var(--cds-text-primary);
     font-size: 0.95rem;
-    transition: border-color 0.2s;
+    transition: border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
 }
 
 .form-group input:focus,
@@ -110,7 +110,7 @@
     font-weight: 600;
     padding: 4px 8px;
     border-radius: var(--cds-radius-00);
-    transition: background-color 0.2s;
+    transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
 }
 
 .dynamic-item-card .remove-btn:hover {
@@ -123,7 +123,9 @@
     font-weight: 600;
     border-radius: var(--cds-radius-00);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                border-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
     border: none;
     display: inline-flex;
     align-items: center;

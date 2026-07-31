@@ -62,6 +62,14 @@ interface Memory {
   createdAt: string;
 }
 
+/* The radar redrawing itself is a moment worth seeing, which is Carbon's
+   definition of expressive motion. The tokens come from src/styles/theme.css;
+   the properties are spelled out because `all` would also animate the fill and
+   stroke colours on a theme switch. */
+const RADAR_MORPH =
+  'opacity var(--cds-duration-slow-01) var(--cds-easing-standard-expressive), ' +
+  'transform var(--cds-duration-slow-01) var(--cds-easing-standard-expressive)';
+
 const RadarChart: React.FC<{ anchors: { name: string; key: string; val: number }[] }> = ({ anchors }) => {
   const center = 200;
   const radius = 130;
@@ -161,14 +169,14 @@ const RadarChart: React.FC<{ anchors: { name: string; key: string; val: number }
           fill="var(--cds-status-applied)" fillOpacity="0.2"
           stroke="url(#radarGrad)"
           strokeWidth="2.5"
-          style={{ transition: 'all 0.5s ease-in-out' }}
+          style={{ transition: RADAR_MORPH }}
         />
 
         {/* Dots on vertices */}
         {anchors.map((anchor, i) => {
           const { x, y } = getCoordinates(i, anchor.val);
           return (
-            <g key={i} style={{ transition: 'all 0.5s ease-in-out' }}>
+            <g key={i} style={{ transition: RADAR_MORPH }}>
               <circle
                 cx={x}
                 cy={y}

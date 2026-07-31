@@ -87,7 +87,8 @@ body {
     font-family: inherit;
     color: var(--cds-text-primary);
     background: var(--cds-field-01);
-    transition: all 0.15s ease;
+    transition: border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
     box-sizing: border-box;
     width: 100%;
 }
@@ -116,7 +117,7 @@ body {
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.15s ease;
+    transition: background-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -204,8 +205,10 @@ body {
     display: block;
 }
 
+/* The showcase blueprint is one of the few genuinely expressive moments in the
+   app — it exists to be looked at, not used. */
 .blueprint-svg g {
-    transition: transform 0.3s ease;
+    transition: transform var(--cds-duration-moderate-02) var(--cds-easing-standard-expressive);
 }
 
 .blueprint-svg g:hover {

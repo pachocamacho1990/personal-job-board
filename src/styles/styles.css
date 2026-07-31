@@ -302,7 +302,10 @@ body {
     padding: var(--cds-spacing-05);
     margin-bottom: var(--cds-spacing-05);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                box-shadow var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
     position: relative;
 }
 
@@ -372,7 +375,7 @@ body {
 }
 
 .job-card.shining {
-    animation: shine 2s infinite;
+    animation: shine var(--app-duration-pulse) infinite;
     position: relative;
     border-color: var(--cds-agent-accent);
 }
@@ -385,7 +388,7 @@ body {
     top: 8px;
     right: 8px;
     font-size: 8px;
-    animation: pulse 2s infinite;
+    animation: pulse var(--app-duration-pulse) infinite;
 }
 
 @keyframes pulse {
@@ -675,7 +678,7 @@ body {
     border: 1px solid var(--cds-border-subtle-00);
     font-family: var(--cds-font-sans);
     font-size: var(--cds-type-size-03);
-    transition: border-color 0.2s ease;
+    transition: border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
 }
 
 .form-group input:focus,
@@ -704,7 +707,8 @@ body {
     padding: var(--cds-spacing-05);
     border: 1px solid var(--cds-border-subtle-00);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
 }
 
 .type-option:hover {
@@ -737,7 +741,8 @@ body {
     font-size: 24px;
     color: var(--cds-rating-empty);
     cursor: pointer;
-    transition: color 0.2s ease, transform 0.1s ease;
+    transition: color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
     user-select: none;
 }
 
@@ -768,7 +773,9 @@ body {
     font-size: var(--cds-type-size-02);
     font-weight: var(--font-weight-medium);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                border-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                color var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
 }
 
 .btn-preview:hover {
@@ -919,7 +926,9 @@ body {
     font-size: var(--cds-type-size-02);
     font-weight: var(--font-weight-medium);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                border-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                color var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -982,7 +991,8 @@ body.focus-mode .column[data-status="forgotten"] {
 }
 
 body.focus-mode .job-card {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity var(--cds-duration-moderate-02) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-moderate-02) var(--cds-easing-standard-productive);
 }
 
 body.focus-mode .job-card.dimmed {
@@ -1017,7 +1027,7 @@ body.focus-mode .job-card.dimmed {
     align-items: center;
     z-index: 9999;
     opacity: 0;
-    animation: fadeIn 0.2s forwards;
+    animation: fadeIn var(--cds-duration-moderate-02) var(--cds-easing-entrance-expressive) forwards;
 }
 
 .modal {
@@ -1027,7 +1037,7 @@ body.focus-mode .job-card.dimmed {
     width: 90%;
     max-width: 400px;
     transform: scale(0.95);
-    animation: scaleIn 0.2s forwards;
+    animation: scaleIn var(--cds-duration-moderate-02) var(--cds-easing-entrance-expressive) forwards;
     border: 1px solid var(--cds-border-subtle-00);
 }
 
@@ -1102,7 +1112,7 @@ body.focus-mode .job-card.dimmed {
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity var(--cds-duration-moderate-02) var(--cds-easing-standard-expressive);
 }
 
 .center-peek-overlay.open {
@@ -1122,7 +1132,7 @@ body.focus-mode .job-card.dimmed {
     flex-direction: column;
     color: var(--cds-text-primary);
     overflow: hidden;
-    animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: scaleUp var(--cds-duration-moderate-02) var(--cds-easing-entrance-expressive);
 }
 
 @keyframes scaleUp {
@@ -1151,7 +1161,9 @@ body.focus-mode .job-card.dimmed {
     font-size: 20px;
     line-height: 1;
     z-index: 10;
-    transition: all 0.2s;
+    transition: background-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                border-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                color var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
 }
 
 .close-peek:hover {
@@ -1219,7 +1231,8 @@ body.focus-mode .job-card.dimmed {
     fill: var(--cds-button-primary);
     stroke: var(--cds-layer-01);
     stroke-width: 2px;
-    transition: all 0.3s ease;
+    transition: fill var(--cds-duration-moderate-01) var(--cds-easing-standard-productive),
+                opacity var(--cds-duration-moderate-01) var(--cds-easing-standard-productive);
     opacity: 0.6;
 }
 
@@ -1313,7 +1326,8 @@ body.focus-mode .job-card.dimmed {
     background: var(--cds-background);
     color: var(--cds-text-primary);
     font-size: var(--cds-type-size-02);
-    transition: all 0.25s ease;
+    transition: border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
 }
 
 .archive-search-input:focus {
@@ -1343,7 +1357,7 @@ body.focus-mode .job-card.dimmed {
     padding: var(--cds-spacing-05) var(--cds-spacing-07);
     border-bottom: 1px solid var(--cds-border-subtle-00);
     background: var(--cds-layer-01);
-    transition: background 0.15s ease;
+    transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
 }
 
 .archive-row:hover {
@@ -1430,7 +1444,7 @@ body.focus-mode .job-card.dimmed {
     background: var(--cds-layer-01);
     border: 1px solid var(--cds-border-subtle-00);
     margin-bottom: var(--cds-spacing-02);
-    transition: background 0.15s ease;
+    transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
 }
 
 .file-item:hover {
@@ -1562,7 +1576,7 @@ body.focus-mode .job-card.dimmed {
 
 .job-card.agent-origin {
     border-left: 4px solid var(--cds-status-interested) !important;
-    animation: pulseAgent 3s infinite;
+    animation: pulseAgent var(--app-duration-pulse-slow) infinite;
 }
 
 .job-card.agent-origin:hover {
