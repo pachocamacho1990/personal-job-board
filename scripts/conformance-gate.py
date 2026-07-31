@@ -444,6 +444,28 @@ def check_radius_literals(root):
     return r
 
 
+# The agent console is an AI surface, not a board. A board-status token in there
+# means a colour was picked for how it looked: repainting the columns would then
+# silently repaint the agent's thinking blocks, and nobody would connect the two.
+BOARD_ONLY_TOKENS = re.compile(r"var\(\s*(--cds-status-[a-z0-9-]+)\s*\)")
+BOARD_ONLY_SCOPE = "agent-console.css"
+
+
+def check_status_token_scope(root):
+    r = Result("Board-status tokens outside the board",
+               f"{BOARD_ONLY_SCOPE} may not consume --cds-status-*")
+    path = root / "src/styles" / BOARD_ONLY_SCOPE
+    if path.exists():
+        for i, line in enumerate(strip_comments(path.read_text()).splitlines(), 1):
+            for m in BOARD_ONLY_TOKENS.finditer(line):
+                r.violations.append(
+                    (path, i, f"{m.group(1)} is a job-board status colour — the agent "
+                              "console has no statuses. Use an --cds-agent-* or "
+                              "--cds-ai-* token, or a support-* one if it is really state."))
+    r.detail = f"{BOARD_ONLY_SCOPE} scanned"
+    return r
+
+
 def check_token_engine(root):
     r = Result("Token engine (delegated to scripts/check-tokens.py)",
                "N1/N2 structure, g10/g100 parity, WCAG contrast, spacing, -rgb twins")
@@ -462,8 +484,8 @@ def check_token_engine(root):
 
 
 CHECKS = [check_css_literals, check_tsx_literals, check_motion_literals,
-          check_radius_literals, check_n1_leakage, check_undefined_vars,
-          check_token_engine]
+          check_radius_literals, check_status_token_scope, check_n1_leakage,
+          check_undefined_vars, check_token_engine]
 
 
 # ── output ───────────────────────────────────────────────

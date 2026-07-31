@@ -621,6 +621,13 @@
        alpha and cannot get the channels out of a hex var(). */
   --cds-agent-accent: var(--cds-purple-60);
   --cds-agent-accent-rgb: var(--cds-purple-60-rgb);
+  /* The agent console is an AI surface end to end, so purple is the only hue in
+     it that means anything. These three exist so its machinery — the send
+     button, the progress bar, the running spinner — can stop borrowing the
+     app's interactive blue, which means "primary action" and not "the agent". */
+  --cds-agent-accent-hover: var(--cds-purple-70);
+  --cds-agent-surface: var(--cds-purple-10);
+  --cds-agent-text-on-accent: var(--cds-white);
 
   /* — Carbon for AI. A stable extension of the system, built on light as a
        metaphor: an aura gradient, a gradient border and a coloured glow, used
@@ -888,6 +895,11 @@
        disappears against Gray 90 and Gray 100 layers. */
   --cds-agent-accent: var(--cds-purple-40);
   --cds-agent-accent-rgb: var(--cds-purple-40-rgb);
+  /* The accent is light here, so anything sitting ON it needs dark text — the
+     one place g100 is not a mirror of g10. */
+  --cds-agent-accent-hover: var(--cds-purple-30);
+  --cds-agent-surface: var(--cds-purple-90);
+  --cds-agent-text-on-accent: var(--cds-gray-100);
 
   /* — Carbon for AI. Same substitution as g10; see that block for the reason.
        Carbon inverts more than the hue here: the aura fades to black rather
