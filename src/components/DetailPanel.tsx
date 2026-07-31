@@ -295,7 +295,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                   background: 'var(--cds-layer-02)',
                   color: 'var(--cds-text-secondary)',
                   padding: '1rem',
-                  borderRadius: '6px',
+                  borderRadius: 'var(--cds-radius-03)',
                   marginBottom: '1rem',
                   textAlign: 'center',
                   border: '1px dashed var(--cds-border-strong-01)',
@@ -648,7 +648,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                 className={`form-group ai-copilot-accordion ${isCopilotOpen ? 'open' : ''}`}
                 style={{
                   border: '1px solid var(--cds-border-subtle-00)',
-                  borderRadius: '8px',
+                  borderRadius: 'var(--cds-radius-03)',
                   padding: '1rem',
                   backgroundColor: 'var(--cds-status-applied-surface)',
                   marginTop: '1.5rem',
@@ -742,7 +742,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                         style={{
                           background: 'var(--cds-layer-01)',
                           border: '1px solid var(--cds-border-subtle-00)',
-                          borderRadius: '6px',
+                          borderRadius: 'var(--cds-radius-03)',
                           padding: '1rem',
                           fontSize: '0.875rem',
                           color: 'var(--cds-text-primary)',
@@ -761,7 +761,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                           textAlign: 'center', 
                           padding: '1.5rem', 
                           border: '1px dashed var(--cds-border-subtle-00)', 
-                          borderRadius: '6px',
+                          borderRadius: 'var(--cds-radius-03)',
                           fontSize: '0.8rem',
                           color: 'var(--cds-text-placeholder)'
                         }}

@@ -11,7 +11,7 @@
                 border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
     background: var(--cds-layer-01);
     border: 1px solid var(--cds-border-subtle-00);
-    border-radius: var(--cds-radius-00);
+    border-radius: var(--cds-radius-03);
     box-shadow: none;
 }
 
@@ -35,7 +35,7 @@
     display: flex;
     align-items: center;
     padding: 0.85rem 1rem;
-    border-radius: var(--cds-radius-00);
+    border-radius: var(--cds-radius-02);
     margin-bottom: 4px;
     cursor: pointer;
     border: 1px solid transparent;
@@ -55,7 +55,7 @@
 .item-icon {
     width: 32px;
     height: 32px;
-    border-radius: var(--cds-radius-00);
+    border-radius: var(--cds-radius-02);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -104,7 +104,7 @@
     font-family: var(--cds-font-mono);
     font-weight: 500;
     padding: 2px 8px;
-    border-radius: 0;
+    border-radius: var(--cds-radius-02);
     background: var(--cds-layer-selected-01);
     border: 1px solid var(--cds-border-subtle-00);
     transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
@@ -150,7 +150,7 @@
     font-weight: 400;
     color: var(--cds-text-secondary);
     cursor: pointer;
-    border-radius: 0;
+    border-radius: var(--cds-radius-00);
     transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
                 color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
                 border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
@@ -224,7 +224,7 @@
 .anchor-bar-outer {
     height: 6px;
     background-color: var(--cds-border-subtle-00);
-    border-radius: 0px;
+    border-radius: var(--cds-radius-00);
     overflow: hidden;
     position: relative;
 }
@@ -232,7 +232,7 @@
 .anchor-bar-inner {
     height: 100%;
     background: var(--cds-button-primary);
-    border-radius: 0px;
+    border-radius: var(--cds-radius-00);
     transition: width var(--cds-duration-slow-02) var(--cds-easing-standard-expressive);
 }
 
@@ -246,7 +246,7 @@
 .strategy-info-card {
     background: var(--cds-layer-01);
     border: 1px solid var(--cds-border-subtle-00);
-    border-radius: var(--cds-radius-00);
+    border-radius: var(--cds-radius-03);
     padding: 1.5rem;
     box-shadow: none;
     display: flex;
@@ -286,7 +286,7 @@
     background-color: var(--cds-highlight);
     color: var(--cds-text-primary);
     border: 1px solid var(--cds-border-interactive);
-    border-radius: 0px;
+    border-radius: var(--cds-radius-02);
     font-size: 0.75rem;
     font-family: var(--cds-font-mono);
     font-weight: 500;
@@ -329,7 +329,7 @@
     margin-top: 2rem;
     background: var(--cds-layer-01);
     border: 1px solid var(--cds-border-subtle-00);
-    border-radius: var(--cds-radius-00);
+    border-radius: var(--cds-radius-03);
     padding: 1.5rem;
     box-shadow: var(--cds-shadow-none);
 }
@@ -350,7 +350,7 @@
     align-items: center;
     background-color: var(--cds-background);
     border: 1px solid var(--cds-border-subtle-00);
-    border-radius: var(--cds-radius-00);
+    border-radius: var(--cds-radius-03);
     padding: 0.75rem 1rem;
     transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
                 border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
@@ -373,7 +373,7 @@
     color: var(--cds-text-secondary);
     cursor: pointer;
     padding: 4px 8px;
-    border-radius: 0;
+    border-radius: var(--cds-radius-02);
     font-size: 0.95rem;
     transition: color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
                 background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
