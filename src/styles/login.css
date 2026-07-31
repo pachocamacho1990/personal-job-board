@@ -87,6 +87,7 @@ body {
     font-family: inherit;
     color: var(--cds-text-primary);
     background: var(--cds-field-01);
+    border-radius: var(--cds-radius-02);
     transition: border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
                 background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
     box-sizing: border-box;
@@ -105,6 +106,7 @@ body {
     background: var(--cds-support-error-subtle);
     border: 1px solid var(--cds-support-error);
     color: var(--cds-support-error);
+    border-radius: var(--cds-radius-03);
     font-size: 13px;
     margin-bottom: 20px;
 }
@@ -117,6 +119,7 @@ body {
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
+    border-radius: var(--cds-radius-02);
     transition: background-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
     display: flex;
     justify-content: space-between;
@@ -194,7 +197,7 @@ body {
     width: 100%;
     background: transparent;
     border: 1px solid var(--cds-terminal-border);
-    border-radius: 0;
+    border-radius: var(--cds-radius-00);
     padding: 10px;
     box-sizing: border-box;
 }

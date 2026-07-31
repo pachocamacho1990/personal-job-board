@@ -167,6 +167,7 @@
   --cds-purple-60-rgb: 138, 63, 252;
   --cds-gray-100-rgb: 22, 22, 22;
   --cds-gray-50-rgb: 141, 141, 141;
+  --cds-black-rgb: 0, 0, 0;
 }
 
 /* ----------------------------------------------------------------------------
@@ -289,19 +290,42 @@
   --cds-heading-05-letter-spacing: var(--cds-letter-spacing-03);
   --cds-heading-05-font-weight: var(--cds-font-weight-regular);
 
-  /* — Radius. Carbon is square: corners are structure, not decoration, and
-       rounding them is the single change that most makes a UI stop reading as
-       Carbon. The pill exists only for tags, which are pill-shaped by spec.
-       Purging the existing 4/6/8px radii is PJBA-15. */
+  /* — Radius. Carbon's *default* is 0. Its vocabulary is not: the library ships
+       2px on popovers (exposed as --cds-popover-border-radius), 4px on the
+       content switcher, 8px on tile--decorator-rounded, 12/16px on the toggle,
+       16px on tags and up to 24px on the chat button. And $button-border-radius
+       is declared `!default`, which is Sass for "override me".
+
+       So the scale below picks from what Carbon already uses rather than
+       inventing values. The earlier claim in this file — that rounding corners
+       is what most makes a UI stop reading as Carbon — was wrong, and PJBA-36
+       retires it.
+
+       Pick by what the thing is, not by how big it is:
+         00   structure — dividers, table edges, the app shell, progress bars
+         01   the smallest chips: inline code, scrollbar thumbs, popovers
+         02   controls — buttons, inputs, selects, tabs, list rows
+         03   containers — cards, columns, panels, modals, notifications
+         pill tags and counts, which are pill-shaped by spec */
   --cds-radius-00: 0;
+  --cds-radius-01: 0.125rem; /* 2px  — Carbon's popover */
+  --cds-radius-02: 0.25rem;  /* 4px  — Carbon's content switcher */
+  --cds-radius-03: 0.5rem;   /* 8px  — Carbon's rounded tile ($spacing-03) */
   --cds-radius-pill: 62.5rem;
 
-  /* — Elevation. Carbon separates surfaces with layer color, not shadow. The
-       one sanctioned shadow is for things that float above the page and must
-       be dismissible — menus, popovers, modals. Anything that sits in the
-       page flow gets --cds-shadow-none. */
+  /* — Elevation. Carbon does have a shadow: the theme token $shadow (black at
+       0.3) and the mixin `box-shadow: 0 2px 6px $shadow` in
+       packages/styles/scss/utilities/_box-shadow.scss. What it does not have is
+       a multi-step ramp — there is no elevation-01..05 to reach for.
+
+       So depth is built from three mechanisms, in this order of preference:
+       layer colour first, motion second, and the shadow last. That order is the
+       whole trick. A shadow marks a state — raised, floating, being dragged —
+       never a permanent hierarchy, which is why nothing at rest carries one.
+
+       Only the geometry lives here. The colour is themed, in N2, because black
+       behaves very differently on the two backgrounds. */
   --cds-shadow-none: none;
-  --cds-shadow-overlay: 0 2px 6px rgba(0, 0, 0, 0.2);
 
   /* — Motion. Carbon splits movement into two registers. *Productive* motion is
        efficient and stays out of the way: button states, dropdowns, revealing
@@ -372,6 +396,21 @@
   --cds-background-selected: rgba(var(--cds-gray-50-rgb), 0.2);
   --cds-background-selected-hover: rgba(var(--cds-gray-50-rgb), 0.32);
   --cds-background-inverse-hover: var(--cds-gray-72);
+
+  /* — Elevation. Carbon uses black at 0.3 in all four themes. On g10 that
+       works: over #f4f4f4 it lands on #ababab, 2.09:1 against the page, which
+       is a shadow you can see.
+
+       On g100 it does not, and no alpha fixes it — over #161616, black at 0.3
+       gives 1.06:1 and even pure black only reaches 1.11:1. You cannot cast a
+       dark shadow on a nearly black page. What still reads there is the seam
+       between the raised surface and what sits under it, so g100 doubles the
+       alpha to deepen that seam and leans on the layer step and the lift to
+       carry the rest. That is the ordering above doing its job, not a
+       workaround. */
+  --cds-shadow-color: rgba(var(--cds-black-rgb), 0.3);
+  --cds-shadow-raised: 0 2px 6px var(--cds-shadow-color);
+  --cds-shadow-overlay: 0 4px 12px var(--cds-shadow-color);
 
   /* — Layers — containers stacked on the background. In g10 the layers
        alternate white/gray as they nest, which is what gives Carbon its
@@ -621,6 +660,14 @@
   --cds-background-selected: rgba(var(--cds-gray-50-rgb), 0.24);
   --cds-background-selected-hover: rgba(var(--cds-gray-50-rgb), 0.32);
   --cds-background-inverse-hover: var(--cds-gray-15);
+
+  /* — Elevation. See the g10 block for the measurement: on this background a
+       dark shadow cannot reach even 1.2:1 against the page, so it is not doing
+       the work here. It deepens the seam under a raised surface and nothing
+       more; the layer step and the lift carry the depth. */
+  --cds-shadow-color: rgba(var(--cds-black-rgb), 0.6);
+  --cds-shadow-raised: 0 2px 6px var(--cds-shadow-color);
+  --cds-shadow-overlay: 0 4px 12px var(--cds-shadow-color);
 
   /* — Layers — where g10 alternates white and gray, g100 climbs the gray
        scale as it nests: 90 → 80 → 70. Same idea, opposite direction. */

@@ -47,7 +47,7 @@ aside.docs-sidebar {
             width: 100%;
             background: var(--cds-layer-02);
             border: 1px solid var(--cds-border-subtle-00);
-            border-radius: var(--cds-radius-00);
+            border-radius: var(--cds-radius-02);
             padding: 0.6rem 1rem 0.6rem 2.2rem;
             color: var(--cds-text-primary);
             font-size: 0.875rem;
@@ -87,7 +87,7 @@ aside.docs-sidebar {
 
         .docs-nav::-webkit-scrollbar-thumb {
             background: var(--cds-border-subtle-00);
-            border-radius: 2px;
+            border-radius: var(--cds-radius-01);
         }
 
         .nav-section-title {
@@ -105,7 +105,7 @@ aside.docs-sidebar {
             color: var(--cds-text-secondary);
             text-decoration: none;
             padding: 0.4rem 0.75rem;
-            border-radius: var(--cds-radius-00);
+            border-radius: var(--cds-radius-02);
             font-size: 0.875rem;
             transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
                         color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
@@ -149,7 +149,7 @@ aside.docs-sidebar {
             background: var(--cds-layer-accent-01);
             border: 1px solid var(--cds-border-subtle-00);
             padding: 0.25rem;
-            border-radius: var(--cds-radius-00);
+            border-radius: var(--cds-radius-02);
         }
 
         .mode-tab {
@@ -157,7 +157,7 @@ aside.docs-sidebar {
             border: none;
             color: var(--cds-text-secondary);
             padding: 0.6rem 1.2rem;
-            border-radius: var(--cds-radius-00);
+            border-radius: var(--cds-radius-02);
             cursor: pointer;
             font-family: var(--cds-font-sans);
             font-weight: 600;
@@ -245,7 +245,7 @@ aside.docs-sidebar {
             background: var(--cds-layer-accent-01);
             border: 1px solid var(--cds-border-subtle-00);
             padding: 0.2rem 0.4rem;
-            border-radius: 0;
+            border-radius: var(--cds-radius-01);
             font-size: 0.875rem;
             color: var(--cds-text-error);
         }
@@ -255,7 +255,7 @@ aside.docs-sidebar {
             position: relative;
             background: var(--cds-terminal-bg);
             border: 1px solid var(--cds-terminal-border);
-            border-radius: var(--cds-radius-00);
+            border-radius: var(--cds-radius-03);
             margin: 1.5rem 0;
             overflow: hidden;
             box-shadow: var(--cds-shadow-none);
@@ -294,7 +294,7 @@ aside.docs-sidebar {
             border: 1px solid var(--cds-terminal-border);
             color: var(--cds-text-secondary);
             padding: 0.25rem 0.6rem;
-            border-radius: var(--cds-radius-00);
+            border-radius: var(--cds-radius-02);
             cursor: pointer;
             font-size: 0.75rem;
             transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
@@ -313,7 +313,7 @@ aside.docs-sidebar {
             background: var(--cds-background);
             border: 1px solid var(--cds-border-subtle-00);
             padding: 1.25rem;
-            border-radius: var(--cds-radius-00);
+            border-radius: var(--cds-radius-03);
             margin: 1.5rem 0;
             position: relative;
             padding-left: 3rem;
@@ -352,7 +352,7 @@ aside.docs-sidebar {
             margin: 1.5rem 0;
             background: var(--cds-layer-01);
             border: 1px solid var(--cds-border-subtle-00);
-            border-radius: var(--cds-radius-00);
+            border-radius: var(--cds-radius-03);
             overflow: hidden;
             box-shadow: var(--cds-shadow-none);
         }
@@ -390,7 +390,7 @@ aside.docs-sidebar {
         .diagram-container {
             background: var(--cds-layer-01);
             border: 1px solid var(--cds-border-subtle-00);
-            border-radius: var(--cds-radius-00);
+            border-radius: var(--cds-radius-03);
             padding: 2rem;
             margin: 2rem 0;
             display: flex;
@@ -415,14 +415,17 @@ aside.docs-sidebar {
             background: var(--cds-layer-01);
             border: 1px solid var(--cds-border-subtle-00);
             padding: 1.5rem;
-            border-radius: var(--cds-radius-00);
+            border-radius: var(--cds-radius-03);
             transition: border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
-                        box-shadow var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+                        box-shadow var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                        transform var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
             box-shadow: var(--cds-shadow-none);
         }
 
         .feature-card:hover {
             border-color: var(--cds-button-primary);
+            box-shadow: var(--cds-shadow-raised);
+            transform: translateY(-2px);
         }
 
         .feature-icon {

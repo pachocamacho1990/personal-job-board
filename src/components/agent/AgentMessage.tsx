@@ -80,7 +80,7 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
                 className="agent-input-field"
                 value={editVal}
                 onChange={(e) => setEditVal(e.target.value)}
-                style={{ width: '100%', minHeight: '100px', maxHeight: 'none', padding: '8px', borderRadius: '4px', border: '1px solid var(--cds-border-subtle-00)', fontSize: '0.85rem', color: 'var(--cds-text-primary)', background: 'var(--cds-field-01)', resize: 'vertical', overflowY: 'auto' }}
+                style={{ width: '100%', minHeight: '100px', maxHeight: 'none', padding: '8px', borderRadius: 'var(--cds-radius-02)', border: '1px solid var(--cds-border-subtle-00)', fontSize: '0.85rem', color: 'var(--cds-text-primary)', background: 'var(--cds-field-01)', resize: 'vertical', overflowY: 'auto' }}
               />
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                 <button
@@ -95,7 +95,7 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
                     border: '1px solid var(--cds-border-subtle-00)',
                     background: 'transparent',
                     color: 'var(--cds-text-secondary)',
-                    borderRadius: '4px',
+                    borderRadius: 'var(--cds-radius-02)',
                     cursor: 'pointer'
                   }}
                 >
@@ -115,7 +115,7 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
                     background: 'var(--cds-button-primary)',
                     color: 'var(--cds-text-on-color)',
                     border: 'none',
-                    borderRadius: '4px',
+                    borderRadius: 'var(--cds-radius-02)',
                     cursor: 'pointer'
                   }}
                 >
@@ -139,7 +139,7 @@ export const AgentMessage: React.FC<Props> = ({ message, onAction, canEdit = fal
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    borderRadius: '4px',
+                    borderRadius: 'var(--cds-radius-02)',
                     transition: 'opacity var(--cds-duration-fast-02) var(--cds-easing-standard-productive)'
                   }}
                   title="Editar mensaje"

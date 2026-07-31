@@ -56,7 +56,7 @@
     padding: 0.75rem 1rem;
     color: var(--cds-text-secondary);
     text-decoration: none;
-    border-radius: var(--cds-radius-00);
+    border-radius: var(--cds-radius-02);
     transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
                 color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
 }
@@ -71,8 +71,10 @@
     color: var(--cds-status-applied);
     font-weight: 600;
     border-left: 3px solid var(--cds-status-applied);
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+    /* The accent bar wants a straight edge to sit against, so the two corners it
+       touches stay square while the other two follow the control radius. */
+    border-top-left-radius: var(--cds-radius-00);
+    border-bottom-left-radius: var(--cds-radius-00);
 }
 
 .sidebar-footer {
@@ -91,7 +93,7 @@
     margin-bottom: 0.25rem;
     background: none;
     border: none;
-    border-radius: var(--cds-radius-00);
+    border-radius: var(--cds-radius-02);
     color: var(--cds-text-secondary);
     font: inherit;
     font-size: 0.875rem;
@@ -156,7 +158,7 @@
     color: var(--cds-text-secondary);
     cursor: pointer;
     padding: 0.5rem;
-    border-radius: var(--cds-radius-00);
+    border-radius: var(--cds-radius-02);
     transition: color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
 }
 
@@ -185,7 +187,7 @@
     font-size: 0.875rem;
     color: var(--cds-text-secondary);
     text-decoration: none;
-    border-radius: var(--cds-radius-00);
+    border-radius: var(--cds-radius-02);
     transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
                 color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
     cursor: pointer;

@@ -9,13 +9,18 @@ WHAT IT ENFORCES
 
   1. No colour literal in any src/styles/*.css.
   2. No colour literal in any src/**/*.tsx.
-  3. No N1 primitive consumed outside theme.css. Components and page stylesheets
+  3. No raw duration or inline cubic-bezier outside theme.css. A hand-written
+     0.15s is the motion equivalent of a hex: it renders, it looks fine, and it
+     quietly opts out of the system.
+  4. No corner-radius literal outside theme.css. 50% and 100% are exempt,
+     because a circle is a shape rather than a radius choice.
+  5. No N1 primitive consumed outside theme.css. Components and page stylesheets
      read N2 semantics only: a primitive is the same value in both themes, so a
      component that reaches for --cds-gray-70 cannot follow a theme switch. That
      is the single rule the whole two-level structure exists to protect.
-  4. No var() reference that resolves to nothing. These do not raise — the
+  6. No var() reference that resolves to nothing. These do not raise — the
      browser drops the whole declaration and the rule silently does nothing.
-  5. The token engine itself, by delegating to scripts/check-tokens.py:
+  7. The token engine itself, by delegating to scripts/check-tokens.py:
      N1/N2 structure, g10/g100 key parity, WCAG contrast, spacing monotonicity,
      -rgb triplets matching their hex twin.
 
@@ -416,6 +421,29 @@ def check_motion_literals(root):
     return r
 
 
+RADIUS_DECL = re.compile(r"\b(?:border(?:-(?:top|bottom)-(?:left|right))?-radius|borderRadius)\b\s*:\s*([^;,}]+)")
+RADIUS_OK = re.compile(r"var\(--cds-radius-|^\s*'?(?:50%|100%)'?\s*$")
+
+
+def check_radius_literals(root):
+    """A corner is a system decision, the same as a colour. 50% and 100% survive
+    because a circle is a shape, not a radius choice."""
+    r = Result("Corner radius literals",
+               "src/styles/*.css and src/**/*.tsx; theme.css holds the scale")
+    files = [p for p in sorted((root / "src/styles").glob("*.css"))
+             if p.name != THEME_FILE]
+    files += sorted((root / "src").rglob("*.tsx"))
+    for path in files:
+        for i, line in enumerate(strip_comments(path.read_text()).splitlines(), 1):
+            for m in RADIUS_DECL.finditer(line):
+                value = m.group(1).strip()
+                if not RADIUS_OK.search(value):
+                    r.violations.append(
+                        (path, i, f"radius literal {value!r} — must be a --cds-radius-* token"))
+    r.detail = f"{len(files)} files scanned; {THEME_FILE} excluded (it is the scale)"
+    return r
+
+
 def check_token_engine(root):
     r = Result("Token engine (delegated to scripts/check-tokens.py)",
                "N1/N2 structure, g10/g100 parity, WCAG contrast, spacing, -rgb twins")
@@ -434,7 +462,8 @@ def check_token_engine(root):
 
 
 CHECKS = [check_css_literals, check_tsx_literals, check_motion_literals,
-          check_n1_leakage, check_undefined_vars, check_token_engine]
+          check_radius_literals, check_n1_leakage, check_undefined_vars,
+          check_token_engine]
 
 
 # ── output ───────────────────────────────────────────────

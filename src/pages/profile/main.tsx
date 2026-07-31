@@ -405,7 +405,7 @@ export const ProfilePage: React.FC = () => {
                   value={newSkill}
                   onChange={(e) => setNewSkill(e.target.value)}
                   placeholder="Ej. Python, React, Docker"
-                  style={{ flex: 1, padding: '10px 12px', border: '1px solid var(--cds-border-subtle-00)', borderRadius: '6px' }}
+                  style={{ flex: 1, padding: '10px 12px', border: '1px solid var(--cds-border-subtle-00)', borderRadius: 'var(--cds-radius-02)' }}
                 />
                 <button type="button" className="btn btn-secondary" onClick={handleAddSkill}>
                   Agregar
