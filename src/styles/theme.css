@@ -672,10 +672,16 @@
   --cds-support-warning-subtle: var(--cds-yellow-10);
   --cds-support-warning-subtle-border: var(--cds-yellow-20);
 
-  /* — Page grid. Needs alpha rather than a palette stop: the nearest solid
-       gray reads as graph paper, and the whole point of this texture is to sit
-       just at the edge of perception. */
-  --cds-grid-line: rgba(var(--cds-gray-100-rgb), 0.025);
+  /* — Page grid. Needs alpha rather than a palette stop: the nearest solid gray
+       reads as graph paper.
+
+       It sat at 2.5% and the texture was, in practice, invisible — the board
+       looked like it stood on a flat grey field. That is what prompted PJBA-45,
+       where the question was whether the CARD fill was wrong. It was not: shown
+       three card treatments against both a 2.5% and an 8% grid, he kept the card
+       exactly as it is and took the stronger grid. The surface was the problem,
+       not what sat on it. */
+  --cds-grid-line: rgba(var(--cds-gray-100-rgb), 0.08);
   --cds-support-error-rgb: var(--cds-red-60-rgb);
 
   /* — Always-dark surfaces. Named for their first use, tool output, but the
@@ -935,9 +941,9 @@
   --cds-support-warning-subtle: var(--cds-yellow-90);
   --cds-support-warning-subtle-border: var(--cds-yellow-80);
 
-  /* Light-on-dark, and a touch stronger: the same 2.5% disappears entirely
-     against Gray 100. */
-  --cds-grid-line: rgba(var(--cds-gray-10-rgb), 0.04);
+  /* Light-on-dark, and a touch stronger than g10 for the same reason it always
+     was: an identical alpha carries less against Gray 100. */
+  --cds-grid-line: rgba(var(--cds-gray-10-rgb), 0.10);
   --cds-support-error-rgb: var(--cds-red-40-rgb);
 
   --cds-terminal-bg: var(--cds-gray-100);

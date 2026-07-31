@@ -66,7 +66,15 @@ SCAN = """
     let solid = null;
     for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
       const cs = getComputedStyle(n);
-      const stops = gradientStops(cs.backgroundImage);
+      // A repeating hairline is a texture, not a surface. The page grid is one
+      // 1px line every 24px in each axis — about 4% of the area — and taking its
+      // colour as "the background" of text sitting over it is not conservative,
+      // it is inaccurate: it fails any subtle texture forever. Compositing still
+      // applies to gradients that actually fill their element, which is what
+      // this was built for (the Carbon for AI auras).
+      const tiled = cs.backgroundSize && /\d/.test(cs.backgroundSize)
+                    && cs.backgroundRepeat.startsWith('repeat');
+      const stops = tiled ? [] : gradientStops(cs.backgroundImage);
       if (stops.length) {
         const worst = stops.reduce((a, b) => (b.a > a.a ? b : a));
         if (worst.a > 0) layers.unshift(worst);
