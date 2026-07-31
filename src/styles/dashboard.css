@@ -17,7 +17,9 @@
 
 .dashboard-card:hover {
     border-color: var(--cds-border-interactive);
-    background-color: var(--cds-background);
+    background-color: var(--cds-layer-hover-01);
+    box-shadow: var(--cds-shadow-raised);
+    transform: translateY(var(--cds-lift-raised));
 }
 
 .card-header {
@@ -48,7 +50,7 @@
 }
 
 .list-item:hover {
-    background-color: var(--cds-layer-selected-01);
+    background-color: var(--cds-layer-hover-01);
     border-color: var(--cds-border-subtle-00);
 }
 
@@ -153,7 +155,8 @@
     border-radius: var(--cds-radius-00);
     transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
                 color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
-                border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+                border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
     font-family: var(--cds-font-sans);
     border-bottom: 2px solid transparent;
 }
@@ -168,6 +171,10 @@
     border-bottom: 2px solid var(--cds-button-primary);
     background-color: var(--cds-layer-01);
     font-weight: 500;
+}
+
+.dashboard-tab-btn:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 /* Strategy Container & Grid */
@@ -358,7 +365,9 @@
 
 .memory-item:hover {
     border-color: var(--cds-border-interactive);
-    background-color: var(--cds-layer-selected-01);
+    background-color: var(--cds-layer-hover-01);
+    box-shadow: var(--cds-shadow-raised);
+    transform: translateY(var(--cds-lift-raised));
 }
 
 .memory-content {
@@ -376,12 +385,17 @@
     border-radius: var(--cds-radius-02);
     font-size: 0.95rem;
     transition: color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
-                background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+                background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
 }
 
 .memory-delete-btn:hover {
     color: var(--cds-support-error);
     background-color: var(--cds-support-error-subtle);
+}
+
+.memory-delete-btn:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 @keyframes fadeIn {

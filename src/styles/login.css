@@ -120,7 +120,8 @@ body {
     font-weight: 500;
     cursor: pointer;
     border-radius: var(--cds-radius-02);
-    transition: background-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
+    transition: background-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -136,6 +137,10 @@ body {
 .btn-submit:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.btn-submit:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 .toggle-mode {

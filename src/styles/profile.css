@@ -96,6 +96,15 @@
     padding: 16px;
     margin-bottom: 12px;
     position: relative;
+    transition: border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                box-shadow var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+}
+
+.dynamic-item-card:hover {
+    border-color: var(--cds-border-interactive);
+    box-shadow: var(--cds-shadow-raised);
+    transform: translateY(var(--cds-lift-raised));
 }
 
 .dynamic-item-card .remove-btn {
@@ -110,11 +119,16 @@
     font-weight: 600;
     padding: 4px 8px;
     border-radius: var(--cds-radius-02);
-    transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+    transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
 }
 
 .dynamic-item-card .remove-btn:hover {
     background-color: var(--cds-support-error-subtle);
+}
+
+.dynamic-item-card .remove-btn:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 .btn {
@@ -125,7 +139,8 @@
     cursor: pointer;
     transition: background-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
                 color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
-                border-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
+                border-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
     border: none;
     display: inline-flex;
     align-items: center;
@@ -156,6 +171,10 @@
     font-size: 0.85rem;
     padding: 6px 12px;
     margin-top: 8px;
+}
+
+.btn:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 .skills-container {

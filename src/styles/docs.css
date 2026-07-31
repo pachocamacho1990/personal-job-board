@@ -166,7 +166,8 @@ aside.docs-sidebar {
             align-items: center;
             gap: 0.5rem;
             transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
-                        color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+                        color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                        transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
         }
 
         .mode-tab:hover {
@@ -177,6 +178,10 @@ aside.docs-sidebar {
             background: var(--cds-button-primary);
             color: var(--cds-text-on-color);
                 }
+
+        .mode-tab:active {
+            transform: translateY(var(--cds-lift-pressed));
+        }
 
         .back-link {
             color: var(--cds-text-secondary);
@@ -298,12 +303,17 @@ aside.docs-sidebar {
             cursor: pointer;
             font-size: 0.75rem;
             transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
-                        color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+                        color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                        transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
         }
 
         .copy-btn:hover {
             color: var(--cds-text-primary);
             background: var(--cds-terminal-border);
+        }
+
+        .copy-btn:active {
+            transform: translateY(var(--cds-lift-pressed));
         }
 
         /* Alerts — flat Carbon panels: a background fill, a subtle border and a
@@ -425,7 +435,7 @@ aside.docs-sidebar {
         .feature-card:hover {
             border-color: var(--cds-button-primary);
             box-shadow: var(--cds-shadow-raised);
-            transform: translateY(-2px);
+            transform: translateY(var(--cds-lift-raised));
         }
 
         .feature-icon {

@@ -316,7 +316,7 @@ body {
     background-color: var(--cds-layer-hover-01);
     border-color: var(--cds-button-primary);
     box-shadow: var(--cds-shadow-raised);
-    transform: translateY(-2px);
+    transform: translateY(var(--cds-lift-raised));
 }
 
 /* Pressed, the card goes back down. Lifting on click would say the opposite of
@@ -454,7 +454,7 @@ body {
 
 .job-card.dragging {
     opacity: 0.5;
-    transform: rotate(2deg) translateY(-2px);
+    transform: rotate(2deg) translateY(var(--cds-lift-raised));
     box-shadow: var(--cds-shadow-raised);
 }
 
@@ -725,7 +725,8 @@ body {
     border: 1px solid var(--cds-border-subtle-00);
     cursor: pointer;
     transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
-                border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+                border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
 }
 
 .type-option:hover {
@@ -741,6 +742,10 @@ body {
 .type-option input[type="radio"]:checked+span {
     font-weight: var(--font-weight-medium);
     color: var(--cds-button-primary);
+}
+
+.type-option:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 /* Rating Input */
@@ -793,7 +798,8 @@ body {
     cursor: pointer;
     transition: background-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
                 border-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
-                color var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
+                color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
 }
 
 .btn-preview:hover {
@@ -806,6 +812,10 @@ body {
     background: var(--cds-button-primary);
     color: var(--cds-text-on-color);
     border-color: var(--cds-button-primary);
+}
+
+.btn-preview:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 /* Markdown Preview Styling */
@@ -950,7 +960,8 @@ body {
     cursor: pointer;
     transition: background-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
                 border-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
-                color var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
+                color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -989,6 +1000,7 @@ body {
 }
 
 .btn-icon {
+    transition: transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
     border-radius: var(--cds-radius-02);
     background: transparent;
     color: var(--cds-text-secondary);
@@ -1006,6 +1018,13 @@ body {
     background: var(--cds-button-primary);
     color: var(--cds-text-on-color);
     border-color: var(--cds-button-primary);
+}
+
+.btn-primary:active,
+.btn-danger:active,
+.btn-secondary:active,
+.btn-icon:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 body.focus-mode .column[data-status="rejected"],
@@ -1188,12 +1207,17 @@ body.focus-mode .job-card.dimmed {
     z-index: 10;
     transition: background-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
                 border-color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
-                color var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
+                color var(--cds-duration-fast-01) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
 }
 
 .close-peek:hover {
     background: var(--cds-border-subtle-00);
     color: var(--cds-text-primary);
+}
+
+.close-peek:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 .peek-content {
@@ -1513,9 +1537,14 @@ body.focus-mode .job-card.dimmed {
 }
 
 .btn-sm {
+    transition: transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
     border-radius: var(--cds-radius-02);
     padding: 6px 12px;
     font-size: var(--cds-type-size-01);
+}
+
+.btn-sm:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 /* File Preview Modal */
