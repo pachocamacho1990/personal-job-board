@@ -111,6 +111,12 @@ body {
     gap: var(--cds-spacing-05);
 }
 
+/* The status used to tint the whole header and the whole column body beneath
+   it. Two large washes of hue per column, seven columns across — which is what
+   read as too strong. Carbon's layering model puts surfaces on grey and keeps
+   hue for accent, so the header is a neutral layer now and the status shows up
+   as a bar along its top edge, the title, and the card's left border. Same
+   information, a fraction of the ink. */
 .column-header {
     border-radius: var(--cds-radius-03);
     display: flex;
@@ -119,6 +125,7 @@ body {
     padding: var(--cds-spacing-03) var(--cds-spacing-05);
     background: var(--cds-layer-01);
     border: 1px solid var(--cds-border-subtle-00);
+    border-block-start: 3px solid var(--cds-border-subtle-00);
     margin-bottom: var(--cds-spacing-02);
 }
 
@@ -131,148 +138,104 @@ body {
 
 /* Column-specific colors */
 .column[data-status="interested"] .column-header {
-    background: var(--cds-status-interested-header);
-    border-color: var(--cds-status-interested);
+    border-block-start-color: var(--cds-status-interested);
 }
 
 .column[data-status="interested"] .column-header h2 {
     color: var(--cds-status-interested);
 }
 
-.column[data-status="interested"] .cards-container {
-    background: var(--cds-status-interested-surface);
-}
 
 .column[data-status="applied"] .column-header {
-    background: var(--cds-status-applied-header);
-    border-color: var(--cds-status-applied);
+    border-block-start-color: var(--cds-status-applied);
 }
 
 .column[data-status="applied"] .column-header h2 {
     color: var(--cds-status-applied);
 }
 
-.column[data-status="applied"] .cards-container {
-    background: var(--cds-status-applied-surface);
-}
 
 .column[data-status="interview"] .column-header {
-    background: var(--cds-status-interview-header);
-    border-color: var(--cds-status-interview);
+    border-block-start-color: var(--cds-status-interview);
 }
 
 .column[data-status="interview"] .column-header h2 {
     color: var(--cds-status-interview);
 }
 
-.column[data-status="interview"] .cards-container {
-    background: var(--cds-status-interview-surface);
-}
 
 .column[data-status="offer"] .column-header {
-    background: var(--cds-status-offer-header);
-    border-color: var(--cds-status-offer);
+    border-block-start-color: var(--cds-status-offer);
 }
 
 .column[data-status="offer"] .column-header h2 {
     color: var(--cds-status-offer);
 }
 
-.column[data-status="offer"] .cards-container {
-    background: var(--cds-status-offer-surface);
-}
 
 .column[data-status="rejected"] .column-header {
-    background: var(--cds-status-rejected-header);
-    border-color: var(--cds-status-rejected);
+    border-block-start-color: var(--cds-status-rejected);
 }
 
 .column[data-status="rejected"] .column-header h2 {
     color: var(--cds-status-rejected);
 }
 
-.column[data-status="rejected"] .cards-container {
-    background: var(--cds-status-rejected-surface);
-}
 
 .column[data-status="forgotten"] .column-header {
-    background: var(--cds-status-forgotten-header);
-    border-color: var(--cds-status-forgotten);
+    border-block-start-color: var(--cds-status-forgotten);
 }
 
 .column[data-status="forgotten"] .column-header h2 {
     color: var(--cds-status-forgotten);
 }
 
-.column[data-status="forgotten"] .cards-container {
-    background: var(--cds-status-forgotten-surface);
-}
 
 /* Business Board Column Status Colors */
 .column[data-status="researching"] .column-header {
-    background: var(--cds-status-researching-header);
-    border-color: var(--cds-status-researching);
+    border-block-start-color: var(--cds-status-researching);
 }
 
 .column[data-status="researching"] .column-header h2 {
     color: var(--cds-status-researching);
 }
 
-.column[data-status="researching"] .cards-container {
-    background: var(--cds-status-researching-surface);
-}
 
 .column[data-status="contacted"] .column-header {
-    background: var(--cds-status-contacted-header);
-    border-color: var(--cds-status-contacted);
+    border-block-start-color: var(--cds-status-contacted);
 }
 
 .column[data-status="contacted"] .column-header h2 {
     color: var(--cds-status-contacted);
 }
 
-.column[data-status="contacted"] .cards-container {
-    background: var(--cds-status-contacted-surface);
-}
 
 .column[data-status="meeting"] .column-header {
-    background: var(--cds-status-meeting-header);
-    border-color: var(--cds-status-meeting);
+    border-block-start-color: var(--cds-status-meeting);
 }
 
 .column[data-status="meeting"] .column-header h2 {
     color: var(--cds-status-meeting);
 }
 
-.column[data-status="meeting"] .cards-container {
-    background: var(--cds-status-meeting-surface);
-}
 
 .column[data-status="negotiation"] .column-header {
-    background: var(--cds-status-negotiation-header);
-    border-color: var(--cds-status-negotiation);
+    border-block-start-color: var(--cds-status-negotiation);
 }
 
 .column[data-status="negotiation"] .column-header h2 {
     color: var(--cds-status-negotiation);
 }
 
-.column[data-status="negotiation"] .cards-container {
-    background: var(--cds-status-negotiation-surface);
-}
 
 .column[data-status="signed"] .column-header {
-    background: var(--cds-status-signed-header);
-    border-color: var(--cds-status-signed);
+    border-block-start-color: var(--cds-status-signed);
 }
 
 .column[data-status="signed"] .column-header h2 {
     color: var(--cds-status-signed);
 }
 
-.column[data-status="signed"] .cards-container {
-    background: var(--cds-status-signed-surface);
-}
 
 .count-badge {
     background: var(--cds-layer-accent-01);
@@ -1123,17 +1086,13 @@ body.focus-mode .job-card.dimmed {
 
 /* Pending Column Styles */
 .column[data-status="pending"] .column-header {
-    background: var(--cds-status-pending-header);
-    border-color: var(--cds-status-pending);
+    border-block-start-color: var(--cds-status-pending);
 }
 
 .column[data-status="pending"] .column-header h2 {
     color: var(--cds-status-pending);
 }
 
-.column[data-status="pending"] .cards-container {
-    background: var(--cds-status-pending-surface);
-}
 
 .column[data-status="pending"] .job-card {
     border-left: 3px solid var(--cds-status-pending);

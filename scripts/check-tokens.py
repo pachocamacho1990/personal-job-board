@@ -173,6 +173,13 @@ STATUS_PAIRS = [
     for s in STATUSES for fill in ("header", "surface")
 ]
 
+# Since PJBA-38 the board column header is a neutral layer with an accent bar,
+# so the accent is heading text on layer-01 — a pair the -header/-surface checks
+# above never covered. The tinted fills survive for tags, chips and the agent's
+# message blocks, which is why both sets are checked rather than one replacing
+# the other.
+STATUS_PAIRS += [(f"--cds-status-{s}", "--cds-layer-01") for s in STATUSES]
+
 # Carbon's own palette puts these below threshold. Reported, never silently passed.
 KNOWN_EXCEPTIONS = {
     "--cds-text-placeholder": "Carbon uses Gray 40; documented as not meeting AA. Never rely on a placeholder to convey information.",
