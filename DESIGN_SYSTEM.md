@@ -372,6 +372,24 @@ shadow.** A shadow marks a state — hovered, dragged, floating — never a perm
 hierarchy. That single rule is what separates a considered interface from a cluttered
 one, and it is the one to defend in review.
 
+### Dialogs
+
+The card editor is a centred dialog, not a right-hand drawer. It was a drawer, in the
+same 400px strip the agent panel occupies and at the same z-index, so opening a card
+with the agent open put the form underneath it. That is not a z-index question to
+arbitrate — it is a layout that assumed only one of the two would ever exist.
+
+Both detail panels share `src/components/Drawer.tsx`, so they behave identically: a
+blurred backdrop that dismisses on click but only when the click started on the
+backdrop itself, the card at `--cds-radius-03` with `--cds-shadow-overlay`, and an
+entrance on the expressive curve.
+
+The header stays put while the body scrolls under it — a dialog whose title scrolls
+away has lost track of what it is editing — and the actions are stuck to the bottom
+edge, because Save should never be something you scroll to find. That row is
+`position: sticky` rather than a real footer: moving it out of the `<form>` would
+disconnect the submit button from what it submits.
+
 ### The interaction vocabulary
 
 Three roles, so a card on the dashboard answers the pointer the way a card on the
@@ -434,16 +452,55 @@ cards with `origin='agent'`, cards with `is_unseen`, the dashboard's AI matches
 widget, the agent's own message bubbles, and the Zenith panel *while it is
 generating*. A `grep` for `--cds-ai-` outside those is a review failure.
 
-**One deliberate substitution.** Carbon builds the register out of blue. Here blue is
-already `--cds-button-primary` and `--cds-status-applied`, so an AI aura in blue would
-read as "interactive" or "applied". The structure is Carbon's stop for stop and alpha
-for alpha; only the hue moves to purple, which this codebase reserved for the agent
-long before the migration.
+**These are Carbon's values, unchanged.** An earlier version moved the hue to purple,
+because blue is also `--cds-button-primary` and `--cds-status-applied` and an AI aura
+in blue risks reading as "interactive" or "applied". Shown both, he chose blue, so the
+substitution is gone.
+
+**The collision that prompted the purple is real and still there.** An agent-created
+card sitting in the *Applied* column wears a blue status border and a blue AI aura at
+once. Checked on a seeded board rather than assumed: it survives, the aura and the top
+edge still read as different from a human card beside it — but it is the weakest joint
+in the system, and the first place to look if anything reads muddy. Two ways out that
+are not "go back to purple": move `status-applied` to another board hue, or separate
+the AI stop from the status stop.
+
+Inside the agent console there is no collision, because it consumes no
+`--cds-button-primary` or `--cds-interactive` at all. See section 9c.
 
 Two traps, both learned the hard way. The hover stop (`ai-aura-hover-start`, alpha
 0.32) is for hover: used as a resting state it tinted a card enough to drag the rating
 glyphs from 4.99:1 to 4.49:1. And nothing here animates — the pulses this replaced ran
 forever, and an unseen card can sit on a board for days.
+
+---
+
+## 9c. The agent console is a single-hue surface
+
+Everything inside it is the agent, so the agent accent is the only hue that carries
+meaning there and the app's interactive blue does not appear — `--cds-button-primary`
+means "the app's primary action", and a message a human typed is not that. It was blue
+by chat convention, not by meaning.
+
+| Token | g10 | g100 |
+|---|---|---|
+| `--cds-agent-accent` | Blue 60 | Blue 40 |
+| `--cds-agent-accent-hover` | Blue 70 | Blue 30 |
+| `--cds-agent-surface` | Blue 10 | Blue 90 |
+| `--cds-agent-text-on-accent` | White | Gray 100 |
+
+That last one is the only place g100 is not a mirror of g10: the accent is dark in one
+theme and light in the other, so what sits on it inverts.
+
+The user's bubble is neutral and the agent's carries the AI register — that asymmetry
+is what marks which half of the conversation was generated. Green and red stay for
+online, success and error, which are real state rather than decoration.
+
+**No `--cds-status-*` token may appear in `agent-console.css`.** The thinking block
+used to be `status-interview-surface` and the suggestion block `status-interested-surface`
+— job-board colours picked for how they looked, in a console that has no job statuses.
+Repainting the board columns would have silently repainted the agent's inner monologue.
+The conformance gate now rejects this.
 
 ---
 
@@ -543,11 +600,10 @@ Recorded here so nobody mistakes it for the intended pattern:
   TSX. Nothing may be added to that block, and it goes away with the inline-style
   migration. `--font-weight-medium: 500` is the odd one out: it is off the Carbon
   scale (400 then 600, nothing between) and still appears in live declarations.
-- **Two N1 leaks.** `styles.css` line 28 maps the legacy `--color-accent` straight to
-  `--cds-purple-60`, and the login showcase SVG in `src/pages/login/main.tsx`
-  references `--cds-teal-50` directly alongside a few hardcoded hex and `rgba()`
-  values. The SVG sits on an always-dark panel so it does not visibly break under a
-  theme switch, but it is still a violation of the hard rule in section 1.
+- **One N1 leak.** `styles.css` line 28 maps the legacy `--color-accent` straight to
+  `--cds-purple-60`. The login showcase SVG used to be the second one; it was redrawn
+  and now reads only the `--showcase-*` scoped tokens, which is the sanctioned pattern
+  for an always-dark surface.
 - **`--cds-white-rgb`** now has a consumer: the Carbon for AI aura fades to
   transparent white in g10. The note that it was unused is retired.
 - **The composed type styles are underused.** Most call sites still assemble

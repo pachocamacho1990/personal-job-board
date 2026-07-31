@@ -2,6 +2,56 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.15.0] - 2026-07-31
+
+### 🔧 Segunda pasada visual (M7)
+
+Lo que salió de mirar la v3.14.0 desplegada. Cuatro bugs, dos de ellos anteriores a
+la migración, y un diagrama de login que prometía funcionalidad inexistente.
+
+#### Fixed
+- **El Dashboard llevaba desde la migración a una sola columna.** `.dashboard-grid`
+  estaba declarada en `layout.css` con la rejilla real y en `dashboard.css` con solo un
+  margen; el commit `3035ca4` borró la primera razonando que la segunda la reemplazaba,
+  pero esa **nunca tuvo `display: grid`**. Invisible en QA porque un dashboard vacío
+  renderiza dos tarjetas apiladas, que es exactamente como se ve el bug.
+- **El contenido no se contraía para el panel del agente al navegar.** `AgentConsole`
+  ponía una clase sobre `.main-content` desde un efecto atado a `[isPanelOpen]`. Esto es
+  una SPA: el router cambia la página sin recargar, el efecto no vuelve a correr, y el
+  nuevo `.main-content` nunca se enteraba — 400px de solape permanente. El estado vive
+  ahora en `<html>` como `data-agent-open`, el único nodo que el router no recrea.
+- **Una lámina opaca tapaba la cuadrícula de fondo.** `.kanban-board` pintaba
+  `--cds-background`, el mismo color que ya pinta `body`: no cambiaba nada visualmente y
+  por eso nadie lo cuestionó, mientras cubría la textura en toda el área del tablero.
+- **El detalle de tarjeta era inalcanzable con el agente abierto.** Los dos ocupaban la
+  misma franja de 400px en el mismo `z-index`. Ahora es un diálogo centrado.
+
+#### Changed
+- **La consola del agente pasa de seis hues a uno.** La burbuja del usuario va neutra —
+  `button-primary` significa "acción primaria de la app" y un mensaje escrito por una
+  persona no es eso — y la maquinaria del agente deja de tomar prestado el azul
+  interactivo. De paso se corrigen dos fugas semánticas: los bloques de *thinking* y
+  *suggestion* usaban tokens de estado del Job Board, elegidos por cómo se veían.
+- **El registro Carbon for AI vuelve al azul de Carbon**, sin la sustitución a morado.
+  Cero desviación que explicar; a cambio, una tarjeta de agente en la columna *Applied*
+  lleva ahora borde azul de estado y aura azul de IA. Verificado sobre datos: se
+  distinguen, pero es el punto más débil del sistema y queda documentado.
+- **La cuadrícula de fondo sube de 2,5 % a 8 %** en claro y de 4 % a 10 % en oscuro.
+  Estaba por debajo del umbral en que se registra como textura.
+- **El diagrama del login, rehecho.** El anterior anunciaba un "ATS Match Optimizador"
+  con un 82 % de coincidencia y generación de cartas de presentación con IA. Nada de eso
+  existe. Ahora muestra el agente, tres etapas reales con los colores reales del board,
+  y el business board.
+
+#### Added
+- Octavo check en el gate de conformidad: ningún `--cds-status-*` dentro de
+  `agent-console.css`.
+
+#### Verification
+Gate 8/8 · barrido de contraste 0 fallos en 12 combinaciones sobre tableros poblados ·
+75 tests de backend · 9 E2E · `tsc` y build limpios. Los dos bugs de layout reproducidos
+en Playwright antes del arreglo y vueltos a medir después.
+
 ## [3.14.0] - 2026-07-31
 
 ### ✨ Refinamiento visual sobre Carbon (M6)

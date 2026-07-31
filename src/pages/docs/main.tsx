@@ -609,10 +609,19 @@ export const DocsPage: React.FC = () => {
                 Carbon: las superficies van en gris y el color queda reservado para el acento.
               </p>
 
+              <h3>Editar una tarjeta</h3>
+              <p>
+                Al pulsar una tarjeta se abre primero una vista de solo lectura con su
+                historial. Desde ahí, <strong>Edit Details</strong> abre el formulario en un
+                diálogo centrado, sobre el resto de la aplicación. Se cierra con{' '}
+                <code>Esc</code> o pulsando fuera, y las acciones de guardar, archivar y
+                borrar quedan siempre visibles al pie aunque el formulario sea largo.
+              </p>
+
               <h3>Cómo se marca el contenido generado por IA</h3>
               <p>
                 Las oportunidades que crea el agente Zenith llevan un{' '}
-                <strong>halo violeta</strong> que asciende desde el borde inferior de la tarjeta,
+                <strong>halo azul</strong> que asciende desde el borde inferior de la tarjeta,
                 más un borde del mismo tono. Las que aún no has abierto lo llevan algo más marcado.
                 El mismo tratamiento aparece en el widget de coincidencias del panel de inicio, en
                 los mensajes del propio agente, y en el panel de Zenith mientras está generando una
