@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="es" data-carbon-theme="g10">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PJBA-35 · Comparación de variantes</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap">
+
+<!-- The real stylesheets, unmodified. Every card below is the production card;
+     only the radius and the hover treatment are overridden, per cell. -->
+<link rel="stylesheet" href="../src/styles/theme.css">
+<link rel="stylesheet" href="../src/styles/styles.css">
+
+<style>
+/* ── Scaffolding only ─────────────────────────────────────────────────────
+   This file is disposable: it is not a vite entry, nothing links to it, and
+   PJBA-40 deletes it. That is why it is allowed to hold raw values — it exists
+   to decide what those values should be. */
+
+body {
+  font-family: var(--cds-font-sans);
+  margin: 0;
+  background: #f4f4f4;
+}
+
+.brief {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 3rem 2rem 1rem;
+  color: #161616;
+  background: #f4f4f4;
+}
+.brief h1 { font-size: 1.75rem; font-weight: 600; margin: 0 0 .5rem; }
+.brief p  { line-height: 1.5; max-width: 46rem; margin: 0 0 .75rem; }
+.brief code {
+  font-family: var(--cds-font-mono);
+  font-size: .85em;
+  background: #e0e0e0;
+  padding: 1px 5px;
+}
+.brief .ask {
+  border-left: 3px solid #0f62fe;
+  padding: .75rem 0 .75rem 1rem;
+  margin: 1.5rem 0 0;
+  background: #ffffff;
+}
+
+/* Each theme gets its own painted slab, so both can be judged at once instead
+   of from memory. The attribute selector in theme.css is not tied to <html>. */
+.slab {
+  background: var(--cds-background);
+  color: var(--cds-text-primary);
+  padding: 2rem;
+}
+.slab > h2 {
+  font-size: .875rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--cds-text-secondary);
+  margin: 0 0 1.5rem;
+  max-width: 62rem;
+  margin-inline: auto;
+}
+
+.matrix {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  max-width: 62rem;
+  margin: 0 auto;
+}
+
+.cell > .label {
+  font-family: var(--cds-font-mono);
+  font-size: .7rem;
+  color: var(--cds-text-secondary);
+  margin-bottom: .5rem;
+  display: block;
+}
+
+/* The card lives in a real column so the status accent and the surface tint
+   are the ones the board actually paints. */
+.cell .column { min-width: 0; max-width: none; }
+.cell .job-card { margin-bottom: 0; }
+.cell .cards-container { min-height: 0; padding: var(--cds-spacing-03); }
+
+/* ── The two axes ──────────────────────────────────────────────────────── */
+
+/* Radius. 4px is what Carbon's content-switcher uses; 8px is $spacing-03, the
+   radius of Carbon's own tile--decorator-rounded. */
+[data-radius="4"] .job-card,
+[data-radius="4"] .column-header,
+[data-radius="4"] .cards-container { border-radius: 4px; }
+
+[data-radius="8"] .job-card,
+[data-radius="8"] .column-header,
+[data-radius="8"] .cards-container { border-radius: 8px; }
+
+/* Depth. The shadow is Carbon's, exactly: the box-shadow mixin in
+   packages/styles/scss/utilities/_box-shadow.scss is `0 2px 6px $shadow`, and
+   $shadow is black at 0.3 alpha in all four themes — g100 included. Whether
+   that reads at all on a near-black background is one of the things to judge. */
+[data-depth="shadow"] .job-card:hover,
+[data-depth="lift"] .job-card:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+[data-depth="lift"] .job-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Every cell hovers with the Carbon timing adopted in PJBA-34, so what is being
+   compared is the treatment, not the speed. */
+.cell .job-card:hover {
+  background-color: var(--cds-layer-hover-01);
+}
+
+.legend {
+  max-width: 62rem;
+  margin: 0 auto 1rem;
+  font-size: .8rem;
+  color: var(--cds-text-secondary);
+  display: flex;
+  gap: 2rem;
+}
+</style>
+</head>
+
+<body>
+
+<div class="brief">
+  <h1>Tres radios × tres profundidades</h1>
+  <p>
+    Cada tarjeta de abajo es la tarjeta real del Job Board, con las hojas de
+    estilo de producción sin tocar. Lo único que cambia por celda es el radio de
+    las esquinas y qué pasa al pasar el ratón por encima.
+  </p>
+  <p>
+    <strong>Pasa el ratón por las tarjetas.</strong> La queja original era sobre
+    cómo se siente la interfaz, y eso no se juzga en una captura.
+  </p>
+  <p>
+    Los tres radios no son inventados: <code>0</code> es lo que hay hoy,
+    <code>4px</code> es lo que usa el <code>content-switcher</code> de Carbon, y
+    <code>8px</code> es <code>$spacing-03</code>, el radio de
+    <code>tile--decorator-rounded</code> — la variante de tile redondeada que
+    Carbon v11 ya trae. La sombra es literalmente la de Carbon:
+    <code>0 2px 6px</code> con negro al 30 %.
+  </p>
+
+  <div class="ask">
+    <p style="margin:0 0 .5rem"><strong>Lo que hay que decidir:</strong></p>
+    <p style="margin:0">
+      1. Un radio para <strong>contenedores</strong> (tarjetas, columnas, paneles).<br>
+      2. Un radio para <strong>controles</strong> (botones, inputs) — puede ser distinto y menor.<br>
+      3. Un tratamiento de <strong>hover</strong>: solo color, color + sombra, o color + sombra + elevación.<br>
+      4. Si la sombra en el tema oscuro se ve lo suficiente, o hay que darle otro valor.
+    </p>
+  </div>
+</div>
+
+<!-- ── g10 ────────────────────────────────────────────────────────────── -->
+<section class="slab">
+  <h2>g10 · claro</h2>
+  <div class="legend"><span>Columnas: radio →</span><span>Filas: profundidad al hover ↓</span></div>
+  <div class="matrix" id="matrix-g10"></div>
+</section>
+
+<!-- ── g100 ───────────────────────────────────────────────────────────── -->
+<section class="slab" data-carbon-theme="g100">
+  <h2>g100 · oscuro</h2>
+  <div class="legend"><span>Columnas: radio →</span><span>Filas: profundidad al hover ↓</span></div>
+  <div class="matrix" id="matrix-g100"></div>
+</section>
+
+<script>
+const RADII = [
+  { value: '0', label: 'radio 0 · lo que hay hoy' },
+  { value: '4', label: 'radio 4px · content-switcher' },
+  { value: '8', label: 'radio 8px · tile redondeada' },
+];
+
+const DEPTHS = [
+  { value: 'none',   label: 'solo color de capa' },
+  { value: 'shadow', label: '+ sombra 0 2px 6px' },
+  { value: 'lift',   label: '+ sombra + translateY(-2px)' },
+];
+
+// One representative card: a long employer name that wraps, a rating, both
+// badges, and every optional line filled in. A short tidy card hides exactly
+// the corner and spacing problems this page is meant to surface.
+const card = () => `
+  <div class="column" data-status="interview">
+    <div class="column-header"><h2>Entrevista</h2><span class="count">3</span></div>
+    <div class="cards-container">
+      <div class="job-card">
+        <div class="card-header">
+          <span class="rating-stars">★★★★☆</span>
+          <div style="display:flex;gap:4px">
+            <span class="type-badge job">Empleo</span>
+            <span class="type-badge origin-human">Humano</span>
+          </div>
+        </div>
+        <h3>Senior Platform Engineer</h3>
+        <p class="company">Iberdrola Innovación y Tecnología</p>
+        <p>Madrid · Híbrido</p>
+        <p>65.000 € – 82.000 €</p>
+        <p class="timestamp">Updated hace 2 días</p>
+      </div>
+    </div>
+  </div>`;
+
+for (const id of ['matrix-g10', 'matrix-g100']) {
+  const host = document.getElementById(id);
+  for (const depth of DEPTHS) {
+    for (const radius of RADII) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.radius = radius.value;
+      cell.dataset.depth = depth.value;
+      cell.innerHTML =
+        `<span class="label">${radius.label}<br>${depth.label}</span>` + card();
+      host.appendChild(cell);
+    }
+  }
+}
+</script>
+
+</body>
+</html>
