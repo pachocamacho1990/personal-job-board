@@ -93,13 +93,17 @@ body {
 }
 
 /* Kanban Board */
+/* No fill. This repainted --cds-background across the whole board area, which
+   is the same colour body already paints — so it changed nothing visually while
+   covering body's grid with an opaque sheet. That flat grey plane behind the
+   cards was this rule, not the card fill and not the grid being too faint.
+   Redundant even before the grid existed. */
 .kanban-board {
     display: flex;
     gap: var(--cds-spacing-06);
     padding: var(--cds-spacing-06);
     overflow-x: auto;
     flex: 1;
-    background: var(--cds-background);
 }
 
 .column {
