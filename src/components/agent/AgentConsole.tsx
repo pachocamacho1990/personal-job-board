@@ -6,6 +6,7 @@ import { AgentStatusBar } from './AgentStatusBar';
 import { BrainIcon, ChatIcon, PlusIcon, TrashIcon, StopIcon } from '../icons';
 import { navigateTo } from '../../router';
 import { apiRequest } from '../../api';
+import { applyAgentOpen, getStoredAgentOpen } from '../../agentLayout';
 import '../../styles/agent-console.css';
 
 interface ConversationHistory {
@@ -24,7 +25,7 @@ export const AgentConsole: React.FC = () => {
   const json = JSON;
 
   const [isPanelOpen, setIsPanelOpen] = useState(() => {
-    return localStorage.getItem('agentPanelOpen') === 'true';
+    return getStoredAgentOpen();
   });
   const [messages, setMessages] = useState<AgentMessageType[]>([]);
   const [activeRun, setActiveRun] = useState<ActiveRun | null>(null);
@@ -215,19 +216,10 @@ export const AgentConsole: React.FC = () => {
     }
   }, [onboardingStatus]);
 
-  // Persist panel state
+  // Persist the panel state and publish it on <html>, where CSS can reach the
+  // page content without this component having to know what is rendered.
   useEffect(() => {
-    localStorage.setItem('agentPanelOpen', String(isPanelOpen));
-
-    // Toggle class on main-content elements
-    const mainContents = document.querySelectorAll('.main-content, .docs-content');
-    mainContents.forEach(el => {
-      if (isPanelOpen) {
-        el.classList.add('agent-open');
-      } else {
-        el.classList.remove('agent-open');
-      }
-    });
+    applyAgentOpen(isPanelOpen, true);
   }, [isPanelOpen]);
 
   const togglePanel = useCallback(() => {

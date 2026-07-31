@@ -605,32 +605,49 @@ body {
 }
 
 /* Detail Panel */
-/* Positioning used to be an inline style repeated in both panels. It belongs
-   here: it is the same decision every time, and the Drawer component has no
-   reason to know pixel values. */
+/* The editing dialog. This was a 400px drawer pinned to the right edge — the
+   same strip the agent panel occupies — so with the agent open the form was
+   unreachable underneath it. It is centred now, which removes the collision
+   rather than arbitrating it with z-index, and matches the read-only peek that
+   opens from the same card.
+
+   .detail-panel is the backdrop; .panel-content is the card. Both keep their
+   names because the specs and the components select on them. */
 .detail-panel {
     position: fixed;
-    right: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 200;
-    width: 400px;
-    background: var(--cds-background);
-    border-left: 1px solid var(--cds-border-subtle-00);
+    inset: 0;
+    z-index: 1000;
+    background: var(--cds-overlay);
+    backdrop-filter: blur(4px);
     display: none;
-    flex-direction: column;
-    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    padding: var(--cds-spacing-07);
 }
 
 .detail-panel.open {
     display: flex;
+    animation: fadeIn var(--cds-duration-moderate-02) var(--cds-easing-entrance-expressive);
 }
 
 .panel-content {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    width: 100%;
+    max-width: 720px;
+    max-height: 88vh;
+    background: var(--cds-layer-01);
+    border: 1px solid var(--cds-border-subtle-00);
+    border-radius: var(--cds-radius-03);
+    box-shadow: var(--cds-shadow-overlay);
     overflow: hidden;
+    animation: scaleUp var(--cds-duration-moderate-02) var(--cds-easing-entrance-expressive);
+}
+
+/* The header and the actions stay put while the form scrolls between them.
+   A dialog whose title scrolls away has lost track of what it is editing. */
+.panel-header {
+    flex-shrink: 0;
 }
 
 .panel-header {
@@ -921,10 +938,24 @@ body {
     margin: var(--cds-spacing-06) 0;
 }
 
+/* Anchored to the bottom of the card rather than trailing the end of a long
+   form: Save should never be something you have to scroll to find.
+
+   Sticky rather than a real footer, because it has to stay inside the <form>
+   for the submit button to submit it. The negative margins let it span the
+   form's padding so the rule above it reaches both edges of the card. */
 .form-actions {
+    position: sticky;
+    bottom: calc(var(--cds-spacing-06) * -1);
     display: flex;
     gap: var(--cds-spacing-03);
-    margin-top: var(--cds-spacing-06);
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: var(--cds-spacing-06) calc(var(--cds-spacing-06) * -1) calc(var(--cds-spacing-06) * -1);
+    padding: var(--cds-spacing-05) var(--cds-spacing-06);
+    border-top: 1px solid var(--cds-border-subtle-00);
+    background: var(--cds-layer-01);
 }
 
 /* Buttons */
