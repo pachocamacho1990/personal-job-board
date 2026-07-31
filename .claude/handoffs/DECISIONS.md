@@ -129,3 +129,56 @@ en la app no hay ninguno. Es la palanca más grande para lo que el usuario llama
 **Restricción dura sobre cualquier cambio de color**: el barrido de contraste
 está en 0 elementos bajo AA en 12 combinaciones página/tema, y tiene que seguir
 en 0. "Colores más suaves" es exactamente el cambio que puede romperlo.
+
+## 2026-07-31 · La revisión se resuelve: mi lectura fue más rígida que Carbon
+
+Cierra la entrada anterior. De las dos respuestas posibles que dejaba abiertas,
+gana la segunda: **hay margen dentro del sistema y no hace falta desviarse**.
+
+Evidencia, toda del código fuente de `carbon-design-system/carbon` en `main`:
+
+- `packages/styles/scss/components/button/_vars.scss:23` —
+  `$button-border-radius: 0 !default`. El `!default` es un punto de override
+  sancionado por Carbon, no un valor cerrado.
+- `components/popover/_popover.scss:63` — expone
+  `--cds-popover-border-radius`, por defecto 2px.
+- `components/content-switcher/_content-switcher.scss:28` — 4px nativo.
+- `components/tile/_tile.scss:630` — `tile--decorator-rounded` a `$spacing-03`
+  (8px). Carbon v11 **ya trae una variante de tile redondeada**.
+- `tag` 16px, `chat-button` 16–24px, `toggle` 12/16px, `badge-indicator` 100px.
+
+El **default** de Carbon es 0. Su **vocabulario** no lo es. La frase que escribí
+en `theme.css` — "redondear las esquinas es el cambio que más hace que una UI
+deje de leerse como Carbon" — es falsa como principio y se retira.
+
+Lo mismo con la elevación: existe el token de tema `$shadow` (negro al 0.3) y el
+mixin oficial `box-shadow: 0 2px 6px $shadow` en
+`packages/styles/scss/utilities/_box-shadow.scss`. Lo que Carbon no tiene es una
+rampa multinivel tipo Material. La profundidad se construye con **tres
+mecanismos, en orden de preferencia: color de capa → motion → la única sombra**.
+Ese orden es la parte que importa; la sombra es el último recurso.
+
+**Lo decidido** (el usuario eligió mirando la matriz de PJBA-35, no describiendo):
+
+- **Contenedores — 8px.** Tarjetas, columnas, paneles, modales. Es
+  `$spacing-03`, el mismo valor de la tile redondeada de Carbon.
+- **Controles — 4px.** Botones, inputs, selects, tags no-pill. Decisión mía, no
+  suya: no la pidió y no bloquea. 8px en un botón de 32px de alto se lee hinchado,
+  y 4px es lo que usa el content-switcher de Carbon.
+- **Popovers y tooltips — 2px**, igualando el default de Carbon.
+- **Radio 0 sobrevive** donde la esquina de verdad es estructura: divisores,
+  bordes de tabla, el shell de la aplicación.
+- **Hover — color de capa + sombra + `translateY(-2px)`**, con la duración y la
+  curva de Carbon. Al hacer click el elemento se hunde: `layer-active`, sin
+  sombra y sin lift.
+- **Ningún elemento estático lleva sombra.** La sombra marca un estado —
+  elevado, flotando, arrastrándose — nunca una jerarquía permanente. Esa regla
+  es lo que separa "premium" de "cargado", y es la que hay que defender en
+  revisión cuando alguien quiera ponerle sombra a una tarjeta en reposo.
+
+**Sin resolver**: si el negro al 30 % de Carbon se ve sobre el fondo de g100. Se
+mide en PJBA-37; si no se ve, el token de sombra en oscuro toma otro valor en
+lugar de copiar el de g10.
+
+**La restricción de contraste sigue en pie**: 0 elementos bajo AA en 12
+combinaciones, y tiene que seguir en 0.
