@@ -2,7 +2,17 @@
    Carbon separates surfaces with layer color rather than shadow, so a card is a
    layer-01 panel on the background and hover shifts the fill and border instead
    of lifting the card. Colors are N2 semantics only; see src/styles/theme.css. */
+/* The grid lived here AND in layout.css. PJBA-19 deleted the layout.css copy on
+   the grounds that this file owned it — but this copy never had display:grid, so
+   the two panels have been stacking ever since. Restored, in one place.
+
+   350px is the narrowest a panel can be and still fit a job title, a company and
+   a date on one line. Below two of those plus the gap, auto-fit drops to one
+   column, which is the right behaviour rather than a fallback. */
 .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
     margin-top: 1.5rem;
 }
 

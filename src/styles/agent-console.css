@@ -87,7 +87,7 @@ main.docs-content.agent-open {
    it is literal. */
 .agent-toggle-btn:hover {
   width: 44px;
-  background: var(--cds-highlight);
+  background: var(--cds-agent-surface);
   box-shadow: var(--cds-shadow-raised);
   transform: translateY(var(--cds-lift-raised));
 }
@@ -107,7 +107,7 @@ main.docs-content.agent-open {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--cds-interactive);
+  color: var(--cds-agent-accent);
 }
 
 /* Hide toggle when panel is open */
@@ -154,7 +154,7 @@ main.docs-content.agent-open {
 .agent-header-icon {
   width: 32px;
   height: 32px;
-  background: var(--cds-highlight);
+  background: var(--cds-agent-surface);
   border-radius: var(--cds-radius-02);
   display: flex;
   align-items: center;
@@ -184,7 +184,11 @@ main.docs-content.agent-open {
   gap: 4px;
 }
 
-.agent-header-status.online { color: var(--cds-status-offer); }
+/* The dot beside this label is support-success and carries the state. The label
+   itself is text, and support-success is a 3:1 indicator colour, not a 4.5:1 text
+   one — it measured 3.35:1 here. Colour alone should not carry state anyway, and
+   the word already says it. */
+.agent-header-status.online { color: var(--cds-text-secondary); }
 .agent-header-status.offline { color: var(--cds-text-secondary); }
 
 .agent-status-dot {
@@ -285,10 +289,15 @@ main.docs-content.agent-open {
   word-break: break-word;
 }
 
-/* User bubble */
+/* User bubble. Neutral on purpose. It used to be button-primary, which is the
+   app's "primary action" blue — a message a human typed is not an action, and
+   painting it blue was chat convention rather than meaning. Two saturated hues
+   facing each other across a thread also read as an argument between them. With
+   this neutral, the only hue left in the conversation is the one that says which
+   half of it was generated. */
 .agent-msg.role-user .agent-msg-bubble {
-  background: var(--cds-button-primary);
-  color: var(--cds-text-on-color);
+  background: var(--cds-layer-accent-01);
+  color: var(--cds-text-primary);
   border-end-end-radius: var(--cds-radius-01);
 }
 
@@ -307,10 +316,16 @@ main.docs-content.agent-open {
 }
 
 /* ── Thinking Block ──────────────────────── */
+/* status-interview-surface is a JOB BOARD token — "this application reached the
+   interview stage" — and it was in here because the yellow looked right, not
+   because it meant anything. Repainting the board columns would have silently
+   repainted the agent's inner monologue. Neutral now, and low emphasis, which is
+   what thinking out loud deserves. */
 .agent-msg.type-thinking .agent-msg-bubble {
-  background: var(--cds-status-interview-surface);
-  border: 1px solid var(--cds-status-interview-header);
-  border-left: 3px solid var(--cds-support-warning);
+  background: var(--cds-layer-02);
+  border: 1px solid var(--cds-border-subtle-00);
+  border-left: 3px solid var(--cds-border-strong-01);
+  background-image: none;
   font-size: 0.8rem;
   color: var(--cds-text-secondary);
   font-style: italic;
@@ -320,16 +335,21 @@ main.docs-content.agent-open {
 .agent-msg.type-tool_call .agent-msg-bubble {
   background: var(--cds-terminal-bg);
   border: 1px solid var(--cds-terminal-border);
-  border-left: 3px solid var(--cds-support-success);
+  /* This was support-success, on every tool call, before any of them had
+     succeeded. A tool call is not an outcome. */
+  border-left: 3px solid var(--cds-border-strong-01);
+  background-image: none;
   font-size: 0.8rem;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 /* ── Suggestion Block ────────────────────── */
+/* Was status-interested-surface — another board token borrowed for its tint. A
+   suggestion is generated content, so it keeps the AI register instead. */
 .agent-msg.type-suggestion .agent-msg-bubble {
-  background: var(--cds-status-interested-surface);
-  border: 1px solid var(--cds-status-interested-header);
-  border-left: 3px solid var(--cds-agent-accent);
+  background: var(--cds-layer-02);
+  border: 1px solid var(--cds-ai-border-start);
+  border-left: 3px solid var(--cds-ai-border-strong);
 }
 
 /* ── Collapsible Toggle ──────────────────── */
@@ -385,7 +405,7 @@ main.docs-content.agent-open {
 
 .agent-progress-bar-fill {
   height: 100%;
-  background: var(--cds-interactive);
+  background: var(--cds-agent-accent);
   border-radius: var(--cds-radius-00);
   transition: width var(--cds-duration-slow-01) var(--cds-easing-standard-productive);
   position: relative;
@@ -395,7 +415,7 @@ main.docs-content.agent-open {
 .agent-progress-pct {
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--cds-interactive);
+  color: var(--cds-agent-accent);
   margin-left: auto;
 }
 
@@ -418,7 +438,7 @@ main.docs-content.agent-open {
 }
 
 .agent-progress-step.running {
-  color: var(--cds-interactive);
+  color: var(--cds-agent-accent);
   font-weight: 500;
 }
 
@@ -437,7 +457,7 @@ main.docs-content.agent-open {
   display: inline-block;
   width: 12px;
   height: 12px;
-  border: 2px solid var(--cds-interactive);
+  border: 2px solid var(--cds-agent-accent);
   border-top-color: transparent;
   border-radius: 50%;
   animation: agent-spin var(--app-duration-spin) linear infinite;
@@ -469,13 +489,13 @@ main.docs-content.agent-open {
 }
 
 .agent-action-btn.variant-primary {
-  background: var(--cds-button-primary);
-  color: var(--cds-text-on-color);
-  border-color: var(--cds-button-primary);
+  background: var(--cds-agent-accent);
+  color: var(--cds-agent-text-on-accent);
+  border-color: var(--cds-agent-accent);
 }
 
 .agent-action-btn.variant-primary:hover {
-  background: var(--cds-button-primary-hover);
+  background: var(--cds-agent-accent-hover);
 }
 
 .agent-action-btn.variant-secondary {
@@ -532,12 +552,12 @@ main.docs-content.agent-open {
 
 /* The whole composer takes focus, not the bare textarea inside it. */
 .agent-input-wrapper:focus-within {
-  border-color: var(--cds-border-interactive);
-  box-shadow: 0 0 0 1px var(--cds-border-interactive);
+  border-color: var(--cds-ai-border-strong);
+  box-shadow: 0 0 0 1px var(--cds-ai-border-strong);
 }
 
 .agent-input-wrapper:focus-within {
-  border-color: var(--cds-interactive);
+  border-color: var(--cds-agent-accent);
   box-shadow: none;
 }
 
@@ -567,8 +587,8 @@ main.docs-content.agent-open {
   height: 34px;
   border-radius: var(--cds-radius-pill);
   border: none;
-  background: var(--cds-interactive);
-  color: var(--cds-text-on-color);
+  background: var(--cds-agent-accent);
+  color: var(--cds-agent-text-on-accent);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -580,7 +600,7 @@ main.docs-content.agent-open {
 }
 
 .agent-send-btn:hover:not(:disabled) {
-  background: var(--cds-button-primary-hover);
+  background: var(--cds-agent-accent-hover);
 }
 
 .agent-send-btn:disabled {
@@ -649,13 +669,13 @@ main.docs-content.agent-open {
   flex: 1;
   font-size: 0.78rem;
   font-weight: 500;
-  color: var(--cds-interactive);
+  color: var(--cds-agent-accent);
 }
 
 .agent-status-bar-action {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--cds-interactive);
+  color: var(--cds-agent-accent);
   background: none;
   border: 1px solid var(--cds-border-subtle-00);
   border-radius: var(--cds-radius-02);
@@ -668,7 +688,7 @@ main.docs-content.agent-open {
 }
 
 .agent-status-bar-action:hover {
-  background: var(--cds-highlight);
+  background: var(--cds-agent-surface);
 }
 
 .agent-status-bar-action:active {
@@ -732,15 +752,15 @@ main.docs-content.agent-open {
 }
 
 .agent-header-btn:hover {
-  background: var(--cds-highlight);
-  color: var(--cds-interactive);
+  background: var(--cds-agent-surface);
+  color: var(--cds-agent-accent);
   border-color: var(--cds-border-subtle-00);
 }
 
 .agent-header-btn.active {
-  background: var(--cds-highlight);
-  color: var(--cds-interactive);
-  border-color: var(--cds-status-applied-header);
+  background: var(--cds-agent-surface);
+  color: var(--cds-agent-accent);
+  border-color: var(--cds-agent-accent);
 }
 
 .agent-header-btn:active {
@@ -775,7 +795,7 @@ main.docs-content.agent-open {
 }
 
 .agent-conv-item:hover {
-  border-color: var(--cds-interactive);
+  border-color: var(--cds-agent-accent);
   box-shadow: var(--cds-shadow-raised);
   transform: translateY(var(--cds-lift-raised));
 }
@@ -786,8 +806,8 @@ main.docs-content.agent-open {
 }
 
 .agent-conv-item.active {
-  background: var(--cds-highlight);
-  border-color: var(--cds-interactive);
+  background: var(--cds-agent-surface);
+  border-color: var(--cds-agent-accent);
 }
 
 .agent-conv-info {
@@ -890,7 +910,7 @@ main.docs-content.agent-open {
 
 /* ── Strategy Panel & Active Search Mode ── */
 .agent-ready-panel {
-  background: var(--cds-highlight);
+  background: var(--cds-agent-surface);
   border: 1px solid var(--cds-border-subtle-00);
   border-radius: var(--cds-radius-03);
   margin: 12px 16px;
@@ -906,7 +926,7 @@ main.docs-content.agent-open {
   align-items: center;
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--cds-interactive);
+  color: var(--cds-agent-accent);
   cursor: pointer;
   user-select: none;
 }
@@ -939,8 +959,8 @@ main.docs-content.agent-open {
   font-weight: 600;
   padding: 3px 8px;
   border-radius: var(--cds-radius-02);
-  background: var(--cds-status-interested-surface);
-  border: 1px solid var(--cds-status-interested-header);
+  background: var(--cds-agent-surface);
+  border: 1px solid var(--cds-ai-border-start);
   color: var(--cds-agent-accent);
 }
 
@@ -988,8 +1008,8 @@ main.docs-content.agent-open {
   padding: 8px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--cds-text-on-color);
-  background: var(--cds-interactive);
+  color: var(--cds-agent-text-on-accent);
+  background: var(--cds-agent-accent);
   border: none;
   border-radius: var(--cds-radius-02);
   cursor: pointer;
@@ -998,7 +1018,7 @@ main.docs-content.agent-open {
 }
 
 .agent-copy-btn:hover {
-  background: var(--cds-interactive);
+  background: var(--cds-agent-accent-hover);
 }
 
 .agent-copy-btn.success {
