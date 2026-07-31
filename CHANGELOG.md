@@ -2,6 +2,67 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.14.0] - 2026-07-31
+
+### ✨ Refinamiento visual sobre Carbon (M6)
+
+La migración de la v3.13.0 dejó la app correcta y plana. Se desplegó, se miró, y no
+convencía: demasiado cuadrada, sin respuesta al puntero, con las columnas del tablero
+demasiado cargadas de color. Tres de esas cuatro cosas eran decisiones tomadas de más
+durante la migración, no deuda heredada.
+
+La investigación fue al código fuente de `carbon-design-system/carbon`, no a la
+memoria, y desmintió la premisa: el **default** de Carbon es cuadrado y plano, su
+**vocabulario** no lo es. Ship 2/4/8/12/16/24px de radio en sus propios componentes,
+`$button-border-radius` está declarado `!default`, existe un token `$shadow` con su
+mixin, y hay un sistema de motion completo que esta app nunca había implementado.
+
+#### Added
+- **Sistema de motion de Carbon**: seis duraciones (70–700ms) y seis curvas de easing,
+  con la distinción *productive* / *expressive*. Las 60 transiciones escritas a mano
+  con `0.15s ease` inventado se migraron; cero `transition: all` en el árbol.
+  `prefers-reduced-motion` colapsa las duraciones en vez de eliminar las reglas.
+- **Escala de radio** de cuatro pasos, elegida de lo que Carbon ya usa: 2px en chips,
+  4px en controles, 8px en contenedores, 0 en lo que de verdad es estructura.
+- **Elevación**: `--cds-shadow-raised` y un `--cds-shadow-color` **temático**. Sobre
+  `#f4f4f4` el negro al 30 % de Carbon da 2.09:1; sobre `#161616` da 1.06:1 y ni el
+  negro puro pasa de 1.11:1 — en oscuro la profundidad la llevan la capa y el
+  desplazamiento, no la sombra.
+- **Vocabulario de interacción** en tres roles (`raised` / `row` / `control`), aplicado
+  a las 78 reglas de hover de la app en vez de a un puñado de selectores elegidos a
+  mano. Todo botón responde al pulsarse.
+- **Carbon for AI** en los cinco sitios donde hay IA de verdad: tarjetas con
+  `origin='agent'`, tarjetas sin ver, el widget de coincidencias, las burbujas del
+  agente y el panel de Zenith mientras genera. Con el hue movido a morado, porque el
+  azul de Carbon ya está ocupado aquí por `button-primary` y `status-applied`.
+
+#### Changed
+- **Las columnas del tablero pierden el relleno de color.** La cabecera es una capa
+  neutra con una barra de acento de 3px y el cuerpo no tiene relleno. Suavizarlo
+  **subió** el margen de contraste: los doce acentos pasan de medirse contra un tinte
+  a medirse contra `layer-01`, donde dan entre 6.36:1 y 11.55:1.
+- El panel del agente: burbujas con la esquina de su propio lado achatada, sombra de
+  overlay en el panel, `:focus-within` en el compositor y botón de enviar circular.
+- Dos animaciones infinitas eliminadas (`pulseAgent`, `shine`). Una tarjeta sin ver
+  puede estar días en el tablero, y un pulso que dura días es ruido.
+
+#### Fixed
+- **El barrido de contraste llevaba seis milestones escaneando un tablero vacío.** Se
+  registraba con una cuenta nueva y nunca sembraba datos, así que ni un timestamp, ni
+  una valoración, ni un tag de estado se había medido jamás. Ahora siembra 7 trabajos
+  y 5 entidades antes de escanear, y resuelve gradientes además de colores sólidos.
+- `.job-card .timestamp` estaba en **2.15:1**: usaba `--cds-text-placeholder`, el token
+  que Carbon documenta como sub-AA precisamente porque nada informativo debe usarlo,
+  con `opacity: 0.7` encima.
+- Las estrellas de valoración se anunciaban a los lectores de pantalla como
+  `"★★★★☆"`, que no significa nada. Ahora van `aria-hidden` con un equivalente hablado.
+- `--cds-shadow-overlay` estaba en alpha 0.2; Carbon usa 0.3.
+
+#### Verification
+Gate de conformidad ampliado a **7 checks** (nuevos: literales de duración/easing y de
+radio). Barrido de contraste en **0 fallos** sobre 12 combinaciones página/tema y ahora
+con tableros poblados. 75 tests de backend, 8 E2E del toggle, `tsc` y build limpios.
+
 ## [3.13.0] - 2026-07-30
 
 ### 🎨 Migración completa a IBM Carbon Design System (g10/g100)

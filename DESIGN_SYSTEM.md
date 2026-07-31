@@ -210,12 +210,19 @@ actually built:
 
 | Token | Where it goes |
 |---|---|
-| `--cds-status-X` | the accent: heading text and the header border |
-| `--cds-status-X-header` | fills the column header |
-| `--cds-status-X-surface` | fills the column body behind the cards |
+| `--cds-status-X` | the accent: the header's top bar, its heading text, the card's left border |
+| `--cds-status-X-header` | small tinted elements — **not** the column header |
+| `--cds-status-X-surface` | small tinted elements — **not** the column body |
 
-The two fills are deliberately close, with `-header` the stronger of the pair, so the
-header reads as part of the column rather than as a stripe.
+**The columns carry no hue fill.** They used to, and that was the problem: `-header`
+tinted the whole header and `-surface` the whole body beneath it, two washes of
+colour per column across seven columns. Carbon's layering model puts surfaces on
+grey and reserves hue for accent, so the header is `--cds-layer-01` with a 3px accent
+bar on its top edge and the column body has no fill at all.
+
+The two fill tokens survive because they are right for small tinted things — skill
+chips, the agent's thinking and suggestion blocks — where a wash of hue is the entire
+point, which is what Carbon does with tags. Do not put them back on a column.
 
 The statuses are `interested`, `applied`, `interview`, `offer`, `rejected`,
 `forgotten`, `pending` (job board) and `researching`, `contacted`, `meeting`,
@@ -229,6 +236,11 @@ hue-60 on a hue-20 fill the accent measures between 3.71 and 3.84 depending on h
 threshold, not the 3:1 UI one. In g100 the fills go to the dark end of each hue
 (header = hue-80, surface = hue-90) and the accent climbs to hue-30, the stop that
 stays legible both on its own fill and on a gray layer.
+
+It stays at 70/30 even though the column header is now neutral and 60 would clear AA
+there with room: the accent is still foreground on those tinted chips, and 60 still
+fails on hue-20. On `layer-01` the twelve accents measure 7.72–11.55 in g10 and
+6.36–8.99 in g100, which is checked.
 
 Two deliberate exceptions: `rejected` and `forgotten` are the two neutral columns,
 and `forgotten` sits one step darker in g10 (Gray 80 accent on Gray 30/Gray 20 fills)
@@ -317,17 +329,121 @@ built from an atom rather than a raw value.
 
 ---
 
-## 9. Radius and elevation
+## 9. Radius, elevation and motion
 
-**Radius is 0.** `--cds-radius-00` everywhere. Carbon is square: corners are
-structure, not decoration, and rounding them is the single change that most makes a
-UI stop reading as Carbon. The one exception is `--cds-radius-pill` (62.5rem), which
-exists only for tags, which are pill-shaped by spec.
+### Radius
 
-**Elevation is none.** Carbon separates surfaces with layer colour, not shadow.
-`--cds-shadow-none` is the default for anything sitting in the page flow. The one
-sanctioned shadow is `--cds-shadow-overlay` (`0 2px 6px rgba(0,0,0,0.2)`), for things
-that float above the page and must be dismissible — menus, popovers, modals.
+Carbon's *default* is 0. Its vocabulary is not: the library ships 2px on popovers
+(exposed as `--cds-popover-border-radius`), 4px on the content switcher, 8px on
+`tile--decorator-rounded`, 12/16px on the toggle, 16px on tags, 24px on the chat
+button — and `$button-border-radius` is declared `!default`, which is Sass for
+"override me". An earlier version of this document claimed rounding corners is what
+most makes a UI stop reading as Carbon. That was wrong and is retired.
+
+| Token | Value | For |
+|---|---|---|
+| `--cds-radius-00` | 0 | structure: dividers, table edges, the shell, progress bars |
+| `--cds-radius-01` | 2px | the smallest chips: inline code, scrollbar thumbs, popovers |
+| `--cds-radius-02` | 4px | controls: buttons, inputs, selects, tabs, list rows |
+| `--cds-radius-03` | 8px | containers: cards, columns, panels, modals, notifications |
+| `--cds-radius-pill` | 62.5rem | tags and counts, which are pill-shaped by spec |
+
+Pick by what a thing **is**, not by how big it is. Applying one radius everywhere is
+as thoughtless as applying none.
+
+### Elevation
+
+Carbon does have a shadow — the `$shadow` theme token at black 0.3 and a `box-shadow`
+mixin of `0 2px 6px $shadow`. What it does not have is a multi-step ramp; there is no
+`elevation-01..05`. Depth comes from three mechanisms in this order of preference:
+**layer colour first, motion second, the shadow last.**
+
+`--cds-shadow-color` is themed, and the reason is measurable. Over `#f4f4f4`, black
+at 0.3 lands on `#ababab` — 2.09:1 against the page, a shadow you can see. Over
+`#161616` it lands on `#0f0f0f`, 1.06:1, and even pure black only reaches 1.11:1. You
+cannot cast a dark shadow on a nearly black page. g100 therefore doubles the alpha to
+deepen the seam under a raised surface and leans on the layer step and the lift for
+the rest.
+
+`--cds-shadow-raised` (`0 2px 6px`) is for things elevated within the page flow;
+`--cds-shadow-overlay` (`0 4px 12px`) for things that float above it and can be
+dismissed; `--cds-shadow-none` for everything else. **Nothing at rest carries a
+shadow.** A shadow marks a state — hovered, dragged, floating — never a permanent
+hierarchy. That single rule is what separates a considered interface from a cluttered
+one, and it is the one to defend in review.
+
+### The interaction vocabulary
+
+Three roles, so a card on the dashboard answers the pointer the way a card on the
+board does. The two distances are tokens — `--cds-lift-raised` (-2px) and
+`--cds-lift-pressed` (1px) — so they cannot drift apart between stylesheets.
+
+| Role | Hover | Active |
+|---|---|---|
+| `raised` — cards, tiles, conversation items | `layer-hover` + `shadow-raised` + lift | `layer-active`, back to rest |
+| `row` — items stacked in a list | `layer-hover`, nothing else | — |
+| `control` — buttons, inputs, icon buttons | colour only | one pixel down |
+
+Rows do not lift: pulling one row out of a stack looks broken next to the neighbours
+that stayed put. Controls do not lift either — a button that rises lies about what it
+is — but every one of them presses, and that single pixel is the cheapest thing in
+this system and the one that makes the app feel answered rather than repainted.
+
+### Motion
+
+Six durations and six easing curves, straight from Carbon:
+
+| Token | Value | Use |
+|---|---|---|
+| `--cds-duration-fast-01` | 70ms | button, toggle |
+| `--cds-duration-fast-02` | 110ms | fade |
+| `--cds-duration-moderate-01` | 150ms | small expansion, short travel |
+| `--cds-duration-moderate-02` | 240ms | expansion, toast, system message |
+| `--cds-duration-slow-01` | 400ms | large expansion, important notification |
+| `--cds-duration-slow-02` | 700ms | background dimming |
+
+`--cds-easing-{standard,entrance,exit}-{productive,expressive}`. **Productive** motion
+is efficient and stays out of the way; that is nearly everything here. **Expressive**
+is deliberately visible and Carbon insists it stay occasional — a modal, an agent
+message, the login blueprint. Pick a curve by what the element is doing: `standard`
+when it is visible start to finish, `entrance` when it arrives, `exit` when it leaves
+for good. If it leaves but stays nearby ready to return — our `Drawer` — use
+`standard`.
+
+Never `transition: all`. It animates whatever happens to change, which on a theme
+switch means every colour on the element.
+
+Four durations sit outside Carbon's scale on purpose, with an `--app-duration-*`
+prefix to say so: spinners and idle pulses are loops, not responses to input, and
+Carbon's scale stops at 700ms because it only describes interaction.
+
+`@media (prefers-reduced-motion: reduce)` collapses the durations rather than dropping
+the rules, so state still changes for people who ask for less movement — it just
+arrives at once.
+
+---
+
+## 9b. Carbon for AI
+
+A stable Carbon extension built on light as a metaphor: an aura gradient, a gradient
+border, a coloured glow. Carbon is emphatic that **it is not decoration** — it marks
+where AI is present and nothing else.
+
+This app qualifies honestly, and the register is allowed in exactly five places:
+cards with `origin='agent'`, cards with `is_unseen`, the dashboard's AI matches
+widget, the agent's own message bubbles, and the Zenith panel *while it is
+generating*. A `grep` for `--cds-ai-` outside those is a review failure.
+
+**One deliberate substitution.** Carbon builds the register out of blue. Here blue is
+already `--cds-button-primary` and `--cds-status-applied`, so an AI aura in blue would
+read as "interactive" or "applied". The structure is Carbon's stop for stop and alpha
+for alpha; only the hue moves to purple, which this codebase reserved for the agent
+long before the migration.
+
+Two traps, both learned the hard way. The hover stop (`ai-aura-hover-start`, alpha
+0.32) is for hover: used as a resting state it tinted a card enough to drag the rating
+glyphs from 4.99:1 to 4.49:1. And nothing here animates — the pulses this replaced ran
+forever, and an unseen card can sit on a board for days.
 
 ---
 
@@ -432,7 +548,8 @@ Recorded here so nobody mistakes it for the intended pattern:
   references `--cds-teal-50` directly alongside a few hardcoded hex and `rgba()`
   values. The SVG sits on an always-dark panel so it does not visibly break under a
   theme switch, but it is still a violation of the hard rule in section 1.
-- **`--cds-white-rgb`** is defined at N1 but currently has no consumer.
+- **`--cds-white-rgb`** now has a consumer: the Carbon for AI aura fades to
+  transparent white in g10. The note that it was unused is retired.
 - **The composed type styles are underused.** Most call sites still assemble
   `--cds-type-size-0N` plus a weight by hand. New code should prefer the composed
   style.
