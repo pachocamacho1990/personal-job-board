@@ -475,8 +475,9 @@ export const DashboardPage: React.FC = () => {
               </div>
             </div>
 
-            {/* New AI Matches */}
-            <div className="dashboard-card">
+            {/* New AI Matches — everything in this card is agent-generated, so it
+                is a legitimate place for the Carbon for AI register. */}
+            <div className="dashboard-card ai-presence">
               <div className="card-header">
                 <div className="card-title">
                   <RobotIcon size={18} style={{ marginRight: '8px', verticalAlign: 'middle', color: 'var(--cds-agent-accent)' }} /> New AI Matches

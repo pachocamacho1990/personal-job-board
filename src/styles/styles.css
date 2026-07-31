@@ -332,28 +332,27 @@ body {
     color: var(--cds-text-secondary);
 }
 
-/* Shine Animation for Unseen Agent Jobs */
-@keyframes shine {
-    0% {
-        box-shadow: 0 0 0 0 rgba(var(--cds-agent-accent-rgb), 0.4);
-        border-color: rgba(var(--cds-agent-accent-rgb), 0.5);
-    }
+/* Unseen agent jobs. Same register as .agent-origin, pushed a little — the AI is
+   not more present here, it is just newer, so the difference is degree rather
+   than a second visual language. No longer animated either: an unseen card can
+   sit on the board for days, and a pulse that runs for days is noise.
 
-    70% {
-        box-shadow: 0 0 0 6px rgba(var(--cds-agent-accent-rgb), 0);
-        border-color: rgba(var(--cds-agent-accent-rgb), 0.2);
-    }
-
-    100% {
-        box-shadow: 0 0 0 0 rgba(var(--cds-agent-accent-rgb), 0);
-        border-color: rgba(var(--cds-agent-accent-rgb), 0);
-    }
-}
-
+   The extra weight is in the border and the inner shadow, NOT the aura, which
+   stays at ai-aura-start. Carbon's 0.32 stop is its HOVER value; using it at
+   rest tinted the card enough to drag the rating glyphs from 4.99:1 to 4.49:1.
+   The seeded contrast sweep caught that — the same mistake as an animation that
+   never ends, made with opacity instead of time. */
 .job-card.shining {
-    animation: shine var(--app-duration-pulse) infinite;
     position: relative;
-    border-color: var(--cds-agent-accent);
+    background-image: linear-gradient(0deg,
+        var(--cds-ai-aura-start) 0%,
+        15%,
+        var(--cds-ai-aura-end) 50%,
+        transparent 100%);
+    border-color: var(--cds-ai-border-end);
+    border-left-width: 4px;
+    box-shadow: 0 2px 6px var(--cds-ai-drop-shadow),
+                inset 0 1px 0 var(--cds-ai-inner-shadow);
 }
 
 /* Optional: Add a "New" badge or pip if desired, but the pulse is subtle and nice */
@@ -382,6 +381,19 @@ body {
 }
 
 /* Star Rating Display */
+/* Available to any glyph-as-picture that needs a spoken equivalent. */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .rating-stars {
     display: inline-block;
     font-size: 14px;
@@ -538,11 +550,13 @@ body {
 }
 
 /* Timestamp on cards - subtle and minimal */
+/* text-placeholder is a documented sub-AA token: Carbon ships it at Gray 40 and
+   says never to convey information with it. A timestamp is information, and the
+   0.7 opacity on top of it took the pair to 2.15:1. Both gone. */
 .job-card .timestamp {
     font-size: 11px;
-    color: var(--cds-text-placeholder);
+    color: var(--cds-text-secondary);
     font-style: normal;
-    opacity: 0.7;
     margin-top: 6px;
 }
 
@@ -1578,31 +1592,38 @@ body.focus-mode .job-card.dimmed {
     margin-bottom: var(--cds-spacing-06);
 }
 
-/* Agent-origin cards.
-   A job the AI created is marked in purple — a left border plus a slow pulse
-   that stops on hover, once the card has the user's attention. The pulse uses
-   the -rgb form of the agent accent because it feeds an alpha into rgba(). */
-@keyframes pulseAgent {
-    0% {
-        box-shadow: 0 0 0 0 rgba(var(--cds-agent-accent-rgb), 0.4);
-    }
-    70% {
-        box-shadow: 0 0 0 6px rgba(var(--cds-agent-accent-rgb), 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(var(--cds-agent-accent-rgb), 0);
-    }
-}
+/* Agent-origin cards — the Carbon for AI register.
 
+   This used to be a ring that pulsed forever. An animation with no end state
+   asks for attention it never gives back, and Carbon's own motion checklist
+   says that motion the user keeps noticing should be reduced or removed. The
+   aura says the same thing without moving: a light gradient rising from the
+   bottom edge and a border that grades along it, which is how Carbon marks
+   AI presence on its own components.
+
+   These tokens are only ever allowed where AI is genuinely present. Carbon is
+   explicit that this styling is not decoration. */
 .job-card.agent-origin {
-    border-left: 4px solid var(--cds-status-interested) !important;
-    animation: pulseAgent var(--app-duration-pulse-slow) infinite;
+    background-image: linear-gradient(0deg,
+        var(--cds-ai-aura-start) 0%,
+        15%,
+        var(--cds-ai-aura-end) 50%,
+        transparent 100%);
+    border-color: var(--cds-ai-border-start);
+    border-block-end-color: var(--cds-ai-border-strong);
+    border-left: 3px solid var(--cds-ai-border-strong);
 }
 
 .job-card.agent-origin:hover {
-    border-left-color: var(--cds-status-interested) !important;
-    box-shadow: 0 0 12px rgba(var(--cds-agent-accent-rgb), 0.25) !important;
-    animation: none;
+    background-image: linear-gradient(0deg,
+        var(--cds-ai-aura-hover-start) 0%,
+        15%,
+        var(--cds-ai-aura-hover-end) 50%,
+        transparent 100%);
+    border-color: var(--cds-ai-border-end);
+    border-block-end-color: var(--cds-ai-border-strong);
+    border-left-color: var(--cds-ai-border-strong);
+    box-shadow: 0 2px 6px var(--cds-ai-drop-shadow);
 }
 /* ── Inline notification ─────────────────────────────────
    Carbon's pattern: a subtle fill, a solid status bar down the leading edge,

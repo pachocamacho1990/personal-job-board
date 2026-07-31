@@ -182,3 +182,40 @@ lugar de copiar el de g10.
 
 **La restricción de contraste sigue en pie**: 0 elementos bajo AA en 12
 combinaciones, y tiene que seguir en 0.
+
+## 2026-07-31 · Carbon for AI se adopta en morado, no en azul
+
+Carbon construye su registro de IA — aura en gradiente, borde en gradiente,
+glow — enteramente sobre **azul**. Aquí el azul ya es `--cds-button-primary` y
+`--cds-status-applied`, así que un aura azul se leería como "interactivo" o como
+"aplicado", no como "generado por IA". Y este repo ya tenía el morado reservado
+para el agente desde antes de la migración (`--cds-agent-accent: purple-60`, y el
+comentario del bloque morado en `theme.css` lo dice).
+
+**Decisión**: se adopta la *estructura* de Carbon literalmente — mismos stops,
+mismos alfas, mismos nombres de token (`--cds-ai-aura-*`, `--cds-ai-border-*`,
+`--cds-ai-drop-shadow`, `--cds-ai-inner-shadow`, `--cds-ai-skeleton-*`) — y se
+sustituye únicamente el hue por morado.
+
+**Descartado**: usar el azul de Carbon tal cual. Sería más fiel a la letra y peor
+en la práctica: haría el marcado de IA ilegible por colisión con dos semánticos
+que ya ocupan ese hue.
+
+**La restricción que hace legítimo todo esto**: la documentación de Carbon dice
+que este estilo *"no es decoración; identifica instancias de uso de IA"*. Se
+aplica solo a: tarjetas con `origin='agent'`, tarjetas `is_unseen`, el widget de
+AI matches del dashboard, el panel de Zenith **mientras genera**, y las burbujas
+del propio agente. En ningún otro sitio. Un `grep` de `--cds-ai-` fuera de esos
+puntos es un fallo de revisión.
+
+**Dos animaciones infinitas eliminadas**: `pulseAgent` y `shine` pulsaban para
+siempre en las tarjetas de agente. Una animación sin estado final pide atención
+que no devuelve, y el propio checklist de motion de Carbon dice que el motion que
+el usuario nota con frecuencia debe reducirse o quitarse. El aura dice lo mismo
+sin moverse.
+
+**Y una trampa que costó un fallo real**: usé `ai-aura-hover-start` (alfa 0.32)
+como estado *en reposo* para las tarjetas sin ver. Eso tiñó la tarjeta lo
+suficiente para bajar las estrellas de valoración de 4.99:1 a 4.49:1. El stop de
+hover es para el hover. El mismo error que una animación que no acaba, cometido
+con opacidad en vez de con tiempo.

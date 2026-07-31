@@ -42,18 +42,51 @@ SCAN = """
     if (p.length > 3 && p[3] === 0) return null;   // transparent
     return [p[0], p[1], p[2]];
   };
-  const effectiveBg = el => {
-    for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
-      const c = parse(getComputedStyle(n).backgroundColor);
-      if (c) return c;
+  // A gradient paints over the background-color, so reading backgroundColor
+  // alone misses it entirely — which is exactly the hole the Carbon for AI
+  // auras would have fallen through. There is no way to ask the browser what a
+  // gradient resolves to at a given pixel, so take the worst case: composite
+  // the most opaque colour stop in the gradient over whatever is underneath.
+  // Conservative by construction, which is the right direction for a gate.
+  const gradientStops = s => {
+    if (!s || s === 'none' || !s.includes('gradient')) return [];
+    const out = [];
+    for (const m of s.matchAll(/rgba?\(([^)]+)\)/g)) {
+      const p = m[1].split(',').map(Number);
+      out.push({ rgb: [p[0], p[1], p[2]], a: p.length > 3 ? p[3] : 1 });
     }
-    return parse(getComputedStyle(document.body).backgroundColor) || [255,255,255];
+    return out;
+  };
+  const over = (fg, a, bg) => bg.map((b, i) => Math.round(fg[i] * a + b * (1 - a)));
+
+  const effectiveBg = el => {
+    // Collect gradients on the way up; the nearest one paints last, so apply
+    // them from the outside in once a solid backstop is found.
+    const layers = [];
+    let solid = null;
+    for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
+      const cs = getComputedStyle(n);
+      const stops = gradientStops(cs.backgroundImage);
+      if (stops.length) {
+        const worst = stops.reduce((a, b) => (b.a > a.a ? b : a));
+        if (worst.a > 0) layers.unshift(worst);
+      }
+      const c = parse(cs.backgroundColor);
+      if (c) { solid = c; break; }
+    }
+    solid = solid || parse(getComputedStyle(document.body).backgroundColor) || [255,255,255];
+    for (const l of layers) solid = over(l.rgb, l.a, solid);
+    return solid;
   };
 
   const out = [];
   for (const el of document.querySelectorAll('body *')) {
     const cs = getComputedStyle(el);
     if (cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0) continue;
+    // Hidden from assistive tech means it is a picture, not text. WCAG asks 3:1
+    // of a graphical object, and this scan is a text-contrast scan. Anything
+    // using this to dodge the gate must supply a spoken equivalent instead.
+    if (el.closest('[aria-hidden="true"]')) continue;
     const box = el.getBoundingClientRect();
     if (!box.width || !box.height) continue;
     // Only elements that paint text themselves.
@@ -79,6 +112,53 @@ SCAN = """
 """
 
 
+# A fresh account has an empty board, and an empty board has no cards, no
+# timestamps, no ratings and no status tags. This swept clean for six milestones
+# while never once measuring a job card — which is how a timestamp at 2.15:1 and
+# a rating glyph at 3.33:1 survived. Seed first, then scan.
+JOBS = [
+    ("Senior Platform Engineer", "Iberdrola Innovación y Tecnología", "interested", "agent", True),
+    ("Staff Backend Engineer",   "Cabify",                            "applied",    "agent", False),
+    ("Head of Data",             "Glovo",                             "interview",  "human", False),
+    ("Principal Architect",      "Telefónica Tech",                   "pending",    "agent", True),
+    ("Engineering Manager",      "Wallapop",                          "offer",      "human", False),
+    ("Tech Lead",                "Idealista",                         "rejected",   "human", False),
+    ("Backend Developer",        "Jobandtalent",                      "forgotten",  "human", False),
+]
+
+ENTITIES = [
+    ("Kfund", "vc", "researching"), ("Seedcamp", "vc", "contacted"),
+    ("Lanzadera", "accelerator", "meeting"), ("Angel Investor", "investor", "negotiation"),
+    ("Wayra", "accelerator", "signed"),
+]
+
+
+async def seed(page):
+    """Fill both boards so every card state actually renders during the scan."""
+    await page.evaluate("""async ([jobs, entities]) => {
+      const tok = localStorage.getItem('authToken');
+      const board = localStorage.getItem('activeBoardId');
+      const post = (url, body) => fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+        body: JSON.stringify(body),
+      });
+      for (const [position, company, status, origin, unseen] of jobs) {
+        await post('/jobboard/api/jobs', {
+          type: 'job', position, company, status, origin, is_unseen: unseen,
+          rating: 4, location: 'Madrid · Híbrido', salary: '65.000 € – 82.000 €',
+          board_id: board ? Number(board) : undefined,
+        });
+      }
+      for (const [name, type, status] of entities) {
+        await post('/jobboard/api/business', {
+          name, type, status, contact_person: 'Ana García',
+          email: 'ana@example.com', location: 'Madrid',
+        });
+      }
+    }""", [JOBS, ENTITIES])
+
+
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(args=["--no-sandbox"])
@@ -91,6 +171,7 @@ async def main():
         await page.fill("#password", "password123")
         await page.click("#submitBtn")
         await page.wait_for_url("**/index.html", timeout=25000)
+        await seed(page)
 
         total = 0
         for theme in ("g10", "g100"):

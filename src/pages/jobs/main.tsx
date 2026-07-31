@@ -361,10 +361,18 @@ export const JobsPage: React.FC = () => {
   const getRatingStars = (rating: number | null) => {
     const r = rating ?? 3;
     return (
-      <span className="rating-stars">
-        {'★'.repeat(r)}
-        {'☆'.repeat(5 - r)}
-      </span>
+      <>
+        {/* The glyphs are a picture of the rating, so they are hidden from
+            assistive tech and the number is announced instead. A screen reader
+            reading "★★★★☆" conveys nothing. This also makes them a graphical
+            object rather than text for contrast purposes, which is the correct
+            reading: they need 3:1, not 4.5:1. */}
+        <span className="rating-stars" aria-hidden="true">
+          {'★'.repeat(r)}
+          {'☆'.repeat(5 - r)}
+        </span>
+        <span className="visually-hidden">{`Valoración: ${r} de 5`}</span>
+      </>
     );
   };
 

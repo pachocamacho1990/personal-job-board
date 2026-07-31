@@ -456,3 +456,23 @@
 .text-accent { color: var(--cds-button-primary); }
 .stack-tight { margin-bottom: var(--cds-spacing-02); display: flex; align-items: center; gap: var(--cds-spacing-03); }
 .stack-spaced { margin-bottom: var(--cds-spacing-06); }
+
+/* ── Carbon for AI ────────────────────────────────────────
+   Applied to the one card on this page whose entire contents are
+   agent-generated. Carbon's rule is that this register identifies AI presence
+   and is never decoration, so it goes here and nowhere else on the dashboard. */
+.dashboard-card.ai-presence {
+    background-image: linear-gradient(0deg,
+        var(--cds-ai-aura-start) 0%,
+        15%,
+        var(--cds-ai-aura-end) 50%,
+        transparent 100%);
+    border-color: var(--cds-ai-border-start);
+    border-block-end-color: var(--cds-ai-border-strong);
+}
+
+.dashboard-card.ai-presence:hover {
+    border-color: var(--cds-ai-border-end);
+    border-block-end-color: var(--cds-ai-border-strong);
+    box-shadow: 0 2px 6px var(--cds-ai-drop-shadow);
+}
