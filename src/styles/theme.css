@@ -168,6 +168,9 @@
   --cds-gray-100-rgb: 22, 22, 22;
   --cds-gray-50-rgb: 141, 141, 141;
   --cds-black-rgb: 0, 0, 0;
+  --cds-white-rgb: 255, 255, 255;
+  --cds-purple-30-rgb: 212, 187, 255;
+  --cds-purple-50-rgb: 165, 110, 255;
 }
 
 /* ----------------------------------------------------------------------------
@@ -619,10 +622,37 @@
   --cds-agent-accent: var(--cds-purple-60);
   --cds-agent-accent-rgb: var(--cds-purple-60-rgb);
 
+  /* — Carbon for AI. A stable extension of the system, built on light as a
+       metaphor: an aura gradient, a gradient border and a coloured glow, used
+       to mark where AI is present. Carbon is emphatic that it is not
+       decoration — it identifies AI instances and nothing else — and this app
+       genuinely qualifies: the Zenith agent, jobs with origin='agent', the AI
+       matches widget.
+
+       ONE DELIBERATE SUBSTITUTION: Carbon builds this register out of blue.
+       Here blue is already --cds-button-primary and --cds-status-applied, so an
+       AI aura in blue would read as "interactive" or "applied" rather than "AI".
+       The structure below is Carbon's, stop for stop and alpha for alpha; only
+       the hue moves to purple, which this codebase already reserved for the
+       agent. See .claude/handoffs/DECISIONS.md. */
+  --cds-ai-aura-start: rgba(var(--cds-purple-50-rgb), 0.1);
+  --cds-ai-aura-end: rgba(var(--cds-white-rgb), 0);
+  --cds-ai-aura-hover-start: rgba(var(--cds-purple-50-rgb), 0.32);
+  --cds-ai-aura-hover-end: rgba(var(--cds-white-rgb), 0);
+  --cds-ai-aura-hover-background: var(--cds-purple-10);
+  --cds-ai-border-start: rgba(var(--cds-purple-30-rgb), 0.64);
+  --cds-ai-border-end: var(--cds-purple-40);
+  --cds-ai-border-strong: var(--cds-purple-50);
+  --cds-ai-drop-shadow: rgba(var(--cds-purple-60-rgb), 0.1);
+  --cds-ai-inner-shadow: rgba(var(--cds-purple-50-rgb), 0.1);
+  --cds-ai-skeleton-background: var(--cds-purple-20);
+  --cds-ai-skeleton-element-background: var(--cds-purple-50);
+
+
   /* — Star rating. Yellow 50 rather than a brighter gold: the filled/empty
        distinction is the information being conveyed, so it has to clear 3:1
        against the card, and the lighter yellows do not. */
-  --cds-rating-filled: var(--cds-yellow-50);
+  --cds-rating-filled: var(--cds-yellow-60);
   --cds-rating-empty: var(--cds-gray-30);
 
   /* — Subtle error fill, for danger buttons and error notifications. */
@@ -858,6 +888,25 @@
        disappears against Gray 90 and Gray 100 layers. */
   --cds-agent-accent: var(--cds-purple-40);
   --cds-agent-accent-rgb: var(--cds-purple-40-rgb);
+
+  /* — Carbon for AI. Same substitution as g10; see that block for the reason.
+       Carbon inverts more than the hue here: the aura fades to black rather
+       than white, and the drop shadow stops being coloured at all, because a
+       purple glow on a near-black page is the same losing proposition as a
+       black shadow. */
+  --cds-ai-aura-start: rgba(var(--cds-purple-50-rgb), 0.1);
+  --cds-ai-aura-end: rgba(var(--cds-black-rgb), 0);
+  --cds-ai-aura-hover-start: rgba(var(--cds-purple-50-rgb), 0.4);
+  --cds-ai-aura-hover-end: rgba(var(--cds-black-rgb), 0);
+  --cds-ai-aura-hover-background: var(--cds-gray-83);
+  --cds-ai-border-start: rgba(var(--cds-purple-30-rgb), 0.36);
+  --cds-ai-border-end: var(--cds-purple-50);
+  --cds-ai-border-strong: var(--cds-purple-40);
+  --cds-ai-drop-shadow: rgba(var(--cds-black-rgb), 0.28);
+  --cds-ai-inner-shadow: rgba(var(--cds-purple-50-rgb), 0.16);
+  --cds-ai-skeleton-background: rgba(var(--cds-purple-40-rgb), 0.5);
+  --cds-ai-skeleton-element-background: rgba(var(--cds-purple-40-rgb), 0.3);
+
 
   /* — Star rating. The dark theme can afford the brighter yellow, which reads
        far better here than the muted one the light theme needs. */

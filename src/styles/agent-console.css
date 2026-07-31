@@ -1009,3 +1009,38 @@ main.docs-content.agent-open {
   transform: translateY(var(--cds-lift-pressed));
 }
 
+/* ── Carbon for AI ────────────────────────────────────────
+   The console is where AI presence is least in doubt, but the panel only wears
+   the register while Zenith is actually generating. A container that glows
+   permanently has stopped saying anything. */
+.agent-panel {
+  transition: transform var(--agent-transition),
+              border-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+              box-shadow var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+}
+
+.agent-panel.generating {
+  border-inline-start-color: var(--cds-ai-border-strong);
+  box-shadow: var(--cds-shadow-overlay),
+              inset 0 1px 0 var(--cds-ai-inner-shadow);
+}
+
+/* The agent's own messages carry the aura; the user's do not. That asymmetry is
+   the point — it marks which half of the conversation was generated. */
+.agent-msg.role-agent .agent-msg-bubble {
+  background-image: linear-gradient(90deg,
+      var(--cds-ai-aura-start) 0%,
+      15%,
+      var(--cds-ai-aura-end) 50%,
+      transparent 100%);
+  border-inline-start-color: var(--cds-ai-border-strong);
+}
+
+/* Waiting on generated content, rather than on any content. */
+.agent-skeleton {
+  background: var(--cds-ai-skeleton-background);
+}
+
+.agent-skeleton-element {
+  background: var(--cds-ai-skeleton-element-background);
+}

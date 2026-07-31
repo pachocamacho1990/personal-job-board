@@ -351,7 +351,10 @@ export const AgentConsole: React.FC = () => {
       )}
 
       {/* Panel */}
-      <div className={`agent-panel ${isPanelOpen ? 'open' : ''}`}>
+      {/* `generating` lights the Carbon for AI border while Zenith is actually
+          working. It is the only moment the panel wears the register: AI
+          presence is a state here, not a property of the container. */}
+      <div className={`agent-panel ${isPanelOpen ? 'open' : ''} ${isGenerating ? 'generating' : ''}`}>
         {/* Header */}
         <div className="agent-header">
           <div className="agent-header-icon"><BrainIcon size={20} /></div>
