@@ -219,3 +219,32 @@ como estado *en reposo* para las tarjetas sin ver. Eso tiñó la tarjeta lo
 suficiente para bajar las estrellas de valoración de 4.99:1 a 4.49:1. El stop de
 hover es para el hover. El mismo error que una animación que no acaba, cometido
 con opacidad en vez de con tiempo.
+
+
+## 2026-07-31 · Revertida: el registro de IA vuelve al azul de Carbon
+
+Anula la entrada *"Carbon for AI se adopta en morado, no en azul"* del mismo día.
+
+Se le enseñaron cuatro tratamientos del hilo del agente y eligió el neutro-más-
+acento, pero **en azul**. Así que la sustitución de hue desaparece y los tokens
+`--cds-ai-*` son ahora literalmente los que publica Carbon, stop por stop y alfa
+por alfa. `--cds-agent-accent` pasa de Purple 60/40 a Blue 60/40.
+
+**Lo que ganamos**: cero desviación. Ya no hay que explicar por qué nuestro
+registro de IA no se parece al de IBM.
+
+**Lo que perdimos, y hay que vigilar**: la colisión que motivó el morado es real
+y sigue ahí. `--cds-status-applied` también es azul, así que una tarjeta creada
+por el agente que esté en la columna *Applied* lleva borde azul de estado y aura
+azul de IA. Verificado en captura: **se distinguen** — el aura y el borde
+superior son visiblemente distintos de una tarjeta humana en la misma columna —
+pero es el punto más débil del sistema y el primero que hay que mirar si alguien
+vuelve a decir que algo no se lee.
+
+Dentro de la consola del agente no hay colisión: PJBA-44 sacó de ahí todo el azul
+de `button-primary` e `interactive`, así que el único azul que queda en el panel
+es el del agente.
+
+**Si algún día vuelve a molestar**, hay dos salidas antes que volver al morado:
+mover `status-applied` a otro hue del board (es el único que colisiona), o darle
+al aura de IA un stop claramente separado del acento de estado.

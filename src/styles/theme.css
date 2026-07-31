@@ -171,6 +171,10 @@
   --cds-white-rgb: 255, 255, 255;
   --cds-purple-30-rgb: 212, 187, 255;
   --cds-purple-50-rgb: 165, 110, 255;
+  --cds-blue-30-rgb: 166, 200, 255;
+  --cds-blue-40-rgb: 120, 169, 255;
+  --cds-blue-50-rgb: 69, 137, 255;
+  --cds-blue-60-rgb: 15, 98, 254;
 }
 
 /* ----------------------------------------------------------------------------
@@ -619,14 +623,14 @@
        agent-created card, the pulse on an unseen one, the connection badge.
        The -rgb twin exists for the keyframes, which need the color at partial
        alpha and cannot get the channels out of a hex var(). */
-  --cds-agent-accent: var(--cds-purple-60);
-  --cds-agent-accent-rgb: var(--cds-purple-60-rgb);
+  --cds-agent-accent: var(--cds-blue-60);
+  --cds-agent-accent-rgb: var(--cds-blue-60-rgb);
   /* The agent console is an AI surface end to end, so purple is the only hue in
      it that means anything. These three exist so its machinery — the send
      button, the progress bar, the running spinner — can stop borrowing the
      app's interactive blue, which means "primary action" and not "the agent". */
-  --cds-agent-accent-hover: var(--cds-purple-70);
-  --cds-agent-surface: var(--cds-purple-10);
+  --cds-agent-accent-hover: var(--cds-blue-70);
+  --cds-agent-surface: var(--cds-blue-10);
   --cds-agent-text-on-accent: var(--cds-white);
 
   /* — Carbon for AI. A stable extension of the system, built on light as a
@@ -636,24 +640,25 @@
        genuinely qualifies: the Zenith agent, jobs with origin='agent', the AI
        matches widget.
 
-       ONE DELIBERATE SUBSTITUTION: Carbon builds this register out of blue.
-       Here blue is already --cds-button-primary and --cds-status-applied, so an
-       AI aura in blue would read as "interactive" or "applied" rather than "AI".
-       The structure below is Carbon's, stop for stop and alpha for alpha; only
-       the hue moves to purple, which this codebase already reserved for the
-       agent. See .claude/handoffs/DECISIONS.md. */
-  --cds-ai-aura-start: rgba(var(--cds-purple-50-rgb), 0.1);
+       These are Carbon's own values, unchanged. An earlier version of this block
+       moved the hue to purple because blue is also --cds-button-primary and
+       --cds-status-applied, and an AI aura in blue risks reading as
+       "interactive" or "applied". He looked at both and chose blue, so the
+       substitution is gone and this is now literally what Carbon ships. The
+       collision it was avoiding is real and is handled below, at the one place
+       it actually bites: an agent card sitting in the Applied column. */
+  --cds-ai-aura-start: rgba(var(--cds-blue-50-rgb), 0.1);
   --cds-ai-aura-end: rgba(var(--cds-white-rgb), 0);
-  --cds-ai-aura-hover-start: rgba(var(--cds-purple-50-rgb), 0.32);
+  --cds-ai-aura-hover-start: rgba(var(--cds-blue-50-rgb), 0.32);
   --cds-ai-aura-hover-end: rgba(var(--cds-white-rgb), 0);
-  --cds-ai-aura-hover-background: var(--cds-purple-10);
-  --cds-ai-border-start: rgba(var(--cds-purple-30-rgb), 0.64);
-  --cds-ai-border-end: var(--cds-purple-40);
-  --cds-ai-border-strong: var(--cds-purple-50);
-  --cds-ai-drop-shadow: rgba(var(--cds-purple-60-rgb), 0.1);
-  --cds-ai-inner-shadow: rgba(var(--cds-purple-50-rgb), 0.1);
-  --cds-ai-skeleton-background: var(--cds-purple-20);
-  --cds-ai-skeleton-element-background: var(--cds-purple-50);
+  --cds-ai-aura-hover-background: var(--cds-blue-10);
+  --cds-ai-border-start: rgba(var(--cds-blue-30-rgb), 0.64);
+  --cds-ai-border-end: var(--cds-blue-40);
+  --cds-ai-border-strong: var(--cds-blue-50);
+  --cds-ai-drop-shadow: rgba(var(--cds-blue-60-rgb), 0.1);
+  --cds-ai-inner-shadow: rgba(var(--cds-blue-50-rgb), 0.1);
+  --cds-ai-skeleton-background: var(--cds-blue-20);
+  --cds-ai-skeleton-element-background: var(--cds-blue-50);
 
 
   /* — Star rating. Yellow 50 rather than a brighter gold: the filled/empty
@@ -899,12 +904,12 @@
 
   /* — Agent identity. Purple 40 here: Purple 60 is a mid tone that all but
        disappears against Gray 90 and Gray 100 layers. */
-  --cds-agent-accent: var(--cds-purple-40);
-  --cds-agent-accent-rgb: var(--cds-purple-40-rgb);
+  --cds-agent-accent: var(--cds-blue-40);
+  --cds-agent-accent-rgb: var(--cds-blue-40-rgb);
   /* The accent is light here, so anything sitting ON it needs dark text — the
      one place g100 is not a mirror of g10. */
-  --cds-agent-accent-hover: var(--cds-purple-30);
-  --cds-agent-surface: var(--cds-purple-90);
+  --cds-agent-accent-hover: var(--cds-blue-30);
+  --cds-agent-surface: var(--cds-blue-90);
   --cds-agent-text-on-accent: var(--cds-gray-100);
 
   /* — Carbon for AI. Same substitution as g10; see that block for the reason.
@@ -912,18 +917,18 @@
        than white, and the drop shadow stops being coloured at all, because a
        purple glow on a near-black page is the same losing proposition as a
        black shadow. */
-  --cds-ai-aura-start: rgba(var(--cds-purple-50-rgb), 0.1);
+  --cds-ai-aura-start: rgba(var(--cds-blue-50-rgb), 0.1);
   --cds-ai-aura-end: rgba(var(--cds-black-rgb), 0);
-  --cds-ai-aura-hover-start: rgba(var(--cds-purple-50-rgb), 0.4);
+  --cds-ai-aura-hover-start: rgba(var(--cds-blue-50-rgb), 0.4);
   --cds-ai-aura-hover-end: rgba(var(--cds-black-rgb), 0);
   --cds-ai-aura-hover-background: var(--cds-gray-83);
-  --cds-ai-border-start: rgba(var(--cds-purple-30-rgb), 0.36);
-  --cds-ai-border-end: var(--cds-purple-50);
-  --cds-ai-border-strong: var(--cds-purple-40);
+  --cds-ai-border-start: rgba(var(--cds-blue-30-rgb), 0.36);
+  --cds-ai-border-end: var(--cds-blue-50);
+  --cds-ai-border-strong: var(--cds-blue-40);
   --cds-ai-drop-shadow: rgba(var(--cds-black-rgb), 0.28);
-  --cds-ai-inner-shadow: rgba(var(--cds-purple-50-rgb), 0.16);
-  --cds-ai-skeleton-background: rgba(var(--cds-purple-40-rgb), 0.5);
-  --cds-ai-skeleton-element-background: rgba(var(--cds-purple-40-rgb), 0.3);
+  --cds-ai-inner-shadow: rgba(var(--cds-blue-50-rgb), 0.16);
+  --cds-ai-skeleton-background: rgba(var(--cds-blue-40-rgb), 0.5);
+  --cds-ai-skeleton-element-background: rgba(var(--cds-blue-40-rgb), 0.3);
 
 
   /* — Star rating. The dark theme can afford the brighter yellow, which reads
