@@ -237,17 +237,30 @@ tokens** defined in `src/styles/theme.css`:
 
 | Token | Applied to |
 |-------|-----------|
-| `--cds-status-<name>` | Column header title + border, card left border (the accent) |
-| `--cds-status-<name>-header` | Column header fill |
-| `--cds-status-<name>-surface` | Column body / cards container fill |
+| `--cds-status-<name>` | Column header accent bar + title, card left border |
+| `--cds-status-<name>-header` | Tinted chips and blocks — **not** the column header |
+| `--cds-status-<name>-surface` | Tinted chips and blocks — **not** the column body |
 
 - Job Board statuses: `interested`, `applied`, `forgotten`, `interview`, `pending`, `offer`, `rejected`
 - Business Board statuses: `researching`, `contacted`, `meeting`, `negotiation`, `signed`
 
+**The columns carry no hue fill** (PJBA-38). They used to: the header was tinted at
+hue-20 and the whole body beneath it at hue-10, which across seven columns read as
+too much colour. Carbon's layering model puts surfaces on grey and reserves hue for
+accent, so the header is now `--cds-layer-01` with a 3px accent bar on its top edge,
+the column body is transparent, and the status survives in that bar, the title, and
+the card's left border.
+
+The `-header` and `-surface` tokens still exist and are still correct — for small
+tinted elements where a hue wash is the point: skill chips, the agent's thinking and
+suggestion blocks. Do not reintroduce them as column fills.
+
 Each triplet is defined **twice** — once under `:root` (g10, light) and once under
 `[data-carbon-theme='g100']` (dark). The light theme tints toward white (accent at
 the 70 stop, fills at 10/20); the dark theme inverts it (accent at 30, fills at
-80/90) so the same status reads at the same strength in both.
+80/90) so the same status reads at the same strength in both. The accent stays at
+70/30 rather than dropping to the more vivid 60: it is still the foreground on those
+tinted chips, where 60 fails AA — that is why PJBA-13 raised it in the first place.
 
 Rules when touching board styling:
 
