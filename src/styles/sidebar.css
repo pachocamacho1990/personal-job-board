@@ -100,7 +100,8 @@
     text-align: left;
     cursor: pointer;
     transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
-                color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+                color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
 }
 
 .theme-toggle:hover {
@@ -116,6 +117,10 @@
 
 .theme-toggle[aria-pressed='true'] svg {
     transform: rotate(180deg);
+}
+
+.theme-toggle:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 .user-profile {
@@ -159,11 +164,16 @@
     cursor: pointer;
     padding: 0.5rem;
     border-radius: var(--cds-radius-02);
-    transition: color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+    transition: color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
 }
 
 .logout-trigger:hover {
     color: var(--cds-support-error);
+}
+
+.logout-trigger:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 /* Subnavigation for Job Boards */
@@ -194,7 +204,7 @@
 }
 
 .board-nav-item:hover {
-    background-color: var(--cds-layer-selected-01);
+    background-color: var(--cds-layer-hover-01);
     color: var(--cds-text-primary);
 }
 
@@ -229,7 +239,8 @@
     font-size: 0.75rem;
     color: var(--cds-text-placeholder);
     transition: background-color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
-                color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+                color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
 }
 
 .board-action-btn:hover {
@@ -240,6 +251,10 @@
 .board-action-btn.delete:hover {
     color: var(--cds-support-error);
     background-color: var(--cds-support-error-subtle);
+}
+
+.board-action-btn:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 
 .new-board-btn {
@@ -256,11 +271,16 @@
     width: calc(100% - 0.75rem);
     margin-left: 1.75rem;
     font-weight: 500;
-    transition: color var(--cds-duration-fast-02) var(--cds-easing-standard-productive);
+    transition: color var(--cds-duration-fast-02) var(--cds-easing-standard-productive),
+                transform var(--cds-duration-fast-01) var(--cds-easing-standard-productive);
 }
 
 .new-board-btn:hover {
     color: var(--cds-link-primary);
     text-decoration: underline;
+}
+
+.new-board-btn:active {
+    transform: translateY(var(--cds-lift-pressed));
 }
 

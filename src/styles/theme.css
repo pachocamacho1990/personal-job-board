@@ -327,6 +327,27 @@
        behaves very differently on the two backgrounds. */
   --cds-shadow-none: none;
 
+  /* — Interaction vocabulary. Three roles, one behaviour each, so a card on the
+       dashboard answers the pointer exactly the way a card on the board does.
+       The roles are a convention rather than a class — each stylesheet writes
+       the rule itself — but the two distances are tokens so they cannot drift
+       apart between sheets.
+
+       raised   things you pick up or open: cards, tiles, conversation items.
+                hover  → layer-hover + shadow-raised + --cds-lift-raised
+                active → layer-active, no shadow, back to rest
+       row      items stacked in a list: table rows, nav items, file entries.
+                hover  → layer-hover, and nothing else. Lifting one row out of a
+                stack looks broken, because its neighbours stay put.
+       control  buttons, inputs, icon buttons.
+                hover  → colour only. A button that rises lies about what it is.
+                active → --cds-lift-pressed, a single pixel down.
+
+       That last pixel is the cheapest thing in this file and the one that makes
+       the whole app feel answered rather than just repainted. */
+  --cds-lift-raised: -2px;
+  --cds-lift-pressed: 1px;
+
   /* — Motion. Carbon splits movement into two registers. *Productive* motion is
        efficient and stays out of the way: button states, dropdowns, revealing
        information. That is most of this app. *Expressive* motion is vibrant and
