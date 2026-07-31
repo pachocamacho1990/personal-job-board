@@ -587,6 +587,42 @@ export const DocsPage: React.FC = () => {
                 decisión; para volver a otro tema basta con pulsar de nuevo el botón de la barra
                 lateral.
               </div>
+
+              <h3>El lenguaje visual</h3>
+              <p>
+                Las superficies de la aplicación tienen esquinas redondeadas: 8px en contenedores
+                (tarjetas, columnas, paneles) y 4px en controles (botones, campos). Son los mismos
+                valores que Carbon usa en su propia librería de componentes.
+              </p>
+              <p>
+                Los elementos responden al puntero de tres formas distintas según lo que sean. Una{' '}
+                <strong>tarjeta</strong> se eleva ligeramente al pasar por encima y se hunde al
+                pulsarla. Una <strong>fila de una lista</strong> solo cambia de fondo, porque
+                levantar una fila de una pila se vería roto. Un <strong>botón</strong> cambia de
+                color y baja un píxel al pulsarse. Todas las transiciones usan las duraciones y
+                curvas de Carbon.
+              </p>
+              <p>
+                Las columnas de los tableros <strong>no llevan relleno de color</strong>. El estado
+                se identifica por la barra de acento sobre la cabecera, el título y el borde
+                izquierdo de cada tarjeta. Es una decisión deliberada del modelo de capas de
+                Carbon: las superficies van en gris y el color queda reservado para el acento.
+              </p>
+
+              <h3>Cómo se marca el contenido generado por IA</h3>
+              <p>
+                Las oportunidades que crea el agente Zenith llevan un{' '}
+                <strong>halo violeta</strong> que asciende desde el borde inferior de la tarjeta,
+                más un borde del mismo tono. Las que aún no has abierto lo llevan algo más marcado.
+                El mismo tratamiento aparece en el widget de coincidencias del panel de inicio, en
+                los mensajes del propio agente, y en el panel de Zenith mientras está generando una
+                respuesta.
+              </p>
+              <div className="alert alert-info">
+                Ese halo es la extensión <strong>Carbon for AI</strong> de IBM y no es decorativo:
+                marca exclusivamente contenido generado por inteligencia artificial. Si una tarjeta
+                lo lleva, la escribió el agente; si no lo lleva, la escribiste tú.
+              </div>
             </section>
           </div>
         )}
