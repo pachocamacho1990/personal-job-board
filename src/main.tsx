@@ -7,10 +7,13 @@ import { createRoot } from 'react-dom/client';
 import './styles/theme.css';
 
 import { initTheme } from './theme';
+import { initAgentLayout } from './agentLayout';
 import { App } from './App';
 
-// Before the first render, so the tree never paints against the wrong theme.
+// Before the first render, so the tree never paints against the wrong theme —
+// or, for the agent panel, at the wrong width.
 initTheme();
+initAgentLayout();
 
 const container = document.getElementById('root');
 if (container) {

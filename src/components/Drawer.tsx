@@ -15,15 +15,21 @@ interface DrawerProps {
 }
 
 /**
- * The right-hand editing drawer, shared by the job and business detail panels.
+ * The editing dialog, shared by the job and business detail panels.
  *
- * Both had grown their own copy of this shell: the same aside, the same
- * positioning inline styles, the same header with a title and a close button,
- * and the same Escape handler. The only real difference was which overlays
- * suppressed Escape, which is now a prop.
+ * It used to be a drawer pinned to the right edge — the same 400px strip the
+ * agent panel occupies. With the agent open, opening a card put one on top of
+ * the other and the form was simply unreachable. Two things fighting for one
+ * strip is not a z-index problem, it is a layout that assumed only one of them
+ * would ever exist.
  *
- * All of it keeps the original ids and class names, because the Playwright
- * specs and styles.css both select on them.
+ * So it is a centred dialog now, matching the read-only peek that opens from
+ * the same card. Nothing on the right edge, nothing to collide with, and the
+ * form gets the width its two-column layout wanted anyway.
+ *
+ * The ids and class names are unchanged: the Playwright specs and styles.css
+ * both select on them, and the element's job is the same even though its
+ * position is not.
  */
 export const Drawer: React.FC<DrawerProps> = ({
   isOpen,
@@ -45,7 +51,18 @@ export const Drawer: React.FC<DrawerProps> = ({
   }, [isOpen, onClose, ...blockedBy]);
 
   return (
-    <aside id="detailPanel" className={`detail-panel ${isOpen ? 'open' : ''}`}>
+    <aside
+      id="detailPanel"
+      className={`detail-panel ${isOpen ? 'open' : ''}`}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="panelTitle"
+      /* Clicking the backdrop dismisses; clicking inside the card must not.
+         Comparing against currentTarget is what distinguishes the two. */
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && !blockedBy.some(Boolean)) onClose();
+      }}
+    >
       <div className="panel-content">
         <div className="panel-header">
           <h2 id="panelTitle">{title}</h2>
