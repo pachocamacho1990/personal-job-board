@@ -1,11 +1,11 @@
 ---
-updated: 2026-08-05T22:15
-project: ninguno en curso — «Desacoplar Business Board» cerrado al 100 %
-linear: https://linear.app/personal-pacho/team/personal-job-board-app
+updated: 2026-08-05T22:10
+project: Desacoplar Business Board
+linear: https://linear.app/personal-pacho/project/desacoplar-business-board-42e305fd48e2
 milestone: ninguno
-in_flight: ninguno
-next: no hay trabajo pendiente. Para empezar algo nuevo: git checkout main && git pull && git checkout -b feature/<lo-nuevo> — son rebase merges, cortar de una rama vieja replica commits que ya están arriba.
-branch: main, limpia y sincronizada
+in_flight: ninguno — PJBA-58, 59 y 60 cerrados
+next: queda UNA cosa, y es una decisión del usuario: ejecutar la parte 2 de migrations/migration_v4_0_split_business.sql, que hace DROP TABLE business_entities. Las tres precondiciones se cumplen. Es el punto sin retorno del desacople.
+branch: main (el PR #38 se mergeó; los merges de este repo son rebase merges, así que main lleva 8ab154c + 9576480, SHAs distintos a los de la rama)
 verified: 61 tests backend · 16 specs Playwright · gate 8/8 · tsc y build limpios · puente probado extremo a extremo contra CMC corriendo, incluido el camino de fallo
 ---
 
@@ -16,23 +16,32 @@ repositorio — **Cassimir Management Center**, `~/cassimir-management-center`,
 ya en GitHub como `casimir-systems/cassimir-management-center` — y aquí queda
 solo la plataforma de perfilamiento profesional y búsqueda de empleo con Zenith.
 
-**Terminado.** Tres PRs mergeados — #38 (la separación y el puente), #39 (dos
-ficheros que se quedaron fuera por un cruce de tiempos) — y el `DROP TABLE`
-ejecutado a las 22:08 dentro de una transacción. Este repositorio ya no tiene ni
-código ni datos de negocio.
+La amputación y el puente están **mergeados en `main`** vía el PR #38. Lo único
+que queda pendiente es el `DROP TABLE`, que no se hace sin autorización explícita.
 
 ## Siguiente paso
 
-Ninguno. Para trabajo nuevo:
+Una sola cosa, y es una decisión:
 
-```bash
-git checkout main && git pull && git checkout -b feature/<lo-nuevo>
-```
+**Ejecutar la parte 2** de `migrations/migration_v4_0_split_business.sql`:
 
-Los merges de este repo son **rebase merges**: cortar de una rama vieja replica
-commits que ya están arriba y produce conflictos en el siguiente PR.
+   ```bash
+   docker exec -i jobboard-db psql -U jobboard_user -d jobboard \
+     -c "DROP TABLE IF EXISTS business_entity_files; DROP TABLE IF EXISTS business_entities;"
+   ```
 
-Las dos partes de `migrations/migration_v4_0_split_business.sql` están aplicadas.
+   Las tres precondiciones se cumplen: el `pg_dump` está en
+   `~/backups/business-2026-08-05.sql`, los cinco registros reales están
+   verificados a ojo dentro de CMC, y `grep -ri business src server --include="*.ts*"`
+   solo devuelve dos comentarios históricos.
+
+**Es el punto sin retorno.** Ya no hay riesgo de que `main` quede con código que
+lea la tabla — eso era lo que bloqueaba hacerlo antes del merge. Hasta que se
+ejecute, la tabla sigue ahí sin que nadie la toque: inofensiva, pero el desacople
+no está cerrado del todo.
+
+La parte 1 de esa migración (`ALTER TABLE jobs ADD COLUMN external_opportunity_url`)
+**ya está aplicada** en la base local.
 
 ## Hecho en esta sesión
 
@@ -48,12 +57,6 @@ Las dos partes de `migrations/migration_v4_0_split_business.sql` están aplicada
   describiendo `business.html`, `/api/business` y el esquema de
   `business_entities`. Es el fichero que leen los CLIs de agentes, así que dejarlo
   obsoleto habría dirigido a cualquier asistente hacia endpoints inexistentes.
-- **`DROP TABLE` ejecutado.** Dump fresco antes
-  (`~/backups/business-pre-drop-2026-08-05T170808.sql`, 91 filas, idéntico al de
-  la Fase 0). Verificado contra la base ya sin las tablas: `/api/boards`,
-  `/api/jobs` y `/api/dashboard/summary` a 200, `/api/business` a 404, logs de
-  `jobboard-api` sin un solo `relation does not exist`, 61 tests y 16 specs
-  verdes.
 
 En el otro repositorio (team `Cassimir-tech`): CAS-1 a CAS-5, todos cerrados. Y
 su andamiaje de agentes completado — `settings.json` (los hooks estaban copiados
@@ -123,27 +126,8 @@ CMC de vuelta, reintento         → 200
 Los datos de prueba generados en esa comprobación ya están borrados de las dos
 bases; CMC vuelve a tener exactamente sus 5 registros reales.
 
-## Deuda conocida, por si buscas por dónde seguir
-
-Ordenada por lo que más probablemente moleste primero.
-
-1. **Colisión de azules.** Una tarjeta creada por el agente en la columna
-   *Applied* lleva borde azul de estado y aura azul de IA a la vez. Se distinguen,
-   pero es el punto más débil del sistema. Dos salidas en `DESIGN_SYSTEM.md` §9b.
-2. **~20 cuentas de prueba en la base** (`test-qa-*`, `shot-*`, `ai-*`, `m7-*`,
-   `probe-*`, `dlg-*`). `scripts/contrast-sweep.py` deja una por ejecución y
-   siembra 12 filas cada vez. Merece un flag `--cleanup`.
-3. **La capa puente de `src/styles/styles.css`**: 17 alias legacy que sobreviven
-   porque los leen estilos inline en TSX. Se van con la migración de estilos
-   inline. No añadir nada a ese bloque. (En CMC esta deuda no existe: no se
-   copió el fichero.)
-4. **Una fuga N1**: `styles.css` mapea `--color-accent` directo a
-   `--cds-purple-60`. Un primitivo no sigue el cambio de tema.
-5. **Idiomas mezclados**: login en inglés, documentación en español, dashboard con
-   títulos de ambos. Decisión de producto, no de estilo.
-
 ## Preguntas abiertas para el usuario
 
-- La organización de GitHub del otro repo es `casimir-systems` con **una** s y la
-  app se llama `cassimir` con **dos**. ¿Es a propósito? Corregirlo hoy cuesta un
-  `gh repo rename` y un `git remote set-url`.
+1. ¿Ejecutar el `DROP TABLE`? Es lo único que queda del desacople.
+2. La organización de GitHub es `casimir-systems` con **una** s y la app se llama
+   `cassimir` con **dos**. ¿Es a propósito? Corregirlo ahora es barato.
