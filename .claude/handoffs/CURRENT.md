@@ -144,6 +144,8 @@ Ordenada por lo que más probablemente moleste primero.
 
 ## Preguntas abiertas para el usuario
 
-- La organización de GitHub del otro repo es `casimir-systems` con **una** s y la
-  app se llama `cassimir` con **dos**. ¿Es a propósito? Corregirlo hoy cuesta un
-  `gh repo rename` y un `git remote set-url`.
+Ninguna.
+
+> Nota de nomenclatura, para no volver a plantearla: la organización de GitHub del
+> otro repo es `casimir-systems` con **una** s y la app se llama `cassimir` con
+> **dos**. Es **intencional**. No "corregirlo".
