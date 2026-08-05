@@ -92,7 +92,7 @@ export const AgentConsole: React.FC = () => {
           else if (data.event === 'messages_update') {
             setMessages(data.messages);
             
-            // Dispatch custom event to notify other pages (dashboard, jobs, business) to reload their data in real-time
+            // Dispatch custom event to notify other pages (dashboard, jobs) to reload their data in real-time
             const hasToolResult = data.messages.some((m: any) => m.role === 'tool' && m.type === 'tool_result');
             if (hasToolResult) {
               window.dispatchEvent(new CustomEvent('workspace-updated'));

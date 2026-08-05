@@ -2,6 +2,65 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.0] - 2026-08-05
+
+### 💥 El Business Board se va a su propia aplicación
+
+Este repositorio contenía dos productos. Uno era una plataforma personal de
+búsqueda de empleo; el otro, el tablero de oportunidades de una compañía.
+Compartían base de datos, tabla `users`, barra lateral y ciclo de despliegue, y
+no compartían nada más.
+
+El segundo ahora es **Cassimir Management Center**, en su propio repositorio, con
+su propio Postgres, su propia tabla `users`, su propio `JWT_SECRET` y su propio
+`docker compose` en los puertos 8080/3001/5433. Su tabla plana
+`business_entities` — ocho columnas con la empresa, la persona y el trato a la
+vez, sin importe, sin fecha de cierre y sin historial — se rediseñó como
+`organizations` / `contacts` / `opportunities` / `activities`.
+
+Los 5 registros reales (de 90 filas; las otras 85 eran cuentas de prueba
+sembradas por `scripts/contrast-sweep.py`) están migrados y verificados: cinco
+oportunidades en sus etapas y un PDF de 3,2 MB que se descarga byte a byte
+idéntico al original.
+
+#### Removed
+- `business.html`, `src/pages/business/`, `src/components/BusinessDetailPanel.tsx`
+- `business.controller.ts`, `business-files.controller.ts`, `business.routes.ts`
+- `business.test.ts` y `business-files.test.ts` (18 tests)
+- Los cinco tripletes de tokens de estado de negocio, en **ambos** bloques de tema
+- Las secciones de Business Board de la guía y de la referencia de API
+
+#### Changed
+- **`POST /api/jobs/:id/transform` ya no escribe en una tabla local.** Llama por
+  HTTP a la API de Cassimir Management Center, autenticándose con un token de
+  integración hasheado — no con el `JWT_SECRET` compartido, que sería recrear
+  justo el acoplamiento que esta separación elimina.
+
+  Se pierde la transacción con rollback: no existe transacción distribuida entre
+  dos bases. La sustituyen el orden (crear remoto → bloquear local) y la
+  idempotencia sobre `external_ref`, de modo que un reintento converge en vez de
+  duplicar. **Si CMC no responde, es 503 y no cambia nada**: la vacante no se
+  bloquea.
+- `BusinessIcon` → `ConnectionIcon`. Marca tarjetas de `type: 'connection'`, que
+  es un concepto del Job Board y siempre lo fue.
+- El diagrama del login ya no promete un tablero de negocios; ahora describe lo
+  que hace el agente.
+
+#### Added
+- Columna `jobs.external_opportunity_url`, para que la tarjeta bloqueada pueda
+  enlazar a dónde fue.
+- `scripts/export-business.js`, con checksum de los adjuntos.
+- `migrations/migration_v4_0_split_business.sql`, en dos partes: la primera se
+  puede correr en cualquier momento, la segunda es el punto sin retorno.
+
+#### Fixed
+- **`UPLOADS_DIR` se derivaba de `__dirname`**, así que significaba
+  `server/uploads/` bajo ts-node y `server/dist/uploads/` una vez compilado,
+  porque el fichero compilado queda un nivel más abajo. No daba ningún error: el
+  directorio se crea a demanda y las subidas nuevas caían ahí. Solo se
+  manifestaba como un 404 al abrir un adjunto anterior al último despliegue.
+  Ahora se ancla al directorio de trabajo, con override por `UPLOADS_DIR`.
+
 ## [3.15.0] - 2026-07-31
 
 ### 🔧 Segunda pasada visual (M7)

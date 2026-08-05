@@ -36,6 +36,11 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: 7d
       PORT: 3000
+      # Cassimir Management Center — the target of the "transform this job into
+      # an opportunity" action. Optional: without it that one endpoint returns
+      # 503 and everything else works unchanged.
+      CMC_API_URL: ${CMC_API_URL:-}
+      CMC_INTEGRATION_TOKEN: ${CMC_INTEGRATION_TOKEN:-}
     ports:
       - "3000:3000"
     depends_on:

@@ -43,6 +43,9 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
   const [contactName, setContactName] = useState<string>('');
   const [organization, setOrganization] = useState<string>('');
   const [isLocked, setIsLocked] = useState<boolean>(false);
+  // Where the opportunity ended up in Cassimir Management Center. Empty for
+  // jobs locked before the split, which have nowhere to point.
+  const [opportunityUrl, setOpportunityUrl] = useState<string>('');
   const [createdAt, setCreatedAt] = useState<string>('');
   const [updatedAt, setUpdatedAt] = useState<string>('');
 
@@ -119,6 +122,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
       setContactName(job.contactName || '');
       setOrganization(job.organization || '');
       setIsLocked(job.is_locked || false);
+      setOpportunityUrl(job.externalOpportunityUrl || '');
       setCreatedAt(job.created_at || '');
       setUpdatedAt(job.updated_at || '');
 
@@ -303,7 +307,15 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
               >
                 🔒 <strong>Locked</strong>
                 <br />
-                This job has been transformed into a Business Connection.
+                This job was pushed to Cassimir Management Center as an opportunity.
+                {opportunityUrl && (
+                  <>
+                    <br />
+                    <a href={opportunityUrl} target="_blank" rel="noreferrer noopener">
+                      Open it there
+                    </a>
+                  </>
+                )}
               </div>
             )}
 
@@ -874,10 +886,14 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({
                   <strong>Lock</strong> this Job card in place 🔒
                 </li>
                 <li>
-                  Create a new <strong>Connection card</strong> in the Business Board 🤝
+                  Create an <strong>opportunity</strong> in Cassimir Management Center 🤝
                 </li>
-                <li>Copy all existing files 📂</li>
+                <li>Copy all existing files across 📂</li>
               </ul>
+              <p>
+                That is a separate application. If it is not running, nothing happens and
+                this card stays exactly as it is.
+              </p>
               <p>Are you sure you want to proceed?</p>
             </div>
             <div className="modal-footer">

@@ -7,7 +7,6 @@ import helmet from 'helmet';
 import authRoutes from './routes/auth.routes';
 import jobsRoutes from './routes/jobs.routes';
 import boardsRoutes from './routes/boards.routes';
-import businessRoutes from './routes/business.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import profileRoutes from './routes/profile.routes';
 import { errorHandler } from './middleware/errorHandler';
@@ -46,7 +45,6 @@ app.get('/api/health', (req: Request, res: Response) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobsRoutes);
 app.use('/api/boards', boardsRoutes);
-app.use('/api/business', businessRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/profile', profileRoutes);
 

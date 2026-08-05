@@ -6,7 +6,6 @@ import {
   RocketIcon,
   DashboardIcon,
   JobBoardIcon,
-  BusinessIcon,
   ProfileIcon,
   DocsIcon,
   PlusIcon,
@@ -17,7 +16,7 @@ import {
 import { CarbonTheme, getCurrentTheme, toggleTheme } from '../theme';
 
 interface SidebarProps {
-  activePage: 'dashboard' | 'jobs' | 'business' | 'docs' | 'profile';
+  activePage: 'dashboard' | 'jobs' | 'docs' | 'profile';
   boards?: (Board & { jobCount?: number })[];
   activeBoardId?: number | null;
   onBoardSelect?: (id: number) => void;
@@ -150,16 +149,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </>
           )}
 
-          <a
-            href="/jobboard/business.html"
-            className={`nav-item ${activePage === 'business' ? 'active' : ''}`}
-            onClick={(e) => {
-              e.preventDefault();
-              navigateTo('/jobboard/business.html');
-            }}
-          >
-            <BusinessIcon size={18} /> Business Board
-          </a>
           <a
             href="/jobboard/profile.html"
             className={`nav-item ${activePage === 'profile' ? 'active' : ''}`}

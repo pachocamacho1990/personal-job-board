@@ -36,15 +36,14 @@ test('Agent Console remains persistent across SPA page navigations without reloa
   // CRITICAL VERIFICATION: The Agent Console panel MUST still be open (it did not close or re-initialize)
   await expect(panel).toHaveClass(/open/);
 
-  // 5. Click "Business Board" link in the sidebar
-  const bizBoardLink = page.locator('.app-sidebar .nav-item', { hasText: 'Business Board' });
-  await bizBoardLink.click();
+  // 5. A second hop, so this proves the panel survives navigation in general
+  //    rather than one particular transition. This used to go to the Business
+  //    Board; that board now lives in its own app.
+  const profileLink = page.locator('.app-sidebar .nav-item', { hasText: 'Mi Perfil' });
+  await profileLink.click();
 
   // Verify URL changes client-side
-  await page.waitForURL('**/business.html');
-
-  // Verify page title updates to Business Connections
-  await expect(page.locator('.page-title')).toContainText('Business Connections');
+  await page.waitForURL('**/profile.html');
 
   // CRITICAL VERIFICATION: The Agent Console panel MUST still be open
   await expect(panel).toHaveClass(/open/);

@@ -136,11 +136,6 @@ export const api = {
     transform: async (id: number | string): Promise<any> => apiRequest(`/jobs/${id}/transform`, { method: 'POST' }),
   },
 
-  business: {
-    ...createCrudApi<any>('/business'),
-    files: createFilesApi('/business'),
-  },
-
   boards: createCrudApi<any>('/boards'),
 
   files: createFilesApi('/jobs'),

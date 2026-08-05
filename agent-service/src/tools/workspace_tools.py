@@ -314,7 +314,7 @@ WORKSPACE_TOOLS_SCHEMAS = [
                     "destination": {
                         "type": "string",
                         "description": "La sección a donde redirigir al usuario.",
-                        "enum": ["dashboard", "jobs", "business", "profile", "docs"]
+                        "enum": ["dashboard", "jobs", "profile", "docs"]
                     }
                 },
                 "required": ["destination"]
@@ -477,7 +477,6 @@ async def navigate_to(destination: str) -> Dict[str, Any]:
     mapping = {
         "dashboard": "/jobboard/index.html",
         "jobs": "/jobboard/jobs.html",
-        "business": "/jobboard/business.html",
         "profile": "/jobboard/profile.html",
         "docs": "/jobboard/docs.html"
     }

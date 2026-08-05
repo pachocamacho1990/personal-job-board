@@ -4,15 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Version**: 3.15.0
+**Version**: 4.0.0
 
-A self-hosted career management platform supporting multiple **board instances** with **Kanban boards** for tracking job applications AND business relationships. The application uses a **multi-user architecture** with JWT authentication, PostgreSQL database, and Docker-based deployment.
+A self-hosted **career management platform**: professional profiling and job search, with an AI agent (Zenith) that works your profile against new postings. Multi-user, JWT authentication, PostgreSQL, Docker-based deployment.
+
+> **The Business Board is no longer here.** It moved to its own repository and
+> its own stack — Cassimir Management Center, `~/cassimir-management-center`, on
+> port 8080. That app has its own database, its own `users` table and its own
+> `JWT_SECRET`. The only remaining link is one outbound HTTP call: see
+> [The Cassimir bridge](#the-cassimir-bridge). Do not add business, CRM or
+> investor-tracking features to this repository.
 
 ### Core Boards
 
 1. **Job Board** (`/jobs.html`): Track job applications through 8 stages (Interested → Applied → Forgotten → Interview → Pending Next Step → Offer → Rejected → Archived) across multiple isolated boards.
-2. **Business Board** (`/business.html`): Track professional relationships (Investors, VCs, Accelerators, Connections).
-3. **Dashboard** (`/index.html`): Home view with upcoming interviews and AI match widgets filtered by active board.
+2. **Dashboard** (`/index.html`): Home view with upcoming interviews and AI match widgets filtered by active board.
 4. **Archive Vault** (Modal): View and restore archived jobs.
 5. **Professional Profile** (`/profile.html`): Manage experience, skills, and languages for Zenith AI Agent onboarding.
 
@@ -28,11 +34,6 @@ A self-hosted career management platform supporting multiple **board instances**
 - Both share: `type`, `rating` (1-5 stars), `status`, `origin` (human/agent), `is_unseen`, `comments` (markdown), and `board_id` (FK → boards.id) for board scoping.
 - **Status Enum**: `interested`, `applied`, `forgotten`, `interview`, `pending`, `offer`, `rejected`, `archived`
 
-**Business Entities Table** (`business_entities`):
-- **Investors**, **VCs**, **Accelerators**, **Connections**
-- Fields: `name`, `type`, `status`, `contact_person`, `email`, `website`, `location`, `notes`
-- Statuses: `researching`, `contacted`, `meeting`, `negotiation`, `signed`, `rejected`, `passed`
-
 **Job History Table** (`job_history`):
 - Automatically tracks all job status changes via PostgreSQL trigger
 - Fields: `job_id`, `previous_status`, `new_status`, `changed_at`
@@ -43,14 +44,13 @@ A self-hosted career management platform supporting multiple **board instances**
 ### Three-Tier Stack
 
 1. **Frontend** (`/src`): React SPA with Vite multi-page architecture
-   - `login.html`, `index.html` (Dashboard), `jobs.html` (Job Board), `business.html` (Business Board), `docs.html` (Documentation) in root pointing to corresponding React entry points in `src/pages/`.
+   - `login.html`, `index.html` (Dashboard), `jobs.html` (Job Board), `profile.html` (Profile), `docs.html` (Documentation) in root pointing to corresponding React entry points in `src/pages/`.
    - `src/types.ts`: Common types and interfaces for the frontend.
    - `src/api.ts`: Strongly typed REST API client using Fetch.
    - `src/utils.ts`: Pure utility functions (formatting, validation).
    - `src/components/`: Reusable React components:
      - `Sidebar.tsx`: Navigation bar with active board indicators and boards submenu.
      - `DetailPanel.tsx`: Sidebar drawer for editing job application details, adding/removing attachments.
-     - `BusinessDetailPanel.tsx`: Sidebar drawer for editing business entities and their attachments.
      - `JourneyMap.tsx`: SVG status progression map.
      - `CenterPeek.tsx`: Read-only modal with status transitions.
      - `ArchiveVault.tsx`: Modal for managing archived opportunities.
@@ -58,7 +58,6 @@ A self-hosted career management platform supporting multiple **board instances**
      - `login/main.tsx`: User registration/login flows.
      - `index/main.tsx`: Home dashboard with widgets.
      - `jobs/main.tsx`: Kanban-based board for job tracking.
-     - `business/main.tsx`: Kanban-based board for business connections tracking.
      - `docs/main.tsx`: Documentation and API explorer.
 
 2. **Backend, Testing & Migrations** (`/server`, `/migrations`, `/tests`):
@@ -67,12 +66,11 @@ A self-hosted career management platform supporting multiple **board instances**
      - `auth.routes.ts`: Authentication endpoints (signup, login, me).
      - `boards.routes.ts`: Board CRUD operations.
      - `jobs.routes.ts`: Job application CRUD + transitions.
-     - `business.routes.ts`: Business entity CRUD.
      - `dashboard.routes.ts`: Summary widgets query.
    - `controllers/`: Request handler controllers.
-     - `auth.controller.ts`, `boards.controller.ts`, `jobs.controller.ts`, `business.controller.ts`, `dashboard.controller.ts`.
+     - `auth.controller.ts`, `boards.controller.ts`, `jobs.controller.ts`, `dashboard.controller.ts`.
      - `files.factory.ts`: Shared controller factory for job and connection attachment uploads.
-     - `files.controller.ts` & `business-files.controller.ts`: Wrappers for the files factory.
+     - `files.controller.ts`: Wrapper for the files factory.
    - `middleware/`: Authentication and error handling middlewares.
    - `config/`: Database connection pool and JWT/auth configs.
    - `tests/`: Integration tests written in TypeScript (run via Jest/ts-jest).
@@ -99,7 +97,7 @@ A self-hosted career management platform supporting multiple **board instances**
 
 1. User logs in → Redirects to Dashboard (`index.html`)
 2. Dashboard shows: Upcoming Interviews, New AI Matches
-3. Sidebar enables navigation: Dashboard ↔ Job Board ↔ Business Board
+3. Sidebar enables navigation: Dashboard ↔ Job Board ↔ Profile ↔ Docs
 4. Focus Mode (Job Board): Toggle sidebar visibility for maximized workspace
 5. Logout confirmation modal prevents accidental logouts
 
@@ -134,7 +132,6 @@ npm run dev                 # Start with nodemon for hot-reload
 Tests cover:
 - `auth.test.js`: Authentication flows, rate limiting
 - `jobs.test.js`: Job CRUD, history endpoint, pending status
-- `business.test.js`: Business entity CRUD + validation
 - `dashboard.test.js`: Summary endpoint + error handling
 
 ### Database Access
@@ -146,7 +143,6 @@ docker exec -it jobboard-db psql -U jobboard_user -d jobboard
 # View data
 SELECT * FROM users;
 SELECT * FROM jobs WHERE user_id = 1;
-SELECT * FROM business_entities WHERE user_id = 1;
 SELECT * FROM job_history WHERE job_id = 1;
 ```
 
@@ -167,15 +163,7 @@ SELECT * FROM job_history WHERE job_id = 1;
 | PUT | `/api/jobs/:id` | Update job |
 | DELETE | `/api/jobs/:id` | Delete job |
 | GET | `/api/jobs/:id/history` | Get job status change history |
-| POST | `/api/jobs/:id/transform` | Transform job to business connection |
-
-### Business Entities
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/business` | List all entities |
-| POST | `/api/business` | Create entity |
-| PUT | `/api/business/:id` | Update entity |
-| DELETE | `/api/business/:id` | Delete entity |
+| POST | `/api/jobs/:id/transform` | Push the job to Cassimir Management Center as an opportunity |
 
 ### Dashboard
 | Method | Endpoint | Description |
@@ -203,27 +191,22 @@ SELECT * FROM job_history WHERE job_id = 1;
 - `updated_at` auto-updates via PostgreSQL trigger
 - `origin` field: 'human' (default) or 'agent' (AI-created)
 - `is_unseen` field: true for agent-created jobs not yet viewed
-- `is_locked` field: true for jobs transformed to business connections (non-editable, non-draggable)
+- `is_locked` field: true once the job has been pushed to Cassimir Management Center (non-editable, non-draggable)
+- `external_opportunity_url` field: where that opportunity lives, so the locked card can link to it
 
 **job_history table**:
 - Automatically populated by `trigger_log_job_status_change` on INSERT/UPDATE
 - Tracks `previous_status`, `new_status`, `changed_at` for each status change
 - Cascades delete when parent job is deleted
 
-**business_entities table**:
-- `type`: investor, vc, accelerator, connection
-- `status`: researching, contacted, meeting, negotiation, signed, rejected, passed
-- User ownership enforced via `user_id` foreign key
-
 ### Frontend State Management
 
-- Global arrays: `jobs[]` for Job Board, `entities[]` for Business Board
+- Global arrays: `jobs[]` for the Job Board
 - CRUD operations update local state optimistically, then sync with API
 - localStorage keys:
   - `authToken`: JWT token
   - `user`: User object (JSON)
   - `viewPreference`: Job Board view preference (`compact` / `comfortable`)
-  - `businessBoardCompactView`: Business Board view preference
   - `focusModePreference`: Focus Mode state (sidebar hidden)
   - `activeBoardId`: Currently selected board instance
   - `carbonTheme`: Active Carbon theme (`g10` light / `g100` dark)
@@ -231,7 +214,7 @@ SELECT * FROM job_history WHERE job_id = 1;
 
 ### Color-Coded Columns (Carbon status tokens)
 
-Both boards still key their styling off `data-status` attributes, but no stylesheet
+The board still keys its styling off `data-status` attributes, but no stylesheet
 holds a colour any more. Every status resolves through a **triplet of semantic
 tokens** defined in `src/styles/theme.css`:
 
@@ -242,7 +225,6 @@ tokens** defined in `src/styles/theme.css`:
 | `--cds-status-<name>-surface` | Tinted chips and blocks — **not** the column body |
 
 - Job Board statuses: `interested`, `applied`, `forgotten`, `interview`, `pending`, `offer`, `rejected`
-- Business Board statuses: `researching`, `contacted`, `meeting`, `negotiation`, `signed`
 
 **The columns carry no hue fill** (PJBA-38). They used to: the header was tinted at
 hue-20 and the whole body beneath it at hue-10, which across seven columns read as
@@ -293,7 +275,7 @@ Rules when touching board styling:
 ### Shared UI Components
 
 - `src/components/Drawer.tsx` — the right-hand editing drawer shell shared by
-  `DetailPanel` and `BusinessDetailPanel` (aside, header, close button, Escape
+  `DetailPanel` (aside, header, close button, Escape
   handling, with a `blockedBy` prop for layers stacked above it).
 - `src/components/InlineNotification.tsx` — Carbon inline notification
   (`error | success | info | warning`). Colour lives entirely in the modifier
@@ -362,13 +344,6 @@ before trusting it**.
 3. Update frontend form in `public/jobs.html`
 4. Add field to `public/js/app.js` form serialization and rendering
 
-### Adding New Fields to Business Entities
-
-1. Update `server/models/schema.sql` business_entities table
-2. Modify `server/controllers/business.controller.js` CRUD operations
-3. Update frontend form in `public/business.html`
-4. Add field to `public/js/business.js` form handling and card rendering
-
 ### Adding New Job Status
 
 1. Update CHECK constraint in `server/models/schema.sql` for jobs table
@@ -385,6 +360,43 @@ before trusting it**.
 4. Register route in `server/server.js`
 5. Add corresponding API method in `public/js/api.js`
 
+### The Cassimir bridge
+
+The one place this repository talks to another application.
+`POST /api/jobs/:id/transform` — `server/controllers/jobs.controller.ts` — pushes
+a job across to Cassimir Management Center as an opportunity.
+
+**Configuration** (`docker-compose.yml`, service `api`):
+
+```
+CMC_API_URL=http://host.docker.internal:8080
+CMC_INTEGRATION_TOKEN=<minted in the CMC repo>
+```
+
+Mint the token **there**, not here:
+`node scripts/create-integration-token.js you@example.com jobboard`. It is stored
+hashed on that side and printed once. It is deliberately **not** this app's
+`JWT_SECRET`: sharing that would let a session token from one app authenticate
+against the other, which is the coupling the split removed.
+
+Leave both blank and the endpoint returns 503. Nothing else is affected.
+
+**What changed and why it matters.** This used to be one local transaction with a
+rollback, because `business_entities` was a table in this database. There is no
+transaction spanning two databases, so two things replace it:
+
+1. **Order** — CMC is written first, the local lock second. The reverse would
+   leave a job marked "transformed" with nothing on the other side.
+2. **Idempotency** — the request carries `external_ref: "jobboard:<id>"` and CMC
+   returns the existing opportunity instead of creating a second one. So if the
+   local lock fails after CMC succeeded, a retry converges.
+
+If CMC is unreachable the endpoint is a **503 and nothing changes** — the job is
+not locked and the user can retry. That degradation is what makes depending on a
+second service acceptable. Attachments are forwarded best-effort afterwards: one
+failed upload is logged, never rolled back, because the opportunity already
+exists.
+
 ### Security Considerations
 
 - Never bypass `authMiddleware` for user-specific data endpoints
@@ -393,7 +405,32 @@ before trusting it**.
 - Helmet.js and CORS configured in `server.js`
 - Rate limiting on auth routes (15 failed attempts per 15 min)
 
-## Recent Changes (v3.10.x)
+## Recent Changes
+
+### v4.0.0 — the Business Board leaves
+- **Split**: the Business Board moved to `~/cassimir-management-center` (Cassimir
+  Management Center), with its own Postgres, `users` table, `JWT_SECRET` and
+  compose stack on ports 8080/3001/5433. Its flat `business_entities` table was
+  redesigned into `organizations` / `contacts` / `opportunities` / `activities`.
+- **Removed here**: `business.html`, `src/pages/business/`,
+  `BusinessDetailPanel.tsx`, the business controllers, routes and tests (18
+  tests), the five business status token triplets in both theme blocks, and the
+  Business Board sections of the docs page.
+- **Rewired**: `POST /api/jobs/:id/transform` no longer writes
+  `business_entities`. It calls CMC over HTTP with an idempotency key and
+  degrades to 503 if CMC is down, leaving the job untouched. See
+  [The Cassimir bridge](#the-cassimir-bridge).
+- **Database**: `migrations/migration_v4_0_split_business.sql`. Part 1 adds
+  `jobs.external_opportunity_url`; part 2 drops the two business tables and is
+  the point of no return — run it only after the data is verified in CMC.
+- **Fix**: `UPLOADS_DIR` was derived from `__dirname`, so it meant
+  `server/uploads/` under ts-node and `server/dist/uploads/` once compiled.
+  Nothing errored; only attachments stored before a deploy 404'd. Now anchored
+  to the working directory with a `UPLOADS_DIR` override.
+- **Rename**: `BusinessIcon` → `ConnectionIcon`. It marks job cards of
+  `type: 'connection'`, which is a job-board concept and always was.
+
+## Older changes (v3.10.x)
 
 ### v3.10.0
 - **Feature**: Job to Business Connection Transformation
@@ -466,9 +503,7 @@ before trusting it**.
 | File | Lines | Concerns |
 |------|-------|----------|
 | `src/pages/jobs/main.tsx` | ~450 | Job Board core Kanban page, React states, and drag-and-drop logic |
-| `src/pages/business/main.tsx` | ~250 | Business Board page |
 | `src/components/DetailPanel.tsx` | ~580 | Large detail sidebar panel with fields, file uploads, and connection conversion logic |
-| `src/components/BusinessDetailPanel.tsx` | ~480 | Business entity detail sidebar panel |
 | `src/components/Sidebar.tsx` | ~160 | Workspace sidebar navigation |
 | `src/components/JourneyMap.tsx` | ~100 | SVG status timeline rendering component |
 | `src/components/CenterPeek.tsx` | ~110 | Read-only details view component |
@@ -488,14 +523,11 @@ before trusting it**.
 src/
 ├── components/
 │   ├── ArchiveVault.tsx       # Archive / restore modal dialog component
-│   ├── BusinessDetailPanel.tsx # Detail side panel drawer for business board
 │   ├── CenterPeek.tsx         # Read-only job details modal
-│   ├── DetailPanel.tsx        # Detail side panel drawer for jobs board (with transform button)
+│   ├── DetailPanel.tsx        # Detail side panel drawer for jobs board (with the Cassimir transform button)
 │   ├── JourneyMap.tsx         # SVG status progression timeline widget
 │   └── Sidebar.tsx            # Left navigation sidebar with boards switcher
 ├── pages/
-│   ├── business/
-│   │   └── main.tsx           # Business Kanban board page
 │   ├── docs/
 │   │   └── main.tsx           # Documentation & API reference explorer page
 │   ├── index/
@@ -517,11 +549,9 @@ server/
 │   ├── auth.controller.ts     # User signup and login controller
 │   ├── boards.controller.ts   # Board CRUD controller
 │   ├── jobs.controller.ts     # Job CRUD controller
-│   ├── business.controller.ts # Business connection CRUD controller
 │   ├── dashboard.controller.ts # Summary widgets controller
 │   ├── files.factory.ts       # Generic file upload/download/delete controller factory
 │   ├── files.controller.ts    # Thin job files factory wrapper
-│   └── business-files.controller.ts # Thin connection files factory wrapper
 ├── middleware/
 │   ├── auth.ts                # JWT token validation middleware
 │   └── errorHandler.ts        # Express global error handler middleware
@@ -529,7 +559,6 @@ server/
 │   ├── auth.routes.ts         # User auth routing
 │   ├── boards.routes.ts       # Board CRUD routing
 │   ├── jobs.routes.ts         # Job CRUD + file uploads + transform routing
-│   ├── business.routes.ts     # Business connection CRUD + files routing
 │   └── dashboard.routes.ts    # Dashboard widgets routing
 ├── tests/
 │   └── [name].test.ts         # Backend unit/integration tests (Jest + ts-jest)
