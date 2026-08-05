@@ -1,14 +1,16 @@
 ---
 name: handoff
-description: Guarda y retoma el estado de trabajo entre sesiones de Claude Code para proyectos de largo aliento. Modo resume reconstruye dónde quedó la sesión anterior; modo checkpoint actualiza el estado tras cerrar un issue; modo save escribe el cierre narrativo completo. Mantiene .claude/handoffs/CURRENT.md sincronizado con el backlog de Linear del team personal-job-board-app.
+description: Guarda y retoma el estado de trabajo entre sesiones para proyectos de largo aliento, indistintamente en Claude Code y en Antigravity (agy). Úsala cuando el usuario diga "retomemos", "dónde quedamos", "continuemos donde lo dejamos", "cerremos", "guarda el contexto" o "hasta aquí llegamos", y al arrancar una sesión si existe .claude/handoffs/CURRENT.md. Modo resume reconstruye dónde quedó la sesión anterior; modo checkpoint actualiza el estado tras cerrar un issue; modo save escribe el cierre narrativo completo. Mantiene .claude/handoffs/CURRENT.md sincronizado con el backlog de Linear del team personal-job-board-app.
 when_to_use: Al arrancar una sesión cuando existe un handoff abierto; al terminar un issue de Linear; cuando el usuario dice "cerremos", "guarda el contexto", "hasta aquí llegamos", "retomemos", "dónde quedamos", "continuemos donde lo dejamos"; o cuando detectes presión de contexto (respuestas truncadas, sesión muy larga, compactación reciente).
 argument-hint: [resume|checkpoint|save]
 allowed-tools: Read, Write, Edit, Glob, Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Bash(ls:*), Bash(date:*), mcp__linear__list_issues, mcp__linear__get_issue, mcp__linear__save_issue, mcp__linear__save_comment, mcp__linear__list_issue_statuses
 ---
 
-Protocolo de continuidad entre sesiones. Modo pedido: `$ARGUMENTS` (si viene vacío, decide según el contexto: al inicio de sesión → `resume`; tras cerrar un issue → `checkpoint`; al cerrar → `save`).
+Protocolo de continuidad entre sesiones, compartido por **Claude Code y Antigravity (`agy`)**. Los dos CLIs leen y escriben el mismo estado; este archivo es la fuente única y `.agents/skills/handoff` es un enlace simbólico a él.
 
-**Rutas**: estado vivo en `.claude/handoffs/CURRENT.md` · histórico en `.claude/handoffs/archive/` · snapshots mecánicos en `.claude/handoffs/snapshots/` (no versionados) · plantilla en `${CLAUDE_SKILL_DIR}/TEMPLATE.md`.
+Modo pedido: `$ARGUMENTS` (si esa variable llega sin expandir o vacía —pasa fuera de Claude Code— decide según el contexto: al inicio de sesión → `resume`; tras cerrar un issue → `checkpoint`; al cerrar → `save`).
+
+**Rutas**, todas relativas a la raíz del repo: estado vivo en `.claude/handoffs/CURRENT.md` · histórico en `.claude/handoffs/archive/` · snapshots mecánicos en `.claude/handoffs/snapshots/` (no versionados) · plantilla en `.claude/skills/handoff/TEMPLATE.md`.
 
 **Linear**: team `personal-job-board-app` (prefijo `PJBA`). Proyecto activo: Migración a IBM Carbon (g10/g100), 26 issues PJBA-8→33 en 6 milestones M0–M5.
 
@@ -38,7 +40,7 @@ Disparador: acabas de cerrar un issue de Linear. Es barato y va sin ceremonia �
 
 Disparador: cierre de sesión, presión de contexto, o petición explícita.
 
-1. Escribe `CURRENT.md` completo siguiendo `${CLAUDE_SKILL_DIR}/TEMPLATE.md`. Rellena **todas** las secciones; si una no aplica, escribe "nada" en vez de borrarla.
+1. Escribe `CURRENT.md` completo siguiendo `.claude/skills/handoff/TEMPLATE.md`. Rellena **todas** las secciones; si una no aplica, escribe "nada" en vez de borrarla.
 2. Copia la versión anterior a `archive/AAAA-MM-DD-<issue>-<slug>.md` antes de sobrescribir, para que quede el rastro.
 3. Sincroniza Linear: estados de los issues tocados + un comentario en el issue en vuelo con el punto exacto de corte.
 4. Ejecuta y registra el estado de verificación (`npm test`, build, o lo que aplique). **Si algo está roto, dilo en el handoff.** Un handoff que oculta que el build falla es peor que no tener handoff.

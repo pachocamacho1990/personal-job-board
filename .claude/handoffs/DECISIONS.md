@@ -248,3 +248,34 @@ es el del agente.
 **Si algún día vuelve a molestar**, hay dos salidas antes que volver al morado:
 mover `status-applied` a otro hue del board (es el único que colisiona), o darle
 al aura de IA un stop claramente separado del acento de estado.
+
+
+## 2026-08-05 · El envoltorio de Antigravity vive fuera del repo, y no hay alternativa
+
+El protocolo de handoff lo comparten Claude Code y Antigravity (`agy`), y todo el
+contenido está versionado en el repo: el protocolo en
+`.claude/skills/handoff/SKILL.md` (con `.agents/skills/handoff` como symlink) y el
+texto de arranque en `.claude/hooks/handoff-context.sh`.
+
+**La excepción es el disparador de Antigravity.** `.agents/hooks.json` se ignora
+—verificado en PJBA-54—, así que un hook dentro del proyecto nunca llega a
+ejecutarse. El envoltorio tiene que ser global y vive en
+`~/.gemini/config/hooks/handoff-session-start.sh`. Localiza el workspace y ejecuta
+`$WS/.claude/hooks/handoff-context.sh agy`.
+
+**La consecuencia**: clonar el repo en otra máquina **no** trae el arranque
+automático de `agy`. Hay que replicar ese archivo y su entrada en
+`~/.gemini/config/hooks.json` a mano. La vía fiable sigue siendo escribir
+*"retomemos el trabajo de la sesión pasada"*, que funciona sin hook alguno.
+
+**Descartado**: duplicar el texto del protocolo dentro del hook global para que
+fuese autocontenido. Ahorra un paso de instalación y a cambio garantiza que las
+dos copias diverjan — que es exactamente el fallo que este diseño existe para
+evitar. El hook global es un envoltorio tonto; el contenido se hereda del repo.
+
+**Trampa asociada**: los comentarios de cabecera de `session-start.sh` y
+`handoff-context.sh` son la documentación real de cómo encajan los dos CLIs, y se
+desincronizan en silencio — los hooks funcionan igual con el comentario
+equivocado. De hecho ambos describieron durante una sesión entera una ruta
+(`.agents/hooks/session-start.sh`) que PJBA-54 ya había descartado. Al tocar el
+protocolo, releerlos.

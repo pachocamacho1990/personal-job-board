@@ -254,3 +254,25 @@ Covers user registration, creating boards, data isolation, and deep link verific
 - **Auto-Open**: The Jobs Page (`src/pages/jobs/main.tsx`) automatically detects this parameter and opens the **Center Peek** modal.
 - **Parameter Handling**: Do not remove the query parameter (allows for bookmarking specific job views).
 
+## Multi-Model Session Continuity (Claude Code ↔ Antigravity)
+
+This repo is worked with either **Claude Code** or **Antigravity (`agy`)**.
+Antigravity is the backup when Claude Code is unavailable. Both share one state
+file, `.claude/handoffs/CURRENT.md`.
+
+- **Single source of truth**: the protocol lives once in
+  `.claude/skills/handoff/SKILL.md`; `.agents/skills/handoff` is a **symlink** to
+  it. The session-start text lives once in `.claude/hooks/handoff-context.sh`;
+  each CLI only wraps it in its own JSON envelope. **Never duplicate protocol
+  text between the two** — change the source and both inherit it.
+- **`.claude/` is the source of truth for `agy` too.** Do not create a parallel
+  protocol under `.agents/`.
+- **Starting a session in `agy`**: say *"retomemos el trabajo de la sesión
+  pasada"*. Rules files (`GEMINI.md`, `AGENTS.md`) load lazily — only once a repo
+  file is opened — so they cannot be relied on to fire the protocol.
+- **Setup details, and what was empirically verified vs. what the vendor docs get
+  wrong**: [GEMINI.md](file:///Users/pacho-home-server/personal-job-board/GEMINI.md).
+- The `gemini` CLI is installed but **deprecated by Google** and its auth is
+  broken. Use `agy`.
+
+

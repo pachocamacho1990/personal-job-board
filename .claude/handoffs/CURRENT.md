@@ -1,127 +1,92 @@
 ---
-updated: 2026-07-31T17:10
-project: ninguno en curso — el de Carbon está cerrado y mergeado
-linear: proyecto "Migración a IBM Carbon (g10/g100)" cerrado, 8 milestones al 100 %
+updated: 2026-08-05T13:35
+project: ninguno en curso — los dos proyectos del team están cerrados
+linear: https://linear.app/personal-pacho/team/personal-job-board-app
 milestone: ninguno
 in_flight: ninguno
-next: no hay trabajo pendiente. Al empezar algo nuevo, arrancar con "git checkout main && git pull && git checkout -b feature/<lo-nuevo>" — main ya tiene todo. Si buscas por dónde seguir, ver "Deuda conocida" abajo.
-branch: main, limpia y sincronizada con origin en 1b3b846 (v3.15.0)
-verified: gate 8/8 · contraste 0 fallos en 12 combinaciones sobre tableros poblados · 75 tests backend · 9 E2E · tsc y build limpios
+next: Abrir el PR de chore/continuidad-multimodelo-agy contra main y mergearlo (rebase merge). Tras el merge: git checkout main && git pull antes de cortar cualquier rama nueva. No hay más trabajo en curso.
+branch: chore/continuidad-multimodelo-agy, pusheada · pendiente de PR y merge a main
+verified: hooks de handoff 4/4 (generador claude + variante agy + JSON de Claude Code + sintaxis del hook global) · tests de la app NO corridos, no se tocó código de la app
 ---
 
 ## Dónde quedamos
 
-Nada en curso. El rediseño a Carbon terminó y está en `main`: PR #34 (v3.13.0 + v3.14.0)
-y PR #35 (v3.15.0), mergeados.
+Cerrado el proyecto **Continuidad multimodelo: Claude Code ↔ Antigravity**, sus 9
+issues (PJBA-49→57) en `Done`. El repo se puede trabajar indistintamente con
+Claude Code y con Antigravity (`agy`): ambos leen y escriben el mismo estado en
+`.claude/handoffs/CURRENT.md`, y el protocolo vive una sola vez en
+`.claude/skills/handoff/SKILL.md`, del que `.agents/skills/handoff` es un symlink.
+El usuario verificó a mano que `agy` funciona en modo interactivo — arranque,
+carga del protocolo y conexión al MCP de Linear.
 
-Empezó como una migración y acabó siendo tres cosas. Cada fase salió de desplegar la
-anterior y mirarla: la migración produjo el refinamiento, y el refinamiento produjo la
-segunda pasada de bugs. Ese ciclo encontró más que cualquiera de las fases planificadas.
+Con esto quedan cerrados los dos proyectos del team: la migración a IBM Carbon y
+la continuidad multimodelo. No hay trabajo en curso.
 
 ## Siguiente paso
 
-No hay ninguno pendiente. Para trabajo nuevo:
+Abrir el PR de `chore/continuidad-multimodelo-agy` contra `main` y mergearlo.
+Los merges de este repo son **rebase merges**, así que en cuanto entre hay que
+hacer `git checkout main && git pull` antes de cortar ninguna rama nueva, o la
+siguiente PR replicará commits que ya están arriba.
 
-```bash
-git checkout main && git pull && git checkout -b feature/<lo-nuevo>
-```
+Después de eso no queda nada pendiente. Si el usuario abre trabajo nuevo, crear
+primero el proyecto y los issues en Linear (team `personal-job-board-app`,
+prefijo `PJBA`, asignados a él) y luego cortar rama desde un `main` recién
+actualizado.
 
-Los merges de este repo son **rebase merges**: cortar de una rama vieja replica commits
-que ya están arriba.
+## Hecho en esta sesión
 
-## Deuda conocida, por si buscas por dónde seguir
+- **PJBA-56** — Cerrado. El usuario verificó `agy` en interactivo: arranca, carga
+  el protocolo de handoff y responde el MCP de Linear.
+- **Corrección de rutas obsoletas** — `.claude/hooks/handoff-context.sh` y
+  `.claude/hooks/session-start.sh` documentaban `.agents/hooks/session-start.sh`
+  como envoltorio de Antigravity. Esa ruta no existe y no puede existir: PJBA-54
+  ya había establecido que los hooks de proyecto se ignoran allí. Ahora ambos
+  comentarios apuntan al hook global real,
+  `~/.gemini/config/hooks/handoff-session-start.sh`.
+- **Commit de la configuración** — Los archivos de configuración y documentación
+  de agentes, que llevaban toda la sesión anterior sin commitear, están
+  commiteados en la rama `chore/continuidad-multimodelo-agy` y pusheados. **No
+  van directos a `main`**: el usuario pidió expresamente rama y PR.
 
-Ordenada por lo que más probablemente moleste primero.
+## En vuelo / a medias
 
-1. **Colisión de azules.** Una tarjeta creada por el agente en la columna *Applied* lleva
-   borde azul de estado y aura azul de IA a la vez. Verificado sobre datos: se
-   distinguen, pero es el punto más débil del sistema. Dos salidas escritas en
-   `DESIGN_SYSTEM.md` §9b — mover `status-applied` a otro hue, o separar el stop de IA
-   del de estado.
-2. **~20 cuentas de prueba en la base** (`test-qa-*`, `shot-*`, `ai-*`, `m7-*`,
-   `probe-*`, `dlg-*`). `scripts/contrast-sweep.py` deja una por ejecución y ahora
-   siembra 12 filas cada vez. Merece un flag `--cleanup`.
-3. **La capa puente** de `src/styles/styles.css`: 17 alias legacy (`--color-primary`,
-   `--canvas`, …) que sobreviven porque los leen estilos inline en TSX. Se van con la
-   migración de estilos inline. No añadir nada a ese bloque.
-4. **Una fuga N1**: `styles.css` línea 28 mapea `--color-accent` directo a
-   `--cds-purple-60`. Un primitivo no sigue el cambio de tema.
-5. **Idiomas mezclados** en toda la app: login en inglés, documentación en español,
-   dashboard con títulos de ambos. Decisión de producto, no de estilo.
-6. **Componente AI label** de Carbon con popover de explicabilidad — quedó fuera de M6
-   por ser componente nuevo, no cambio de estilo.
+- **El PR de `chore/continuidad-multimodelo-agy`** — la rama está pusheada pero
+  sin mergear. No hay código de la app en el diff: solo hooks de shell, el symlink
+  de skills y markdown.
 
-## Cómo verificar cualquier cambio visual
+## Decisiones tomadas
 
-```bash
-npm run check:design                             # gate: 8 checks
-python3 scripts/check-tokens.py                  # estructura, paridad g10/g100, WCAG
-python3 scripts/audit-undefined-tokens.py        # var() que no resuelven
-cd server && npm test                            # 75 tests backend
-npx playwright test tests/                       # 9 E2E
+- **El envoltorio de Antigravity vive fuera del repo, a propósito.** Está en
+  `~/.gemini/config/hooks/handoff-session-start.sh` porque `.agents/hooks.json`
+  se ignora (PJBA-54). Es la única pieza del protocolo que no se puede versionar:
+  si se clona el repo en otra máquina, hay que replicarla a mano. El texto que
+  inyecta sí está versionado, en `.claude/hooks/handoff-context.sh`.
+- **Mantener la URL remota del MCP de Linear** (`https://mcp.linear.app/mcp`) en
+  los dos entornos de Antigravity, para paridad total con Claude Code.
 
-# El barrido de contraste vive en el contenedor del agente, que pierde /tmp:
-docker cp scripts/contrast-sweep.py jobboard-agent:/tmp/sweep.py
-docker exec jobboard-agent python /tmp/sweep.py  # 0 fallos, 12 combinaciones
-```
+## Trampas descubiertas
 
-El gate son **8 checks**: literales de color en CSS y en TSX, duraciones y easings,
-radios, tokens de estado del board fuera del board, primitivos N1 filtrados, `var()`
-colgantes, y el motor de tokens. Cada uno de los nuevos encontró violaciones reales en
-su primera ejecución.
-
-## Lo que hay que saber para no repetir errores
-
-Las decisiones de arquitectura están en `DECISIONS.md` y el sistema visual completo en
-`DESIGN_SYSTEM.md`. Esto es lo que costó caro y no vive en ninguno de los dos:
-
-- **Verificar sobre cuentas vacías no verifica nada.** El barrido de contraste llevaba
-  seis milestones escaneando un tablero sin tarjetas, porque se registra con una cuenta
-  nueva. Nunca midió un timestamp, una valoración ni un tag. El mismo punto ciego
-  escondía el Dashboard a una sola columna: dos paneles vacíos apilados se ven igual que
-  dos paneles en pantalla estrecha. **Sembrar datos antes de mirar.**
-- **Reproducir por la ruta equivocada da un falso negativo limpio.** El solape del panel
-  del agente no aparece con `page.goto()` — eso recarga y remonta todo. Solo sale
-  haciendo clic en el sidebar, que es como navega una persona. Esta app **es una SPA**
-  aunque tenga seis entradas HTML: `src/router.ts` hace `pushState` y `App.tsx`
-  intercambia el componente de página.
-- **Medir la pila de ancestros antes de leer CSS.** El "fondo gris plano" que se veía
-  detrás de las tarjetas no era la tarjeta ni la cuadrícula: era `.kanban-board`
-  pintando el mismo color que ya pinta `body`. Invisible al leer, obvio al recorrer los
-  `backgroundColor` computados en la app corriendo.
-- **Una premisa puede estar entera equivocada.** Se montó un experimento preguntando
-  "¿está mal el relleno de la tarjeta?" cuando la respuesta era "hay una lámina
-  redundante encima". El usuario dio la respuesta correcta a la pregunta equivocada.
-- **Escribir una decisión con confianza no la hace cierta.** `DESIGN_SYSTEM.md` afirmaba
-  que Carbon es cuadrado por principio y que la elevación es ninguna. Ambas falsas:
-  `$button-border-radius` está declarado `!default` y el token `$shadow` con su mixin
-  llevaban ahí desde siempre.
-- **`carbondesignsystem.com` es un Gatsby SPA** y WebFetch devuelve contenido truncado.
-  Ir al `.mdx` en `raw.githubusercontent.com/carbon-design-system/carbon-website/main/src/pages/<ruta>.mdx`
-  y usar `gh api "repos/carbon-design-system/carbon/git/trees/main?recursive=1"` para
-  localizar ficheros. El `!default` de Sass marca los puntos de override sancionados.
-- **Un `var()` indefinido no da error**: el navegador descarta la declaración entera.
-- **El contenedor `jobboard-agent` se recrea solo** y pierde `/tmp`: volver a copiar los
-  scripts con `docker cp` antes de cada uso.
-- **El `package.json` raíz no tiene campo `version`.** La versión vive en `CLAUDE.md` y
-  `CHANGELOG.md`.
-- **No mergear sin autorización explícita del usuario para ese merge concreto.** Se dio
-  por implícito una vez a partir de un "ejecuta lo que depende de ti" y no lo era.
+- **Los comentarios de los hooks se desincronizan en silencio.** Los dos que se
+  corrigieron aquí describían una arquitectura que un issue anterior ya había
+  descartado, y nada lo detecta: los hooks funcionan igual con el comentario
+  equivocado. Al tocar el protocolo, releer los comentarios de cabecera de
+  `session-start.sh` y `handoff-context.sh` — son la documentación real de cómo
+  encajan los dos CLIs.
+- Heredada de la sesión anterior: las reglas (`GEMINI.md`, `AGENTS.md`) en `agy`
+  cargan de forma perezosa, solo al abrir un archivo del repo, así que no sirven
+  para disparar el protocolo al arrancar. Por eso hace falta el hook global.
 
 ## Estado de verificación
 
-Corrido sobre `main` en `1b3b846`, antes del merge del PR #35:
-
-```
-npm run check:design                        PASS — 8/8
-python3 scripts/check-tokens.py             PASS
-python3 scripts/audit-undefined-tokens.py   0 referencias sin fallback
-python3 scripts/contrast-sweep.py           0 fallos · 12 combinaciones · tableros poblados
-cd server && npm test                       75 passed, 1 skipped
-npx playwright test                         9 passed
-npx tsc --noEmit && npm run build           limpios
-```
+- Hooks de handoff, **4/4 tras la corrección**: el generador emite el texto para
+  `claude`; la variante `agy` cita correctamente `.agents/skills/handoff/SKILL.md`;
+  el envoltorio de Claude Code produce JSON válido (1861 caracteres de contexto);
+  el hook global de `agy` pasa `bash -n`.
+- Modo interactivo de `agy`: **verificado a mano por el usuario**.
+- Tests y build de la aplicación: **no corridos**. No se tocó código de la app en
+  esta sesión — el diff son hooks de shell y markdown.
 
 ## Preguntas abiertas para el usuario
 
-Ninguna. El proyecto de Carbon está cerrado y no hay decisiones pendientes.
+Ninguna.
