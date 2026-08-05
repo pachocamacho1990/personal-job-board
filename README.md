@@ -10,7 +10,10 @@
   <img src="docs/assets/detail-preview.png" width="45%" alt="Job Detail View" />
 </div>
 
-A minimalist, **self-hosted Kanban board** to track job applications, networking opportunities, and business connections. Powered by **Docker**, **PostgreSQL**, and a secure **User Authentication** system.
+A minimalist, **self-hosted Kanban board** for your job search: applications, networking opportunities, and an AI agent that works your profile against new postings. Powered by **Docker**, **PostgreSQL**, and a secure **User Authentication** system.
+
+> Tracking investors, clients and partners lives in a separate app now —
+> [Cassimir Management Center](https://github.com/casimir-systems/cassimir-management-center).
 
 ## 🚀 Key Features
 
@@ -30,15 +33,8 @@ A minimalist, **self-hosted Kanban board** to track job applications, networking
 - **Compact/Comfortable View**: Toggle between dense and detailed card layouts
 - **Focus Mode 🎯**: Filter to high-priority items (hides low-rated cards and Rejected/Forgotten columns)
 - **Archive Vault 📦**: Archive completed or old jobs to declutter your board while preserving history
-- **Transform to Connection 🚀**: Convert job applications into Business Board connections with file migration and locked state
+- **Transform to Opportunity 🚀**: Push a job application to Cassimir Management Center as an opportunity, attachments included, leaving the card locked and linked
 
-### 🤝 Business Board
-- **Track Business Relationships**: Investors, VCs, Accelerators, Connections
-- **Kanban Stages**: Researching → Contacted → Meeting → Negotiation → Signed/Rejected
-- **Color-Coded Columns**: Each stage has distinct visual styling
-- **Drag & Drop**: Move entities between stages
-- **File Attachments**: Upload pitch decks, contracts, or notes to any entity
-- **Compact/Comfortable View**: Same view toggle as Job Board
 - **Deep Linking**: Click jobs from Dashboard to open directly in Job Board with details visible
 
 ### 🤖 Zenith AI Agent
@@ -107,8 +103,7 @@ personal-job-board/
 ├── dist/                     # Compiled frontend assets (served by Nginx)
 ├── src/                      # Frontend source code (React + TypeScript)
 │   ├── components/           # Reusable React components (Sidebar, Panels, etc.)
-│   ├── pages/                # MPA Entry points (Dashboard, Jobs, Business, Docs, Login)
-│   │   ├── business/
+│   ├── pages/                # MPA Entry points (Dashboard, Jobs, Profile, Docs, Login)
 │   │   ├── docs/
 │   │   ├── index/
 │   │   ├── jobs/
@@ -214,21 +209,10 @@ See [TESTING.md](TESTING.md) for full testing strategy.
 | PUT | `/api/jobs/:id` | Update job |
 | DELETE | `/api/jobs/:id` | Delete job |
 | GET | `/api/jobs/:id/history` | Get status change history |
-| POST | `/api/jobs/:id/transform` | Transform job to business connection |
+| POST | `/api/jobs/:id/transform` | Push the job to Cassimir Management Center |
 | GET | `/api/jobs/:id/files` | List job files |
 | POST | `/api/jobs/:id/files` | Upload file to job |
 | DELETE | `/api/jobs/:id/files/:fileId` | Delete job file |
-
-### Business Entities
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/business` | List all entities |
-| POST | `/api/business` | Create entity |
-| PUT | `/api/business/:id` | Update entity |
-| DELETE | `/api/business/:id` | Delete entity |
-| GET | `/api/business/:id/files` | List entity files |
-| POST | `/api/business/:id/files` | Upload file to entity |
-| DELETE | `/api/business/:id/files/:fileId` | Delete entity file |
 
 ### Dashboard
 | Method | Endpoint | Description |

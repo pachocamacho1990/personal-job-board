@@ -5,7 +5,7 @@ import { Sidebar } from '../../components/Sidebar';
 import {
   TargetIcon,
   ArchiveIcon,
-  BusinessIcon,
+  ConnectionIcon,
   JobBoardIcon,
   RobotIcon,
   ProfileIcon,
@@ -327,8 +327,12 @@ export const JobsPage: React.FC = () => {
 
   const handleTransformJob = async (id: number) => {
     try {
-      await api.jobs.transform(id);
-      alert('Job transformed successfully! Check the Business Board for the new connection.');
+      const result = await api.jobs.transform(id);
+      alert(
+        result?.opportunityUrl
+          ? `Opportunity created in Cassimir Management Center:\n${result.opportunityUrl}`
+          : 'Opportunity created in Cassimir Management Center.'
+      );
       if (activeBoardId) await loadJobs(activeBoardId);
       setIsEditPanelOpen(false);
       setSelectedJobId(null);
@@ -506,7 +510,7 @@ export const JobsPage: React.FC = () => {
                                 <div style={{ display: 'flex', gap: '4px', marginLeft: 'auto' }}>
                                   <span className={`type-badge ${job.type}`}>
                                     <span className="type-emoji inline-icon" >
-                                      {isConnection ? <BusinessIcon size={12} /> : <JobBoardIcon size={12} />}
+                                      {isConnection ? <ConnectionIcon size={12} /> : <JobBoardIcon size={12} />}
                                     </span>
                                     {typeName}
                                   </span>
@@ -534,7 +538,7 @@ export const JobsPage: React.FC = () => {
                                 <div style={{ display: 'flex', gap: '4px' }}>
                                   <span className={`type-badge ${job.type}`}>
                                     <span className="type-emoji inline-icon" >
-                                      {isConnection ? <BusinessIcon size={12} /> : <JobBoardIcon size={12} />}
+                                      {isConnection ? <ConnectionIcon size={12} /> : <JobBoardIcon size={12} />}
                                     </span>
                                     {typeName}
                                   </span>

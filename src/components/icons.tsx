@@ -23,7 +23,7 @@ export const JobBoardIcon: React.FC<IconProps> = ({ size = 16, className, ...pro
   </svg>
 );
 
-export const BusinessIcon: React.FC<IconProps> = ({ size = 16, className, ...props }) => (
+export const ConnectionIcon: React.FC<IconProps> = ({ size = 16, className, ...props }) => (
   <svg width={size} height={size} viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
     <rect x="4" y="2" width="24" height="28" rx="2" />
     <line x1="9" y1="6" x2="13" y2="6" />

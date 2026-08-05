@@ -15,7 +15,7 @@ interface DrawerProps {
 }
 
 /**
- * The editing dialog, shared by the job and business detail panels.
+ * The editing dialog behind the job detail panel.
  *
  * It used to be a drawer pinned to the right edge — the same 400px strip the
  * agent panel occupies. With the agent open, opening a card put one on top of

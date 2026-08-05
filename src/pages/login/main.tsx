@@ -281,19 +281,19 @@ export const LoginPage: React.FC = () => {
               <path d="M 381 188 H 404" stroke="var(--showcase-text)" strokeOpacity="0.3"
                     strokeWidth="1.5" strokeDasharray="3 4" markerEnd="url(#flow-arrow)" />
 
-              {/* ── The other half of the product: the same board for relationships ── */}
+              {/* ── What the agent contributes: matches dropped straight in ── */}
               <g transform="translate(40, 330)">
                 <rect width="520" height="76" rx="8" fill="var(--showcase-surface)"
                       stroke="var(--showcase-teal)" strokeOpacity="0.35" strokeWidth="1.5" />
                 <path d="M 8 1 H 512" stroke="var(--showcase-teal)" strokeWidth="3" strokeLinecap="round" />
-                <text x="18" y="26" fill="var(--showcase-text)" fontSize="11.5" fontWeight="600" fontFamily="var(--cds-font-sans)">Business board</text>
-                <text x="18" y="42" fill="var(--showcase-text-muted)" fontSize="9.5" fontFamily="var(--cds-font-sans)">The same pipeline, for the people behind the roles</text>
+                <text x="18" y="26" fill="var(--showcase-text)" fontSize="11.5" fontWeight="600" fontFamily="var(--cds-font-sans)">Zenith, your agent</text>
+                <text x="18" y="42" fill="var(--showcase-text-muted)" fontSize="9.5" fontFamily="var(--cds-font-sans)">Reads your profile, finds the matches, writes the letter</text>
                 {[
-                  { x: 18,  label: 'Researching' },
-                  { x: 118, label: 'Contacted' },
-                  { x: 208, label: 'Meeting' },
-                  { x: 288, label: 'Negotiation' },
-                  { x: 386, label: 'Signed' },
+                  { x: 18,  label: 'Interviews you' },
+                  { x: 118, label: 'Searches' },
+                  { x: 208, label: 'Matches' },
+                  { x: 288, label: 'Drafts' },
+                  { x: 386, label: 'Applies' },
                 ].map((s, i, all) => (
                   <g key={s.label}>
                     <rect x={s.x} y="52" width={s.label.length * 5.6 + 14} height="16" rx="8"
@@ -311,8 +311,8 @@ export const LoginPage: React.FC = () => {
             <p>
               Zenith tracks your applications through eight stages and keeps a history of
               every move, so you always know where each one stands. The agent works your
-              profile against new postings and drops what fits straight into the board — and
-              the same pipeline handles the investors, funds and contacts behind the roles.
+              profile against new postings, drops what fits straight into the board, and
+              drafts the cover letter before you ask.
             </p>
           </div>
         </div>

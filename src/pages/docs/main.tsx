@@ -43,7 +43,6 @@ export const DocsPage: React.FC = () => {
     { id: 'quickstart', label: 'Primeros Pasos' },
     { id: 'boards', label: 'Separación de Tableros' },
     { id: 'kanban', label: 'Job Board Kanban' },
-    { id: 'business', label: 'Business Board' },
     { id: 'transform', label: 'Transformación de Vacante' },
     { id: 'files', label: 'Gestión de Archivos' },
     { id: 'theming', label: 'Temas y Apariencia' },
@@ -54,7 +53,6 @@ export const DocsPage: React.FC = () => {
     { id: 'agent-auth', label: 'Flujo de Autenticación' },
     { id: 'agent-boards', label: 'API de Tableros' },
     { id: 'agent-jobs', label: 'API de Vacantes' },
-    { id: 'agent-biz', label: 'API de Business Board' },
     { id: 'agent-dash', label: 'API de Dashboard' },
     { id: 'agent-tools', label: 'Herramientas de Zenith' },
   ];
@@ -288,10 +286,10 @@ export const DocsPage: React.FC = () => {
                 </div>
                 <div className="feature-card">
                   <span className="feature-icon inline-icon-center" ><HandshakeIcon size={24} /></span>
-                  <h3>Business Board</h3>
+                  <h3>Perfil profesional</h3>
                   <p>
-                    Organiza relaciones de red como inversionistas y aceleradoras usando estados y
-                    procesos optimizados.
+                    Experiencia, competencias e idiomas. Es lo que lee Zenith para buscar
+                    vacantes y redactar tus cartas de presentación.
                   </p>
                 </div>
               </div>
@@ -418,40 +416,6 @@ export const DocsPage: React.FC = () => {
               </p>
             </section>
 
-            {/* Section: Business */}
-            <section
-              id="business"
-              className={`doc-section ${activeSection === 'business' ? 'active' : ''}`}
-            >
-              <h1>Business Board (Mesa de Negocios)</h1>
-              <p>
-                A diferencia de las ofertas de empleo tradicionales, el <strong>Business Board</strong>{' '}
-                te permite gestionar contactos comerciales, socios de inversión o aceleradoras. El
-                tablero cuenta con estados adaptados para negocios:
-              </p>
-              <ul>
-                <li>
-                  <strong>Investigando (Researching)</strong>: Listado de posibles aceleradoras o VCs de
-                  interés.
-                </li>
-                <li>
-                  <strong>Contactado</strong>: Mensajes enviados (outreach) a través de LinkedIn, correo
-                  o plataformas.
-                </li>
-                <li>
-                  <strong>Reunión (Meeting)</strong>: Primera o sucesivas llamadas de alineación o
-                  pitch.
-                </li>
-                <li>
-                  <strong>Negociación</strong>: Discusión activa de términos (Term Sheets, valuación,
-                  contratos).
-                </li>
-                <li>
-                  <strong>Firmado (Signed)</strong>: ¡Relación formalizada!
-                </li>
-              </ul>
-            </section>
-
             {/* Section: Transform */}
             <section
               id="transform"
@@ -473,7 +437,7 @@ export const DocsPage: React.FC = () => {
                     La vacante queda bloqueada (bloqueo visual tipo "Ghost" y desactivación de edición) con un candado (🔒) que previene modificaciones accidentales pero permite auditar el historial.
                   </li>
                   <li>
-                    Se crea un nuevo registro en el Business Board con toda la información (Compañía, Contacto, Notas).
+                    Se crea una <strong>oportunidad en Cassimir Management Center</strong> con toda la información (organización, contacto, notas). Es otra aplicación: si no está levantada, la operación devuelve 503 y la vacante queda intacta.
                   </li>
                   <li>
                     Todos los archivos adjuntos de la vacante (como CVs o cartas de presentación) se copian automáticamente a la nueva entidad comercial.
@@ -936,51 +900,6 @@ export const DocsPage: React.FC = () => {
               </table>
             </section>
 
-            {/* Section: Agent Biz */}
-            <section
-              id="agent-biz"
-              className={`doc-section ${activeSection === 'agent-biz' ? 'active' : ''}`}
-            >
-              <h1>API de Business Board</h1>
-              <p>
-                Gestión de entidades comerciales (no segmentados por tablero Kanban ordinario):
-              </p>
-              <div className="code-block-wrapper">
-                <div className="code-block-header">
-                  <span>POST /api/business</span>
-                  <button
-                    className="copy-btn"
-                    onClick={() =>
-                      handleCopyCode(
-                        `{\n  "name": "Y Combinator",\n  "type": "accelerator",\n  "status": "researching",\n  "contact_person": "Garry Tan",\n  "email": "garry@yc.com",\n  "website": "https://ycombinator.com",\n  "location": "Mountain View, CA",\n  "notes": "Postular en lote S26."\n}`,
-                        4
-                      )
-                    }
-                  >
-                    {copiedIndex === 4 ? '¡Copiado!' : 'Copiar'}
-                  </button>
-                </div>
-                <pre>
-                  <code>
-                    {`// Headers
-// Authorization: Bearer <token>
-// Content-Type: application/json
-
-// Body
-{
-  "name": "Y Combinator",
-  "type": "accelerator",
-  "status": "researching",
-  "contact_person": "Garry Tan",
-  "email": "garry@yc.com",
-  "website": "https://ycombinator.com",
-  "location": "Mountain View, CA",
-  "notes": "Postular en lote S26."
-}`}
-                  </code>
-                </pre>
-              </div>
-            </section>
 
             {/* Section: Agent Dash */}
             <section

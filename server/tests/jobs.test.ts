@@ -353,86 +353,146 @@ describe('Jobs Routes', () => {
         });
     });
 
+    /**
+     * The bridge to Cassimir Management Center.
+     *
+     * These tests used to assert on BEGIN/COMMIT/ROLLBACK, because the target
+     * table lived in this database. It does not any more, and there is no
+     * transaction spanning two of them. What replaces the rollback is the order
+     * of operations plus idempotency, so that is what is asserted here: CMC is
+     * always written first, and the job is only locked once CMC has confirmed.
+     */
     describe('POST /api/jobs/:id/transform', () => {
-        let mockClient: any;
+        const OLD_ENV = { ...process.env };
+
+        const unlockedJob = {
+            id: 1,
+            user_id: 1,
+            company: 'Transformed Corp',
+            organization: 'Transformed Corp',
+            status: 'interview',
+            is_locked: false,
+            comments: 'Great job',
+        };
 
         beforeEach(() => {
-            mockClient = {
-                query: jest.fn(),
-                release: jest.fn()
-            };
-            (pool.connect as jest.Mock).mockResolvedValue(mockClient);
+            process.env.CMC_API_URL = 'http://cmc.test:8080';
+            process.env.CMC_INTEGRATION_TOKEN = 'test-token';
+            global.fetch = jest.fn();
         });
 
-        it('should transform a job successfully (Transaction)', async () => {
-            // Mock Data
-            const jobData = {
-                id: 1,
-                user_id: 1,
-                company: 'Transformed Corp',
-                status: 'interview',
-                is_locked: false,
-                comments: 'Great job'
-            };
-            const filesData = [{ filename: 'resume.pdf', original_name: 'resume.pdf' }];
+        afterEach(() => {
+            process.env = { ...OLD_ENV };
+        });
 
-            // Mock Query Sequence
-            mockClient.query
-                .mockResolvedValueOnce({}) // BEGIN
-                .mockResolvedValueOnce({ rows: [jobData] }) // SELECT job
-                .mockResolvedValueOnce({ rows: [{ id: 100 }] }) // INSERT entity
-                .mockResolvedValueOnce({ rows: filesData }) // SELECT files
-                .mockResolvedValueOnce({}) // INSERT file 1
-                .mockResolvedValueOnce({}) // UPDATE job
-                .mockResolvedValueOnce({}); // COMMIT
+        it('creates the opportunity in CMC, then locks the job', async () => {
+            (pool.query as jest.Mock)
+                .mockResolvedValueOnce({ rows: [unlockedJob] })  // SELECT job
+                .mockResolvedValueOnce({ rows: [] })             // SELECT job_files
+                .mockResolvedValueOnce({ rows: [] });            // UPDATE jobs
+
+            (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({ opportunity_id: 42, url: 'http://cmc.test:8080/?opportunity=42' }),
+            });
 
             const res = await request(app).post('/api/jobs/1/transform');
 
             expect(res.statusCode).toBe(200);
-            expect(res.body).toHaveProperty('entityId', 100);
+            expect(res.body.opportunityId).toBe(42);
+            expect(res.body.opportunityUrl).toBe('http://cmc.test:8080/?opportunity=42');
 
-            // Verify Transaction Flow
-            expect(mockClient.query).toHaveBeenNthCalledWith(1, 'BEGIN');
-            expect(mockClient.query).toHaveBeenCalledWith(expect.stringContaining('UPDATE jobs'), expect.anything());
-            expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
-            expect(mockClient.release).toHaveBeenCalled();
+            // The idempotency key is what lets a retry converge instead of
+            // creating a second opportunity.
+            const [, init] = (global.fetch as jest.Mock).mock.calls[0];
+            expect(JSON.parse(init.body).external_ref).toBe('jobboard:1');
+            expect(init.headers['X-CMC-Integration-Token']).toBe('test-token');
+
+            const updateCall = (pool.query as jest.Mock).mock.calls
+                .find((c) => String(c[0]).includes('UPDATE jobs'));
+            expect(updateCall[1][0]).toBe('http://cmc.test:8080/?opportunity=42');
         });
 
-        it('should return 404 if job not found', async () => {
-            mockClient.query
-                .mockResolvedValueOnce({}) // BEGIN
-                .mockResolvedValueOnce({ rows: [] }) // SELECT job (empty)
-                .mockResolvedValueOnce({}); // ROLLBACK
+        it('returns 503 and leaves the job untouched when CMC is unreachable', async () => {
+            (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [unlockedJob] });
+            (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('ECONNREFUSED'));
+
+            const res = await request(app).post('/api/jobs/1/transform');
+
+            expect(res.statusCode).toBe(503);
+            expect(res.body.error).toMatch(/unreachable/i);
+
+            // The whole point of the degradation: nothing was written.
+            const wrote = (pool.query as jest.Mock).mock.calls
+                .some((c) => String(c[0]).includes('UPDATE jobs'));
+            expect(wrote).toBe(false);
+        });
+
+        it('returns 503 without calling CMC when it is not configured', async () => {
+            delete process.env.CMC_API_URL;
+
+            const res = await request(app).post('/api/jobs/1/transform');
+
+            expect(res.statusCode).toBe(503);
+            expect(res.body.error).toMatch(/not configured/i);
+            expect(global.fetch).not.toHaveBeenCalled();
+        });
+
+        it('returns 404 if the job is not the caller\'s', async () => {
+            (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
 
             const res = await request(app).post('/api/jobs/999/transform');
 
             expect(res.statusCode).toBe(404);
-            expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
+            expect(global.fetch).not.toHaveBeenCalled();
         });
 
-        it('should return 400 if job is already locked', async () => {
-            mockClient.query
-                .mockResolvedValueOnce({}) // BEGIN
-                .mockResolvedValueOnce({ rows: [{ id: 1, is_locked: true }] }) // SELECT job
-                .mockResolvedValueOnce({}); // ROLLBACK
+        it('refuses a job that is already locked, without calling CMC again', async () => {
+            (pool.query as jest.Mock)
+                .mockResolvedValueOnce({ rows: [{ id: 1, is_locked: true }] });
 
             const res = await request(app).post('/api/jobs/1/transform');
 
             expect(res.statusCode).toBe(400);
             expect(res.body.error).toMatch(/already transformed/);
-            expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
+            expect(global.fetch).not.toHaveBeenCalled();
         });
 
-        it('should rollback transaction on error', async () => {
-            mockClient.query
-                .mockResolvedValueOnce({}) // BEGIN
-                .mockRejectedValueOnce(new Error('Database error')); // SELECT fails
+        it('surfaces a 5xx from CMC as 503 and does not lock the job', async () => {
+            (pool.query as jest.Mock).mockResolvedValueOnce({ rows: [unlockedJob] });
+            (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: false,
+                status: 500,
+                json: async () => ({ error: 'boom' }),
+            });
 
             const res = await request(app).post('/api/jobs/1/transform');
 
-            expect(res.statusCode).toBe(500); // Or whatever global error handler returns
-            expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
-            expect(mockClient.release).toHaveBeenCalled();
+            expect(res.statusCode).toBe(503);
+            const wrote = (pool.query as jest.Mock).mock.calls
+                .some((c) => String(c[0]).includes('UPDATE jobs'));
+            expect(wrote).toBe(false);
+        });
+
+        it('still locks the job when forwarding an attachment fails', async () => {
+            (pool.query as jest.Mock)
+                .mockResolvedValueOnce({ rows: [unlockedJob] })
+                .mockResolvedValueOnce({ rows: [{ filename: 'nope.pdf', original_name: 'nope.pdf', mimetype: 'application/pdf' }] })
+                .mockResolvedValueOnce({ rows: [] });
+
+            (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({ opportunity_id: 42, url: 'http://cmc.test:8080/?opportunity=42' }),
+            });
+
+            const res = await request(app).post('/api/jobs/1/transform');
+
+            // The file is missing from disk and gets skipped. Failing the whole
+            // request here would strand an opportunity CMC has already created.
+            expect(res.statusCode).toBe(200);
+            const wrote = (pool.query as jest.Mock).mock.calls
+                .some((c) => String(c[0]).includes('UPDATE jobs'));
+            expect(wrote).toBe(true);
         });
     });
 

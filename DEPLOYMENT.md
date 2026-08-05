@@ -65,7 +65,6 @@ Open browser: **http://localhost/jobboard/**
 You'll be redirected to login. Create an account to access:
 - **Dashboard**: Home view with widgets
 - **Job Board**: Track job applications
-- **Business Board**: Track business relationships
 
 ## Database Schema
 
@@ -73,7 +72,6 @@ The database includes three main tables:
 
 1. **users**: User accounts with hashed passwords
 2. **jobs**: Job applications and connections
-3. **business_entities**: Business relationships (v3.0.0+)
 
 On first start, the schema is auto-initialized from `server/models/schema.sql`.
 
@@ -98,8 +96,6 @@ docker exec -i jobboard-db psql -U jobboard_user -d jobboard < migrations/migrat
 # 2. File uploads table
 docker exec -i jobboard-db psql -U jobboard_user -d jobboard < migrations/migration_v3_3_files.sql
 
-# 3. Business entity files
-docker exec -i jobboard-db psql -U jobboard_user -d jobboard < migrations/migration_v3_4_business_files.sql
 
 # 4. Lock column
 docker exec -i jobboard-db psql -U jobboard_user -d jobboard < migrations/migration_v3_5_locked.sql
@@ -120,8 +116,6 @@ SELECT id, email, created_at FROM users;
 # View jobs
 SELECT id, company, status FROM jobs WHERE user_id = 1;
 
-# View business entities
-SELECT id, name, type, status FROM business_entities WHERE user_id = 1;
 
 # Backup
 docker-compose exec postgres pg_dump -U jobboard_user jobboard > backup.sql
@@ -227,7 +221,6 @@ npm run test:ui
 │   ├── pages/                   # Multi-page application entry points
 │   │   ├── dashboard/           # Dashboard home view
 │   │   ├── jobs/                # Job applications board
-│   │   ├── business/            # Business relationships board
 │   │   ├── login/               # Sign in / Sign up page
 │   │   └── docs/                # Interactive documentation page
 │   ├── api.ts                   # Strongly typed REST API client
@@ -268,4 +261,4 @@ For migrating from the old localStorage-based version:
    node scripts/import-to-database.js migration-data.json user@email.com password
    ```
 
-Note: This only migrates jobs. Business entities are a new feature in v3.0.0.
+Note: This only migrates jobs. Business relationships now live in Cassimir Management Center, a separate application.

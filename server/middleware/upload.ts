@@ -3,8 +3,21 @@ import path from 'path';
 import crypto from 'crypto';
 import fs from 'fs';
 
-// Ensure uploads directory exists
-export const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
+/**
+ * Where attachments live on disk.
+ *
+ * Anchored to the working directory, not to __dirname. Resolving it relative to
+ * the module means `server/uploads/` under ts-node and `server/dist/uploads/`
+ * once compiled, because the built file sits one level deeper. Nothing errors —
+ * the directory is created on demand and new uploads land in the wrong place
+ * quietly — so the split only shows up as a 404 on an attachment stored before
+ * the last deploy. In the container, cwd is /app, which is where the real
+ * uploads directory has always been.
+ */
+export const UPLOADS_DIR = process.env.UPLOADS_DIR
+    ? path.resolve(process.env.UPLOADS_DIR)
+    : path.resolve(process.cwd(), 'uploads');
+
 if (!fs.existsSync(UPLOADS_DIR)) {
     fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }

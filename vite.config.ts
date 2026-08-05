@@ -21,7 +21,6 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         login: resolve(__dirname, 'login.html'),
         jobs: resolve(__dirname, 'jobs.html'),
-        business: resolve(__dirname, 'business.html'),
         docs: resolve(__dirname, 'docs.html'),
         profile: resolve(__dirname, 'profile.html'),
       },

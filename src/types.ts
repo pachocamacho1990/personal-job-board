@@ -23,6 +23,11 @@ export interface Job {
   origin: string;
   is_unseen: boolean;
   is_locked: boolean;
+  /**
+   * Where this job ended up in Cassimir Management Center once transformed.
+   * Null for jobs locked before the split, which have nowhere to point.
+   */
+  externalOpportunityUrl: string | null;
   company: string;
   position: string;
   location: string;
@@ -31,21 +36,6 @@ export interface Job {
   contact_name: string | null;
   organization: string | null;
   comments: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface BusinessEntity {
-  id: number;
-  user_id: number;
-  name: string;
-  type: 'investor' | 'vc' | 'accelerator' | 'connection';
-  status: 'researching' | 'contacted' | 'meeting' | 'negotiation' | 'signed' | 'rejected' | 'passed';
-  contact_person: string | null;
-  email: string | null;
-  website: string | null;
-  location: string | null;
-  notes: string | null;
   created_at: string;
   updated_at: string;
 }

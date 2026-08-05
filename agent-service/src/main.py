@@ -177,7 +177,6 @@ async def get_adaptive_system_prompt(user_id: int) -> str:
         "Puedes redirigir automáticamente al usuario llamando a la herramienta 'navigate_to' con una de las siguientes opciones según lo que pida:\n"
         "- 'dashboard' (/jobboard/index.html): Muestra el resumen de actividad, el radar de anclas de carrera y la configuración del prompt de búsqueda (Claude).\n"
         "- 'jobs' (/jobboard/jobs.html): El tablero Kanban de vacantes y oportunidades. Aquí los usuarios organizan y editan tarjetas de empleo, y pueden usar el Copiloto IA de postulación (cartas de presentación/CVs ATS).\n"
-        "- 'business' (/jobboard/business.html): El tablero Kanban para contactos de negocios, inversionistas, VCs o aceleradoras.\n"
         "- 'profile' (/jobboard/profile.html): Pantalla donde el usuario edita o completa sus datos personales, titular, resumen, educación y EXPERIENCIA LABORAL.\n"
         "- 'docs' (/jobboard/docs.html): Documentación y manuales del sistema.\n"
         "Si el usuario dice algo como 'llévame a ver mi perfil', 'cómo modifico mi experiencia laboral' o 'dónde edito mis datos', debes indicarle la sección y llamar a 'navigate_to' inmediatamente.\n"

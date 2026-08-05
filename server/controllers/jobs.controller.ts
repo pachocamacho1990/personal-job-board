@@ -1,6 +1,9 @@
 import { Response, NextFunction } from 'express';
+import path from 'path';
+import fs from 'fs';
 import { pool } from '../config/db';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { UPLOADS_DIR } from '../middleware/upload';
 
 /**
  * Get all jobs for authenticated user
@@ -24,7 +27,7 @@ export const getAllJobs = async (req: AuthenticatedRequest, res: Response, next:
         }
 
         const result = await pool.query(
-            `SELECT id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary, url,
+            `SELECT id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, external_opportunity_url AS "externalOpportunityUrl", company, position, location, salary, url,
                     contact_name AS "contactName", organization, comments, 
                     created_at AS "created_at", updated_at AS "updated_at"
              FROM jobs 
@@ -99,7 +102,7 @@ export const createJob = async (req: AuthenticatedRequest, res: Response, next: 
               contact_name, organization, comments, created_at, updated_at)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
                      COALESCE($16::timestamptz, NOW()), COALESCE($17::timestamptz, NOW()))
-             RETURNING id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary, url,
+             RETURNING id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, external_opportunity_url AS "externalOpportunityUrl", company, position, location, salary, url,
                        contact_name AS "contactName", organization, comments,
                        created_at AS "created_at", updated_at AS "updated_at"`,
             [req.userId, targetBoardId, type, rating, status, origin, is_unseen, company, position, location, salary, url,
@@ -181,7 +184,7 @@ export const updateJob = async (req: AuthenticatedRequest, res: Response, next: 
                  comments = COALESCE($13, comments),
                  board_id = COALESCE($14, board_id)
              WHERE id = $15 AND user_id = $16
-             RETURNING id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary, url,
+             RETURNING id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, external_opportunity_url AS "externalOpportunityUrl", company, position, location, salary, url,
                        contact_name AS "contactName", organization, comments,
                        created_at AS "created_at", updated_at AS "updated_at"`,
             [type, rating, status, origin, resolvedIsUnseen, company, position, location, salary, url,
@@ -247,88 +250,150 @@ export const getJobHistory = async (req: AuthenticatedRequest, res: Response, ne
 };
 
 /**
- * Transform Job to Business Entity
+ * Push a job across to Cassimir Management Center as an opportunity.
  * POST /api/jobs/:id/transform
+ *
+ * This used to be one local transaction writing into business_entities. That
+ * table lives in another application now, so the write is an outbound HTTP call
+ * and there is no transaction spanning both databases.
+ *
+ * Two things replace the rollback that is no longer possible:
+ *
+ *   Order. CMC is written first and the local lock second. The reverse would
+ *   leave a job marked "transformed" with nothing on the other side.
+ *
+ *   Idempotency. The request carries external_ref "jobboard:<id>", and CMC
+ *   returns the existing opportunity rather than making a second one. So if the
+ *   local lock fails after CMC succeeded, a retry converges instead of
+ *   duplicating.
+ *
+ * If CMC is unreachable, this is a 503 and *nothing changes* — the job is not
+ * locked and the user can try again later. That graceful degradation is what
+ * makes depending on a second service acceptable here.
  */
 export const transformJobToEntity = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const client = await pool.connect();
     try {
         const { id } = req.params;
 
-        await client.query('BEGIN');
+        const cmcUrl = process.env.CMC_API_URL;
+        const cmcToken = process.env.CMC_INTEGRATION_TOKEN;
 
-        // 1. Fetch Job
-        const jobResult = await client.query(
+        if (!cmcUrl || !cmcToken) {
+            return res.status(503).json({
+                error: 'Cassimir Management Center is not configured. Set CMC_API_URL and CMC_INTEGRATION_TOKEN.',
+            });
+        }
+
+        const jobResult = await pool.query(
             'SELECT * FROM jobs WHERE id = $1 AND user_id = $2',
             [id, req.userId]
         );
 
         if (jobResult.rows.length === 0) {
-            await client.query('ROLLBACK');
             return res.status(404).json({ error: 'Job not found' });
         }
 
         const job = jobResult.rows[0];
 
         if (job.is_locked) {
-            await client.query('ROLLBACK');
             return res.status(400).json({ error: 'Job is already transformed/locked' });
         }
 
-        // 2. Create Business Entity
-        const notes = (job.comments || '') + `\n\n**Transformed from Job**\nPosition: ${job.position || 'N/A'}\nSalary: ${job.salary || 'N/A'}`;
+        const notes = (job.comments || '') +
+            `\n\n**Transformed from a job application**\nPosition: ${job.position || 'N/A'}\nSalary: ${job.salary || 'N/A'}`;
 
-        const entityResult = await client.query(
-            `INSERT INTO business_entities 
-            (user_id, name, type, status, contact_person, website, location, notes) 
-            VALUES ($1, $2, 'connection', 'researching', $3, $4, $5, $6) 
-            RETURNING id`,
-            [
-                req.userId,
-                job.company || 'Unknown Company',
-                job.contact_name,
-                job.organization,
-                job.location,
-                notes
-            ]
-        );
-        const newEntityId = entityResult.rows[0].id;
+        let created: { opportunity_id: number; url: string };
 
-        // 3. Copy Files
-        const filesResult = await client.query(
-            'SELECT * FROM job_files WHERE job_id = $1',
-            [id]
-        );
+        try {
+            const response = await fetch(`${cmcUrl.replace(/\/$/, '')}/api/integrations/opportunities`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CMC-Integration-Token': cmcToken,
+                },
+                body: JSON.stringify({
+                    external_ref: `jobboard:${id}`,
+                    source: 'jobboard',
+                    organization: {
+                        name: job.organization || job.company || 'Unknown organization',
+                        type: 'partner',
+                        location: job.location || null,
+                        website: job.url || null,
+                    },
+                    contact: job.contact_name ? { full_name: job.contact_name } : undefined,
+                    opportunity: {
+                        title: job.company || job.position || 'Opportunity from the job board',
+                        kind: 'partnership',
+                        stage: 'researching',
+                        notes,
+                    },
+                }),
+            });
 
-        for (const file of filesResult.rows) {
-            await client.query(
-                `INSERT INTO business_entity_files 
-                (entity_id, filename, original_name, mimetype, size) 
-                VALUES ($1, $2, $3, $4, $5)`,
-                [newEntityId, file.filename, file.original_name, file.mimetype, file.size]
-            );
+            if (!response.ok) {
+                const body = await response.json().catch(() => ({}));
+                console.error(`CMC rejected the transform of job ${id}:`, response.status, body);
+                return res.status(response.status >= 500 ? 503 : 502).json({
+                    error: body.error || `Cassimir Management Center responded ${response.status}`,
+                });
+            }
+
+            created = await response.json();
+        } catch (networkError) {
+            // Unreachable, DNS failure, timeout. Nothing has been written on
+            // either side, so say so plainly and leave the job untouched.
+            console.error(`Could not reach CMC while transforming job ${id}:`, networkError);
+            return res.status(503).json({
+                error: 'Cassimir Management Center is unreachable. The job was left unchanged.',
+            });
         }
 
-        // 4. Lock Job (keep original status, do NOT archive)
-        await client.query(
-            `UPDATE jobs 
-             SET is_locked = TRUE, updated_at = NOW() 
-             WHERE id = $1`,
-            [id]
-        );
+        // Attachments are best-effort: the opportunity already exists, and
+        // failing the whole request over one upload would strand it.
+        const filesResult = await pool.query('SELECT * FROM job_files WHERE job_id = $1', [id]);
 
-        await client.query('COMMIT');
+        for (const file of filesResult.rows) {
+            try {
+                const filePath = path.join(UPLOADS_DIR, file.filename);
+                if (!fs.existsSync(filePath)) {
+                    console.error(`Attachment missing on disk, skipped: ${file.filename}`);
+                    continue;
+                }
+
+                const form = new FormData();
+                form.append(
+                    'file',
+                    new Blob([fs.readFileSync(filePath)], { type: file.mimetype }),
+                    file.original_name
+                );
+
+                const upload = await fetch(
+                    `${cmcUrl.replace(/\/$/, '')}/api/integrations/opportunities/${created.opportunity_id}/files`,
+                    { method: 'POST', headers: { 'X-CMC-Integration-Token': cmcToken }, body: form }
+                );
+
+                if (!upload.ok) {
+                    console.error(`CMC refused attachment ${file.original_name}:`, upload.status);
+                }
+            } catch (uploadError) {
+                console.error(`Failed to forward attachment ${file.original_name}:`, uploadError);
+            }
+        }
+
+        await pool.query(
+            `UPDATE jobs
+                SET is_locked = TRUE, external_opportunity_url = $1, updated_at = NOW()
+              WHERE id = $2 AND user_id = $3`,
+            [created.url, id, req.userId]
+        );
 
         res.json({
             message: 'Transformation successful',
-            entityId: newEntityId
+            opportunityId: created.opportunity_id,
+            opportunityUrl: created.url,
         });
-
     } catch (error) {
-        await client.query('ROLLBACK');
         next(error);
-    } finally {
-        client.release();
     }
 };
 
@@ -341,7 +406,7 @@ export const getJobById = async (req: AuthenticatedRequest, res: Response, next:
         const { id } = req.params;
 
         const result = await pool.query(
-            `SELECT id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, company, position, location, salary, url,
+            `SELECT id, board_id AS "boardId", type, rating, status, origin, is_unseen, is_locked, external_opportunity_url AS "externalOpportunityUrl", company, position, location, salary, url,
                     contact_name AS "contactName", organization, comments,
                     created_at AS "created_at", updated_at AS "updated_at"
              FROM jobs 

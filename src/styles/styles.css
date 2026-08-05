@@ -195,52 +195,6 @@ body {
 }
 
 
-/* Business Board Column Status Colors */
-.column[data-status="researching"] .column-header {
-    border-block-start-color: var(--cds-status-researching);
-}
-
-.column[data-status="researching"] .column-header h2 {
-    color: var(--cds-status-researching);
-}
-
-
-.column[data-status="contacted"] .column-header {
-    border-block-start-color: var(--cds-status-contacted);
-}
-
-.column[data-status="contacted"] .column-header h2 {
-    color: var(--cds-status-contacted);
-}
-
-
-.column[data-status="meeting"] .column-header {
-    border-block-start-color: var(--cds-status-meeting);
-}
-
-.column[data-status="meeting"] .column-header h2 {
-    color: var(--cds-status-meeting);
-}
-
-
-.column[data-status="negotiation"] .column-header {
-    border-block-start-color: var(--cds-status-negotiation);
-}
-
-.column[data-status="negotiation"] .column-header h2 {
-    color: var(--cds-status-negotiation);
-}
-
-
-.column[data-status="signed"] .column-header {
-    border-block-start-color: var(--cds-status-signed);
-}
-
-.column[data-status="signed"] .column-header h2 {
-    color: var(--cds-status-signed);
-}
-
-
 .count-badge {
     background: var(--cds-layer-accent-01);
     padding: 2px 8px;
