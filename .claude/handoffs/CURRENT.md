@@ -4,8 +4,8 @@ project: Desacoplar Business Board
 linear: https://linear.app/personal-pacho/project/desacoplar-business-board-42e305fd48e2
 milestone: ninguno
 in_flight: ninguno — PJBA-58, 59 y 60 cerrados
-next: dos decisiones del usuario, ninguna ejecutable sin él. (1) Mergear feature/split-business-board a main. (2) Ejecutar la parte 2 de migrations/migration_v4_0_split_business.sql, que hace DROP TABLE business_entities — precondiciones cumplidas, es el punto sin retorno.
-branch: feature/split-business-board, commiteada en d376332, SIN mergear y SIN pushear
+next: dos decisiones del usuario, ninguna ejecutable sin él. (1) Mergear el PR #38 (https://github.com/pachocamacho1990/personal-job-board/pull/38). (2) Tras el merge, ejecutar la parte 2 de migrations/migration_v4_0_split_business.sql, que hace DROP TABLE business_entities — precondiciones cumplidas, es el punto sin retorno.
+branch: feature/split-business-board, pusheada · PR #38 abierto contra main y MERGEABLE, sin mergear
 verified: 61 tests backend · 16 specs Playwright · gate 8/8 · tsc y build limpios · puente probado extremo a extremo contra CMC corriendo, incluido el camino de fallo
 ---
 
@@ -27,7 +27,11 @@ en `aeec109` al cortar esta rama.
 
 No hay ninguno ejecutable sin decidir antes. Las dos decisiones pendientes:
 
-1. **Mergear** `feature/split-business-board` (commit `d376332`) a `main`.
+1. **Mergear el PR #38** —
+   https://github.com/pachocamacho1990/personal-job-board/pull/38 · `MERGEABLE`
+   · 39 ficheros, +811/−1.848. Tras mergear:
+   `git checkout main && git pull` antes de cortar cualquier rama nueva, porque
+   son rebase merges.
 2. **Ejecutar la parte 2** de `migrations/migration_v4_0_split_business.sql`:
 
    ```bash
@@ -123,7 +127,7 @@ bases; CMC vuelve a tener exactamente sus 5 registros reales.
 
 ## Preguntas abiertas para el usuario
 
-1. ¿Mergear `feature/split-business-board` a `main`?
-2. ¿Ejecutar el `DROP TABLE`?
+1. ¿Mergear el PR #38?
+2. ¿Ejecutar el `DROP TABLE`? (después del merge)
 3. La organización de GitHub es `casimir-systems` con **una** s y la app se llama
    `cassimir` con **dos**. ¿Es a propósito? Corregirlo ahora es barato.
