@@ -4,8 +4,8 @@ project: ninguno en curso — los dos proyectos del team están cerrados
 linear: https://linear.app/personal-pacho/team/personal-job-board-app
 milestone: ninguno
 in_flight: ninguno
-next: Abrir el PR de chore/continuidad-multimodelo-agy contra main y mergearlo (rebase merge). Tras el merge: git checkout main && git pull antes de cortar cualquier rama nueva. No hay más trabajo en curso.
-branch: chore/continuidad-multimodelo-agy, pusheada · pendiente de PR y merge a main
+next: Mergear el PR #37 (https://github.com/pachocamacho1990/personal-job-board/pull/37) a main. Tras el merge: git checkout main && git pull antes de cortar cualquier rama nueva, porque son rebase merges. No hay más trabajo en curso.
+branch: chore/continuidad-multimodelo-agy, pusheada · PR #37 abierto contra main, sin mergear
 verified: hooks de handoff 4/4 (generador claude + variante agy + JSON de Claude Code + sintaxis del hook global) · tests de la app NO corridos, no se tocó código de la app
 ---
 
@@ -24,7 +24,8 @@ la continuidad multimodelo. No hay trabajo en curso.
 
 ## Siguiente paso
 
-Abrir el PR de `chore/continuidad-multimodelo-agy` contra `main` y mergearlo.
+Mergear el **PR #37**
+(https://github.com/pachocamacho1990/personal-job-board/pull/37) a `main`.
 Los merges de este repo son **rebase merges**, así que en cuanto entre hay que
 hacer `git checkout main && git pull` antes de cortar ninguna rama nueva, o la
 siguiente PR replicará commits que ya están arriba.
@@ -51,9 +52,8 @@ actualizado.
 
 ## En vuelo / a medias
 
-- **El PR de `chore/continuidad-multimodelo-agy`** — la rama está pusheada pero
-  sin mergear. No hay código de la app en el diff: solo hooks de shell, el symlink
-  de skills y markdown.
+- **PR #37** — abierto contra `main`, sin mergear. No hay código de la app en el
+  diff: solo hooks de shell, el symlink de skills y markdown.
 
 ## Decisiones tomadas
 
