@@ -1,13 +1,15 @@
-# AI Development Guide - Personal Job Board v3.10.0 (TypeScript & React)
+# AI Development Guide - Personal Job Board v4.0.0 (TypeScript & React)
 
 **Purpose**: Token-efficient reference for AI-assisted development. For human docs, see README.md and DESIGN.md.
 
 ## Quick Context
 
-Multi-board career management platform with PostgreSQL backend. Three main views served via a Vite multi-page React application:
+Career management platform — professional profiling and job search — with a PostgreSQL backend. Views served via a Vite multi-page React application:
 1. **Dashboard** (`index.html` -> `src/pages/index/main.tsx`) - Home with interview/AI match widgets
 2. **Job Board** (`jobs.html` -> `src/pages/jobs/main.tsx`) - Kanban for job applications supporting multiple board instances (similar to ChatGPT sidebar history)
-3. **Business Board** (`business.html` -> `src/pages/business/main.tsx`) - Kanban for professional relationships
+3. **Profile** (`profile.html` -> `src/pages/profile/main.tsx`) - Experience, skills and languages; what Zenith reads
+
+> Business relationships moved out in v4.0.0 to **Cassimir Management Center**, a separate repository and stack. The only link left is `POST /api/jobs/:id/transform`, an outbound HTTP call. Do not add CRM features here.
 
 ## Data Schema
 
@@ -45,24 +47,6 @@ Multi-board career management platform with PostgreSQL backend. Three main views
 }
 ```
 
-### Business Entities Table (business_entities)
-```javascript
-{
-  id: serial,                          // Auto-increment PK
-  user_id: integer,                    // FK → users.id
-  name: string,                        // Entity name
-  type: "investor" | "vc" | "accelerator" | "connection",
-  status: "researching" | "contacted" | "meeting" | "negotiation" | "signed" | "rejected",
-  contact_person: string,
-  email: string,
-  website: string,
-  location: string,
-  notes: text,
-  created_at: timestamp,
-  updated_at: timestamp
-}
-```
-
 ## Core Files
 
 ### Frontend React SPA (`/src`)
@@ -70,7 +54,6 @@ Multi-board career management platform with PostgreSQL backend. Three main views
 |------|---------|
 | `src/pages/index/main.tsx` | Dashboard home view |
 | `src/pages/jobs/main.tsx` | Job Board Kanban board page |
-| `src/pages/business/main.tsx` | Business Board Kanban page |
 | `src/pages/login/main.tsx` | Auth register / login page |
 | `src/pages/docs/main.tsx` | Dynamic API Reference and guide |
 | `src/pages/profile/main.tsx` | Professional Profile form |
@@ -79,7 +62,6 @@ Multi-board career management platform with PostgreSQL backend. Three main views
 | `src/utils.ts` | Pure utility functions (escaping, ratings, dates) |
 | `src/components/Sidebar.tsx` | Left side navigation with active board selection |
 | `src/components/DetailPanel.tsx` | Jobs detail edit panel (sliding drawer) |
-| `src/components/BusinessDetailPanel.tsx` | Business connection detail panel (sliding drawer) |
 
 ### Backend, Testing & Migrations
 | Folder/File | Purpose |
@@ -111,10 +93,9 @@ PUT    /api/jobs/:id             → { job }
 DELETE /api/jobs/:id             → { message }
 GET    /api/jobs/:id             → { job } (Deep link retrieval)
 
-GET    /api/business             → [entities]
-POST   /api/business             → { entity }
-PUT    /api/business/:id         → { entity }
-DELETE /api/business/:id         → { message }
+POST   /api/jobs/:id/transform   → { opportunityId, opportunityUrl }
+                                   Pushes the job to Cassimir Management Center.
+                                   503 if CMC is unreachable; the job is left untouched.
 
 GET    /api/dashboard/summary    → { interviews, newMatches } (Filtered by boardId)
 
@@ -134,12 +115,6 @@ All except auth require `Authorization: Bearer <token>` header.
 - `viewMode` (state `"comfortable" | "compact"`): Layout density.
 - `focusMode` (state `boolean`): Filters the board to high-rated cards and hides rejected/forgotten columns.
 - `activePanel` (state `"details" | "center-peek" | "archive-vault" | null`): Currently visible modal/drawer view.
-
-### Business Page (`pages/business/main.tsx`)
-- `entities` (state `BusinessEntity[]`): Business connections.
-- `selectedEntity` (state `BusinessEntity | null`): Connection being edited/viewed in the sliding drawer.
-- `viewMode` (state `"comfortable" | "compact"`): Layout density.
-- `activePanel` (state `"details" | null`): Panel visibility indicator.
 
 ## Core Component Architectures
 
@@ -167,13 +142,12 @@ For drag-and-drop status changes, state arrays are updated immediately on drop:
 3. Drop retrieves card ID, modifies status, triggers background API PUT sync.
 
 ### View Toggle
-- Stored in localStorage: `viewPreference` (jobs), `businessBoardCompactView` (business).
+- Stored in localStorage: `viewPreference` (jobs).
 - Controls mapping CSS classes: `.comfortable` or `.compact` on cards.
 
 ### Color-Coded Columns
 Tailored HSL theme colors mapped via `data-status` attributes in CSS.
 - Job Board: `interested`, `applied`, `forgotten`, `interview`, `pending`, `offer`, `rejected`, `archived`
-- Business Board: `researching`, `contacted`, `meeting`, `negotiation`, `signed`, `rejected`
 
 ## Common Workflows
 
@@ -181,7 +155,7 @@ Tailored HSL theme colors mapped via `data-status` attributes in CSS.
 1. User clicks "+ Add Job" or "+ Add Relationship" button.
 2. React sets `selectedJob` / `selectedEntity` to `null` and sets `activePanel = "details"`.
 3. The detail panel renders blank fields.
-4. Form submit sends POST request to `/api/jobs` or `/api/business`, appends returned object to state, and closes panel.
+4. Form submit sends POST request to `/api/jobs`, appends returned object to state, and closes panel.
 
 ### Edit Job/Entity
 1. User clicks card.
@@ -207,8 +181,6 @@ npm test    # Runs all 61 unit tests across 7 test suites
 | `auth.test.js` | Signup, login, tokens, password hashing |
 | `boards.test.js` | Board CRUD, data isolation, last board deletion restriction |
 | `jobs.test.js` | Job CRUD, column updates, archive/restore operations |
-| `business.test.js` | Business entity CRUD, type validation, user checks |
-| `business-files.test.js` | Business file attachment handling |
 | `files.test.js` | Job file uploads, downloads, delete operations |
 | `dashboard.test.js` | Summary widgets, interviews, AI matches |
 
