@@ -1,11 +1,11 @@
 ---
-updated: 2026-08-05T21:45
+updated: 2026-08-05T22:10
 project: Desacoplar Business Board
 linear: https://linear.app/personal-pacho/project/desacoplar-business-board-42e305fd48e2
 milestone: ninguno
 in_flight: ninguno — PJBA-58, 59 y 60 cerrados
-next: dos decisiones del usuario, ninguna ejecutable sin él. (1) Mergear feature/split-business-board a main. (2) Ejecutar la parte 2 de migrations/migration_v4_0_split_business.sql, que hace DROP TABLE business_entities — precondiciones cumplidas, es el punto sin retorno.
-branch: feature/split-business-board, commiteada en d376332, SIN mergear y SIN pushear
+next: queda UNA cosa, y es una decisión del usuario: ejecutar la parte 2 de migrations/migration_v4_0_split_business.sql, que hace DROP TABLE business_entities. Las tres precondiciones se cumplen. Es el punto sin retorno del desacople.
+branch: main (el PR #38 se mergeó; los merges de este repo son rebase merges, así que main lleva 8ab154c + 9576480, SHAs distintos a los de la rama)
 verified: 61 tests backend · 16 specs Playwright · gate 8/8 · tsc y build limpios · puente probado extremo a extremo contra CMC corriendo, incluido el camino de fallo
 ---
 
@@ -16,19 +16,14 @@ repositorio — **Cassimir Management Center**, `~/cassimir-management-center`,
 ya en GitHub como `casimir-systems/cassimir-management-center` — y aquí queda
 solo la plataforma de perfilamiento profesional y búsqueda de empleo con Zenith.
 
-La amputación y el puente están hechos, verificados y commiteados en una rama.
-Lo único que falta son dos cosas que no se hacen sin autorización explícita: el
-merge y el `DROP TABLE`.
-
-Nota: el PR #37 que mencionaba el handoff anterior ya está mergeado; `main` estaba
-en `aeec109` al cortar esta rama.
+La amputación y el puente están **mergeados en `main`** vía el PR #38. Lo único
+que queda pendiente es el `DROP TABLE`, que no se hace sin autorización explícita.
 
 ## Siguiente paso
 
-No hay ninguno ejecutable sin decidir antes. Las dos decisiones pendientes:
+Una sola cosa, y es una decisión:
 
-1. **Mergear** `feature/split-business-board` (commit `d376332`) a `main`.
-2. **Ejecutar la parte 2** de `migrations/migration_v4_0_split_business.sql`:
+**Ejecutar la parte 2** de `migrations/migration_v4_0_split_business.sql`:
 
    ```bash
    docker exec -i jobboard-db psql -U jobboard_user -d jobboard \
@@ -40,8 +35,10 @@ No hay ninguno ejecutable sin decidir antes. Las dos decisiones pendientes:
    verificados a ojo dentro de CMC, y `grep -ri business src server --include="*.ts*"`
    solo devuelve dos comentarios históricos.
 
-   **Es el punto sin retorno.** Hasta entonces la tabla sigue ahí sin que nada la
-   lea: inofensiva, pero el desacople no está cerrado del todo.
+**Es el punto sin retorno.** Ya no hay riesgo de que `main` quede con código que
+lea la tabla — eso era lo que bloqueaba hacerlo antes del merge. Hasta que se
+ejecute, la tabla sigue ahí sin que nadie la toque: inofensiva, pero el desacople
+no está cerrado del todo.
 
 La parte 1 de esa migración (`ALTER TABLE jobs ADD COLUMN external_opportunity_url`)
 **ya está aplicada** en la base local.
@@ -55,8 +52,16 @@ La parte 1 de esa migración (`ALTER TABLE jobs ADD COLUMN external_opportunity_
 - **PJBA-59** — amputación. 8 ficheros borrados, 37 tocados, −1.785/+619 líneas.
 - **PJBA-60** — el puente. `transformJobToEntity` reescrito como llamada HTTP.
 - Versión subida a **v4.0.0** en `CLAUDE.md` y `CHANGELOG.md`.
+- **PR #38 mergeado** a `main`.
+- `AI-GUIDE.md` corregido: se me había escapado en la amputación y seguía
+  describiendo `business.html`, `/api/business` y el esquema de
+  `business_entities`. Es el fichero que leen los CLIs de agentes, así que dejarlo
+  obsoleto habría dirigido a cualquier asistente hacia endpoints inexistentes.
 
-En el otro repositorio (team `Cassimir-tech`): CAS-1 a CAS-5, todos cerrados.
+En el otro repositorio (team `Cassimir-tech`): CAS-1 a CAS-5, todos cerrados. Y
+su andamiaje de agentes completado — `settings.json` (los hooks estaban copiados
+pero **sin cablear**), el symlink de `.agents/skills/handoff` para Antigravity,
+`GEMINI.md`, `AI-GUIDE.md` y `DECISIONS.md`.
 
 ## En vuelo / a medias
 
@@ -98,7 +103,7 @@ Nada a medias en el código. Solo las dos decisiones de arriba.
 
 ## Estado de verificación
 
-Corrido sobre `feature/split-business-board` en `d376332`:
+Corrido sobre la rama antes del merge (`d376332`, ahora `8ab154c` en `main`):
 
 ```
 npm test                                    61 tests (1 skipped) — verde
@@ -123,7 +128,6 @@ bases; CMC vuelve a tener exactamente sus 5 registros reales.
 
 ## Preguntas abiertas para el usuario
 
-1. ¿Mergear `feature/split-business-board` a `main`?
-2. ¿Ejecutar el `DROP TABLE`?
-3. La organización de GitHub es `casimir-systems` con **una** s y la app se llama
+1. ¿Ejecutar el `DROP TABLE`? Es lo único que queda del desacople.
+2. La organización de GitHub es `casimir-systems` con **una** s y la app se llama
    `cassimir` con **dos**. ¿Es a propósito? Corregirlo ahora es barato.
